@@ -1,4 +1,4 @@
 # Sam
 
-**Role:** [AE/FE/ADM]
-**Fun fact:** [Something about you]
+**Role:** AE
+**Fun fact:** I love speaking French.
