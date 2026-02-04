@@ -14,6 +14,8 @@ let isLineDropping = false;
 let lineX = canvas.width / 2;
 let lineY = 0;
 let lineLength = 0;
+let fishCaughtThisLine = 0;
+const BONUS_PER_EXTRA_FISH = 5;
 const maxLineLength = canvas.height;
 const lineSpeed = 5;
 const targetScore = 100;
@@ -112,6 +114,7 @@ canvas.addEventListener('mousedown', (e) => {
     lineY = 0;
     isLineDropping = true;
     lineLength = 0;
+    fishCaughtThisLine = 0;
 });
 
 canvas.addEventListener('mousemove', (e) => {
@@ -237,7 +240,11 @@ function gameLoop() {
         
         // Check collision with fishing line
         if (gameRunning && isLineDropping && fish[i].checkCollision(lineX, lineY, lineLength)) {
+            fishCaughtThisLine++;
             score += fish[i].points;
+            if (fishCaughtThisLine >= 2) {
+                score += BONUS_PER_EXTRA_FISH * (fishCaughtThisLine - 1);
+            }
             scoreElement.textContent = score;
             
             fish.splice(i, 1);
