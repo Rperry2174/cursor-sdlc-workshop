@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hyrox Daily Plan</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>Hyrox Weekly Plan</h1>
+    <p class="tagline">Today’s workout, one tap away.</p>
+  </header>
+
+  <main>
+    <p class="how-to">Open this page any day to see your workout. Click the button below to get a notification with today’s workout.</p>
+
+    <section class="today" aria-labelledby="today-heading">
+      <h2 id="today-heading">Today’s workout: <span id="day-name"></span></h2>
+      <div id="workout-content" class="workout-card"></div>
+      <div class="actions">
+        <button type="button" id="notify-btn">Notify me with today’s workout</button>
+        <p id="notify-status" class="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <section class="week" aria-labelledby="week-heading">
+      <h2 id="week-heading">This week</h2>
+      <ul id="week-list" class="week-list"></ul>
+    </section>
+
+    <section class="stations" aria-labelledby="stations-heading">
+      <h2 id="stations-heading">Station reference (race standards)</h2>
+      <details>
+        <summary>Show 8 Hyrox stations</summary>
+        <table class="station-table">
+          <thead>
+            <tr>
+              <th>Station</th>
+              <th>Distance/Reps</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>1. SkiErg</td><td>1000 m</td><td>Pace for 4–5 min</td></tr>
+            <tr><td>2. Sled push</td><td>50 m</td><td>Heavy; practice technique</td></tr>
+            <tr><td>3. Sled pull</td><td>50 m</td><td>Grip + hip hinge</td></tr>
+            <tr><td>4. Burpee broad jump</td><td>80 m</td><td>20–40 reps typically</td></tr>
+            <tr><td>5. Rowing</td><td>1000 m</td><td>Steady split</td></tr>
+            <tr><td>6. Farmer’s carry</td><td>200 m</td><td>Grip + core</td></tr>
+            <tr><td>7. Sandbag lunges</td><td>100 m</td><td>Weight by division</td></tr>
+            <tr><td>8. Wall balls</td><td>75 reps</td><td>9 ft target, 4 kg / 6 kg</td></tr>
+          </tbody>
+        </table>
+      </details>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
