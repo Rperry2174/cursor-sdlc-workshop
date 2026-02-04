@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>First Month @ Cursor — Action Items</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d0f12;
+      --surface: #161a20;
+      --surface-hover: #1c2129;
+      --border: #2a313c;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --accent: #7c8aff;
+      --accent-dim: #5c6bc7;
+      --done: #3fb950;
+      --incomplete: #f85149;
+      --inprogress: #d4a72c;
+      --danger: #f85149;
+      --radius: 10px;
+      --font-sans: 'DM Sans', system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--font-sans);
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+    .app {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem;
+    }
+    .header { margin-bottom: 2rem; }
+    .header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin: 0 0 0.25rem 0;
+      color: var(--text);
+    }
+    .subtitle { margin: 0; font-size: 0.95rem; color: var(--text-muted); }
+    .add-section { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+    .input {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-sans);
+      font-size: 0.95rem;
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      outline: none;
+    }
+    .input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(124, 138, 255, 0.2); }
+    .input::placeholder { color: var(--text-muted); }
+    .btn-add {
+      padding: 0.75rem 1.25rem;
+      font-family: var(--font-sans);
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #fff;
+      background: var(--accent);
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+    }
+    .btn-add:hover { background: var(--accent-dim); }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .column {
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 1rem;
+      min-height: 200px;
+    }
+    .column-not_started { border-top: 3px solid var(--incomplete); }
+    .column-in_progress { border-top: 3px solid var(--inprogress); }
+    .column-completed { border-top: 3px solid var(--done); }
+    .column-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin: 0 0 0.75rem 0;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .column-not_started .column-title { color: var(--incomplete); }
+    .column-in_progress .column-title { color: var(--inprogress); }
+    .column-completed .column-title { color: var(--done); }
+    .list { list-style: none; margin: 0; padding: 0; }
+    .item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.65rem 0.75rem;
+      background: var(--bg);
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      border: 1px solid var(--border);
+    }
+    .item:hover { background: var(--surface-hover); }
+    .item-text { flex: 1; font-size: 0.9rem; line-height: 1.35; color: var(--text); cursor: text; }
+    .item-edit {
+      flex: 1;
+      padding: 0.4rem 0.5rem;
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+      color: var(--text);
+      background: var(--surface-hover);
+      border: 1px solid var(--accent);
+      border-radius: 6px;
+      outline: none;
+      width: 100%;
+    }
+    .item-actions { display: flex; align-items: center; gap: 0.25rem; flex-shrink: 0; }
+    .btn-move {
+      width: 1.6rem;
+      height: 1.6rem;
+      padding: 0;
+      font-size: 0.9rem;
+      line-height: 1;
+      color: var(--text-muted);
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .btn-move:hover { color: var(--accent); border-color: var(--accent); }
+    .btn-remove {
+      width: 1.6rem;
+      height: 1.6rem;
+      padding: 0;
+      font-size: 1.1rem;
+      line-height: 1;
+      color: var(--text-muted);
+      background: transparent;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .btn-remove:hover { color: var(--danger); background: rgba(248, 81, 73, 0.12); }
+    .empty { text-align: center; color: var(--text-muted); font-size: 0.95rem; margin-top: 2rem; }
+    @media (max-width: 768px) { .board { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <h1>First month @ Cursor</h1>
+      <p class="subtitle">Action items to own your ramp</p>
+    </header>
+    <section class="add-section">
+      <input type="text" class="input" id="newItem" placeholder="Add an action item…" aria-label="New action item" />
+      <button type="button" class="btn-add" id="btnAdd">Add</button>
+    </section>
+    <div class="board" id="board">
+      <div class="column column-not_started">
+        <h2 class="column-title">Not Started</h2>
+        <ul class="list" id="list-not_started" aria-label="Not Started"></ul>
+      </div>
+      <div class="column column-in_progress">
+        <h2 class="column-title">In Progress</h2>
+        <ul class="list" id="list-in_progress" aria-label="In Progress"></ul>
+      </div>
+      <div class="column column-completed">
+        <h2 class="column-title">Completed</h2>
+        <ul class="list" id="list-completed" aria-label="Completed"></ul>
+      </div>
+    </div>
+    <p class="empty" id="empty" style="display: none;">No action items yet. Add one above.</p>
+  </div>
+  <script>
+    (function () {
+      var STORAGE_KEY = 'cursor-sales-todo-v2';
+      var LEGACY_KEY = 'cursor-sales-todo-v1';
+      var NOT_STARTED = 'not_started';
+      var IN_PROGRESS = 'in_progress';
+      var COMPLETED = 'completed';
+      var COLS = [
+        { key: NOT_STARTED, label: 'Not Started' },
+        { key: IN_PROGRESS, label: 'In Progress' },
+        { key: COMPLETED, label: 'Completed' }
+      ];
+      var DEFAULT_ITEMS = [
+        'Complete Cursor onboarding and systems access',
+        'Finish Cursor product & value proposition training',
+        'Shadow 2–3 discovery or demo calls',
+        'Build your first 30-day target account list',
+        'Schedule intro meetings with 10 qualified prospects',
+        'Send your first outreach sequence (email/LinkedIn)',
+        'Log all activity and notes in CRM',
+        'Book 1:1 with your manager to align on goals',
+        'Join team standups and introduce yourself',
+        'Complete first month goals & ramp checklist'
+      ];
+
+      function migrateItem(item) {
+        if (item.status) return item;
+        if (typeof item.done === 'boolean') {
+          return { id: item.id, text: item.text, status: item.done ? COMPLETED : NOT_STARTED };
+        }
+        return { id: item.id, text: item.text, status: NOT_STARTED };
+      }
+
+      function loadTodos() {
+        try {
+          var raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_KEY);
+          if (!raw) return null;
+          var data = JSON.parse(raw);
+          if (!Array.isArray(data) || data.length === 0) return null;
+          return data.map(migrateItem);
+        } catch (e) { return null; }
+      }
+
+      function getDefaultTodos() {
+        return DEFAULT_ITEMS.map(function (text) {
+          return { id: crypto.randomUUID(), text: text, status: NOT_STARTED };
+        });
+      }
+
+      function saveTodos(todos) {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(todos)); } catch (e) {}
+      }
+
+      var newItemEl = document.getElementById('newItem');
+      var btnAdd = document.getElementById('btnAdd');
+      var emptyEl = document.getElementById('empty');
+      var todos = loadTodos() || getDefaultTodos();
+      var editingId = null;
+
+      function colIndex(key) {
+        for (var i = 0; i < COLS.length; i++) if (COLS[i].key === key) return i;
+        return -1;
+      }
+
+      function setStatus(id, status) {
+        var t = todos.find(function (x) { return x.id === id; });
+        if (t) { t.status = status; render(); }
+      }
+
+      function startEdit(id) {
+        editingId = id;
+        render();
+      }
+
+      function commitEdit(inputEl, todoId) {
+        var val = (inputEl.value || '').trim();
+        var t = todos.find(function (x) { return x.id === todoId; });
+        if (t) {
+          if (val) t.text = val;
+        }
+        editingId = null;
+        render();
+      }
+
+      function cancelEdit() {
+        editingId = null;
+        render();
+      }
+
+      function createItemEl(todo, statusKey) {
+        var i = colIndex(statusKey);
+        var canLeft = i > 0 ? COLS[i - 1].key : null;
+        var canRight = i < COLS.length - 1 ? COLS[i + 1].key : null;
+        var isEditing = editingId === todo.id;
+
+        var li = document.createElement('li');
+        li.className = 'item';
+
+        var textSpan;
+        if (isEditing) {
+          var input = document.createElement('input');
+          input.type = 'text';
+          input.className = 'item-edit';
+          input.value = todo.text;
+          input.setAttribute('data-editing-id', todo.id);
+          input.setAttribute('aria-label', 'Edit action item');
+          input.addEventListener('blur', function () { commitEdit(input, todo.id); });
+          input.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') { e.preventDefault(); commitEdit(input, todo.id); }
+            if (e.key === 'Escape') { e.preventDefault(); cancelEdit(); }
+          });
+          textSpan = input;
+        } else {
+          textSpan = document.createElement('span');
+          textSpan.className = 'item-text';
+          textSpan.textContent = todo.text;
+          textSpan.title = 'Double-click to edit';
+          textSpan.addEventListener('dblclick', function () { startEdit(todo.id); });
+        }
+
+        var actions = document.createElement('div');
+        actions.className = 'item-actions';
+
+        if (canLeft) {
+          var leftBtn = document.createElement('button');
+          leftBtn.type = 'button';
+          leftBtn.className = 'btn-move';
+          leftBtn.textContent = '\u2190';
+          leftBtn.title = 'Move to ' + COLS[i - 1].label;
+          leftBtn.setAttribute('aria-label', 'Move to ' + COLS[i - 1].label);
+          leftBtn.addEventListener('click', function () { setStatus(todo.id, canLeft); });
+          actions.appendChild(leftBtn);
+        }
+        if (canRight) {
+          var rightBtn = document.createElement('button');
+          rightBtn.type = 'button';
+          rightBtn.className = 'btn-move';
+          rightBtn.textContent = '\u2192';
+          rightBtn.title = 'Move to ' + COLS[i + 1].label;
+          rightBtn.setAttribute('aria-label', 'Move to ' + COLS[i + 1].label);
+          rightBtn.addEventListener('click', function () { setStatus(todo.id, canRight); });
+          actions.appendChild(rightBtn);
+        }
+        var removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'btn-remove';
+        removeBtn.textContent = '\u00D7';
+        removeBtn.setAttribute('aria-label', 'Remove: ' + todo.text);
+        removeBtn.addEventListener('click', function () {
+          todos = todos.filter(function (t) { return t.id !== todo.id; });
+          render();
+        });
+        actions.appendChild(removeBtn);
+
+        li.appendChild(textSpan);
+        li.appendChild(actions);
+        return li;
+      }
+
+      function render() {
+        saveTodos(todos);
+        COLS.forEach(function (col) {
+          var listEl = document.getElementById('list-' + col.key);
+          listEl.replaceChildren();
+          todos.filter(function (t) { return t.status === col.key; }).forEach(function (todo) {
+            listEl.appendChild(createItemEl(todo, col.key));
+          });
+        });
+        emptyEl.style.display = todos.length === 0 ? '' : 'none';
+        if (editingId && !todos.some(function (t) { return t.id === editingId; })) editingId = null;
+        if (editingId) {
+          var inp = document.querySelector('input[data-editing-id="' + editingId + '"]');
+          if (inp) { inp.focus(); inp.select(); }
+        }
+      }
+
+      function addTodo() {
+        var text = (newItemEl.value || '').trim();
+        if (!text) return;
+        todos.push({ id: crypto.randomUUID(), text: text, status: NOT_STARTED });
+        newItemEl.value = '';
+        render();
+      }
+
+      btnAdd.addEventListener('click', addTodo);
+      newItemEl.addEventListener('keydown', function (e) { if (e.key === 'Enter') addTodo(); });
+      render();
+    })();
+  </script>
+</body>
+</html>
