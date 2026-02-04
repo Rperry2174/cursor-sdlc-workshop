@@ -1,4 +1,4 @@
 # Clint
 
-**Role:** [AE/FE/ADM]
-**Fun fact:** [Something about you]
+**Role:** Account Associate
+**Fun fact:** I'm allergic to peanuts!
