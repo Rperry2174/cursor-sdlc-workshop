@@ -53,7 +53,3 @@ This is your first git exercise! Everyone on the team will:
 4. Push and open a PR
 
 If multiple people try to push at the same time... you'll get to experience your first merge conflict. Welcome to collaborative development!
-
----
-
-*Team 0: Cursor Agent and GitHub CLI setup included in workshop pre-work.*
