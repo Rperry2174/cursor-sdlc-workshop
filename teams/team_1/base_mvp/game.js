@@ -23,6 +23,11 @@ const fish = [];
 const fishSpawnRate = 0.015; // Slower spawn rate
 const fishSpeed = 1.2; // Slower fish movement
 
+// Bonus sharks - bigger, faster, 10 points
+const sharks = [];
+const sharkSpawnRate = 0.004; // Rare spawn
+const sharkSpeed = 2.8; // Faster than fish
+
 // Score and timer display
 const scoreElement = document.getElementById('score');
 const timerElement = document.getElementById('timer');
@@ -92,6 +97,93 @@ class Fish {
     isOffScreen() {
         return (this.direction > 0 && this.x > canvas.width + 30) ||
                (this.direction < 0 && this.x < -30);
+    }
+
+    checkCollision(lineX, lineY, lineLength) {
+        const lineEndX = lineX;
+        const lineEndY = lineY + lineLength;
+        const distance = Math.sqrt(
+            Math.pow(this.x - lineEndX, 2) + Math.pow(this.y - lineEndY, 2)
+        );
+        return distance < this.size;
+    }
+}
+
+// Bonus shark - bigger, faster, 10 points
+class Shark {
+    constructor() {
+        this.x = Math.random() < 0.5 ? -60 : canvas.width + 60;
+        this.y = Math.random() * (canvas.height - 120) + 60;
+        this.size = 45 + Math.random() * 15; // Bigger than fish (20–35)
+        this.speed = sharkSpeed + Math.random() * 0.6; // Faster
+        this.direction = this.x < canvas.width / 2 ? 1 : -1;
+        this.points = 10;
+    }
+
+    update() {
+        this.x += this.speed * this.direction;
+    }
+
+    draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.scale(this.direction, 1);
+
+        // Shark body - dark gray
+        ctx.fillStyle = '#4A5568';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, this.size, this.size * 0.45, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Belly
+        ctx.fillStyle = '#718096';
+        ctx.beginPath();
+        ctx.ellipse(0, this.size * 0.25, this.size * 0.7, this.size * 0.2, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Tail - wider for shark
+        ctx.fillStyle = '#4A5568';
+        ctx.beginPath();
+        ctx.moveTo(-this.size, 0);
+        ctx.lineTo(-this.size * 1.8, -this.size * 0.6);
+        ctx.lineTo(-this.size * 1.8, this.size * 0.6);
+        ctx.closePath();
+        ctx.fill();
+
+        // Dorsal fin
+        ctx.beginPath();
+        ctx.moveTo(this.size * 0.2, -this.size * 0.5);
+        ctx.lineTo(this.size * 0.5, -this.size * 1.1);
+        ctx.lineTo(this.size * 0.8, -this.size * 0.5);
+        ctx.closePath();
+        ctx.fill();
+
+        // Eye
+        ctx.fillStyle = 'white';
+        ctx.beginPath();
+        ctx.arc(this.size * 0.35, -this.size * 0.15, this.size * 0.12, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = 'black';
+        ctx.beginPath();
+        ctx.arc(this.size * 0.4, -this.size * 0.15, this.size * 0.06, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Gills
+        ctx.strokeStyle = '#2D3748';
+        ctx.lineWidth = 2;
+        for (let g = 0; g < 3; g++) {
+            ctx.beginPath();
+            ctx.moveTo(this.size * 0.5 + g * 8, this.size * 0.2);
+            ctx.lineTo(this.size * 0.4 + g * 8, this.size * 0.5);
+            ctx.stroke();
+        }
+
+        ctx.restore();
+    }
+
+    isOffScreen() {
+        return (this.direction > 0 && this.x > canvas.width + 60) ||
+               (this.direction < 0 && this.x < -60);
     }
 
     checkCollision(lineX, lineY, lineLength) {
@@ -221,7 +313,12 @@ function gameLoop() {
     if (gameRunning && Math.random() < fishSpawnRate) {
         fish.push(new Fish());
     }
-    
+
+    // Spawn bonus sharks (rarer, faster, 10 points)
+    if (gameRunning && Math.random() < sharkSpawnRate) {
+        sharks.push(new Shark());
+    }
+
     // Update and draw fish
     for (let i = fish.length - 1; i >= 0; i--) {
         if (gameRunning) {
@@ -249,7 +346,30 @@ function gameLoop() {
             }, 200);
         }
     }
-    
+
+    // Update and draw sharks (bonus 10 points, faster)
+    for (let i = sharks.length - 1; i >= 0; i--) {
+        if (gameRunning) {
+            sharks[i].update();
+        }
+        sharks[i].draw();
+
+        if (sharks[i].isOffScreen()) {
+            sharks.splice(i, 1);
+            continue;
+        }
+
+        if (gameRunning && isLineDropping && sharks[i].checkCollision(lineX, lineY, lineLength)) {
+            score += sharks[i].points;
+            scoreElement.textContent = score;
+            sharks.splice(i, 1);
+            canvas.style.borderColor = '#F59E0B';
+            setTimeout(() => {
+                canvas.style.borderColor = '#4682B4';
+            }, 200);
+        }
+    }
+
     // Update fishing line
     if (isLineDropping && gameRunning && lineLength < maxLineLength) {
         lineLength += lineSpeed;
