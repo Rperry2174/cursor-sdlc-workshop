@@ -20,9 +20,17 @@ const CONFIG = {
     waveDark: '#3A7BA4',
     fishOrange: '#FF8C00',
     fishYellow: '#FFD700',
-    line: '#8B4513',
-    hook: '#696969',
     catchFlash: '#FF6347',
+    // Spear
+    shaft: '#8B6914',      // wood
+    shaftHighlight: '#A67C00',
+    spearTip: '#C0C0C0',   // metal
+    spearTipDark: '#808080',
+  },
+  spear: {
+    shaftWidth: 8,
+    tipLength: 18,
+    tipWidth: 6,
   },
 };
 
@@ -201,21 +209,42 @@ function drawWaves() {
   drawWaveLayer(60, 20, CONFIG.colors.waveDark, 1.5, 6, 0.015, Math.PI / 4);
 }
 
-function drawFishingLine() {
+function drawSpear() {
   if (!line.dropping || !state.running) return;
 
   const endY = line.y + line.length;
-  ctx.strokeStyle = CONFIG.colors.line;
-  ctx.lineWidth = 3;
+  const w = CONFIG.spear.shaftWidth / 2;
+  const tipLen = CONFIG.spear.tipLength;
+  const tipW = CONFIG.spear.tipWidth;
+
+  // Shaft (wooden pole) – rounded rect
+  const shaftTop = line.y;
+  const shaftBottom = endY - tipLen;
+  ctx.fillStyle = CONFIG.colors.shaft;
   ctx.beginPath();
-  ctx.moveTo(line.x, line.y);
-  ctx.lineTo(line.x, endY);
+  ctx.roundRect(line.x - w, shaftTop, w * 2, shaftBottom - shaftTop, 2);
+  ctx.fill();
+  // Highlight stripe
+  ctx.strokeStyle = CONFIG.colors.shaftHighlight;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(line.x - w + 2, shaftTop);
+  ctx.lineTo(line.x - w + 2, shaftBottom);
   ctx.stroke();
 
-  ctx.fillStyle = CONFIG.colors.hook;
+  // Spear tip (metal, pointed down)
+  const tipTop = shaftBottom;
+  ctx.fillStyle = CONFIG.colors.spearTip;
+  ctx.strokeStyle = CONFIG.colors.spearTipDark;
+  ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.arc(line.x, endY, 5, 0, Math.PI * 2);
+  ctx.moveTo(line.x, tipTop + tipLen);           // point
+  ctx.lineTo(line.x - tipW, tipTop);              // left
+  ctx.lineTo(line.x, tipTop + tipLen * 0.3);     // notch
+  ctx.lineTo(line.x + tipW, tipTop);             // right
+  ctx.closePath();
   ctx.fill();
+  ctx.stroke();
 }
 
 function flashCatchFeedback() {
@@ -262,7 +291,7 @@ function gameLoop() {
     line.length += CONFIG.game.lineSpeed;
   }
 
-  drawFishingLine();
+  drawSpear();
 
   if (state.running) {
     animationId = requestAnimationFrame(gameLoop);
