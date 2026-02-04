@@ -85,6 +85,22 @@ class Fish {
         ctx.beginPath();
         ctx.arc(this.size * 0.35, -this.size * 0.2, this.size * 0.08, 0, Math.PI * 2);
         ctx.fill();
+
+        // Draw sunglasses
+        const gY = -this.size * 0.2;
+        const lensW = this.size * 0.2;
+        const lensH = this.size * 0.12;
+        ctx.strokeStyle = '#1a1a1a';
+        ctx.lineWidth = Math.max(1, this.size * 0.02);
+        ctx.fillStyle = 'rgba(20, 20, 40, 0.85)';
+        ctx.fillRect(this.size * 0.15, gY - lensH / 2, lensW, lensH);
+        ctx.strokeRect(this.size * 0.15, gY - lensH / 2, lensW, lensH);
+        ctx.fillRect(this.size * 0.35, gY - lensH / 2, lensW, lensH);
+        ctx.strokeRect(this.size * 0.35, gY - lensH / 2, lensW, lensH);
+        ctx.beginPath();
+        ctx.moveTo(this.size * 0.35, gY);
+        ctx.lineTo(this.size * 0.35 + lensW, gY);
+        ctx.stroke();
         
         ctx.restore();
     }
