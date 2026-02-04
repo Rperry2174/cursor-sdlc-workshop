@@ -6,11 +6,11 @@
 
 ## Project Overview
 
-**Project Name:** _[Give your project a name]_
+**Project Name:** Fishing Game
 
-**One-line Description:** _[What does it do in one sentence?]_
+**One-line Description:** An interactive fishing game where players drop a fishing line with the mouse and collect points by catching fish.
 
-**Type:** _[e.g., Chrome Extension, Web App, CLI Tool, etc.]_
+**Type:** Web App (Single-page HTML/CSS/JavaScript)
 
 ---
 
@@ -59,10 +59,20 @@
 > **One person** creates the foundation that everyone else builds on.
 
 **What the MVP includes:**
-- _[Describe the minimal working version]_
+- A canvas-based fishing game interface
+- Mouse-controlled fishing line that drops when clicking/holding
+- Fish that swim across the screen
+- Point system that increases when fish are caught
+- Score display showing current points
+- Basic visual feedback when catching fish
 
 **What it does NOT include:**
-- _[List features deliberately left out for team members to add]_
+- Different fish types with varying point values
+- Timer or game over conditions
+- Sound effects
+- High score tracking
+- Power-ups or special features
+- Multiple difficulty levels
 
 ---
 
