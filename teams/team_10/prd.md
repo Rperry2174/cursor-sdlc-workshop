@@ -62,7 +62,7 @@
 - A single HTML page (or one main view in a framework) that displays a **list of mock notifications**.
 - Each notification has: **source** (Email, SMS, WhatsApp, Instagram), **sender/preview**, **short preview text**, and **urgency** (e.g. Urgent / Normal / Low).
 - Notifications are **grouped by urgency** (e.g. Urgent first, then Normal, then Low).
-- A **simple reply area** at the bottom or in a panel (e.g. text input + “Send” button). For MVP, “Send” can just show an alert or append to the page — no real sending.
+- A **simple reply area** at the bottom or in a panel (e.g. text input + "Send" button). For MVP, "Send" can just show an alert or append to the page — no real sending.
 - Mock data: 6–10 sample notifications in a JS array or JSON, covering all four channels and at least two urgency levels.
 
 **What it does NOT include:**
@@ -79,7 +79,7 @@
 
 ### Feature 1: Urgency filter / tabs
 - **Assigned to:** _[Team member]_
-- **Description:** Buttons or tabs (e.g. “Urgent”, “Normal”, “Low”, “All”) that filter the visible notifications by urgency.
+- **Description:** Buttons or tabs (e.g. "Urgent", "Normal", "Low", "All") that filter the visible notifications by urgency.
 - **Files to modify/create:** Main HTML/JS or main component; optional `styles.css` for tab styling.
 
 ### Feature 2: Channel badges
@@ -89,7 +89,7 @@
 
 ### Feature 3: Reply UI
 - **Assigned to:** _[Team member]_
-- **Description:** Improve the reply area: placeholder text, styled input and button, and on “Send” either show a confirmation or append a “Reply sent” message to the selected notification (mock).
+- **Description:** Improve the reply area: placeholder text, styled input and button, and on "Send" either show a confirmation or append a "Reply sent" message to the selected notification (mock).
 - **Files to modify/create:** Main HTML/JS or reply component; `styles.css` for reply box.
 
 ### Feature 4: Notification cards
@@ -99,7 +99,7 @@
 
 ### Feature 5: Header & layout
 - **Assigned to:** _[Team member]_
-- **Description:** Add an app header (e.g. “Inbox One”), optional subtitle, and a simple layout (e.g. list on the left, reply panel on the right, or stacked). Keep it minimal.
+- **Description:** Add an app header (e.g. "Inbox One"), optional subtitle, and a simple layout (e.g. list on the left, reply panel on the right, or stacked). Keep it minimal.
 - **Files to modify/create:** Main HTML and CSS; optional `layout.css`.
 
 ---

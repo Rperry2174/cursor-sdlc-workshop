@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GTM Coffee Chat Tracker</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: #0a0a0a;
+      color: #ffffff;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, #00d9ff, #a855f7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      color: #888;
+      font-size: 1.1rem;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #1a1a1a;
+      border-radius: 8px;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #00d9ff;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Add Person Form */
+    .add-person-section {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .add-person-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
+      background: none;
+      border: none;
+      color: #00d9ff;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      padding: 0.5rem;
+    }
+
+    .add-person-toggle:hover {
+      color: #fff;
+    }
+
+    .add-person-form {
+      display: none;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #333;
+    }
+
+    .add-person-form.open {
+      display: block;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .form-input {
+      flex: 1;
+      background: #0a0a0a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 0.75rem;
+      color: #fff;
+      font-size: 0.9rem;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #00d9ff;
+    }
+
+    .form-input::placeholder {
+      color: #555;
+    }
+
+    .add-btn {
+      background: linear-gradient(135deg, #00d9ff, #a855f7);
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .add-btn:hover {
+      opacity: 0.9;
+    }
+
+    /* Team List */
+    .team-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .member-row {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+      overflow: hidden;
+    }
+
+    .member-row:hover {
+      border-color: #444;
+    }
+
+    .member-row.completed {
+      border-color: #22c55e;
+      background: linear-gradient(135deg, #1a1a1a 0%, #0f2a1a 100%);
+    }
+
+    .member-main {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      cursor: pointer;
+    }
+
+    .checkbox {
+      width: 24px;
+      height: 24px;
+      border: 2px solid #444;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .member-row.completed .checkbox {
+      background: #22c55e;
+      border-color: #22c55e;
+    }
+
+    .checkbox::after {
+      content: '';
+      display: none;
+    }
+
+    .member-row.completed .checkbox::after {
+      content: '✓';
+      display: block;
+      color: white;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .member-avatar {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, #00d9ff, #a855f7);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .member-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .member-name {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.15rem;
+    }
+
+    .member-role {
+      font-size: 0.8rem;
+      color: #888;
+    }
+
+    .member-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .action-btn {
+      background: none;
+      border: 1px solid #444;
+      color: #888;
+      padding: 0.4rem 0.75rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.2s ease;
+    }
+
+    .action-btn:hover {
+      border-color: #666;
+      color: #fff;
+    }
+
+    .action-btn.has-notes {
+      border-color: #a855f7;
+      color: #a855f7;
+    }
+
+    .action-btn.delete {
+      border-color: transparent;
+      color: #666;
+    }
+
+    .action-btn.delete:hover {
+      border-color: #ef4444;
+      color: #ef4444;
+    }
+
+    /* Notes Section - Dropdown Style */
+    .notes-section {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      background: #141414;
+      border-top: 1px solid transparent;
+    }
+
+    .notes-section.open {
+      max-height: 300px;
+      border-top-color: #333;
+    }
+
+    .notes-content {
+      padding: 1rem 1.25rem;
+    }
+
+    .notes-label {
+      font-size: 0.75rem;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.5rem;
+    }
+
+    .notes-textarea {
+      width: 100%;
+      background: #0a0a0a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 0.75rem;
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.9rem;
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .notes-textarea:focus {
+      outline: none;
+      border-color: #a855f7;
+    }
+
+    .notes-textarea::placeholder {
+      color: #555;
+    }
+
+    /* Notes Preview - More visible dropdown style */
+    .notes-preview {
+      background: #252525;
+      border-left: 3px solid #a855f7;
+      padding: 0.6rem 0.8rem;
+      margin: 0.75rem 1.25rem;
+      border-radius: 0 6px 6px 0;
+      font-size: 0.85rem;
+      color: #ccc;
+      line-height: 1.4;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .notes-preview:hover {
+      background: #303030;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid #222;
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: #555;
+    }
+
+    .empty-state p {
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>☕ GTM Coffee Chat Tracker</h1>
+      <p class="subtitle">Track your coffee chats and add notes</p>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-value" id="completedCount">0</div>
+          <div class="stat-label">Completed</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="remainingCount">0</div>
+          <div class="stat-label">Remaining</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="totalCount">0</div>
+          <div class="stat-label">Total</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Add Person Section -->
+    <div class="add-person-section">
+      <button class="add-person-toggle" onclick="toggleAddForm()">
+        <span id="addToggleIcon">+</span> Add Team Member
+      </button>
+      <div class="add-person-form" id="addPersonForm">
+        <div class="form-row">
+          <input type="text" class="form-input" id="newName" placeholder="Name (e.g., John Smith)">
+          <input type="text" class="form-input" id="newRole" placeholder="Role (e.g., Account Executive)">
+        </div>
+        <button class="add-btn" onclick="addPerson()">Add Person</button>
+      </div>
+    </div>
+
+    <div class="team-list" id="teamList">
+      <!-- Rows generated by JS -->
+    </div>
+
+    <footer>
+      <p>Cursor GTM Team • Track your connections</p>
+    </footer>
+  </div>
+
+  <script>
+    // Default GTM Team Members
+    const defaultMembers = [
+      { id: 1, name: 'Sarah Chen', role: 'Account Executive' },
+      { id: 2, name: 'Marcus Johnson', role: 'Sales Development Rep' },
+      { id: 3, name: 'Emily Rodriguez', role: 'Customer Success Manager' },
+      { id: 4, name: 'David Kim', role: 'Solutions Engineer' },
+      { id: 5, name: 'Rachel Thompson', role: 'Account Executive' },
+      { id: 6, name: 'James Wilson', role: 'Sales Development Rep' },
+      { id: 7, name: 'Olivia Martinez', role: 'Customer Success Manager' },
+      { id: 8, name: 'Michael Brown', role: 'Solutions Engineer' },
+      { id: 9, name: 'Amanda Lee', role: 'Account Executive' },
+      { id: 10, name: 'Chris Taylor', role: 'Sales Manager' },
+      { id: 11, name: 'Jessica Nguyen', role: 'Marketing Manager' },
+      { id: 12, name: 'Ryan Patel', role: 'Business Development Rep' },
+    ];
+
+    // LocalStorage keys
+    const MEMBERS_KEY = 'gtm-team-members';
+    const CHATS_KEY = 'gtm-coffee-chats';
+    const NOTES_KEY = 'gtm-coffee-notes';
+
+    // Get data from localStorage
+    function getTeamMembers() {
+      const stored = localStorage.getItem(MEMBERS_KEY);
+      if (stored) {
+        return JSON.parse(stored);
+      }
+      // Initialize with defaults
+      saveTeamMembers(defaultMembers);
+      return defaultMembers;
+    }
+
+    function getCompletedChats() {
+      const stored = localStorage.getItem(CHATS_KEY);
+      return stored ? JSON.parse(stored) : [];
+    }
+
+    function getNotes() {
+      const stored = localStorage.getItem(NOTES_KEY);
+      return stored ? JSON.parse(stored) : {};
+    }
+
+    // Save data to localStorage
+    function saveTeamMembers(members) {
+      localStorage.setItem(MEMBERS_KEY, JSON.stringify(members));
+    }
+
+    function saveCompletedChats(completedIds) {
+      localStorage.setItem(CHATS_KEY, JSON.stringify(completedIds));
+    }
+
+    function saveNotes(notes) {
+      localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
+    }
+
+    // Get initials from name
+    function getInitials(name) {
+      return name.split(' ').map(n => n[0]).join('').substring(0, 2);
+    }
+
+    // Generate unique ID
+    function generateId() {
+      return Date.now() + Math.random();
+    }
+
+    // Toggle add person form
+    function toggleAddForm() {
+      const form = document.getElementById('addPersonForm');
+      const icon = document.getElementById('addToggleIcon');
+      form.classList.toggle('open');
+      icon.textContent = form.classList.contains('open') ? '−' : '+';
+    }
+
+    // Add new person
+    function addPerson() {
+      const nameInput = document.getElementById('newName');
+      const roleInput = document.getElementById('newRole');
+      
+      const name = nameInput.value.trim();
+      const role = roleInput.value.trim();
+      
+      if (!name) {
+        nameInput.focus();
+        return;
+      }
+      
+      const members = getTeamMembers();
+      members.push({
+        id: generateId(),
+        name: name,
+        role: role || 'Team Member'
+      });
+      
+      saveTeamMembers(members);
+      
+      // Clear inputs
+      nameInput.value = '';
+      roleInput.value = '';
+      
+      renderTeamList();
+    }
+
+    // Remove person
+    function removePerson(memberId) {
+      if (!confirm('Remove this person from the list?')) return;
+      
+      let members = getTeamMembers();
+      members = members.filter(m => m.id !== memberId);
+      saveTeamMembers(members);
+      
+      // Also clean up their completed status and notes
+      let completed = getCompletedChats();
+      completed = completed.filter(id => id !== memberId);
+      saveCompletedChats(completed);
+      
+      const notes = getNotes();
+      delete notes[memberId];
+      saveNotes(notes);
+      
+      renderTeamList();
+    }
+
+    // Toggle chat completion
+    function toggleChat(memberId) {
+      const completed = getCompletedChats();
+      const index = completed.indexOf(memberId);
+      
+      if (index === -1) {
+        completed.push(memberId);
+      } else {
+        completed.splice(index, 1);
+      }
+      
+      saveCompletedChats(completed);
+      renderTeamList();
+    }
+
+    // Toggle notes section
+    function toggleNotes(memberId) {
+      const section = document.getElementById(`notes-${memberId}`);
+      const allSections = document.querySelectorAll('.notes-section');
+      
+      // Close other open sections
+      allSections.forEach(s => {
+        if (s.id !== `notes-${memberId}`) {
+          s.classList.remove('open');
+        }
+      });
+      
+      section.classList.toggle('open');
+      
+      if (section.classList.contains('open')) {
+        setTimeout(() => {
+          section.querySelector('textarea').focus();
+        }, 100);
+      }
+    }
+
+    // Save note for a member
+    function saveNote(memberId) {
+      const textarea = document.getElementById(`textarea-${memberId}`);
+      const notes = getNotes();
+      notes[memberId] = textarea.value;
+      saveNotes(notes);
+      renderTeamList();
+    }
+
+    // Update stats
+    function updateStats() {
+      const members = getTeamMembers();
+      const completed = getCompletedChats();
+      const validCompleted = completed.filter(id => members.some(m => m.id === id));
+      
+      document.getElementById('completedCount').textContent = validCompleted.length;
+      document.getElementById('remainingCount').textContent = members.length - validCompleted.length;
+      document.getElementById('totalCount').textContent = members.length;
+    }
+
+    // Escape HTML to prevent XSS
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Render the team list
+    function renderTeamList() {
+      const list = document.getElementById('teamList');
+      const members = getTeamMembers();
+      const completed = getCompletedChats();
+      const notes = getNotes();
+      
+      if (members.length === 0) {
+        list.innerHTML = `
+          <div class="empty-state">
+            <p>No team members yet.</p>
+            <p>Add someone above to get started!</p>
+          </div>
+        `;
+        updateStats();
+        return;
+      }
+      
+      list.innerHTML = members.map(member => {
+        const isCompleted = completed.includes(member.id);
+        const memberNotes = notes[member.id] || '';
+        const hasNotes = memberNotes.trim().length > 0;
+        const truncatedNotes = memberNotes.length > 100 
+          ? memberNotes.substring(0, 100) + '...' 
+          : memberNotes;
+        
+        return `
+          <div class="member-row ${isCompleted ? 'completed' : ''}">
+            <div class="member-main" onclick="toggleChat(${member.id})">
+              <div class="checkbox"></div>
+              <div class="member-avatar">${escapeHtml(getInitials(member.name))}</div>
+              <div class="member-info">
+                <div class="member-name">${escapeHtml(member.name)}</div>
+                <div class="member-role">${escapeHtml(member.role)}</div>
+              </div>
+              <div class="member-actions">
+                <button class="action-btn ${hasNotes ? 'has-notes' : ''}" onclick="event.stopPropagation(); toggleNotes(${member.id})">
+                  ${hasNotes ? '📝 Notes' : '+ Notes'}
+                </button>
+                <button class="action-btn delete" onclick="event.stopPropagation(); removePerson(${member.id})">
+                  ✕
+                </button>
+              </div>
+            </div>
+            ${hasNotes ? `<div class="notes-preview" onclick="toggleNotes(${member.id})">${escapeHtml(truncatedNotes)}</div>` : ''}
+            <div class="notes-section" id="notes-${member.id}">
+              <div class="notes-content">
+                <div class="notes-label">Chat Notes</div>
+                <textarea 
+                  class="notes-textarea" 
+                  id="textarea-${member.id}"
+                  placeholder="Topics discussed, follow-ups, things you learned..."
+                  onblur="saveNote(${member.id})"
+                >${escapeHtml(memberNotes)}</textarea>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      updateStats();
+    }
+
+    // Handle Enter key in add form
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && (e.target.id === 'newName' || e.target.id === 'newRole')) {
+        addPerson();
+      }
+    });
+
+    // Initialize
+    renderTeamList();
+  </script>
+</body>
+</html>
