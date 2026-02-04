@@ -1,0 +1,119 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(to bottom, #87CEEB 0%, #4682B4 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.game-container {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    max-width: 800px;
+    width: 100%;
+    position: relative;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #4682B4;
+}
+
+.header h1 {
+    color: #4682B4;
+    font-size: 2em;
+}
+
+.game-stats {
+    display: flex;
+    gap: 30px;
+    align-items: center;
+}
+
+.timer, .score {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #2E8B57;
+}
+
+#timer {
+    color: #FF6347;
+}
+
+#score {
+    color: #FF6347;
+}
+
+.game-over {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    z-index: 1000;
+}
+
+.game-over h2 {
+    color: #4682B4;
+    margin-bottom: 15px;
+    font-size: 2em;
+    margin-top: 0;
+}
+
+.game-over p {
+    font-size: 1.3em;
+    margin-bottom: 20px;
+    color: #666;
+}
+
+.game-over button {
+    background: #4682B4;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    font-size: 1.1em;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.game-over button:hover {
+    background: #2E5F8F;
+}
+
+#gameCanvas {
+    display: block;
+    width: 100%;
+    max-width: 760px;
+    height: 500px;
+    border: 3px solid #4682B4;
+    border-radius: 5px;
+    background: #4682B4;
+    cursor: crosshair;
+    margin: 0 auto;
+}
+
+.instructions {
+    margin-top: 15px;
+    text-align: center;
+    color: #666;
+    font-size: 0.9em;
+}
