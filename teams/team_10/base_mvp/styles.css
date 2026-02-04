@@ -1,0 +1,524 @@
+/* ===== iMessage-style design (Apple HIG) ===== */
+:root {
+  /* Apple system blue (iMessage sent / primary actions) */
+  --apple-blue: #007AFF;
+  --apple-blue-hover: #0056b3;
+  --apple-blue-pressed: #004080;
+
+  /* iMessage gray bubble (received messages) */
+  --bubble-gray: #E5E5EA;
+  --bubble-gray-dark: #D1D1D6;
+
+  /* iOS system backgrounds */
+  --bg-grouped: #F2F2F7;
+  --bg-secondary-grouped: #FFFFFF;
+  --bg-tertiary-grouped: #F2F2F7;
+
+  /* Separators & borders */
+  --separator: #C6C6C8;
+  --separator-opaque: rgba(0, 0, 0, 0.1);
+
+  /* Label colors */
+  --label-primary: #000000;
+  --label-secondary: #3C3C43;
+  --label-tertiary: #3C3C4399;
+  --label-quaternary: #3C3C434D;
+
+  /* Urgency (subtle, keep iMessage feel) */
+  --urgency-urgent: #FF3B30;
+  --urgency-normal: #FF9500;
+  --urgency-low: #8E8E93;
+
+  /* Channel badges (muted to match) */
+  --channel-email: #007AFF;
+  --channel-sms: #34C759;
+  --channel-whatsapp: #30D158;
+  --channel-instagram: #FF375F;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+
+  --radius-bubble: 18px;
+  --radius-bubble-tight: 14px;
+  --radius-input: 20px;
+  --radius-segment: 9px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  background: var(--bg-grouped);
+  color: var(--label-primary);
+  font-size: 17px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== Header (Messages-style: minimal, large title) ===== */
+.app-header {
+  padding: var(--space-4) var(--space-6);
+  padding-top: max(env(safe-area-inset-top), 12px);
+  background: var(--bg-secondary-grouped);
+  border-bottom: 0.5px solid var(--separator-opaque);
+}
+
+.app-header-title {
+  margin: 0;
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: 0.37px;
+}
+
+.app-header-subtitle {
+  margin: var(--space-1) 0 0;
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--label-secondary);
+}
+
+/* ===== Main layout ===== */
+.app-main {
+  display: flex;
+  flex-wrap: wrap;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: var(--space-4);
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.app-inbox {
+  flex: 1;
+  min-width: 300px;
+}
+
+.app-reply-panel {
+  flex: 0 0 340px;
+  min-width: 280px;
+  padding: var(--space-4);
+  background: var(--bg-secondary-grouped);
+  border-radius: 12px;
+  height: fit-content;
+  position: sticky;
+  top: var(--space-4);
+  border: 0.5px solid var(--separator-opaque);
+}
+
+/* ===== Filter tabs (iOS segmented control) ===== */
+.filter-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: var(--space-4);
+  flex-wrap: wrap;
+  background: var(--bubble-gray);
+  padding: 3px;
+  border-radius: var(--radius-segment);
+  width: fit-content;
+}
+
+.filter-tab {
+  padding: 6px 14px;
+  border: none;
+  background: transparent;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--label-secondary);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.filter-tab:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.filter-tab-active {
+  background: var(--bg-secondary-grouped);
+  color: var(--label-primary);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.filter-tab-active:hover {
+  background: var(--bg-secondary-grouped);
+  color: var(--label-primary);
+}
+
+/* ===== Notification list ===== */
+#notification-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.notification-card {
+  margin-bottom: var(--space-3);
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Urgency: subtle left bar (iMessage doesn't use heavy urgency colors; keep minimal) */
+.notification-card.urgency-urgent .notification-bubble {
+  border-left: 3px solid var(--urgency-urgent);
+}
+
+.notification-card.urgency-normal .notification-bubble {
+  border-left: 3px solid var(--urgency-normal);
+}
+
+.notification-card.urgency-low .notification-bubble {
+  border-left: 3px solid var(--urgency-low);
+}
+
+#notification-list .notification-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+}
+
+/* Avatar (Messages conversation list style) */
+.notification-avatar {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--bubble-gray);
+  color: var(--label-secondary);
+  font-size: 20px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+}
+
+/* Bubble (iMessage received-message style) */
+.notification-bubble {
+  flex: 1;
+  min-width: 0;
+  background: var(--bubble-gray);
+  border-radius: var(--radius-bubble);
+  border-top-left-radius: 4px;
+  padding: var(--space-3) var(--space-4);
+  max-width: 85%;
+}
+
+.notification-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.channel-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-bottom: var(--space-2);
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--label-secondary);
+}
+
+.channel-badge-email { color: var(--channel-email); }
+.channel-badge-sms { color: var(--channel-sms); }
+.channel-badge-whatsapp { color: var(--channel-whatsapp); }
+.channel-badge-instagram { color: var(--channel-instagram); }
+
+#notification-list .notification-item .sender {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--label-primary);
+  margin-bottom: 2px;
+  display: block;
+}
+
+#notification-list .notification-item .preview {
+  font-size: 16px;
+  color: var(--label-primary);
+  margin-bottom: var(--space-1);
+  display: block;
+  line-height: 1.35;
+}
+
+#notification-list .notification-item .urgency {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--label-tertiary);
+  margin: 0;
+  display: block;
+}
+
+/* ===== Reply area (iMessage input bar) ===== */
+.reply-area {
+  padding: 0;
+  border: none;
+  margin: 0;
+}
+
+.reply-area-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--label-secondary);
+  margin-bottom: var(--space-2);
+}
+
+.reply-area-row {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  background: var(--bubble-gray);
+  border-radius: var(--radius-input);
+  padding: 6px 8px 6px 14px;
+}
+
+.reply-input {
+  flex: 1;
+  padding: 10px 0;
+  border: none;
+  border-radius: 0;
+  font-size: 17px;
+  font-family: inherit;
+  color: var(--label-primary);
+  background: transparent;
+  min-width: 0;
+}
+
+.reply-input::placeholder {
+  color: var(--label-quaternary);
+}
+
+.reply-input:focus {
+  outline: none;
+}
+
+.reply-send {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--apple-blue);
+  color: #fff;
+  font-size: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.reply-send:hover {
+  background: var(--apple-blue-hover);
+}
+
+.reply-send:active {
+  background: var(--apple-blue-pressed);
+  transform: scale(0.95);
+}
+
+/* Send icon (upward arrow like iMessage) */
+.reply-send::after {
+  content: "";
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 8px solid #fff;
+  margin-bottom: 4px;
+}
+
+.reply-confirmation {
+  margin: var(--space-2) 0 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--channel-sms);
+  min-height: 1.2em;
+}
+
+.reply-sent-message {
+  padding: var(--space-3) var(--space-4);
+  margin-top: var(--space-2);
+  background: var(--bubble-gray);
+  color: var(--label-primary);
+  border-radius: var(--radius-bubble-tight);
+  font-size: 16px;
+  max-width: 85%;
+  border-top-left-radius: 4px;
+}
+
+/* ===== Thread view (conversation with previous messages) ===== */
+.thread-view {
+  flex: 1 1 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-grouped);
+  border-radius: 12px;
+  border: 0.5px solid var(--separator-opaque);
+  overflow: hidden;
+  max-height: 70vh;
+}
+
+.thread-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-secondary-grouped);
+  border-bottom: 0.5px solid var(--separator-opaque);
+}
+
+.thread-back {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  font-size: 28px;
+  line-height: 1;
+  color: var(--apple-blue);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+}
+
+.thread-back:hover {
+  background: var(--bubble-gray);
+}
+
+.thread-header-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.thread-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--label-primary);
+}
+
+.thread-channel {
+  font-size: 13px;
+  color: var(--label-tertiary);
+}
+
+.thread-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-height: 200px;
+}
+
+.thread-message {
+  max-width: 75%;
+  padding: var(--space-3) var(--space-4);
+  font-size: 16px;
+  line-height: 1.4;
+  border-radius: var(--radius-bubble);
+}
+
+.thread-message-from-them {
+  align-self: flex-start;
+  background: var(--bubble-gray);
+  border-top-left-radius: 4px;
+  color: var(--label-primary);
+}
+
+.thread-message-from-me {
+  align-self: flex-end;
+  background: var(--apple-blue);
+  color: #fff;
+  border-top-right-radius: 4px;
+}
+
+.thread-reply-bar {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  padding: var(--space-2) var(--space-4);
+  padding-bottom: max(var(--space-4), env(safe-area-inset-bottom));
+  background: var(--bg-secondary-grouped);
+  border-top: 0.5px solid var(--separator-opaque);
+}
+
+.thread-reply-input {
+  flex: 1;
+  padding: 10px 14px;
+  border: none;
+  border-radius: var(--radius-input);
+  font-size: 17px;
+  font-family: inherit;
+  color: var(--label-primary);
+  background: var(--bubble-gray);
+}
+
+.thread-reply-input::placeholder {
+  color: var(--label-quaternary);
+}
+
+.thread-reply-input:focus {
+  outline: none;
+}
+
+.thread-send {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--apple-blue);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.thread-send:hover {
+  background: var(--apple-blue-hover);
+}
+
+.thread-send:active {
+  transform: scale(0.95);
+}
+
+/* Clickable conversation cards */
+.notification-card {
+  cursor: pointer;
+}
+
+.notification-card:hover .notification-bubble {
+  background: var(--bubble-gray-dark);
+}

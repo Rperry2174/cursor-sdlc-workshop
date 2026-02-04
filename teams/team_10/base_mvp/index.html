@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inbox One</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <h1 class="app-header-title">Inbox One</h1>
+    <p class="app-header-subtitle">All your notifications in one place</p>
+  </header>
+
+  <main class="app-main">
+    <!-- Inbox list view -->
+    <section id="inbox-view" class="app-inbox">
+      <div id="filter-tabs" class="filter-tabs" role="tablist"></div>
+      <div id="notification-list" role="list"></div>
+    </section>
+
+    <aside id="reply-panel" class="app-reply-panel">
+      <div id="reply-area" class="reply-area">
+        <label for="reply-input" class="reply-area-label">Quick reply</label>
+        <div class="reply-area-row">
+          <input type="text" id="reply-input" class="reply-input" placeholder="Type your reply..." aria-label="Reply message">
+          <button type="button" id="reply-send" class="reply-send">Send</button>
+        </div>
+        <p id="reply-confirmation" class="reply-confirmation" aria-live="polite" hidden></p>
+      </div>
+    </aside>
+
+    <!-- Thread view (conversation with previous messages + inline reply) -->
+    <section id="thread-view" class="thread-view" hidden>
+      <div class="thread-header">
+        <button type="button" id="thread-back" class="thread-back" aria-label="Back to inbox">‹</button>
+        <div class="thread-header-info">
+          <span id="thread-title" class="thread-title"></span>
+          <span id="thread-channel" class="thread-channel"></span>
+        </div>
+      </div>
+      <div id="thread-messages" class="thread-messages" role="log" aria-live="polite"></div>
+      <div class="thread-reply-bar">
+        <input type="text" id="thread-reply-input" class="thread-reply-input" placeholder="Message" aria-label="Reply in conversation">
+        <button type="button" id="thread-send" class="thread-send" aria-label="Send">↑</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
