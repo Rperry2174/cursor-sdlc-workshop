@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CityWeather Toggle</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 700px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        
+        .city-selector {
+            margin: 20px 0;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 15px;
+            font-weight: bold;
+            color: #555;
+            font-size: 18px;
+        }
+        
+        /* City Grid Styles */
+        .city-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 15px;
+        }
+        
+        .city-button {
+            padding: 15px 20px;
+            font-size: 16px;
+            font-weight: 500;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .city-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-color: #4a90e2;
+            background: linear-gradient(135deg, #ffffff 0%, #f0f4f8 100%);
+        }
+        
+        .city-button.active {
+            background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+            color: white;
+            border-color: #357abd;
+            box-shadow: 0 4px 12px rgba(74, 144, 226, 0.4);
+            transform: translateY(-2px);
+        }
+        
+        .city-button:active {
+            transform: translateY(0px);
+        }
+        
+        .weather-display {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+        
+        .weather-info {
+            margin: 10px 0;
+            font-size: 18px;
+        }
+        
+        .city-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .temperature {
+            font-size: 36px;
+            margin: 15px 0;
+        }
+        
+        .condition {
+            font-size: 20px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CityWeather Toggle</h1>
+        
+        <div class="city-selector">
+            <label>Select a City:</label>
+            <div class="city-grid" id="cityGrid">
+                <button class="city-button active" data-city="new-york" onclick="selectCity('new-york')">New York</button>
+                <button class="city-button" data-city="los-angeles" onclick="selectCity('los-angeles')">Los Angeles</button>
+                <button class="city-button" data-city="chicago" onclick="selectCity('chicago')">Chicago</button>
+                <button class="city-button" data-city="houston" onclick="selectCity('houston')">Houston</button>
+                <button class="city-button" data-city="phoenix" onclick="selectCity('phoenix')">Phoenix</button>
+                <button class="city-button" data-city="philadelphia" onclick="selectCity('philadelphia')">Philadelphia</button>
+                <button class="city-button" data-city="san-antonio" onclick="selectCity('san-antonio')">San Antonio</button>
+                <button class="city-button" data-city="san-diego" onclick="selectCity('san-diego')">San Diego</button>
+                <button class="city-button" data-city="dallas" onclick="selectCity('dallas')">Dallas</button>
+                <button class="city-button" data-city="austin" onclick="selectCity('austin')">Austin</button>
+            </div>
+        </div>
+        
+        <div class="weather-display" id="weatherDisplay">
+            <div class="city-name" id="cityName">New York</div>
+            <div class="temperature" id="temperature">72°F</div>
+            <div class="condition" id="condition">Partly Cloudy</div>
+        </div>
+    </div>
+
+    <script>
+        // Hardcoded weather data for 10 biggest US cities
+        const weatherData = {
+            'new-york': {
+                name: 'New York',
+                temperature: 72,
+                condition: 'Partly Cloudy',
+                humidity: 65,
+                windSpeed: 12,
+                feelsLike: 70
+            },
+            'los-angeles': {
+                name: 'Los Angeles',
+                temperature: 85,
+                condition: 'Sunny',
+                humidity: 45,
+                windSpeed: 8,
+                feelsLike: 83
+            },
+            'chicago': {
+                name: 'Chicago',
+                temperature: 68,
+                condition: 'Cloudy',
+                humidity: 70,
+                windSpeed: 15,
+                feelsLike: 65
+            },
+            'houston': {
+                name: 'Houston',
+                temperature: 88,
+                condition: 'Sunny',
+                humidity: 80,
+                windSpeed: 10,
+                feelsLike: 92
+            },
+            'phoenix': {
+                name: 'Phoenix',
+                temperature: 98,
+                condition: 'Sunny',
+                humidity: 20,
+                windSpeed: 5,
+                feelsLike: 95
+            },
+            'philadelphia': {
+                name: 'Philadelphia',
+                temperature: 74,
+                condition: 'Partly Cloudy',
+                humidity: 60,
+                windSpeed: 11,
+                feelsLike: 73
+            },
+            'san-antonio': {
+                name: 'San Antonio',
+                temperature: 90,
+                condition: 'Sunny',
+                humidity: 55,
+                windSpeed: 9,
+                feelsLike: 93
+            },
+            'san-diego': {
+                name: 'San Diego',
+                temperature: 78,
+                condition: 'Sunny',
+                humidity: 50,
+                windSpeed: 7,
+                feelsLike: 77
+            },
+            'dallas': {
+                name: 'Dallas',
+                temperature: 86,
+                condition: 'Partly Cloudy',
+                humidity: 58,
+                windSpeed: 13,
+                feelsLike: 88
+            },
+            'austin': {
+                name: 'Austin',
+                temperature: 92,
+                condition: 'Sunny',
+                humidity: 52,
+                windSpeed: 8,
+                feelsLike: 95
+            }
+        };
+
+        // Current selected city
+        let currentCity = 'new-york';
+
+        // Function to select a city and update the display
+        function selectCity(cityId) {
+            currentCity = cityId;
+            
+            // Update active state on buttons
+            const buttons = document.querySelectorAll('.city-button');
+            buttons.forEach(button => {
+                if (button.getAttribute('data-city') === cityId) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
+            });
+            
+            // Update weather display
+            updateWeather(cityId);
+        }
+
+        // Function to update weather display
+        function updateWeather(cityId) {
+            const weather = weatherData[cityId];
+            
+            document.getElementById('cityName').textContent = weather.name;
+            document.getElementById('temperature').textContent = weather.temperature + '°F';
+            document.getElementById('condition').textContent = weather.condition;
+        }
+
+        // Initialize with first city on page load
+        window.onload = function() {
+            updateWeather('new-york');
+        };
+    </script>
+</body>
+</html>

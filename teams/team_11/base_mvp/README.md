@@ -1,29 +1,31 @@
-# Base MVP
+# Base MVP — Sunny Day Weather
 
-This folder is where your project code lives.
+Minimal React (Vite) weather app. One main view: location, temperature (°C), and condition as text. Stub data only — no API.
 
-## Phase 2: Design (One Person)
+## Run locally
 
-**One team member** creates the base MVP here. This is the foundation everyone else builds on.
+```bash
+cd teams/team_11/base_mvp
+npm install   # once
+npm run dev   # starts at http://localhost:5176
+```
 
-### What to Build
-- A minimal, working version of your project
-- Should run locally and do *something* visible
-- Keep it simple — 10 minutes max!
+## What’s included (base only)
 
-### Good Examples
-- A Chrome extension with one button that does one thing
-- A web page with basic HTML/CSS/JS
-- A simple CLI script
+- **Vite + React** — runs with `npm run dev`
+- **Stub data** — `src/data/weatherStub.js`: `location`, `temperature`, `condition`
+- **One view** — current location name, temperature in one unit, condition as text
+- **Simple weather card** — basic layout and styling
 
-### Instructions
+## Left for teammates
 
-1. Tell Cursor to read the `prd.md` in your team folder
-2. Tell Cursor to generate the base MVP here
-3. Tell Cursor to run it locally and verify it works
+- **Jack** — Unit toggle (°C / °F)
+- **Allegra** — Location selector (2–3 cities)
+- **Hanna** — Condition icon (sun/cloud/rain)
+- **Nini** — Extra stats card (feels like, humidity, wind)
 
-### After You're Done
+## After you’re done
 
-> **Ask Cursor:** "Commit all my changes with the message '[Team] - Base MVP scaffold', push to my fork, and open a PR to the original repo"
+> **Ask Cursor:** "Commit all my changes with the message '[Team 11] - Base MVP scaffold', push to my fork, and open a PR to the original repo"
 
-Once the PR is merged, your teammates can build on top of it!
+Once the PR is merged, teammates can build on top of it.

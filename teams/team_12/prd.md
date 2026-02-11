@@ -6,64 +6,34 @@
 
 ## Project Overview
 
-**Project Name:** _[Give your project a name]_
+**Project Name:** MotoFrogger
 
-**One-line Description:** _[What does it do in one sentence?]_
+**One-line Description:** A Frogger-style arcade game where you ride a motorcycle across lanes of traffic to reach the finish line.
 
-**Type:** _[e.g., Chrome Extension, Web App, CLI Tool, etc.]_
+**Type:** Web App (HTML/CSS/JS — single page, no backend)
 
 ---
 
 ## Guidelines
 
-### Keep It Small!
-- Your MVP should be buildable in **10 minutes** by one person
-- Think "proof of concept" not "production ready"
-- If it sounds ambitious, make it simpler
-- **Use Cursor to help you plan this!** You need a project that has at least 5 features so everyone on your team can pick one and add it
-- Feel free to take one of the ideas below — this exercise is about learning the git flow, collaborating as a team, and understanding where Cursor's features fit into the SDLC
-
-### Good Project Ideas
-
-**Pong** — classic paddle-and-ball game
-- _Example features:_ scoreboard, sound effects, difficulty/speed settings
-
-**Memory Card Match** — flip cards to find matching pairs
-- _Example features:_ move counter, timer, win animation/confetti
-
-**Drawing Pad** — simple canvas you can sketch on
-- _Example features:_ color picker, brush size slider, eraser tool
-
-**Typing Speed Game** — type a passage and measure your words per minute
-- _Example features:_ WPM display, accuracy tracker, difficulty levels
-
-**Trivia Quiz** — multiple choice questions with score tracking
-- _Example features:_ timer per question, category selector, results summary screen
-
-### Bad Project Ideas (Too Big!)
-- Anything with a database -- tell cursor to avoid this
-- Anything requiring authentication
-- Anything with multiple pages/screens
-- Anything that "needs" an API
+- Keep it simple — single HTML file with embedded CSS/JS for the MVP
+- No databases, no auth, no APIs
+- Must run by opening the HTML file in a browser
+- All features should be independent so team members can work in parallel
 
 ---
 
 ## Team Members & Tasks
 
-> **Important:** Each team member MUST have their own task. Tasks should be independent features that can be built in parallel without stepping on each other's toes.
-
 | Name | Task | Description |
 |------|------|-------------|
-| _[Name 1]_ | _[Feature 1]_ | _[Brief description]_ |
-| _[Name 2]_ | _[Feature 2]_ | _[Brief description]_ |
-| _[Name 3]_ | _[Feature 3]_ | _[Brief description]_ |
-| _[Name 4]_ | _[Feature 4]_ | _[Brief description]_ |
-| _[Name 5]_ | _[Feature 5]_ | _[Brief description]_ |
+| Talal | Score & Lives HUD | Add a heads-up display showing current score, high score, and remaining lives |
+| Person 2 | Power-Ups | Add collectible items (speed boost, shield) that spawn randomly on the road |
+| Person 3 | Sound Effects & Polish | Add engine/crash sounds and visual effects (exhaust trail, screen shake on crash) |
 
 ### Task Guidelines
 - Each task should add something **visible** to the project
 - Tasks should be **independent** — no dependencies on other tasks
-- Think: new button, new section, new color scheme, new text, etc.
 - Everyone should be able to work at the same time without conflicts
 
 ---
@@ -73,10 +43,17 @@
 > **One person** creates the foundation that everyone else builds on.
 
 **What the MVP includes:**
-- _[Describe the minimal working version]_
+- A canvas-based game with a motorcycle sprite at the bottom
+- Arrow key controls to move the motorcycle up, down, left, right
+- Multiple lanes of traffic (cars/trucks) moving at different speeds in alternating directions
+- Collision detection — hitting a vehicle resets the motorcycle to the start
+- Reaching the top row = completing a level (motorcycle resets to bottom)
+- Simple retro/arcade visual style with lane markings
 
 **What it does NOT include:**
-- _[List features deliberately left out for team members to add]_
+- No score tracking or lives (Feature 1)
+- No power-ups or collectibles (Feature 2)
+- No sound effects or visual polish (Feature 3)
 
 ---
 
@@ -84,35 +61,25 @@
 
 > These are the features team members will add. Design them to be **independent** so people can work in parallel.
 
-### Feature 1: _[Name]_
-- **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+### Feature 1: Score & Lives HUD
+- **Assigned to:** Talal
+- **Description:** Add a HUD overlay showing current score (increments each time the motorcycle reaches the top), a persisted high score (localStorage), and 3 lives. Losing all lives shows a "Game Over" screen with a restart button.
+- **Files to modify/create:** Modify `base_mvp/index.html` — add HUD rendering in the draw loop, game-over logic, and restart handler
 
-### Feature 2: _[Name]_
-- **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+### Feature 2: Power-Ups
+- **Assigned to:** Person 2
+- **Description:** Spawn random collectible items on the road — a speed boost (yellow lightning bolt, temporarily doubles movement speed) and a shield (blue circle, grants one free hit). Items appear for a few seconds then disappear.
+- **Files to modify/create:** Modify `base_mvp/index.html` — add power-up spawning, rendering, collision with motorcycle, and timed effects
 
-### Feature 3: _[Name]_
-- **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
-
-### Feature 4: _[Name]_
-- **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
-
-### Feature 5: _[Name]_
-- **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+### Feature 3: Sound Effects & Visual Polish
+- **Assigned to:** Person 3
+- **Description:** Add Web Audio API sound effects for engine idle, acceleration, crash, and level complete. Add a particle-based exhaust trail behind the motorcycle and a screen shake effect on collision.
+- **Files to modify/create:** Modify `base_mvp/index.html` — add audio context setup, sound generation functions, particle system, and shake animation
 
 ---
 
 ## Success Criteria
 
-- [ ] MVP runs locally
+- [ ] MVP runs locally by opening `index.html` in a browser
 - [ ] Each team member has merged at least one PR
 - [ ] All features work together without breaking the app

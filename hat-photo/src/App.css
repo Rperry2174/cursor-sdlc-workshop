@@ -1,0 +1,97 @@
+.app {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.app h1 {
+  margin-bottom: 1rem;
+}
+
+.photo-container {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+}
+
+.photo {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  vertical-align: top;
+}
+
+.hat-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.hat {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  transform: translate(-50%, -50%);
+  user-select: none;
+}
+
+.controls {
+  margin-top: 1.5rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-add,
+.btn-reset {
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.btn-add {
+  background: #646cff;
+  color: white;
+}
+
+.btn-add:hover {
+  background: #535bf2;
+}
+
+.btn-reset {
+  background: #eee;
+  color: #333;
+}
+
+.btn-reset:hover {
+  background: #ddd;
+}
+
+/* Compare view: side-by-side without hat / with hat */
+.compare-view {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.compare-panel {
+  flex: 1 1 280px;
+  max-width: 100%;
+}
+
+.compare-panel h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+}

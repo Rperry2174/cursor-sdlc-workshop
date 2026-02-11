@@ -117,6 +117,11 @@ cursor-sdlc-workshop/
 │   └── cursor-sdlc-slides.html      # Interactive HTML slide deck
 ├── docs/
 │   └── cursor-sdlc-workshop.docx    # Comprehensive facilitator guide
+├── startup-stress-test/             # Example app: Startup Idea Stress Tester
+│   └── src/
+│       ├── App.jsx                  # Main app with form/results toggle
+│       ├── components/              # Scorecard, RadarChart, ReportSummary
+│       └── data/                    # Scoring engine and industry data
 └── teams/                           # Created during workshop
     └── [team-name]/
         ├── members/
@@ -143,6 +148,16 @@ cursor-sdlc-workshop/
 - Section-by-section instructions
 - SDLC-to-Cursor feature mapping
 - Closing discussion guide
+
+### Startup Stress Tester
+
+`startup-stress-test/` — A React app demonstrating what can be built with Cursor:
+- **Input form** for startup metrics (TAM, competition, feasibility, risks, etc.)
+- **Scorecard** with letter grades (A-F) for each dimension
+- **Radar chart** (pure SVG) visualizing strengths and weaknesses
+- **Report summary** with verdict, risk flags, and recommendations
+
+*To run:* `cd startup-stress-test && npm install && npm run dev`
 
 ---
 

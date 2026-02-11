@@ -6,6 +6,11 @@
 
 ## Project Overview
 
+**Project Name:** FreshFind
+
+**One-line Description:** A farmers' market directory where you can browse markets, see vendors, view photos, and leave reviews.
+
+**Type:** Web App (React, frontend-only)
 **Project Name:** Cursor SDLC Board
 
 **One-line Description:** A simple visual board that shows the six SDLC stages (Plan → Design → Develop → Test → Review → Deploy) and where Cursor helps at each step.
@@ -52,13 +57,14 @@
 
 > **Important:** Each team member MUST have their own task. Tasks should be independent features that can be built in parallel without stepping on each other's toes.
 
-| Name  | Task               | Description                                                                 |
-|-------|--------------------|-----------------------------------------------------------------------------|
-| Joe   | Progress tracker   | Shows how many stages are "complete" (e.g. 2/6) with a simple progress bar  |
-| David | Stage descriptions | Expandable or hover text for each stage with a short Cursor tip             |
-| Sam   | Timer              | Elapsed time since "starting" the board (or a countdown)                    |
-| Alex  | Theme toggle       | Switch between light and dark (or Cursor-style blue) theme                  |
-| Chris | What's next        | Highlights the "current" stage and shows a short call-to-action tip         |
+| Name | Task | Description |
+|------|------|-------------|
+| Person 1 (MVP builder) | Base Game | Build the base game: 3x3 grid, moles pop up randomly, click to score, 30-second round |
+| Person 2 | Scoreboard | Display current score, track high score in localStorage, show "New High Score!" message |
+| Person 3 | Difficulty Settings | Slider or buttons to change mole speed (easy/medium/hard), persist choice |
+| Person 4 | Sound Effects | Whack sound on hit, miss sound on click-empty, round-start/round-end sounds |
+| Person 5 | Timer and Round Display | Countdown bar, round number, "Game Over" screen with stats |
+| Person 6 | Animations | Mole pop-up/pop-down CSS transitions, shake on miss, confetti on new high score |
 
 ### Task Guidelines
 - Each task should add something **visible** to the project
@@ -73,18 +79,19 @@
 > **One person** creates the foundation that everyone else builds on.
 
 **What the MVP includes:**
-- Single-page React app (Vite + React)
-- Six stage cards in a row: **Plan**, **Design**, **Develop**, **Test**, **Review**, **Deploy**
-- Each card shows the stage name and a one-line description (e.g. "Define requirements, break down tasks")
-- Minimal styling: readable layout, one color accent (e.g. Cursor blue)
-- No backend, no auth — all state in React or localStorage if needed
+- 3x3 grid of "holes"
+- Moles appear in random holes every ~800ms
+- Click a mole to score +1
+- Basic score counter at the top
+- 30-second game timer
+- Scaffolded with Vite (`npm create vite@latest -- --template react`)
 
 **What it does NOT include:**
-- Progress bar or "stages complete" counter (Joe)
-- Rich/expandable descriptions or Cursor tips per stage (David)
-- Timer or countdown (Sam)
-- Theme/color toggle (Alex)
-- "Current stage" highlight or "what's next" call-to-action (Chris)
+- No high score tracking (Scoreboard feature)
+- No difficulty options (Difficulty Settings feature)
+- No audio (Sound Effects feature)
+- No fancy timer UI or game-over screen (Timer feature)
+- No CSS animations or confetti (Animations feature)
 
 ---
 
@@ -92,30 +99,30 @@
 
 > These are the features team members will add. Design them to be **independent** so people can work in parallel.
 
-### Feature 1: Progress tracker
-- **Assigned to:** Joe
-- **Description:** A component that displays "X/6 stages" and a progress bar. Stages can be marked complete (e.g. click to toggle) — state in React or localStorage.
-- **Files to modify/create:** New component e.g. `src/components/ProgressTracker.jsx`; add it to `App.jsx`.
+### Feature 1: Scoreboard
+- **Assigned to:** Person 2
+- **Description:** Display the current score prominently, track the all-time high score in localStorage, and show a "New High Score!" message when the player beats it.
+- **Files to modify/create:** `src/components/Scoreboard.jsx`
 
-### Feature 2: Stage descriptions
-- **Assigned to:** David
-- **Description:** Each stage card shows a short Cursor tip (e.g. "Plan Mode, multi-model reasoning" for Plan). Can be expand/collapse or hover tooltip — one component or a small description module.
-- **Files to modify/create:** New component e.g. `src/components/StageDescriptions.jsx` or extend the stage card component; optional `src/data/stageTips.js` for the copy.
+### Feature 2: Difficulty Settings
+- **Assigned to:** Person 3
+- **Description:** Add a slider or button group to change mole speed (easy/medium/hard). Persist the chosen difficulty so it survives a page refresh.
+- **Files to modify/create:** `src/components/Settings.jsx`
 
-### Feature 3: Timer
-- **Assigned to:** Sam
-- **Description:** Displays elapsed time since the user "started" (e.g. since page load or since clicking Start). Simple MM:SS display.
-- **Files to modify/create:** New component e.g. `src/components/Timer.jsx`; add it to `App.jsx`.
+### Feature 3: Sound Effects
+- **Assigned to:** Person 4
+- **Description:** Play a whack sound on hit, a miss sound when clicking an empty hole, and round-start/round-end sounds.
+- **Files to modify/create:** `src/components/SoundEffects.jsx`, `src/data/sounds/`
 
-### Feature 4: Theme toggle
-- **Assigned to:** Alex
-- **Description:** A control (button or toggle) to switch between two themes — e.g. light vs dark, or default vs Cursor-blue. Use CSS variables or a theme class on a wrapper.
-- **Files to modify/create:** New component e.g. `src/components/ThemeToggle.jsx`; add theme styles (e.g. in `App.css` or a small `themes.css`); add to `App.jsx`.
+### Feature 4: Timer and Round Display
+- **Assigned to:** Person 5
+- **Description:** Replace the basic timer with a visual countdown bar, add a round number, and show a "Game Over" screen with stats (score, accuracy, time).
+- **Files to modify/create:** `src/components/Timer.jsx`
 
-### Feature 5: What's next
-- **Assigned to:** Chris
-- **Description:** Highlights the "current" stage (e.g. first incomplete, or user-selectable) and shows a short call-to-action (e.g. "Next: Design — sketch your components").
-- **Files to modify/create:** New component e.g. `src/components/WhatsNext.jsx`; add it to `App.jsx`. May read "current stage" from shared state or props if the team adds it.
+### Feature 5: Animations
+- **Assigned to:** Person 6
+- **Description:** Add CSS transitions for mole pop-up/pop-down, a shake effect on miss, and confetti when the player sets a new high score.
+- **Files to modify/create:** `src/components/Animations.jsx`
 
 ---
 

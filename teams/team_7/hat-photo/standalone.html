@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hat Try-On</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #1a1a2e; color: #eee; }
+    .app { max-width: 900px; margin: 0 auto; padding: 24px; }
+    .header { text-align: center; margin-bottom: 24px; }
+    .header h1 { margin: 0 0 8px; font-size: 1.75rem; }
+    .header p { margin: 0; color: #aaa; font-size: 0.95rem; }
+    .upload-btn { display: inline-block; padding: 12px 24px; background: #4a90d9; color: white; border-radius: 8px; cursor: pointer; font-weight: 500; }
+    .upload-btn:hover { background: #3a7bc8; }
+    .preview-area { display: flex; gap: 24px; align-items: flex-start; margin-bottom: 24px; flex-wrap: wrap; }
+    .photo-container { position: relative; flex-shrink: 0; }
+    .photo { display: block; max-width: 400px; max-height: 400px; object-fit: contain; border-radius: 8px; background: #222; }
+    .hat-overlay { position: absolute; pointer-events: none; object-fit: contain; }
+    .placeholder { width: 400px; height: 300px; display: flex; align-items: center; justify-content: center; background: #252540; border: 2px dashed #444; border-radius: 8px; color: #666; }
+    .hat-controls { flex: 1; min-width: 220px; padding: 16px; background: #252540; border-radius: 8px; }
+    .hat-controls h3 { margin: 0 0 8px; font-size: 1rem; }
+    .slider-group { margin-bottom: 16px; }
+    .slider-group label { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+    .slider-group span:first-of-type { min-width: 120px; font-size: 0.9rem; }
+    .slider-group input[type="range"] { flex: 1; min-width: 120px; height: 8px; accent-color: #4a90d9; }
+    .slider-group .value { min-width: 48px; font-size: 0.875rem; color: #888; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <h1>Hat Try-On</h1>
+      <p>Upload a photo and use the sliders to position the hat on your head.</p>
+    </header>
+    <div class="upload-section">
+      <label class="upload-btn">
+        <span id="upload-label">Upload Photo</span>
+        <input type="file" accept="image/*" id="photo-input" hidden />
+      </label>
+    </div>
+    <div class="preview-area">
+      <div class="photo-container" id="photo-container" style="display:none">
+        <img src="" alt="Your photo" class="photo" id="photo" />
+        <img src="public/hats/baseball-cap.svg" alt="Hat" class="hat-overlay" id="hat-overlay" />
+      </div>
+      <div class="placeholder" id="placeholder">
+        <p>Upload a photo to get started</p>
+      </div>
+      <div class="hat-controls" id="controls" style="display:none">
+        <h3>Position the hat</h3>
+        <div class="slider-group">
+          <label>
+            <span>Top (vertical)</span>
+            <input type="range" id="top-slider" min="0" max="40" value="5" />
+            <span class="value" id="top-value">5%</span>
+          </label>
+        </div>
+        <div class="slider-group">
+          <label>
+            <span>Side (horizontal)</span>
+            <input type="range" id="side-slider" min="20" max="80" value="50" />
+            <span class="value" id="side-value">50%</span>
+          </label>
+        </div>
+        <div class="slider-group">
+          <label>
+            <span>Size</span>
+            <input type="range" id="size-slider" min="80" max="300" value="150" />
+            <span class="value" id="size-value">150px</span>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const photoInput = document.getElementById('photo-input');
+    const photo = document.getElementById('photo');
+    const photoContainer = document.getElementById('photo-container');
+    const placeholder = document.getElementById('placeholder');
+    const hatOverlay = document.getElementById('hat-overlay');
+    const controls = document.getElementById('controls');
+    const uploadLabel = document.getElementById('upload-label');
+
+    let topPos = 5, leftPos = 50, size = 150;
+
+    function updateHat() {
+      hatOverlay.style.top = topPos + '%';
+      hatOverlay.style.left = leftPos + '%';
+      hatOverlay.style.width = size + 'px';
+      hatOverlay.style.transform = 'translate(-50%, -50%)';
+    }
+
+    photoInput.addEventListener('change', (e) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        const url = URL.createObjectURL(file);
+        photo.src = url;
+        photoContainer.style.display = 'block';
+        placeholder.style.display = 'none';
+        controls.style.display = 'block';
+        uploadLabel.textContent = 'Change Photo';
+        updateHat();
+      }
+    });
+
+    document.getElementById('top-slider').addEventListener('input', (e) => {
+      topPos = Number(e.target.value);
+      document.getElementById('top-value').textContent = topPos + '%';
+      updateHat();
+    });
+    document.getElementById('side-slider').addEventListener('input', (e) => {
+      leftPos = Number(e.target.value);
+      document.getElementById('side-value').textContent = leftPos + '%';
+      updateHat();
+    });
+    document.getElementById('size-slider').addEventListener('input', (e) => {
+      size = Number(e.target.value);
+      document.getElementById('size-value').textContent = size + 'px';
+      updateHat();
+    });
+  </script>
+</body>
+</html>
