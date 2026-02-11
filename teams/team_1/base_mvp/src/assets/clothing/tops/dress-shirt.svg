@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <rect width="200" height="200" rx="16" fill="#F8F6F3"/>
+  
+  <g transform="translate(100,105)">
+    <!-- body -->
+    <path d="M-40,-45 L-40,50 Q-40,55 -35,55 L35,55 Q40,55 40,50 L40,-45 L25,-45 Q20,-30 0,-28 Q-20,-30 -25,-45 Z" fill="#F5F5F5" stroke="#c3c3c3" stroke-width="2"/>
+    <!-- sleeves -->
+    <path d="M-40,-45 L-62,-25 L-52,-12 L-40,-18 Z" fill="#F5F5F5" stroke="#c3c3c3" stroke-width="2"/>
+    <path d="M40,-45 L62,-25 L52,-12 L40,-18 Z" fill="#F5F5F5" stroke="#c3c3c3" stroke-width="2"/>
+    <!-- collar (dress collar, pointed) -->
+    <path d="M-25,-45 L-32,-58 L-12,-48 L0,-45" fill="#F5F5F5" stroke="#c3c3c3" stroke-width="1.5"/>
+    <path d="M25,-45 L32,-58 L12,-48 L0,-45" fill="#F5F5F5" stroke="#c3c3c3" stroke-width="1.5"/>
+    <!-- placket -->
+    <rect x="-4" y="-45" width="8" height="100" rx="1" fill="#fdfdfd" stroke="#c3c3c3" stroke-width="0.8"/>
+    <!-- buttons -->
+    <circle cx="0" cy="-30" r="2.2" fill="#b9b9b9"/>
+    <circle cx="0" cy="-15" r="2.2" fill="#b9b9b9"/>
+    <circle cx="0" cy="0" r="2.2" fill="#b9b9b9"/>
+    <circle cx="0" cy="15" r="2.2" fill="#b9b9b9"/>
+    <circle cx="0" cy="30" r="2.2" fill="#b9b9b9"/>
+    <!-- cuff lines -->
+    <line x1="-62" y1="-25" x2="-52" y2="-12" stroke="#c3c3c3" stroke-width="2.5"/>
+    <line x1="62" y1="-25" x2="52" y2="-12" stroke="#c3c3c3" stroke-width="2.5"/>
+  </g>
+</svg>

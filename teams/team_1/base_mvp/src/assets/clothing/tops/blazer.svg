@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <rect width="200" height="200" rx="16" fill="#F8F6F3"/>
+  
+  <g transform="translate(100,108)">
+    <!-- body -->
+    <path d="M-42,-48 L-45,52 Q-45,55 -40,55 L40,55 Q45,55 45,52 L42,-48 Z" fill="#1B3A5C" stroke="#001c3e" stroke-width="2"/>
+    <!-- lapels -->
+    <path d="M-10,-48 L-20,-20 L-5,-15 L0,-48 Z" fill="#39587a" stroke="#001c3e" stroke-width="1.5"/>
+    <path d="M10,-48 L20,-20 L5,-15 L0,-48 Z" fill="#39587a" stroke="#001c3e" stroke-width="1.5"/>
+    <!-- sleeves -->
+    <path d="M-42,-40 L-65,-18 L-58,-5 L-45,-12 Z" fill="#1B3A5C" stroke="#001c3e" stroke-width="2"/>
+    <path d="M42,-40 L65,-18 L58,-5 L45,-12 Z" fill="#1B3A5C" stroke="#001c3e" stroke-width="2"/>
+    <!-- buttons -->
+    <circle cx="0" cy="5" r="3" fill="#001234"/>
+    <circle cx="0" cy="20" r="3" fill="#001234"/>
+    <!-- center line -->
+    <line x1="0" y1="-15" x2="0" y2="55" stroke="#001c3e" stroke-width="1"/>
+    <!-- pocket -->
+    <rect x="8" y="10" width="18" height="2" rx="1" fill="#001c3e"/>
+    <rect x="-26" y="10" width="18" height="2" rx="1" fill="#001c3e"/>
+  </g>
+</svg>
