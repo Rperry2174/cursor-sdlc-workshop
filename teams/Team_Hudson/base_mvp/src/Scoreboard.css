@@ -1,0 +1,184 @@
+/* ─── Scoreboard HUD ─────────────────────────────────────── */
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: scale(0.9) translateY(10px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes milePop {
+  0%   { color: #e0e8f0; }
+  30%  { color: #ffd700; text-shadow: 0 0 8px rgba(255,215,0,0.5); }
+  100% { color: #e0e8f0; text-shadow: none; }
+}
+@keyframes redFlash {
+  0%   { background: rgba(200,40,40,0.2); }
+  100% { background: rgba(10,20,35,0.8); }
+}
+
+/* ─── Base ────────────────────────────────────────────────── */
+.scoreboard {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+  padding: 10px 14px 8px;
+
+  background: rgba(10, 20, 35, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+
+  color: #d8e4ee;
+  font-family: 'SF Mono', 'Cascadia Code', Consolas, 'Courier New', monospace;
+  pointer-events: none;
+  user-select: none;
+}
+
+.scoreboard.fadeIn  { animation: fadeIn 0.3s ease-out; }
+.scoreboard.slideIn { animation: slideIn 0.4s cubic-bezier(0.16,1,0.3,1); }
+
+/* ─── Row: label + value ─────────────────────────────────── */
+.sb-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.sb-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: rgba(160,180,200,0.4);
+  width: 32px;
+  flex-shrink: 0;
+}
+
+.sb-val {
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.5px;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.sb-unit {
+  font-size: 11px;
+  font-weight: 400;
+  color: rgba(160,180,200,0.4);
+  margin-left: 3px;
+}
+
+/* Mile pop */
+.sb-row.mile-pop .sb-val {
+  animation: milePop 0.5s ease-out;
+}
+
+/* ─── Progress bar ────────────────────────────────────────── */
+.sb-bar-track {
+  height: 3px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 2px;
+  overflow: hidden;
+  margin: 4px 0;
+}
+
+.sb-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #1a4a7a, #00d4aa);
+  transition: width 0.15s linear;
+}
+
+/* ─── Best line ───────────────────────────────────────────── */
+.sb-best {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  color: rgba(160,180,200,0.28);
+  text-align: right;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* ─── Game-over panel ─────────────────────────────────────── */
+.scoreboard-gameover {
+  top: 50%;
+  left: 50%;
+  right: auto;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  min-width: 240px;
+  padding: 20px 28px;
+  pointer-events: auto;
+}
+
+.sb-lost {
+  animation: slideIn 0.45s cubic-bezier(0.16,1,0.3,1), redFlash 0.6s ease-out;
+}
+
+.sb-new-record {
+  margin-bottom: 12px;
+  padding: 5px 12px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.sb-record-text {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  color: rgba(200,220,240,0.85);
+}
+
+.sb-final-stats {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.sb-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.sb-stat-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: rgba(200,220,240,0.5);
+  text-transform: uppercase;
+}
+
+.sb-stat-value {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: #e0e8f0;
+}
+
+.sb-stat-value.gold { color: #ffd700; }
+
+.sb-prev-best {
+  font-size: 11px;
+  color: rgba(200,220,240,0.4);
+  margin-top: 4px;
+}
+
+/* ─── Game-over Scoreboard positioning ────────────────────── */
+.game-over-screen .scoreboard-gameover {
+  position: relative;
+  top: auto;
+  left: auto;
+  transform: none;
+  margin: 1rem auto;
+}

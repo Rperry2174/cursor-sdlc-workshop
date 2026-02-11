@@ -6,49 +6,237 @@
   padding: 1rem;
 }
 
-.start-screen,
+/* Wrapper keeps canvas + scoreboard overlay positioned together */
+.game-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   START SCREEN – winter Hudson / shadcn-inspired
+   ═══════════════════════════════════════════════════════════ */
+
+.start-screen {
+  text-align: center;
+  max-width: 420px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+/* ── Decorative snowflakes ──────────────────────────────── */
+.snowflakes {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+  user-select: none;
+}
+.flake {
+  font-size: 1rem;
+  color: rgba(148, 187, 218, 0.35);
+  animation: drift 4s ease-in-out infinite alternate;
+}
+.flake:nth-child(2) { animation-delay: 0.8s; font-size: 0.85rem; }
+.flake:nth-child(3) { animation-delay: 1.6s; }
+@keyframes drift {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 0.3; }
+  100% { transform: translateY(-6px) rotate(15deg); opacity: 0.6; }
+}
+
+/* ── Hero section ───────────────────────────────────────── */
+.start-hero {
+  margin-bottom: 2rem;
+}
+.hero-icon {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: 0.75rem;
+  filter: drop-shadow(0 0 12px rgba(100, 160, 220, 0.4));
+}
+.start-screen h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: #e2e8f0;
+  margin: 0 0 0.5rem;
+}
+.tagline {
+  color: #7b8fa3;
+  font-size: 0.925rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ── Main card container ────────────────────────────────── */
+.start-card {
+  width: 100%;
+  padding: 1.75rem 2rem;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(148, 187, 218, 0.12);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.3),
+    0 8px 24px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.start-divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(148, 187, 218, 0.15) 50%,
+    transparent 100%
+  );
+}
+
+/* ── Controls / kbd ─────────────────────────────────────── */
+.start-card .controls {
+  color: #64748b;
+  font-size: 0.85rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.start-card kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.6rem;
+  padding: 0.15rem 0.45rem;
+  font-family: inherit;
+  font-size: 0.8rem;
+  color: #94a3b8;
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(148, 187, 218, 0.15);
+  border-radius: 5px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+/* ── Best score ─────────────────────────────────────────── */
+.best-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+}
+.best-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #64748b;
+}
+.best-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+.best-distance {
+  font-family: 'Courier New', 'Consolas', monospace;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #93c5fd;
+}
+.best-time {
+  font-size: 0.8rem;
+  color: #475569;
+  font-family: 'Courier New', 'Consolas', monospace;
+}
+.no-best {
+  color: #475569;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+/* ── CTA button ─────────────────────────────────────────── */
+.start-button {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.85rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #1e6091 0%, #1e3a5f 100%);
+  border: 1px solid rgba(148, 187, 218, 0.2);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+.start-button:hover {
+  background: linear-gradient(135deg, #2571a7 0%, #244e78 100%);
+  border-color: rgba(148, 187, 218, 0.35);
+  box-shadow: 0 4px 12px rgba(30, 96, 145, 0.35);
+  transform: translateY(-1px);
+}
+.start-button:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+.btn-hint {
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: rgba(148, 187, 218, 0.5);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   GAME OVER SCREEN
+   ═══════════════════════════════════════════════════════════ */
+
 .game-over-screen {
   text-align: center;
   max-width: 480px;
 }
-
-.start-screen h1,
 .game-over-screen h1 {
   font-size: 2rem;
   margin-bottom: 0.5rem;
+  color: #c8d4dc;
+  font-weight: 600;
 }
-
-.start-screen p,
 .game-over-screen p {
-  color: #bbb;
+  font-size: 1rem;
+  color: #9ca3af;
   margin-bottom: 1rem;
 }
 
-.start-screen .controls {
-  font-size: 0.95rem;
-  margin-bottom: 1.5rem;
-}
-
-.start-button,
 .restart-button {
   padding: 0.75rem 1.5rem;
   font-size: 1.1rem;
-  background: #2a6a4a;
+  background: linear-gradient(135deg, #1e6091 0%, #1e3a5f 100%);
   color: #fff;
-  border: none;
+  border: 1px solid rgba(148, 187, 218, 0.2);
   border-radius: 8px;
   cursor: pointer;
+  transition: all 0.15s ease;
 }
-
-.start-button:hover,
 .restart-button:hover {
-  background: #3a7a5a;
+  background: linear-gradient(135deg, #2571a7 0%, #244e78 100%);
+  border-color: rgba(148, 187, 218, 0.35);
+  box-shadow: 0 4px 12px rgba(30, 96, 145, 0.35);
 }
 
-.game-over-screen h1 {
-  color: #8f8;
-}
-
-.game-over-screen p {
-  font-size: 1.1rem;
+/* ─── Game-over Scoreboard positioning ────────────────────── */
+.game-over-screen .scoreboard-gameover {
+  position: relative;
+  top: auto;
+  left: auto;
+  transform: none;
+  margin: 1rem auto;
 }
