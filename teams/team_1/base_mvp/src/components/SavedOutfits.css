@@ -1,0 +1,150 @@
+/* ============================================
+   Saved Outfits Gallery — Feature Styles
+   ============================================ */
+
+/* ---------- Container ---------- */
+.saved-outfits {
+  margin-top: 2rem;
+  width: 100%;
+}
+
+.saved-outfits-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #aaa;
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ---------- Horizontal Scroll Strip ---------- */
+.saved-outfits-strip {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Hide scrollbar but keep functionality */
+.saved-outfits-strip::-webkit-scrollbar {
+  height: 4px;
+}
+
+.saved-outfits-strip::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.saved-outfits-strip::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
+}
+
+/* ---------- Thumbnail Card ---------- */
+.saved-outfit-card {
+  position: relative;
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  width: 80px;
+  padding: 0.6rem 0.5rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  color: inherit;
+  font-family: inherit;
+}
+
+.saved-outfit-card:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+/* ---------- Stacked Emojis ---------- */
+.saved-outfit-emojis {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  font-size: 1.4rem;
+  line-height: 1.2;
+}
+
+/* ---------- Remove Button ---------- */
+.saved-outfit-remove {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 80, 80, 0.85);
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  line-height: 1;
+}
+
+.saved-outfit-card:hover .saved-outfit-remove {
+  opacity: 1;
+}
+
+.saved-outfit-remove:hover {
+  transform: scale(1.15);
+  background: rgba(255, 60, 60, 1);
+}
+
+/* ---------- Empty State ---------- */
+.saved-outfits-empty {
+  margin-top: 2rem;
+  padding: 1.25rem 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  text-align: center;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.saved-outfits-empty-icon {
+  display: block;
+  font-size: 1.5rem;
+  margin-bottom: 0.4rem;
+}
+
+/* ---------- Light mode overrides ---------- */
+@media (prefers-color-scheme: light) {
+  .saved-outfits-title {
+    color: #777;
+  }
+
+  .saved-outfit-card {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.08);
+  }
+
+  .saved-outfit-card:hover {
+    background: rgba(0, 0, 0, 0.06);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+  }
+
+  .saved-outfits-strip::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+  }
+
+  .saved-outfits-empty {
+    background: rgba(0, 0, 0, 0.02);
+    border-color: rgba(0, 0, 0, 0.1);
+    color: #999;
+  }
+}
