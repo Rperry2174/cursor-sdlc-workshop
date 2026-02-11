@@ -71,6 +71,18 @@ function acvBandLabel(acv) {
   return labels[band];
 }
 
+function getMatrixDiscount(usage, tier) {
+  const u = Math.min(Number(usage), 100);
+  const keys = Object.keys(MATRIX).map(Number).sort((a, b) => a - b);
+  if (u <= keys[0]) return MATRIX[keys[0]][tier];
+  if (u >= keys[keys.length - 1]) return MATRIX[keys[keys.length - 1]][tier];
+  const i = keys.findIndex((k) => k >= u);
+  const lo = keys[i - 1];
+  const hi = keys[i];
+  const t = (u - lo) / (hi - lo);
+  return MATRIX[lo][tier] + t * (MATRIX[hi][tier] - MATRIX[lo][tier]);
+}
+
 function maxCtrDiscount(acv, term) {
   const band = acvBand(acv);
   const termKey = Number(term);
@@ -108,7 +120,7 @@ function generateAcvCtrCurve(minACV, maxACV, term) {
 function calculate(seats, usage, term) {
   const tier = seatTier(seats);
   const tierLabel = seatTierLabel(tier);
-  const baseMatrixDiscount = MATRIX[usage][tier];
+  const baseMatrixDiscount = getMatrixDiscount(usage, tier);
   const termUplift = TERM_UPLIFT[term];
   const finalCoreDiscount = Math.min(1, baseMatrixDiscount + termUplift);
 
@@ -144,7 +156,7 @@ function termLabel(term) {
   const labels = {
     1: "1 Year",
     2: "2 Years",
-    3: "3+ Years"
+    3: "3 Years"
   };
   return labels[term] || "Unknown";
 }
@@ -235,11 +247,12 @@ function validateInputs(seats, usage, term) {
   if (!Number.isFinite(seats) || seats < 1) {
     return "Seats must be at least 1.";
   }
-  if (!MATRIX[usage]) {
-    return "Committed usage per user must be one of: $20, $30, ..., $100.";
+  const usageNum = Number(usage);
+  if (!Number.isFinite(usageNum)) {
+    return "Committed usage per user must be a number.";
   }
   if (!(term in TERM_UPLIFT)) {
-    return "Term must be 1, 2, or 3+ years.";
+    return "Term must be 1, 2, or 3 years.";
   }
   return "";
 }
@@ -248,6 +261,31 @@ const form = document.getElementById("pricing-form");
 const errorEl = document.getElementById("error");
 const resetBtn = document.getElementById("reset-btn");
 const copySummaryBtn = document.getElementById("copy-summary-btn");
+const usageSlider = document.getElementById("usage-slider");
+const usageInput = document.getElementById("usage");
+
+const USAGE_MIN = 20;
+const USAGE_MAX = 200;
+
+function syncUsageFromSlider() {
+  const v = Number(usageSlider.value);
+  usageInput.value = v;
+}
+
+function syncUsageFromInput() {
+  let v = Number(usageInput.value);
+  if (!Number.isFinite(v)) v = USAGE_MIN;
+  v = Math.round(v);
+  if (v < USAGE_MIN) v = USAGE_MIN;
+  if (v > USAGE_MAX) v = USAGE_MAX;
+  usageInput.value = v;
+  usageSlider.value = v;
+  usageSlider.setAttribute("aria-valuenow", String(v));
+}
+
+usageSlider.addEventListener("input", syncUsageFromSlider);
+usageInput.addEventListener("input", syncUsageFromInput);
+usageInput.addEventListener("blur", syncUsageFromInput);
 
 let lastResult = null;
 
@@ -255,7 +293,8 @@ form.addEventListener("submit", (event) => {
   event.preventDefault();
 
   const seats = Number(document.getElementById("seats").value);
-  const usage = Number(document.getElementById("usage").value);
+  let usage = Math.round(Number(document.getElementById("usage").value));
+  usage = Math.max(USAGE_MIN, Math.min(USAGE_MAX, usage));
   const term = Number(document.getElementById("term").value);
 
   const error = validateInputs(seats, usage, term);
@@ -273,6 +312,8 @@ form.addEventListener("submit", (event) => {
 resetBtn.addEventListener("click", () => {
   document.getElementById("seats").value = 300;
   document.getElementById("usage").value = 20;
+  document.getElementById("usage-slider").value = 20;
+  document.getElementById("usage-slider").setAttribute("aria-valuenow", "20");
   document.getElementById("term").value = 1;
   errorEl.textContent = "";
   const result = calculate(300, 20, 1);

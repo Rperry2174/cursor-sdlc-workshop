@@ -45,6 +45,37 @@ button {
   border-radius: 8px;
 }
 
+.usage-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.usage-row .usage-label {
+  font-size: 0.95rem;
+}
+
+.usage-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.usage-controls input[type="range"] {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  height: 1.5rem;
+  accent-color: #2563eb;
+  box-sizing: border-box;
+}
+
+.usage-controls input[type="number"] {
+  width: 5rem;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
 button {
   cursor: pointer;
   border: 1px solid #1d4ed8;
@@ -63,6 +94,10 @@ button.secondary {
   align-items: end;
   gap: 0.5rem;
   margin-top: 0.4rem;
+}
+
+.results-actions {
+  margin-bottom: 1rem;
 }
 
 .error {
