@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import HatGallery from './components/HatGallery';
+import DownloadButton from './components/DownloadButton';
 import { hats } from './data/hats';
 import './App.css';
 
@@ -62,6 +63,13 @@ function App() {
               <p>Upload a photo to get started</p>
             </div>
           )}
+        </div>
+
+        <div className="download-section">
+          <DownloadButton
+            uploadedPhoto={uploadedPhoto}
+            selectedHatData={selectedHatData}
+          />
         </div>
 
         <HatGallery
