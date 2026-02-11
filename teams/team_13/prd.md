@@ -6,6 +6,11 @@
 
 ## Project Overview
 
+**Project Name:** FreshFind
+
+**One-line Description:** A farmers' market directory where you can browse markets, see vendors, view photos, and leave reviews.
+
+**Type:** Web App (React, frontend-only)
 **Project Name:** Cursor SDLC Board
 
 **One-line Description:** A simple visual board that shows the six SDLC stages (Plan → Design → Develop → Test → Review → Deploy) and where Cursor helps at each step.
@@ -52,6 +57,13 @@
 
 > **Important:** Each team member MUST have their own task. Tasks should be independent features that can be built in parallel without stepping on each other's toes.
 
+| Name | Task | Description |
+|------|------|-------------|
+| _TBD_ | Review Section | Add a review list and submission form with star ratings for each market (`src/components/ReviewSection.jsx`) |
+| _TBD_ | Photo Gallery | Add a photo grid with lightbox modal overlay for each market (`src/components/PhotoGallery.jsx`) |
+| _TBD_ | Vendor Directory | Add an accordion-style expandable/collapsible vendor list for each market (`src/components/VendorList.jsx`) |
+| _TBD_ | Search & Filter Bar | Add a text search input and day-of-week/category filter buttons to the market list (`src/components/SearchFilter.jsx`) |
+| _TBD_ | Favorites & Ratings Summary | Add a heart/favorite toggle and "My Favorites" section with average rating badges (`src/components/Favorites.jsx`) |
 | Name  | Task               | Description                                                                 |
 |-------|--------------------|-----------------------------------------------------------------------------|
 | Joe   | Progress tracker   | Shows how many stages are "complete" (e.g. 2/6) with a simple progress bar  |
@@ -73,6 +85,20 @@
 > **One person** creates the foundation that everyone else builds on.
 
 **What the MVP includes:**
+- A `src/data.js` file with an array of 4–5 hardcoded farmers' markets (name, location, hours, day of week, short description)
+- An `App.jsx` with a header ("FreshFind") and a grid of simple market cards
+- Clicking a card sets state to show that market's detail panel (conditional rendering, not a router)
+- Basic CSS (`App.css`) for a clean card layout
+- Scaffolded with `npm create vite@latest -- --template react`
+
+**What it does NOT include:**
+- Reviews
+- Photos / photo gallery
+- Vendor lists
+- Search and filtering
+- Favorites / rating badges
+
+These are the 5 features left for team members to build independently.
 - Single-page React app (Vite + React)
 - Six stage cards in a row: **Plan**, **Design**, **Develop**, **Test**, **Review**, **Deploy**
 - Each card shows the stage name and a one-line description (e.g. "Define requirements, break down tasks")
@@ -92,6 +118,52 @@
 
 > These are the features team members will add. Design them to be **independent** so people can work in parallel.
 
+### Feature 1: Review Section
+- **Assigned to:** _TBD_
+- **Description:** Displays a list of hardcoded sample reviews for each market, plus a form to add a new review (text input + star rating). New reviews are stored in `useState`. Shows reviewer name (text field), comment, and star rating. Sample review data can be added to the market objects in `data.js` or kept inside the component.
+- **Files to modify/create:** `src/components/ReviewSection.jsx`, `src/components/ReviewSection.css`
+
+### Feature 2: Photo Gallery
+- **Assigned to:** _TBD_
+- **Description:** Displays a grid of market photos (hardcoded placeholder image URLs or Unsplash links). Clicking a photo opens a simple lightbox/modal overlay. Includes a caption for each photo. Photo data (url + caption) can be added to each market in `data.js` or hardcoded within the component.
+- **Files to modify/create:** `src/components/PhotoGallery.jsx`, `src/components/PhotoGallery.css`
+
+### Feature 3: Vendor Directory
+- **Assigned to:** _TBD_
+- **Description:** Shows an expandable/collapsible accordion-style list of vendors for each market. Each vendor has a name, category (produce, baked goods, crafts, etc.), and a short description. Uses `useState` for expand/collapse toggling. Vendor data can be added to each market in `data.js`.
+- **Files to modify/create:** `src/components/VendorList.jsx`, `src/components/VendorList.css`
+
+### Feature 4: Search & Filter Bar
+- **Assigned to:** _TBD_
+- **Description:** A bar at the top of the market list with a text search input (filters market cards by name) and category/day-of-week filter buttons. Calls a filter callback passed as a prop (`onFilter`) from `App.jsx`. The component itself is self-contained; the only touch point with App is the filter prop.
+- **Files to modify/create:** `src/components/SearchFilter.jsx`, `src/components/SearchFilter.css`
+
+### Feature 5: Favorites & Ratings Summary
+- **Assigned to:** _TBD_
+- **Description:** Adds a heart/favorite toggle button to each market card and a "My Favorites" sidebar or section that lists favorited markets. Favorites stored in `useState` (or `localStorage` for persistence across refresh). Shows an average star rating badge on each card. Renders alongside the card grid in App and receives the market list as a prop.
+- **Files to modify/create:** `src/components/Favorites.jsx`, `src/components/Favorites.css`
+
+---
+
+## Architecture
+
+```
+src/
+  data.js                    -- hardcoded market data (shared)
+  App.jsx                    -- MVP: header, card grid, detail view
+  App.css                    -- base styles
+  components/
+    ReviewSection.jsx        -- Feature 1
+    ReviewSection.css
+    PhotoGallery.jsx         -- Feature 2
+    PhotoGallery.css
+    VendorList.jsx           -- Feature 3
+    VendorList.css
+    SearchFilter.jsx         -- Feature 4
+    SearchFilter.css
+    Favorites.jsx            -- Feature 5
+    Favorites.css
+```
 ### Feature 1: Progress tracker
 - **Assigned to:** Joe
 - **Description:** A component that displays "X/6 stages" and a progress bar. Stages can be marked complete (e.g. click to toggle) — state in React or localStorage.
