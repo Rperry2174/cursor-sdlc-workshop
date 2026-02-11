@@ -6,17 +6,18 @@
 
 ## Project Overview
 
-**Project Name:** _[Give your project a name]_
+**Project Name:** *[Give your project a name]*
 
-**One-line Description:** _[What does it do in one sentence?]_
+**One-line Description:** *[What does it do in one sentence?]*
 
-**Type:** _[e.g., Chrome Extension, Web App, CLI Tool, etc.]_
+**Type:** *[e.g., Chrome Extension, Web App, CLI Tool, etc.]*
 
 ---
 
 ## Guidelines
 
 ### Keep It Small!
+
 - Your MVP should be buildable in **10 minutes** by one person
 - Think "proof of concept" not "production ready"
 - If it sounds ambitious, make it simpler
@@ -26,21 +27,27 @@
 ### Good Project Ideas
 
 **Pong** — classic paddle-and-ball game
-- _Example features:_ scoreboard, sound effects, difficulty/speed settings
+
+- *Example features:* scoreboard, sound effects, difficulty/speed settings
 
 **Memory Card Match** — flip cards to find matching pairs
-- _Example features:_ move counter, timer, win animation/confetti
+
+- *Example features:* move counter, timer, win animation/confetti
 
 **Drawing Pad** — simple canvas you can sketch on
-- _Example features:_ color picker, brush size slider, eraser tool
+
+- *Example features:* color picker, brush size slider, eraser tool
 
 **Typing Speed Game** — type a passage and measure your words per minute
-- _Example features:_ WPM display, accuracy tracker, difficulty levels
+
+- *Example features:* WPM display, accuracy tracker, difficulty levels
 
 **Trivia Quiz** — multiple choice questions with score tracking
-- _Example features:_ timer per question, category selector, results summary screen
+
+- *Example features:* timer per question, category selector, results summary screen
 
 ### Bad Project Ideas (Too Big!)
+
 - Anything with a database -- tell cursor to avoid this
 - Anything requiring authentication
 - Anything with multiple pages/screens
@@ -52,15 +59,18 @@
 
 > **Important:** Each team member MUST have their own task. Tasks should be independent features that can be built in parallel without stepping on each other's toes.
 
-| Name | Task | Description |
-|------|------|-------------|
-| _[Name 1]_ | _[Feature 1]_ | _[Brief description]_ |
-| _[Name 2]_ | _[Feature 2]_ | _[Brief description]_ |
-| _[Name 3]_ | _[Feature 3]_ | _[Brief description]_ |
-| _[Name 4]_ | _[Feature 4]_ | _[Brief description]_ |
-| _[Name 5]_ | _[Feature 5]_ | _[Brief description]_ |
+
+| Name       | Task          | Description           |
+| ---------- | ------------- | --------------------- |
+| *[Name 1]* | *[Feature 1]* | *[Brief description]* |
+| *[Name 2]* | *[Feature 2]* | *[Brief description]* |
+| *[Name 3]* | *[Feature 3]* | *[Brief description]* |
+| *[Name 4]* | *[Feature 4]* | *[Brief description]* |
+| *[Name 5]* | *[Feature 5]* | *[Brief description]* |
+
 
 ### Task Guidelines
+
 - Each task should add something **visible** to the project
 - Tasks should be **independent** — no dependencies on other tasks
 - Think: new button, new section, new color scheme, new text, etc.
@@ -73,10 +83,12 @@
 > **One person** creates the foundation that everyone else builds on.
 
 **What the MVP includes:**
-- _[Describe the minimal working version]_
+
+- *[Describe the minimal working version]*
 
 **What it does NOT include:**
-- _[List features deliberately left out for team members to add]_
+
+- *[List features deliberately left out for team members to add]*
 
 ---
 
@@ -84,35 +96,41 @@
 
 > These are the features team members will add. Design them to be **independent** so people can work in parallel.
 
-### Feature 1: _[Name]_
-- **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+### Feature 1: *[Name]*
 
-### Feature 2: _[Name]_
-- **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+- **Assigned to:** *[Team member]*
+- **Description:** *[What it does]*
+- **Files to modify/create:** *[Be specific]*
 
-### Feature 3: _[Name]_
-- **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+### Feature 2: *[Name]*
 
-### Feature 4: _[Name]_
-- **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+- **Assigned to:** *[Team member]*
+- **Description:** *[What it does]*
+- **Files to modify/create:** *[Be specific]*
 
-### Feature 5: _[Name]_
-- **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+### Feature 3: *[Name]*
+
+- **Assigned to:** *[Team member]*
+- **Description:** *[What it does]*
+- **Files to modify/create:** *[Be specific]*
+
+### Feature 4: *[Name]*
+
+- **Assigned to:** *[Team member]*
+- **Description:** *[What it does]*
+- **Files to modify/create:** *[Be specific]*
+
+### Feature 5: *[Name]*
+
+- **Assigned to:** *[Team member]*
+- **Description:** *[What it does]*
+- **Files to modify/create:** *[Be specific]*
 
 ---
 
 ## Success Criteria
 
-- [ ] MVP runs locally
-- [ ] Each team member has merged at least one PR
-- [ ] All features work together without breaking the app
+- MVP runs locally
+- Each team member has merged at least one PR
+- All features work together without breaking the app
+
