@@ -1,0 +1,57 @@
+/* Team picker — grid of clickable team cards */
+.team-picker {
+  margin-bottom: 2rem;
+}
+
+.team-picker-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.75rem;
+  color: #cbd5e1;
+}
+
+.team-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.75rem;
+}
+
+.team-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 1rem 0.75rem;
+  font-size: 0.95rem;
+  border: 2px solid #334155;
+  border-radius: 0.5rem;
+  background: #1e293b;
+  color: #f1f5f9;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.team-card:hover {
+  border-color: #475569;
+  background: #334155;
+}
+
+.team-card--selected {
+  border-color: #3b82f6;
+  background: #1e3a5f;
+}
+
+.team-card--selected:hover {
+  border-color: #3b82f6;
+  background: #1e3a5f;
+}
+
+.team-card-name {
+  font-weight: 600;
+}
+
+.team-card-percent {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
