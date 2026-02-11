@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <rect width="200" height="200" rx="16" fill="#F8F6F3"/>
+  
+  <g transform="translate(100,110)">
+    <!-- sole -->
+    <path d="M-55,-5 L-55,12 Q-55,18 -45,18 L52,18 Q62,18 64,12 L64,-5 Z" fill="#333" stroke="#222" stroke-width="2"/>
+    <!-- midsole -->
+    <path d="M-52,-5 L-52,5 Q-52,10 -42,10 L50,10 Q58,10 60,5 L60,-5 Z" fill="#72a7dd" stroke="#2c6197" stroke-width="1"/>
+    <!-- body -->
+    <path d="M-48,-5 L-48,-28 Q-43,-38 -18,-40 L12,-40 Q38,-38 48,-22 L55,-5 Z" fill="#4A7FB5" stroke="#2c6197" stroke-width="2"/>
+    <!-- mesh overlay -->
+    <path d="M-10,-35 L10,-35 L20,-5 L-20,-5 Z" fill="#598ec4" stroke="none" opacity="0.3"/>
+    <!-- swoosh / accent -->
+    <path d="M-35,-15 Q0,-30 45,-10" fill="none" stroke="#FF6B35" stroke-width="3" stroke-linecap="round"/>
+    <!-- laces -->
+    <line x1="-8" y1="-33" x2="8" y2="-33" stroke="#eee" stroke-width="1.5"/>
+    <line x1="-10" y1="-27" x2="10" y2="-27" stroke="#eee" stroke-width="1.5"/>
+    <line x1="-12" y1="-21" x2="12" y2="-21" stroke="#eee" stroke-width="1.5"/>
+    <!-- heel tab -->
+    <rect x="-50" y="-30" width="8" height="15" rx="2" fill="#FF6B35" stroke="#e14d17" stroke-width="1"/>
+  </g>
+</svg>

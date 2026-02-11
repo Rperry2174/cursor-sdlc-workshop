@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <rect width="200" height="200" rx="16" fill="#F8F6F3"/>
+  
+  <g transform="translate(100,110)">
+    <!-- sole -->
+    <path d="M-55,-5 L-55,10 Q-55,18 -45,18 L50,18 Q60,18 62,10 L62,-5 Z" fill="#E0E0E0" stroke="#999" stroke-width="2"/>
+    <!-- body -->
+    <path d="M-50,-5 L-50,-30 Q-45,-40 -20,-42 L10,-42 Q40,-42 50,-25 L55,-5 Z" fill="#F5F5F5" stroke="#d7d7d7" stroke-width="2"/>
+    <!-- toe cap -->
+    <path d="M35,-5 Q50,-15 55,-5 L62,-5 Q60,5 50,5 L35,5 Z" fill="#ffffff" stroke="#d7d7d7" stroke-width="1.5"/>
+    <!-- laces -->
+    <line x1="-5" y1="-35" x2="10" y2="-35" stroke="#d7d7d7" stroke-width="1.5"/>
+    <line x1="-8" y1="-28" x2="12" y2="-28" stroke="#d7d7d7" stroke-width="1.5"/>
+    <line x1="-10" y1="-21" x2="15" y2="-21" stroke="#d7d7d7" stroke-width="1.5"/>
+    <!-- ankle collar -->
+    <path d="M-50,-30 Q-45,-38 -30,-40 Q-20,-42 -10,-42" fill="none" stroke="#d7d7d7" stroke-width="3"/>
+    <!-- logo circle -->
+    <circle cx="30" cy="-20" r="6" fill="#ffffff" stroke="#d7d7d7" stroke-width="1"/>
+  </g>
+</svg>

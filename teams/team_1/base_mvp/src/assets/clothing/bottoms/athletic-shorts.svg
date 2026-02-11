@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <rect width="200" height="200" rx="16" fill="#F8F6F3"/>
+  
+  <g transform="translate(100,95)">
+    <!-- waistband (elastic) -->
+    <rect x="-42" y="-40" width="84" height="10" rx="5" fill="#3c3c3c" stroke="#0f0f0f" stroke-width="2"/>
+    <!-- body -->
+    <path d="M-42,-30 L-48,38 Q-48,42 -44,42 L-4,42 L0,5 L4,42 L44,42 Q48,42 48,38 L42,-30 Z" fill="#2D2D2D" stroke="#0f0f0f" stroke-width="2"/>
+    <!-- side stripes -->
+    <path d="M-42,-30 L-48,38" fill="none" stroke="#555555" stroke-width="4" opacity="0.6"/>
+    <path d="M42,-30 L48,38" fill="none" stroke="#555555" stroke-width="4" opacity="0.6"/>
+    <!-- drawstring -->
+    <path d="M-8,-35 Q-5,-28 0,-32 Q5,-28 8,-35" fill="none" stroke="#5f5f5f" stroke-width="1.5"/>
+  </g>
+</svg>

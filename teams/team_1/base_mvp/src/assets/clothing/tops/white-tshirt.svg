@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <rect width="200" height="200" rx="16" fill="#F8F6F3"/>
+  
+  <g transform="translate(100,105)">
+    <!-- body -->
+    <path d="M-42,-45 L-42,50 Q-42,55 -37,55 L37,55 Q42,55 42,50 L42,-45 L25,-45 Q20,-30 0,-28 Q-20,-30 -25,-45 Z" fill="#F5F5F5" stroke="#d7d7d7" stroke-width="2"/>
+    <!-- sleeves -->
+    <path d="M-42,-45 L-65,-25 L-55,-15 L-42,-20 Z" fill="#F5F5F5" stroke="#d7d7d7" stroke-width="2"/>
+    <path d="M42,-45 L65,-25 L55,-15 L42,-20 Z" fill="#F5F5F5" stroke="#d7d7d7" stroke-width="2"/>
+    <!-- collar -->
+    <path d="M-25,-45 Q-15,-55 0,-52 Q15,-55 25,-45 Q20,-30 0,-28 Q-20,-30 -25,-45 Z" fill="#ffffff" stroke="#d7d7d7" stroke-width="1.5"/>
+  </g>
+</svg>

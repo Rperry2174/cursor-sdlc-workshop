@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <rect width="200" height="200" rx="16" fill="#F8F6F3"/>
+  
+  <g transform="translate(100,110)">
+    <!-- sole front -->
+    <path d="M5,10 L50,10 Q58,10 58,5 L58,-5 L5,-5 Z" fill="#333" stroke="#222" stroke-width="1.5"/>
+    <!-- heel -->
+    <path d="M-35,-5 L-40,20 Q-42,25 -38,25 L-28,25 Q-24,25 -25,20 L-30,-5 Z" fill="#C9463D" stroke="#ab281f" stroke-width="2"/>
+    <!-- body -->
+    <path d="M-35,-5 L-35,-18 Q-30,-28 0,-30 L20,-30 Q42,-28 50,-15 L55,-5 Z" fill="#C9463D" stroke="#ab281f" stroke-width="2"/>
+    <!-- opening -->
+    <path d="M-30,-18 Q-20,-25 0,-28 Q10,-30 20,-30" fill="none" stroke="#ab281f" stroke-width="2.5"/>
+    <!-- inner shadow -->
+    <path d="M-25,-15 Q-10,-22 10,-22" fill="none" stroke="#b53229" stroke-width="1.5" opacity="0.5"/>
+    <!-- pointed toe -->
+    <path d="M50,-5 Q56,-10 58,-5 L58,5 Q55,8 50,8 Z" fill="#C9463D" stroke="#ab281f" stroke-width="1.5"/>
+    <!-- sole tip -->
+    <path d="M50,8 Q56,8 58,5 L58,10 Q55,12 50,10 Z" fill="#333" stroke="#222" stroke-width="1"/>
+  </g>
+</svg>

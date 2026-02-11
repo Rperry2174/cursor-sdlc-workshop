@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <rect width="200" height="200" rx="16" fill="#F8F6F3"/>
+  
+  <g transform="translate(100,115)">
+    <!-- sole -->
+    <path d="M-50,0 L-50,10 Q-50,16 -40,16 L48,16 Q56,16 58,10 L58,0 Z" fill="#C9A96E" stroke="#8B6914" stroke-width="2"/>
+    <!-- body -->
+    <path d="M-45,0 L-45,-20 Q-40,-30 -15,-32 L15,-32 Q40,-30 48,-15 L52,0 Z" fill="#8B6340" stroke="#6d4522" stroke-width="2"/>
+    <!-- opening -->
+    <ellipse cx="-10" cy="-22" rx="22" ry="10" fill="#815936" stroke="#6d4522" stroke-width="1.5"/>
+    <!-- penny strap -->
+    <path d="M10,-20 Q20,-22 30,-15" fill="none" stroke="#6d4522" stroke-width="3"/>
+    <rect x="15" y="-22" width="10" height="6" rx="2" fill="#774f2c" stroke="#6d4522" stroke-width="1"/>
+    <!-- heel -->
+    <rect x="-50" y="2" width="10" height="14" rx="2" fill="#8B6914" stroke="#6B4F12" stroke-width="1"/>
+  </g>
+</svg>
