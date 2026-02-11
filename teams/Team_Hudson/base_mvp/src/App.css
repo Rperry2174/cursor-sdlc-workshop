@@ -1,0 +1,57 @@
+.app {
+  min-height: 100vh;
+  background: #0d2d44;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  color: #fff;
+}
+
+.start-screen,
+.game-over-screen {
+  text-align: center;
+  max-width: 420px;
+}
+
+.start-screen h1,
+.game-over-screen h1 {
+  font-size: 1.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.start-screen p,
+.game-over-screen p {
+  margin-bottom: 0.5rem;
+  opacity: 0.9;
+}
+
+.controls {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.start-screen button,
+.game-over-screen button {
+  margin-top: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  background: #1e5f8a;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+}
+
+.start-screen button:hover,
+.game-over-screen button:hover {
+  background: #2a7ab0;
+}
+
+.canvas-wrap {
+  margin-top: 0.5rem;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
