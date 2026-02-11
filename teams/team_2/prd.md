@@ -6,11 +6,11 @@
 
 ## Project Overview
 
-**Project Name:** _[Give your project a name]_
+**Project Name:** CityWeather Toggle
 
-**One-line Description:** _[What does it do in one sentence?]_
+**One-line Description:** A simple weather app that lets you toggle between the 10 biggest US cities and displays current weather conditions.
 
-**Type:** _[e.g., Chrome Extension, Web App, CLI Tool, etc.]_
+**Type:** Web App (Single HTML page)
 
 ---
 
@@ -54,11 +54,11 @@
 
 | Name | Task | Description |
 |------|------|-------------|
-| _[Name 1]_ | _[Feature 1]_ | _[Brief description]_ |
-| _[Name 2]_ | _[Feature 2]_ | _[Brief description]_ |
-| _[Name 3]_ | _[Feature 3]_ | _[Brief description]_ |
-| _[Name 4]_ | _[Feature 4]_ | _[Brief description]_ |
-| _[Name 5]_ | _[Feature 5]_ | _[Brief description]_ |
+| Matt Giordano | City Selector Grid | Add a visual grid of city buttons with hover effects |
+| Trevor Cotta | Weather Icons | Add weather condition icons/emojis based on weather type |
+| Casey Brenna | Temperature Styling | Style the temperature display with color coding (hot/cold) |
+| Dan Riley | Weather Details Panel | Add humidity, wind speed, and "feels like" information |
+| _(Bonus)_ | Dark/Light Mode Toggle | Add theme switcher for day/night viewing |
 
 ### Task Guidelines
 - Each task should add something **visible** to the project
@@ -73,10 +73,18 @@
 > **One person** creates the foundation that everyone else builds on.
 
 **What the MVP includes:**
-- _[Describe the minimal working version]_
+- Single HTML file with embedded CSS and JavaScript
+- Hardcoded weather data for 10 biggest US cities (New York, Los Angeles, Chicago, Houston, Phoenix, Philadelphia, San Antonio, San Diego, Dallas, Austin)
+- Basic city dropdown/select element
+- Simple text display showing: City name, Temperature (°F), and Weather condition
+- Function to switch between cities when dropdown changes
 
 **What it does NOT include:**
-- _[List features deliberately left out for team members to add]_
+- Styled city buttons (Matt will add)
+- Weather icons (Trevor will add)
+- Temperature color coding (Casey will add)
+- Detailed weather info like humidity/wind (Dan will add)
+- Theme switcher (bonus feature)
 
 ---
 
@@ -84,30 +92,30 @@
 
 > These are the features team members will add. Design them to be **independent** so people can work in parallel.
 
-### Feature 1: _[Name]_
-- **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+### Feature 1: City Selector Grid
+- **Assigned to:** Matt Giordano
+- **Description:** Replace the basic dropdown with a visually appealing grid of city buttons. Add hover effects and active state styling. Each button displays the city name and shows selected state.
+- **Files to modify/create:** Modify the main HTML file - update the city selector section and add CSS for the button grid
 
-### Feature 2: _[Name]_
-- **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+### Feature 2: Weather Icons
+- **Assigned to:** Trevor Cotta
+- **Description:** Add weather condition icons (using emojis or simple SVGs) next to the weather condition text. Map different weather conditions (Sunny, Cloudy, Rainy, etc.) to appropriate visual icons.
+- **Files to modify/create:** Modify the main HTML file - add icon display function and update weather display area with icon element
 
-### Feature 3: _[Name]_
-- **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+### Feature 3: Temperature Color Coding
+- **Assigned to:** Casey Brenna
+- **Description:** Style the temperature display with color gradients based on temperature ranges (e.g., blue for cold <50°F, orange for warm 50-80°F, red for hot >80°F). Make the temperature stand out visually.
+- **Files to modify/create:** Modify the main HTML file - add CSS classes for temperature ranges and JavaScript to apply the right class based on temp value
 
-### Feature 4: _[Name]_
-- **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+### Feature 4: Weather Details Panel
+- **Assigned to:** Dan Riley
+- **Description:** Add an additional information panel below the main display showing humidity percentage, wind speed (mph), and "feels like" temperature. Style it as a neat info card.
+- **Files to modify/create:** Modify the main HTML file - add new HTML section for details panel, add corresponding data to the weather data object, and style the panel
 
-### Feature 5: _[Name]_
-- **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+### Feature 5: Dark/Light Mode Toggle
+- **Assigned to:** _(Bonus Feature)_
+- **Description:** Add a toggle button to switch between light and dark themes. Updates background colors, text colors, and card styling based on selected theme.
+- **Files to modify/create:** Modify the main HTML file - add theme toggle button, CSS variables for themes, and JavaScript toggle function
 
 ---
 
