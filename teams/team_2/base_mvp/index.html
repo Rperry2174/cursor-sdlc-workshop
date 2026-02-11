@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CityWeather Toggle</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        
+        .city-selector {
+            margin: 20px 0;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        select {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .weather-display {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+        
+        .weather-info {
+            margin: 10px 0;
+            font-size: 18px;
+        }
+        
+        .city-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .temperature {
+            font-size: 36px;
+            margin: 15px 0;
+        }
+        
+        .condition {
+            font-size: 20px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CityWeather Toggle</h1>
+        
+        <div class="city-selector">
+            <label for="citySelect">Select a City:</label>
+            <select id="citySelect" onchange="updateWeather()">
+                <option value="new-york">New York</option>
+                <option value="los-angeles">Los Angeles</option>
+                <option value="chicago">Chicago</option>
+                <option value="houston">Houston</option>
+                <option value="phoenix">Phoenix</option>
+                <option value="philadelphia">Philadelphia</option>
+                <option value="san-antonio">San Antonio</option>
+                <option value="san-diego">San Diego</option>
+                <option value="dallas">Dallas</option>
+                <option value="austin">Austin</option>
+            </select>
+        </div>
+        
+        <div class="weather-display" id="weatherDisplay">
+            <div class="city-name" id="cityName">New York</div>
+            <div class="temperature" id="temperature">72°F</div>
+            <div class="condition" id="condition">Partly Cloudy</div>
+        </div>
+    </div>
+
+    <script>
+        // Hardcoded weather data for 10 biggest US cities
+        const weatherData = {
+            'new-york': {
+                name: 'New York',
+                temperature: 72,
+                condition: 'Partly Cloudy',
+                humidity: 65,
+                windSpeed: 12,
+                feelsLike: 70
+            },
+            'los-angeles': {
+                name: 'Los Angeles',
+                temperature: 85,
+                condition: 'Sunny',
+                humidity: 45,
+                windSpeed: 8,
+                feelsLike: 83
+            },
+            'chicago': {
+                name: 'Chicago',
+                temperature: 68,
+                condition: 'Cloudy',
+                humidity: 70,
+                windSpeed: 15,
+                feelsLike: 65
+            },
+            'houston': {
+                name: 'Houston',
+                temperature: 88,
+                condition: 'Sunny',
+                humidity: 80,
+                windSpeed: 10,
+                feelsLike: 92
+            },
+            'phoenix': {
+                name: 'Phoenix',
+                temperature: 98,
+                condition: 'Sunny',
+                humidity: 20,
+                windSpeed: 5,
+                feelsLike: 95
+            },
+            'philadelphia': {
+                name: 'Philadelphia',
+                temperature: 74,
+                condition: 'Partly Cloudy',
+                humidity: 60,
+                windSpeed: 11,
+                feelsLike: 73
+            },
+            'san-antonio': {
+                name: 'San Antonio',
+                temperature: 90,
+                condition: 'Sunny',
+                humidity: 55,
+                windSpeed: 9,
+                feelsLike: 93
+            },
+            'san-diego': {
+                name: 'San Diego',
+                temperature: 78,
+                condition: 'Sunny',
+                humidity: 50,
+                windSpeed: 7,
+                feelsLike: 77
+            },
+            'dallas': {
+                name: 'Dallas',
+                temperature: 86,
+                condition: 'Partly Cloudy',
+                humidity: 58,
+                windSpeed: 13,
+                feelsLike: 88
+            },
+            'austin': {
+                name: 'Austin',
+                temperature: 92,
+                condition: 'Sunny',
+                humidity: 52,
+                windSpeed: 8,
+                feelsLike: 95
+            }
+        };
+
+        // Function to update weather display when city changes
+        function updateWeather() {
+            const citySelect = document.getElementById('citySelect');
+            const selectedCity = citySelect.value;
+            const weather = weatherData[selectedCity];
+            
+            document.getElementById('cityName').textContent = weather.name;
+            document.getElementById('temperature').textContent = weather.temperature + '°F';
+            document.getElementById('condition').textContent = weather.condition;
+        }
+
+        // Initialize with first city on page load
+        window.onload = function() {
+            updateWeather();
+        };
+    </script>
+</body>
+</html>
