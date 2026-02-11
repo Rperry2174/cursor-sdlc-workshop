@@ -6,11 +6,11 @@
 
 ## Project Overview
 
-**Project Name:** _[Give your project a name]_
+**Project Name:** Quick Todo
 
-**One-line Description:** _[What does it do in one sentence?]_
+**One-line Description:** A minimal single-page todo list where you can add and manage items.
 
-**Type:** _[e.g., Chrome Extension, Web App, CLI Tool, etc.]_
+**Type:** Single-page web app (HTML, CSS, JavaScript)
 
 ---
 
@@ -40,11 +40,11 @@
 
 | Name | Task | Description |
 |------|------|-------------|
-| _[Name 1]_ | _[Feature 1]_ | _[Brief description]_ |
-| _[Name 2]_ | _[Feature 2]_ | _[Brief description]_ |
-| _[Name 3]_ | _[Feature 3]_ | _[Brief description]_ |
-| _[Name 4]_ | _[Feature 4]_ | _[Brief description]_ |
-| _[Name 5]_ | _[Feature 5]_ | _[Brief description]_ |
+| Clint | Clear All button | Button that removes all todos from the list |
+| _[Name 2]_ | Item counter | Display "X items" (or "No items") above the list |
+| _[Name 3]_ | Basic styling | Add CSS so the list and input look like a simple card |
+| _[Name 4]_ | Mark complete | Checkbox or toggle on each item to mark it done (strikethrough) |
+| _[Name 5]_ | Persist with localStorage | Save todos so they're still there after refresh |
 
 ### Task Guidelines
 - Each task should add something **visible** to the project
@@ -59,10 +59,13 @@
 > **One person** creates the foundation that everyone else builds on.
 
 **What the MVP includes:**
-- _[Describe the minimal working version]_
+- One HTML page with an input field and "Add" button
+- A list (ul/ol) where new todos appear when you click Add
+- Basic JavaScript to add items to the list (no styling required)
+- All in one file or simple index.html + script is fine
 
 **What it does NOT include:**
-- _[List features deliberately left out for team members to add]_
+- Clear All, item counter, styling, mark complete, or localStorage (those are Phase 3 features)
 
 ---
 
@@ -70,30 +73,30 @@
 
 > These are the features team members will add. Design them to be **independent** so people can work in parallel.
 
-### Feature 1: _[Name]_
-- **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+### Feature 1: Clear All button
+- **Assigned to:** Clint
+- **Description:** A "Clear All" button that removes every item from the todo list when clicked.
+- **Files to modify/create:** Same HTML/JS file as MVP (e.g. `index.html` or `app.js`). Add button, wire click handler to clear the list DOM and any in-memory array.
 
-### Feature 2: _[Name]_
-- **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+### Feature 2: Item counter
+- **Assigned to:** _[Name 2]_
+- **Description:** Display a line like "3 items" or "No items" that updates when items are added or removed.
+- **Files to modify/create:** Same file(s) as MVP. Add an element for the count and update it whenever the list changes.
 
-### Feature 3: _[Name]_
-- **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+### Feature 3: Basic styling
+- **Assigned to:** _[Name 3]_
+- **Description:** Add CSS so the input, button, and list look like a simple card (e.g. box, padding, maybe a border or shadow).
+- **Files to modify/create:** MVP HTML file and/or a new `style.css`; link the stylesheet and add classes as needed.
 
-### Feature 4: _[Name]_
-- **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+### Feature 4: Mark complete
+- **Assigned to:** _[Name 4]_
+- **Description:** Each todo item gets a checkbox (or toggle). When checked, show the item as complete (e.g. strikethrough). Toggling off removes the strikethrough.
+- **Files to modify/create:** Same file(s) as MVP. When rendering each item, add a checkbox and style the text based on checked state.
 
-### Feature 5: _[Name]_
-- **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+### Feature 5: Persist with localStorage
+- **Assigned to:** _[Name 5]_
+- **Description:** Save the list of todos to localStorage when it changes, and load from localStorage on page load so todos survive a refresh.
+- **Files to modify/create:** Same JS as MVP. On load, read from localStorage and render; on add/remove/clear, write the current list to localStorage.
 
 ---
 
