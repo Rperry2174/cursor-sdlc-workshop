@@ -71,6 +71,35 @@
             font-size: 20px;
             color: #666;
         }
+
+        .weather-details-panel {
+            margin-top: 20px;
+            padding: 16px 20px;
+            background: linear-gradient(135deg, #e8f4f8 0%, #f0f8f0 100%);
+            border-radius: 8px;
+            border: 1px solid #c8e0d8;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+
+        .weather-details-panel h3 {
+            margin: 0 0 12px 0;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #555;
+        }
+
+        .weather-details-panel .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 15px;
+            color: #333;
+        }
+
+        .weather-details-panel .detail-label {
+            color: #666;
+        }
     </style>
 </head>
 <body>
@@ -97,6 +126,12 @@
             <div class="city-name" id="cityName">New York</div>
             <div class="temperature" id="temperature">72°F</div>
             <div class="condition" id="condition">Partly Cloudy</div>
+            <div class="weather-details-panel" id="weatherDetailsPanel">
+                <h3>Vibes</h3>
+                <div class="detail-row"><span class="detail-label">Humidity</span><span id="detailHumidity">—</span></div>
+                <div class="detail-row"><span class="detail-label">Wind</span><span id="detailWind">—</span></div>
+                <div class="detail-row"><span class="detail-label">Feels like</span><span id="detailFeelsLike">—</span></div>
+            </div>
         </div>
     </div>
 
@@ -185,15 +220,37 @@
             }
         };
 
+        // Egregious California surfer speak
+        const surferSpeak = {
+            'Sunny': 'Totally glassy — epic set, paddle out!',
+            'Partly Cloudy': 'Partly glassy, swell\'s still there. Paddle!',
+            'Cloudy': 'Kooky overcast — swell hiding inside.',
+            'Rainy': 'Liquid sunshine. Leave the fin at home, brah.',
+            'Stormy': 'Gnarly storm. No paddle today.',
+            'Foggy': 'Heavy marine layer — total kook conditions.',
+            'Windy': 'Breezy offshore. Epic if you paddle out.',
+            'Clear': 'Clean glass. Tubular.',
+            'Mostly Sunny': 'Mostly glassy — epic set coming.',
+            'Mostly Cloudy': 'Swell\'s inside. Kinda kooky out there.'
+        };
+
+        function getSurferSpeak(condition) {
+            return surferSpeak[condition] || 'Chill vibes. Could go either way.';
+        }
+
         // Function to update weather display when city changes
         function updateWeather() {
             const citySelect = document.getElementById('citySelect');
             const selectedCity = citySelect.value;
             const weather = weatherData[selectedCity];
-            
+
             document.getElementById('cityName').textContent = weather.name;
             document.getElementById('temperature').textContent = weather.temperature + '°F';
-            document.getElementById('condition').textContent = weather.condition;
+            document.getElementById('condition').textContent = getSurferSpeak(weather.condition);
+
+            document.getElementById('detailHumidity').textContent = weather.humidity + '%';
+            document.getElementById('detailWind').textContent = weather.windSpeed + ' mph';
+            document.getElementById('detailFeelsLike').textContent = weather.feelsLike + '°F';
         }
 
         // Initialize with first city on page load
