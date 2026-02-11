@@ -6,11 +6,11 @@
 
 ## Project Overview
 
-**Project Name:** _[Give your project a name]_
+**Project Name:** Cursor SDLC Board
 
-**One-line Description:** _[What does it do in one sentence?]_
+**One-line Description:** A simple visual board that shows the six SDLC stages (Plan → Design → Develop → Test → Review → Deploy) and where Cursor helps at each step.
 
-**Type:** _[e.g., Chrome Extension, Web App, CLI Tool, etc.]_
+**Type:** Web App (React, single page)
 
 ---
 
@@ -52,13 +52,13 @@
 
 > **Important:** Each team member MUST have their own task. Tasks should be independent features that can be built in parallel without stepping on each other's toes.
 
-| Name | Task | Description |
-|------|------|-------------|
-| _[Name 1]_ | _[Feature 1]_ | _[Brief description]_ |
-| _[Name 2]_ | _[Feature 2]_ | _[Brief description]_ |
-| _[Name 3]_ | _[Feature 3]_ | _[Brief description]_ |
-| _[Name 4]_ | _[Feature 4]_ | _[Brief description]_ |
-| _[Name 5]_ | _[Feature 5]_ | _[Brief description]_ |
+| Name  | Task               | Description                                                                 |
+|-------|--------------------|-----------------------------------------------------------------------------|
+| Joe   | Progress tracker   | Shows how many stages are "complete" (e.g. 2/6) with a simple progress bar  |
+| David | Stage descriptions | Expandable or hover text for each stage with a short Cursor tip             |
+| Sam   | Timer              | Elapsed time since "starting" the board (or a countdown)                    |
+| Alex  | Theme toggle       | Switch between light and dark (or Cursor-style blue) theme                  |
+| Chris | What's next        | Highlights the "current" stage and shows a short call-to-action tip         |
 
 ### Task Guidelines
 - Each task should add something **visible** to the project
@@ -73,10 +73,18 @@
 > **One person** creates the foundation that everyone else builds on.
 
 **What the MVP includes:**
-- _[Describe the minimal working version]_
+- Single-page React app (Vite + React)
+- Six stage cards in a row: **Plan**, **Design**, **Develop**, **Test**, **Review**, **Deploy**
+- Each card shows the stage name and a one-line description (e.g. "Define requirements, break down tasks")
+- Minimal styling: readable layout, one color accent (e.g. Cursor blue)
+- No backend, no auth — all state in React or localStorage if needed
 
 **What it does NOT include:**
-- _[List features deliberately left out for team members to add]_
+- Progress bar or "stages complete" counter (Joe)
+- Rich/expandable descriptions or Cursor tips per stage (David)
+- Timer or countdown (Sam)
+- Theme/color toggle (Alex)
+- "Current stage" highlight or "what's next" call-to-action (Chris)
 
 ---
 
@@ -84,30 +92,30 @@
 
 > These are the features team members will add. Design them to be **independent** so people can work in parallel.
 
-### Feature 1: _[Name]_
-- **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+### Feature 1: Progress tracker
+- **Assigned to:** Joe
+- **Description:** A component that displays "X/6 stages" and a progress bar. Stages can be marked complete (e.g. click to toggle) — state in React or localStorage.
+- **Files to modify/create:** New component e.g. `src/components/ProgressTracker.jsx`; add it to `App.jsx`.
 
-### Feature 2: _[Name]_
-- **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+### Feature 2: Stage descriptions
+- **Assigned to:** David
+- **Description:** Each stage card shows a short Cursor tip (e.g. "Plan Mode, multi-model reasoning" for Plan). Can be expand/collapse or hover tooltip — one component or a small description module.
+- **Files to modify/create:** New component e.g. `src/components/StageDescriptions.jsx` or extend the stage card component; optional `src/data/stageTips.js` for the copy.
 
-### Feature 3: _[Name]_
-- **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+### Feature 3: Timer
+- **Assigned to:** Sam
+- **Description:** Displays elapsed time since the user "started" (e.g. since page load or since clicking Start). Simple MM:SS display.
+- **Files to modify/create:** New component e.g. `src/components/Timer.jsx`; add it to `App.jsx`.
 
-### Feature 4: _[Name]_
-- **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+### Feature 4: Theme toggle
+- **Assigned to:** Alex
+- **Description:** A control (button or toggle) to switch between two themes — e.g. light vs dark, or default vs Cursor-blue. Use CSS variables or a theme class on a wrapper.
+- **Files to modify/create:** New component e.g. `src/components/ThemeToggle.jsx`; add theme styles (e.g. in `App.css` or a small `themes.css`); add to `App.jsx`.
 
-### Feature 5: _[Name]_
-- **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+### Feature 5: What's next
+- **Assigned to:** Chris
+- **Description:** Highlights the "current" stage (e.g. first incomplete, or user-selectable) and shows a short call-to-action (e.g. "Next: Design — sketch your components").
+- **Files to modify/create:** New component e.g. `src/components/WhatsNext.jsx`; add it to `App.jsx`. May read "current stage" from shared state or props if the team adds it.
 
 ---
 
