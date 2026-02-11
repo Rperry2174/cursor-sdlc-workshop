@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Snake — Eat the Apples</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: #eee;
+    }
+    h1 {
+      margin-bottom: 0.5rem;
+      font-size: 1.75rem;
+      color: #4ade80;
+    }
+    .subtitle { color: #94a3b8; font-size: 0.9rem; margin-bottom: 1rem; }
+    .score-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    .score { font-size: 1.25rem; font-weight: 600; color: #4ade80; }
+    .controls { font-size: 0.8rem; color: #64748b; margin-bottom: 0.5rem; }
+    #gameCanvas {
+      display: block;
+      background: #0f172a;
+      border: 3px solid #334155;
+      border-radius: 8px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+    }
+    .message {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      padding: 1.5rem 2rem;
+      background: rgba(15, 23, 42, 0.95);
+      border: 2px solid #4ade80;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      z-index: 10;
+      pointer-events: none;
+    }
+    .message.hidden { display: none; }
+    .message .big { font-size: 1.5rem; color: #4ade80; margin-bottom: 0.5rem; }
+    .message .small { color: #94a3b8; font-size: 0.9rem; }
+    .wrap { position: relative; }
+  </style>
+</head>
+<body>
+  <h1>Snake</h1>
+  <p class="subtitle">Eat the apples. Don't hit the walls or yourself.</p>
+  <div class="score-row">
+    <span class="score">Score: <span id="score">0</span></span>
+  </div>
+  <p class="controls">Arrow keys or WASD to move · Speed increases as you eat</p>
+  <div class="wrap">
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <div id="startMessage" class="message">
+      <div class="big">Ready?</div>
+      <div class="small">Press any arrow key or WASD to start</div>
+    </div>
+    <div id="gameOverMessage" class="message hidden">
+      <div class="big">Game Over</div>
+      <div class="small">Final score: <span id="finalScore">0</span>. Press Space to play again.</div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const canvas = document.getElementById('gameCanvas');
+      const ctx = canvas.getContext('2d');
+      const cellSize = 20;
+      const cols = Math.floor(canvas.width / cellSize);
+      const rows = Math.floor(canvas.height / cellSize);
+
+      let snake = [];
+      let direction = { x: 1, y: 0 };
+      let nextDirection = { x: 1, y: 0 };
+      let apple = { x: 0, y: 0 };
+      let score = 0;
+      let gameLoopId = null;
+      let intervalMs = 120;
+      let running = false;
+      let gameOver = false;
+
+      const startMessage = document.getElementById('startMessage');
+      const gameOverMessage = document.getElementById('gameOverMessage');
+      const scoreEl = document.getElementById('score');
+      const finalScoreEl = document.getElementById('finalScore');
+
+      function randInt(max) {
+        return Math.floor(Math.random() * max);
+      }
+
+      // ---------- Food logic (Clint) ----------
+      /** Returns a random grid cell that is not occupied by the snake. Food must not spawn on the snake. */
+      function getRandomEmptyCell(snakeBody) {
+        let x, y;
+        do {
+          x = randInt(cols);
+          y = randInt(rows);
+        } while (snakeBody.some(seg => seg.x === x && seg.y === y));
+        return { x, y };
+      }
+
+      function spawnFood() {
+        apple = getRandomEmptyCell(snake);
+      }
+
+      function renderFood() {
+        const px = apple.x * cellSize;
+        const py = apple.y * cellSize;
+        const r = (cellSize - 4) / 2;
+        const cx = px + cellSize / 2;
+        const cy = py + cellSize / 2;
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#b91c1c';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      function initGame() {
+        const midX = Math.floor(cols / 2);
+        const midY = Math.floor(rows / 2);
+        // Head at index 0, tail at end; head faces right so head is rightmost
+        snake = [
+          { x: midX + 1, y: midY },
+          { x: midX, y: midY },
+          { x: midX - 1, y: midY },
+        ];
+        direction = { x: 1, y: 0 };
+        nextDirection = { x: 1, y: 0 };
+        score = 0;
+        intervalMs = 120;
+        gameOver = false;
+        spawnFood();
+        scoreEl.textContent = '0';
+        gameOverMessage.classList.add('hidden');
+        startMessage.classList.remove('hidden');
+      }
+
+      function drawCell(x, y, color) {
+        const px = x * cellSize;
+        const py = y * cellSize;
+        ctx.fillStyle = color;
+        ctx.fillRect(px + 1, py + 1, cellSize - 2, cellSize - 2);
+      }
+
+      function draw() {
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        snake.forEach((seg, i) => {
+          const color = i === 0 ? '#4ade80' : '#22c55e';
+          drawCell(seg.x, seg.y, color);
+        });
+        renderFood();
+      }
+
+      function tick() {
+        if (gameOver) return;
+        direction = nextDirection;
+        const head = snake[0];
+        const newHead = {
+          x: head.x + direction.x,
+          y: head.y + direction.y,
+        };
+
+        // Hit wall = game over
+        if (newHead.x < 0 || newHead.x >= cols || newHead.y < 0 || newHead.y >= rows) {
+          endGame();
+          return;
+        }
+
+        // Exclude tail from collision check — it moves this tick, so its cell is valid
+        const bodyOnly = snake.slice(0, -1);
+        if (bodyOnly.some(seg => seg.x === newHead.x && seg.y === newHead.y)) {
+          endGame();
+          return;
+        }
+
+        snake.unshift(newHead);
+
+        // Eat detection (food logic — Clint): head enters food cell → consume, grow, score, spawn new food
+        if (newHead.x === apple.x && newHead.y === apple.y) {
+          score += 10;
+          scoreEl.textContent = String(score);
+          spawnFood();
+          if (intervalMs > 60) intervalMs -= 3;
+          clearInterval(gameLoopId);
+          gameLoopId = setInterval(tick, intervalMs);
+        } else {
+          snake.pop();
+        }
+        draw();
+      }
+
+      function endGame() {
+        gameOver = true;
+        if (gameLoopId) clearInterval(gameLoopId);
+        gameLoopId = null;
+        startMessage.classList.add('hidden');
+        finalScoreEl.textContent = String(score);
+        gameOverMessage.classList.remove('hidden');
+      }
+
+      function startGame() {
+        if (running) return;
+        running = true;
+        startMessage.classList.add('hidden');
+        gameLoopId = setInterval(tick, intervalMs);
+      }
+
+      document.addEventListener('keydown', function (e) {
+        if (gameOver) {
+          if (e.code === 'Space') {
+            e.preventDefault();
+            initGame();
+            running = false;
+            gameOverMessage.classList.add('hidden');
+            startMessage.classList.remove('hidden');
+          }
+          return;
+        }
+        if (!running) {
+          const startKeys = ['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','KeyW','KeyA','KeyS','KeyD'];
+          if (startKeys.includes(e.code)) {
+            e.preventDefault();
+            startGame();
+          }
+          return;
+        }
+        e.preventDefault();
+        if (e.code === 'ArrowUp' || e.code === 'KeyW') {
+          if (direction.y === 0) nextDirection = { x: 0, y: -1 };
+        } else if (e.code === 'ArrowDown' || e.code === 'KeyS') {
+          if (direction.y === 0) nextDirection = { x: 0, y: 1 };
+        } else if (e.code === 'ArrowLeft' || e.code === 'KeyA') {
+          if (direction.x === 0) nextDirection = { x: -1, y: 0 };
+        } else if (e.code === 'ArrowRight' || e.code === 'KeyD') {
+          if (direction.x === 0) nextDirection = { x: 1, y: 0 };
+        }
+      });
+
+      initGame();
+      draw();
+    })();
+  </script>
+</body>
+</html>
