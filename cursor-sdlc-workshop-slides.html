@@ -34,12 +34,22 @@
         }
 
         .slide-container {
+            position: absolute;
+            top: 0;
+            left: 0;
             height: 100vh;
             width: 100vw;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 60px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .slide-container:has(.slide.active) {
+            z-index: 1;
+            pointer-events: auto;
         }
 
         .slide {
@@ -66,10 +76,14 @@
             font-size: 4rem;
             font-weight: 700;
             margin-bottom: 1rem;
+            color: var(--cursor-blue);
             background: linear-gradient(135deg, var(--cursor-blue), #64B5F6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+        }
+        @supports (background-clip: text) or (-webkit-background-clip: text) {
+            h1 { color: transparent; }
         }
 
         h2 {

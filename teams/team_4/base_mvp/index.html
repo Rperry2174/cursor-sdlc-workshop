@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calm Call — Breathing Exercise</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    h1 { font-size: 1.5rem; margin-bottom: 2rem; }
+    .cue {
+      font-size: 2rem;
+      font-weight: 600;
+      margin-bottom: 2rem;
+      min-height: 3rem;
+    }
+    .breath-visual {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: #e0e7ff;
+      margin-bottom: 2rem;
+    }
+    .controls { display: flex; gap: 1rem; }
+    button {
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .start { background: #4f46e5; color: white; }
+    .stop { background: #64748b; color: white; }
+  </style>
+</head>
+<body>
+  <h1>Calm Call</h1>
+  <p class="cue" id="cue">Click Start to begin</p>
+  <div class="breath-visual" id="breath-visual" aria-hidden="true"></div>
+  <div class="controls">
+    <button class="start" id="start">Start</button>
+    <button class="stop" id="stop" disabled>Stop</button>
+  </div>
+
+  <script>
+    const cueEl = document.getElementById('cue');
+    const startBtn = document.getElementById('start');
+    const stopBtn = document.getElementById('stop');
+
+    const INHALE = 4, HOLD = 4, EXHALE = 4;
+    let timeoutId = null;
+    let isRunning = false;
+
+    const phases = [
+      { label: 'Breathe in', duration: INHALE },
+      { label: 'Hold', duration: HOLD },
+      { label: 'Breathe out', duration: EXHALE }
+    ];
+
+    function runPhase(phaseIndex) {
+      if (!isRunning) return;
+      const phase = phases[phaseIndex];
+      cueEl.textContent = phase.label;
+
+      timeoutId = setTimeout(() => {
+        const next = (phaseIndex + 1) % phases.length;
+        runPhase(next);
+      }, phase.duration * 1000);
+    }
+
+    function start() {
+      if (isRunning) return;
+      isRunning = true;
+      startBtn.disabled = true;
+      stopBtn.disabled = false;
+      runPhase(0);
+    }
+
+    function stop() {
+      isRunning = false;
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = null;
+      cueEl.textContent = 'Click Start to begin';
+      startBtn.disabled = false;
+      stopBtn.disabled = true;
+    }
+
+    startBtn.addEventListener('click', start);
+    stopBtn.addEventListener('click', stop);
+  </script>
+</body>
+</html>

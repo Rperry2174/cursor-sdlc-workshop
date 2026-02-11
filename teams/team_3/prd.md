@@ -6,11 +6,11 @@
 
 ## Project Overview
 
-**Project Name:** _[Give your project a name]_
+**Project Name:** Snake
 
-**One-line Description:** _[What does it do in one sentence?]_
+**One-line Description:** A browser-based Snake game where you control a growing snake, eat food, and try to beat your high score.
 
-**Type:** _[e.g., Chrome Extension, Web App, CLI Tool, etc.]_
+**Type:** Web App
 
 ---
 
@@ -54,11 +54,11 @@
 
 | Name | Task | Description |
 |------|------|-------------|
-| _[Name 1]_ | _[Feature 1]_ | _[Brief description]_ |
-| _[Name 2]_ | _[Feature 2]_ | _[Brief description]_ |
-| _[Name 3]_ | _[Feature 3]_ | _[Brief description]_ |
-| _[Name 4]_ | _[Feature 4]_ | _[Brief description]_ |
-| _[Name 5]_ | _[Feature 5]_ | _[Brief description]_ |
+| Simon | Snake movement | Arrow-key controls, snake body grows and follows head, wall/self collision ends game |
+| Clint | Food | Spawn food at random grid cell; when snake eats it, body grows and score increases |
+| Alex | Speed ramp | Game speed increases as score goes up (e.g. every N points or apples) |
+| Ria | Game modes | E.g. Classic vs. No walls (wrap) or different grid sizes; mode selector before/at start |
+| Simon | High scores | Show top N scores (e.g. localStorage); display on game over and optional “High scores” screen |
 
 ### Task Guidelines
 - Each task should add something **visible** to the project
@@ -73,10 +73,10 @@
 > **One person** creates the foundation that everyone else builds on.
 
 **What the MVP includes:**
-- _[Describe the minimal working version]_
+- Playable grid (e.g. canvas or div-based), one snake segment that moves with arrow keys, basic collision (walls or wrap), one food spawn that the snake can “eat” to grow by one segment, and a simple score display (increment on eat). Game over on wall hit (or wrap) and restart. No persistence, no speed change, single mode only.
 
 **What it does NOT include:**
-- _[List features deliberately left out for team members to add]_
+- Speed ramp; multiple game modes; persistent high scores / leaderboard; polish (sounds, animations).
 
 ---
 
@@ -84,30 +84,30 @@
 
 > These are the features team members will add. Design them to be **independent** so people can work in parallel.
 
-### Feature 1: _[Name]_
-- **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+### Feature 1: Snake movement
+- **Assigned to:** Simon
+- **Description:** Snake moves continuously in the current direction; arrow keys change direction (up/down/left/right). Snake body is a list of segments that follow the head; eating food adds a segment. Collision with wall (or self, if desired in MVP) ends the game.
+- **Files to modify/create:** Core game loop and input handling (e.g. `App.jsx` or `Game.jsx`, or equivalent in vanilla JS); state for snake segments and direction. Possibly a small `useGameLoop` or `gameLoop.js` if using React.
 
-### Feature 2: _[Name]_
-- **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+### Feature 2: Food
+- **Assigned to:** Clint
+- **Description:** Food appears on a random empty grid cell. When the snake’s head enters that cell, the food is consumed, the snake grows by one segment, score increments, and new food spawns. Food must not spawn on the snake.
+- **Files to modify/create:** Food spawn logic (e.g. `getRandomEmptyCell()` or similar), render food on grid, and “eat” detection in the main game loop (same file as movement, but clearly separated so Clint can own the food logic).
 
-### Feature 3: _[Name]_
-- **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+### Feature 3: Speed ramp
+- **Assigned to:** Alex
+- **Description:** As the player scores more (e.g. every 5 or 10 points), increase the game speed (shorten the tick interval). Speed should be configurable (e.g. a multiplier or step) so it doesn’t become unplayable.
+- **Files to modify/create:** Game loop timing (e.g. `setInterval`/`requestAnimationFrame` and a `speed` or `tickMs` state). Optionally a small `speedRamp.js` or constants file for the ramp steps.
 
-### Feature 4: _[Name]_
-- **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+### Feature 4: Game modes
+- **Assigned to:** Ria
+- **Description:** At least two playable modes, e.g. “Classic” (die on wall) vs “No walls” (wrap around). Optional: different grid sizes. Player selects mode before starting; the chosen mode affects only the rules (wall vs wrap, maybe grid size).
+- **Files to modify/create:** Mode selector UI (e.g. start screen or dropdown), a `mode` or `gameMode` setting (e.g. `'classic' | 'wrap'`), and use it in collision/boundary logic. Shared with movement code but Ria owns the mode value and selector.
 
-### Feature 5: _[Name]_
-- **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+### Feature 5: High scores
+- **Assigned to:** Simon
+- **Description:** Persist top N high scores (e.g. 5 or 10) in `localStorage`. On game over, show “New high score?” and update the list if applicable. Optional: simple “High scores” view (modal or section) showing the list.
+- **Files to modify/create:** A small `highScores.js` (or similar) for read/write/update of scores; game over screen or overlay that shows current score and top scores; optionally a “View high scores” button that displays the list.
 
 ---
 
