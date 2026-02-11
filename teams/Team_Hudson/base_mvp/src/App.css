@@ -1,54 +1,57 @@
 .app {
+  min-height: 100vh;
+  background: #0d2d44;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
   padding: 1rem;
+  color: #fff;
 }
 
 .start-screen,
 .game-over-screen {
   text-align: center;
-  max-width: 480px;
+  max-width: 420px;
 }
 
 .start-screen h1,
 .game-over-screen h1 {
-  font-size: 2rem;
+  font-size: 1.75rem;
   margin-bottom: 0.5rem;
 }
 
 .start-screen p,
 .game-over-screen p {
-  color: #bbb;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
+  opacity: 0.9;
 }
 
-.start-screen .controls {
-  font-size: 0.95rem;
-  margin-bottom: 1.5rem;
+.controls {
+  font-size: 0.9rem;
+  opacity: 0.8;
 }
 
-.start-button,
-.restart-button {
+.start-screen button,
+.game-over-screen button {
+  margin-top: 1.5rem;
   padding: 0.75rem 1.5rem;
-  font-size: 1.1rem;
-  background: #2a6a4a;
+  font-size: 1rem;
+  cursor: pointer;
+  background: #1e5f8a;
   color: #fff;
   border: none;
   border-radius: 8px;
-  cursor: pointer;
 }
 
-.start-button:hover,
-.restart-button:hover {
-  background: #3a7a5a;
+.start-screen button:hover,
+.game-over-screen button:hover {
+  background: #2a7ab0;
 }
 
-.game-over-screen h1 {
-  color: #8f8;
-}
-
-.game-over-screen p {
-  font-size: 1.1rem;
+.canvas-wrap {
+  margin-top: 0.5rem;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }

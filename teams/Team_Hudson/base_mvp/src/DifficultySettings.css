@@ -1,0 +1,39 @@
+.difficulty-settings {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.difficulty-label {
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+.difficulty-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.difficulty-btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.difficulty-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.difficulty-btn.selected {
+  background: #1e5f8a;
+  border-color: #3a9bd6;
+}
