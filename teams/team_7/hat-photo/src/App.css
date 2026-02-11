@@ -1,0 +1,176 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #1a1a2e;
+  color: #eee;
+}
+
+.app {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  margin: 0 0 8px;
+  font-size: 1.75rem;
+}
+
+.header p {
+  margin: 0;
+  color: #aaa;
+  font-size: 0.95rem;
+}
+
+.upload-section {
+  margin-bottom: 24px;
+}
+
+.upload-btn {
+  display: inline-block;
+  padding: 12px 24px;
+  background: #4a90d9;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.upload-btn:hover {
+  background: #3a7bc8;
+}
+
+.preview-area {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.photo-container {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.photo {
+  display: block;
+  max-width: 400px;
+  max-height: 400px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: #222;
+}
+
+.hat-overlay {
+  position: absolute;
+  pointer-events: none;
+  object-fit: contain;
+}
+
+.placeholder {
+  width: 400px;
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #252540;
+  border: 2px dashed #444;
+  border-radius: 8px;
+  color: #666;
+}
+
+.hat-controls {
+  flex: 1;
+  min-width: 220px;
+  padding: 16px;
+  background: #252540;
+  border-radius: 8px;
+}
+
+.hat-controls h3 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.hat-controls > p {
+  margin: 0 0 16px;
+  color: #aaa;
+  font-size: 0.875rem;
+}
+
+.slider-group {
+  margin-bottom: 16px;
+}
+
+.slider-group label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.slider-group span:first-of-type {
+  min-width: 120px;
+  font-size: 0.9rem;
+}
+
+.slider-group input[type="range"] {
+  flex: 1;
+  min-width: 120px;
+  height: 8px;
+  accent-color: #4a90d9;
+}
+
+.slider-group .value {
+  min-width: 48px;
+  font-size: 0.875rem;
+  color: #888;
+}
+
+.hat-selector {
+  padding: 16px;
+  background: #252540;
+  border-radius: 8px;
+}
+
+.hat-selector h3 {
+  margin: 0 0 12px;
+  font-size: 1rem;
+}
+
+.hat-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.hat-buttons button {
+  padding: 8px 16px;
+  background: #333;
+  color: #eee;
+  border: 1px solid #555;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.hat-buttons button:hover {
+  background: #444;
+  border-color: #666;
+}
+
+.hat-buttons button.active {
+  background: #4a90d9;
+  border-color: #4a90d9;
+}

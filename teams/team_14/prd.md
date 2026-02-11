@@ -1,128 +1,268 @@
 # Product Requirements Document (PRD)
 
-> **Instructions:** This is your team's project specification. Fill in the sections below to define what you're building.
+> Internal tool to standardize discount guidance and reduce quote back-and-forth for sales reps.
 
 ---
 
 ## Project Overview
 
-**Project Name:** Memory Card Match
+**Project Name:** Cursor Deal Pricing Calculator
 
-**One-line Description:** A web game where players flip cards to find matching pairs.
+**One-line Description:** An input-driven web calculator that takes seats, pre-committed usage per user, and term to output ACV range and corresponding CTR rate range.
 
-**Type:** Web App (React, frontend-only)
+**Type:** Internal Web App (single page)
+
+**Primary Users:**
+- Account Executives (AEs)
+- Sales Engineers
+- Deal Desk / Pricing Operations
+
+**Problem Statement:**
+- Reps currently estimate discounts manually across multiple dimensions (usage/user, seat tier, term, ACV, and CTR rules), which is error-prone and slow.
+- Teams need one consistent source of truth for discount eligibility and final quote math.
+
+**Business Outcome:**
+- Reduce time to produce a pricing proposal.
+- Improve consistency and policy adherence in discounting.
+- Increase confidence in approvals by showing transparent math.
 
 ---
 
 ## Guidelines
 
 ### Keep It Small!
+- MVP should support one complete deal-calculation flow end-to-end.
+- No backend required for MVP; pricing rules are hardcoded from approved policy tables.
+- Outputs should be clear enough to copy into deal notes.
 
-- Your MVP should be buildable in **10 minutes** by one person
-- Think "proof of concept" not "production ready"
-- If it sounds ambitious, make it simpler
-- **Use Cursor to help you plan this!** You need a project that has at least 5 features so everyone on your team can pick one and add it
-- Feel free to take one of the ideas below — this exercise is about learning the git flow, collaborating as a team, and understanding where Cursor's features fit into the SDLC
+### Out of Scope (MVP)
+- CRM integrations (Salesforce, HubSpot)
+- Authentication and role permissions
+- Persisting scenarios to a database
+- Approval workflow orchestration
 
-### Good Project Ideas
+---
 
-**Pong** — classic paddle-and-ball game
+## Pricing Rules (Source of Truth)
 
-- *Example features:* scoreboard, sound effects, difficulty/speed settings
+### List Prices
+- Seat license fee: `$40` per seat
+- Committed usage minimum: `$20` per user (can be higher)
+- CTR list rate: `$0.25` per 1M tokens
 
-**Memory Card Match** — flip cards to find matching pairs
+### Discount Matrix: Usage/User x Seat Tier
+Base discount for seat license + committed usage line items:
 
-- *Example features:* move counter, timer, win animation/confetti
+| Avg Monthly Pre-committed Usage per User | 0-500 seats | 500-1,000 seats | 1,000+ seats |
+|---|---:|---:|---:|
+| $20 | 0% | 5% | 10% |
+| $30 | 5% | 5% | 10% |
+| $40 | 10% | 15% | 20% |
+| $50 | 15% | 20% | 25% |
+| $60 | 20% | 25% | 30% |
+| $70 | 25% | 30% | 35% |
+| $80 | 30% | 35% | 40% |
+| $90 | 35% | 40% | 45% |
+| $100 | 40% | 45% | 50% |
 
-**Drawing Pad** — simple canvas you can sketch on
+### Commitment Term Uplift (Additive)
+Apply additional discount to seat license + committed usage:
+- 1 year: `+0%`
+- 2 years: `+5%`
+- 3+ years: `+10%`
 
-- *Example features:* color picker, brush size slider, eraser tool
+Final discount for seat + committed usage line items:
 
-**Typing Speed Game** — type a passage and measure your words per minute
+`finalCoreDiscount = baseMatrixDiscount + termUplift`
 
-- *Example features:* WPM display, accuracy tracker, difficulty levels
+### Maximum CTR Discount Table
+CTR is a separate line item and discounted independently based on pre-commit ACV and term.
 
-**Trivia Quiz** — multiple choice questions with score tracking
+| Pre-Commit ACV | 1 Year | 2 Year | 3+ Years |
+|---|---:|---:|---:|
+| $0 - $100K | 0% | 5% | 10% |
+| $100K - $250K | 10% | 15% | 20% |
+| $250K - $500K | 20% | 25% | 30% |
+| $500K - $1M | 30% | 35% | 40% |
+| $1M+ | 40% | 45% | 50% |
 
-- *Example features:* timer per question, category selector, results summary screen
+### Input Model
+Required inputs:
+- `seats`
+- `monthlyCommittedUsagePerUser` (>= `$20`)
+- `term` (`1 year`, `2 years`, `3+ years`)
 
-### Bad Project Ideas (Too Big!)
+### Derived Core ACV Calculations
+Annualized core list pricing:
 
-- Anything with a database -- tell cursor to avoid this
-- Anything requiring authentication
-- Anything with multiple pages/screens
-- Anything that "needs" an API
+`listCoreACV = (seats * 40 * 12) + (seats * monthlyCommittedUsagePerUser * 12)`
+
+Core discount:
+
+`finalCoreDiscount = baseMatrixDiscount + termUplift`
+
+Annualized discounted core pricing:
+
+`discountedCoreACV = listCoreACV * (1 - finalCoreDiscount)`
+
+ACV range displayed to reps:
+
+`acvRange = [discountedCoreACV, listCoreACV]`
+
+### Coupled ACV to CTR Output Model
+CTR is a separate line item, but it is tightly coupled to ACV through policy bands. Instead of showing two independent ranges, we generate a discrete ACV->CTR point series:
+
+`acvMin = discountedCoreACV`
+
+`acvMax = listCoreACV`
+
+`N = 11  // number of discrete points shown`
+
+For each point `i` from `0` to `N-1`:
+
+`acv_i = acvMin + (i / (N - 1)) * (acvMax - acvMin)`
+
+`maxCtrDiscount_i = lookupCtrDiscount(acv_i, term)`
+
+`minCtrRate_i = 0.25 * (1 - maxCtrDiscount_i)`
+
+Display output as ordered points:
+
+`acvCtrCurvePoints = [{acv, maxCtrDiscount, minCtrRate}, ...]`
+
+Optional rollup summary:
+
+`ctrRateRange = [min(minCtrRate_i), max(minCtrRate_i)]`
+
+### Core Calculation Assumptions
+- ACV in this PRD refers to annualized core spend (seat + committed usage only).
+- CTR does not change core ACV; it is shown as a separate term/rate line.
+- Discount percentages cannot exceed 100% and cannot be negative.
+- CTR lookup uses ACV band thresholds exactly as defined in the table.
+- Reps should pick a specific ACV point and use the matched CTR at that same point.
 
 ---
 
 ## Team Members & Tasks
 
-> **Important:** Each team member MUST have their own task. Tasks should be independent features that can be built in parallel without stepping on each other's toes.
+> Team size is 1. One teammate + Cursor agent delivers the full MVP.
 
 | Name | Task | Description |
 |------|------|-------------|
-| Maureen | Move Counter | Displays how many card flips the player has made |
-| Tina | Timer | Shows elapsed time since game start |
-| James | Win Animation | Confetti or celebration when all pairs are matched |
-| Pranathi | Restart Button | Button to shuffle and start a new game |
+| _[Your Name]_ | End-to-end MVP build | Implement inputs, calculations, coupled ACV->CTR output, validation, and scenarios |
 
 ### Task Guidelines
-
-- Each task should add something **visible** to the project
-- Tasks should be **independent** — no dependencies on other tasks
-- Think: new button, new section, new color scheme, new text, etc.
-- Everyone should be able to work at the same time without conflicts
+- Every task must produce visible UI or visible user behavior.
+- Each task should have minimal file overlap with others.
+- Teams should integrate against a shared `PricingResult` interface contract.
 
 ---
 
 ## Base MVP (Phase 2)
 
-> **One person** creates the foundation that everyone else builds on.
+> One person creates the app shell and baseline calculation flow.
 
 **What the MVP includes:**
-- 4×4 grid of face-down cards (8 pairs)
-- Click to flip two cards at a time
-- Match logic: matching pairs stay face-up; non-matches flip back after a short delay
-- Simple "You win!" message when all pairs are matched
-- Basic styling (cards, grid layout)
+- Single-page UI with required inputs only: seats, usage/user, term
+- Hardcoded pricing/discount tables
+- Compute outputs for:
+  - `listCoreACV`
+  - `discountedCoreACV`
+  - `acvRange = [discountedCoreACV, listCoreACV]`
+  - `acvCtrCurvePoints[]` mapping each ACV point to its corresponding max CTR discount and min CTR rate
+- Clear explanation of matrix row/column, term uplift, ACV band transitions, and point-by-point ACV->CTR mapping
 
 **What it does NOT include:**
-- Move counter
-- Timer
-- Win animation/confetti
-- Restart button
+- Authentication
+- CRM sync
+- Multi-page reporting dashboards
+- Admin rule editor
 
 ---
 
 ## Feature Slots (Phase 3)
 
-> These are the features team members will add. Design them to be **independent** so people can work in parallel.
+> These are workstreams for one teammate using Cursor agent.
 
-### Feature 1: Move Counter
-- **Assigned to:** Maureen
-- **Description:** Display a count of how many moves (card flips) the player has made. Increment when two cards are flipped (whether they match or not).
-- **Files to modify/create:** `App.jsx` or main game component, `App.css` or styles for the counter display
+### Workstream 1: Inputs Panel and Guardrails
+- **Assigned to:** _[Single teammate + Cursor agent]_
+- **Description:** Build form controls for seats, usage/user, and term, plus inline validation messages.
+- **Files to modify/create:** `src/App.tsx`, `src/components/InputsPanel.tsx`, `src/lib/validators.ts`, `src/types/pricing.ts`
 
-### Feature 2: Timer
-- **Assigned to:** Tina
-- **Description:** Show elapsed time in seconds (and optionally minutes) since the game started. Pause or stop when the player wins.
-- **Files to modify/create:** `App.jsx` or main game component, `App.css` for timer display
+### Workstream 2: Pricing Engine + Coupled ACV->CTR Series
+- **Assigned to:** _[Single teammate + Cursor agent]_
+- **Description:** Implement matrix lookup, additive term uplift, list/discounted ACV formulas, and ACV-to-CTR point-series generation.
+- **Files to modify/create:** `src/lib/pricingEngine.ts`, `src/lib/ctrTranslator.ts`, `src/lib/discountTables.ts`, `src/types/pricing.ts`
 
-### Feature 3: Win Animation
-- **Assigned to:** James
-- **Description:** When all pairs are matched, trigger a celebration (confetti, animation, or visual effect) instead of or in addition to the "You win!" message.
-- **Files to modify/create:** `App.jsx` or main game component, possibly a confetti library (e.g., `canvas-confetti`) or custom CSS animation
+### Workstream 3: Results + Scenario Utilities
+- **Assigned to:** _[Single teammate + Cursor agent]_
+- **Description:** Present ACV range and ACV->CTR points with clear rationale, plus preset scenarios, reset, and copy-to-clipboard summary.
+- **Files to modify/create:** `src/components/ResultsPanel.tsx`, `src/components/DiscountSummary.tsx`, `src/components/ScenarioPresets.tsx`, `src/lib/formatters.ts`, `src/App.tsx`
 
-### Feature 4: Restart Button
-- **Assigned to:** Pranathi
-- **Description:** Add a "New Game" or "Restart" button that reshuffles the cards and resets the game state so the player can play again.
-- **Files to modify/create:** `App.jsx` or main game component, `App.css` for button styling
+### Feature 5: Sound Effects
+- **Assigned to:** Ali
+- **Description:** Play a sound when a card is flipped and a different sound when a pair matches. Can use the Web Audio API or a simple audio element.
+- **Files to modify/create:** `App.jsx` or main game component, optional audio files or inline audio using Web Audio API
 
 ---
 
 ## Success Criteria
 
-- MVP runs locally
-- Each team member has merged at least one PR
-- All features work together without breaking the app
+- [ ] MVP runs locally
+- [ ] Calculator returns deterministic outputs for known inputs
+- [ ] Single teammate can complete the MVP using Cursor agent support
+- [ ] All features work together without breaking the app
+- [ ] Reps can understand why each discount was applied in under 60 seconds
+- [ ] Reps can select any ACV point and immediately read the matched CTR floor at that point
 
+### Acceptance Test Scenarios
+
+1) **Small deal, 1-year term**
+- Inputs: `300 seats`, `$20` usage/user, `1 year`
+- Expected:
+  - Base core discount = `0%` (row `$20`, col `0-500`)
+  - Term uplift = `0%`
+  - Final core discount = `0%`
+  - `listCoreACV = $216,000`
+  - `discountedCoreACV = $216,000`
+  - `acvRange = [$216,000, $216,000]`
+  - `acvCtrCurvePoints` has 11 points; all points are `$216,000`
+  - Every point maps to ACV band `$100K-$250K` (1 year -> `10%` max CTR discount)
+  - Every point has `minCtrRate = $0.225/M`
+
+2) **Mid-market deal, 2-year term**
+- Inputs: `750 seats`, `$60` usage/user, `2 years`
+- Expected:
+  - Base core discount = `25%` (row `$60`, col `500-1,000`)
+  - Term uplift = `5%`
+  - Final core discount = `30%`
+  - `listCoreACV = $900,000`
+  - `discountedCoreACV = $630,000`
+  - `acvRange = [$630,000, $900,000]`
+  - `acvCtrCurvePoints` has 11 points from `$630,000` to `$900,000`
+  - Every point maps to ACV band `$500K-$1M` (2 year -> `35%` max CTR discount)
+  - Every point has `minCtrRate = $0.1625/M`
+
+3) **Enterprise deal, 3+ years**
+- Inputs: `1,500 seats`, `$100` usage/user, `3+ years`
+- Expected:
+  - Base core discount = `50%` (row `$100`, col `1,000+`)
+  - Term uplift = `10%`
+  - Final core discount = `60%`
+  - `listCoreACV = $2,520,000`
+  - `discountedCoreACV = $1,008,000`
+  - `acvRange = [$1,008,000, $2,520,000]`
+  - `acvCtrCurvePoints` has 11 points from `$1,008,000` to `$2,520,000`
+  - Every point maps to ACV band `$1M+` (3+ years -> `50%` max CTR discount)
+  - Every point has `minCtrRate = $0.125/M`
+  - Proposed CTR rate of `$0.20/M` is compliant
+
+4) **Band-crossing coupling behavior**
+- Inputs: `145 seats`, `$20` usage/user, `3+ years`
+- Expected:
+  - `listCoreACV = $104,400`
+  - `discountedCoreACV = $93,960`
+  - `acvRange = [$93,960, $104,400]`
+  - `acvCtrCurvePoints` crosses ACV bands:
+    - lower ACV points in `$0-$100K` at 3+ years -> `10%` max CTR discount (`$0.225/M`)
+    - upper ACV points in `$100K-$250K` at 3+ years -> `20%` max CTR discount (`$0.20/M`)

@@ -79,7 +79,46 @@
       border-color: #4f46e5;
     }
     .pattern-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .duration-presets {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .preset-btn {
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      border: 2px solid #c7d2fe;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      color: #333;
+    }
+    .preset-btn[aria-pressed="true"] {
+      background: #4f46e5;
+      color: white;
+      border-color: #4f46e5;
+    }
+    .preset-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .controls { display: flex; gap: 1rem; }
+    .cycle-counter {
+      font-size: 1.25rem;
+      margin-bottom: 1.5rem;
+      color: #fff;
+      text-shadow: 0 0 20px rgba(0, 0, 0, 0.6), 0 2px 4px rgba(0, 0, 0, 0.5);
+      opacity: 0.9;
+    }
+    .cycle-counter .current {
+      font-weight: 700;
+      font-size: 1.5rem;
+    }
+    .total-breaths {
+      font-size: 0.9rem;
+      margin-top: 1rem;
+      color: #fff;
+      opacity: 0.8;
+    }
     button {
       padding: 0.75rem 1.5rem;
       font-size: 1rem;
@@ -109,8 +148,17 @@
     <button class="pattern-btn" data-pattern="4-7-8" aria-pressed="false">4-7-8</button>
     <button class="pattern-btn" data-pattern="box" aria-pressed="false">Box</button>
   </div>
+  <div class="duration-presets" id="duration-presets">
+    <button class="preset-btn" data-seconds="30" aria-pressed="false">Quick (30 sec)</button>
+    <button class="preset-btn" data-seconds="60" aria-pressed="true">Standard (1 min)</button>
+    <button class="preset-btn" data-seconds="120" aria-pressed="false">Deep reset (2 min)</button>
+  </div>
   <p class="cue" id="cue">Click Start to begin</p>
+  <div class="cycle-counter" id="cycle-counter" style="display: none;">
+    Breath <span class="current" id="current-breath">1</span> of <span id="total-breaths-target">5</span>
+  </div>
   <div class="breath-visual" id="breath-visual" aria-hidden="true"></div>
+  <p class="total-breaths" id="total-breaths-display" style="display: none;">Total breaths completed: <span id="total-completed">0</span></p>
   <div class="controls">
     <button class="start" id="start">Start</button>
     <button class="stop" id="stop" disabled>Stop</button>
@@ -121,6 +169,7 @@
     const startBtn = document.getElementById('start');
     const stopBtn = document.getElementById('stop');
     const patternBtns = document.querySelectorAll('.pattern-btn');
+    const presetBtns = document.querySelectorAll('.preset-btn');
 
     const PATTERNS = {
       '4-4-4': [
@@ -144,12 +193,26 @@
     let currentPattern = '4-4-4';
     let timeoutId = null;
     let isRunning = false;
+    let targetSeconds = 60;
+    
+    // Cycle counter state (Jesse's feature)
+    let currentBreath = 1;
+    let totalBreathsTarget = 5;
+    let totalCompleted = 0;
+    
+    const cycleCounterEl = document.getElementById('cycle-counter');
+    const currentBreathEl = document.getElementById('current-breath');
+    const totalBreathsTargetEl = document.getElementById('total-breaths-target');
+    const totalBreathsDisplayEl = document.getElementById('total-breaths-display');
+    const totalCompletedEl = document.getElementById('total-completed');
 
     function selectPattern(patternId) {
       currentPattern = patternId;
       patternBtns.forEach(btn => {
         btn.setAttribute('aria-pressed', btn.dataset.pattern === patternId);
       });
+      totalBreathsTarget = computeTargetCycles(targetSeconds);
+      if (totalBreathsTargetEl) totalBreathsTargetEl.textContent = totalBreathsTarget;
     }
 
     patternBtns.forEach(btn => {
@@ -159,18 +222,59 @@
       });
     });
 
+    function getCycleDurationSeconds() {
+      const phases = PATTERNS[currentPattern];
+      return phases.reduce((sum, p) => sum + p.duration, 0);
+    }
+
+    function computeTargetCycles(seconds) {
+      const cycleSec = getCycleDurationSeconds();
+      return Math.max(1, Math.floor(seconds / cycleSec));
+    }
+
+    function selectPreset(seconds) {
+      targetSeconds = parseInt(seconds, 10);
+      totalBreathsTarget = computeTargetCycles(targetSeconds);
+      presetBtns.forEach(btn => {
+        btn.setAttribute('aria-pressed', parseInt(btn.dataset.seconds, 10) === targetSeconds);
+      });
+    }
+
+    presetBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (isRunning) return;
+        selectPreset(btn.dataset.seconds);
+        totalBreathsTargetEl.textContent = totalBreathsTarget;
+      });
+    });
+
+    totalBreathsTarget = computeTargetCycles(targetSeconds);
+
     function runPhase(phases, phaseIndex) {
       if (!isRunning) return;
       var phase = phases[phaseIndex];
       cueEl.textContent = phase.label;
 
-      breathEl.classList.remove('inhale', 'hold', 'exhale');
-      void breathEl.offsetWidth;
-      breathEl.classList.add(phase.cls);
-
       timeoutId = setTimeout(function() {
         var next = (phaseIndex + 1) % phases.length;
-        runPhase(next);
+        
+        // When we complete a full cycle (back to phase 0), update counters
+        if (next === 0) {
+          totalCompleted++;
+          totalCompletedEl.textContent = totalCompleted;
+          
+          if (currentBreath < totalBreathsTarget) {
+            currentBreath++;
+            currentBreathEl.textContent = currentBreath;
+            runPhase(phases, next);
+          } else {
+            // Completed all target breaths
+            cueEl.textContent = 'Well done! 🧘';
+            stop();
+          }
+        } else {
+          runPhase(phases, next);
+        }
       }, phase.duration * 1000);
     }
 
@@ -180,6 +284,13 @@
       startBtn.disabled = true;
       stopBtn.disabled = false;
       patternBtns.forEach(btn => { btn.disabled = true; });
+      
+      // Reset and show cycle counter (Jesse's feature)
+      currentBreath = 1;
+      currentBreathEl.textContent = currentBreath;
+      cycleCounterEl.style.display = 'block';
+      totalBreathsDisplayEl.style.display = 'block';
+      
       const phases = PATTERNS[currentPattern];
       runPhase(phases, 0);
     }
@@ -191,7 +302,11 @@
       cueEl.textContent = 'Click Start to begin';
       startBtn.disabled = false;
       stopBtn.disabled = true;
-      breathEl.classList.remove('inhale', 'hold', 'exhale');
+      patternBtns.forEach(btn => { btn.disabled = false; });
+      presetBtns.forEach(btn => { btn.disabled = false; });
+      
+      // Hide cycle counter but keep total visible (Jesse's feature)
+      cycleCounterEl.style.display = 'none';
     }
 
     startBtn.addEventListener('click', start);
