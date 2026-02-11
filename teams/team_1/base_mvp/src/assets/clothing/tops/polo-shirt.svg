@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <rect width="200" height="200" rx="16" fill="#F8F6F3"/>
+  
+  <g transform="translate(100,105)">
+    <!-- body -->
+    <path d="M-42,-45 L-42,50 Q-42,55 -37,55 L37,55 Q42,55 42,50 L42,-45 L25,-45 Q20,-30 0,-28 Q-20,-30 -25,-45 Z" fill="#1B3A5C" stroke="#001c3e" stroke-width="2"/>
+    <!-- sleeves -->
+    <path d="M-42,-45 L-62,-28 L-52,-18 L-42,-22 Z" fill="#1B3A5C" stroke="#001c3e" stroke-width="2"/>
+    <path d="M42,-45 L62,-28 L52,-18 L42,-22 Z" fill="#1B3A5C" stroke="#001c3e" stroke-width="2"/>
+    <!-- collar (polo style - larger) -->
+    <path d="M-25,-45 Q-28,-58 -15,-55 L0,-48 L15,-55 Q28,-58 25,-45 Q20,-30 0,-28 Q-20,-30 -25,-45 Z" fill="#2f4e70" stroke="#001c3e" stroke-width="1.5"/>
+    <!-- placket -->
+    <rect x="-4" y="-28" width="8" height="25" rx="1" fill="#254466" stroke="#001c3e" stroke-width="1"/>
+    <!-- buttons -->
+    <circle cx="0" cy="-20" r="2.5" fill="#00082a"/>
+    <circle cx="0" cy="-10" r="2.5" fill="#00082a"/>
+    <!-- sleeve ribbing -->
+    <line x1="-52" y1="-18" x2="-42" y2="-22" stroke="#072648" stroke-width="2.5"/>
+    <line x1="52" y1="-18" x2="42" y2="-22" stroke="#072648" stroke-width="2.5"/>
+  </g>
+</svg>

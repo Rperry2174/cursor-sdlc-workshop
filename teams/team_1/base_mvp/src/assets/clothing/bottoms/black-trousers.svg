@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <rect width="200" height="200" rx="16" fill="#F8F6F3"/>
+  
+  <g transform="translate(100,100)">
+    <!-- waistband -->
+    <rect x="-38" y="-55" width="76" height="12" rx="3" fill="#373737" stroke="#050505" stroke-width="2"/>
+    <!-- body -->
+    <path d="M-38,-43 L-38,55 L-5,55 L0,-5 L5,55 L38,55 L38,-43 Z" fill="#2D2D2D" stroke="#050505" stroke-width="2"/>
+    <!-- crease lines (sharp) -->
+    <line x1="-20" y1="-30" x2="-20" y2="55" stroke="#464646" stroke-width="1.2"/>
+    <line x1="20" y1="-30" x2="20" y2="55" stroke="#464646" stroke-width="1.2"/>
+    <!-- fly -->
+    <line x1="0" y1="-43" x2="0" y2="-5" stroke="#050505" stroke-width="1.5"/>
+    <!-- belt -->
+    <rect x="-38" y="-53" width="76" height="5" rx="2" fill="#0f0f0f" stroke="#050505" stroke-width="1"/>
+    <!-- belt buckle -->
+    <rect x="-4" y="-54" width="8" height="7" rx="1" fill="#B8860B" stroke="#8B6914" stroke-width="1"/>
+  </g>
+</svg>

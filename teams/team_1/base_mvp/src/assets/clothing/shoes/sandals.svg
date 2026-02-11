@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <rect width="200" height="200" rx="16" fill="#F8F6F3"/>
+  
+  <g transform="translate(100,115)">
+    <!-- sole -->
+    <path d="M-48,-5 Q-50,5 -48,12 Q-45,18 -30,18 L35,18 Q50,18 52,12 Q54,5 52,-5 Q50,-10 35,-12 L-30,-12 Q-46,-10 -48,-5 Z" fill="#8B6340" stroke="#6d4522" stroke-width="2"/>
+    <!-- sole texture -->
+    <path d="M-40,5 L40,5" stroke="#7c5431" stroke-width="0.8" opacity="0.4"/>
+    <path d="M-38,10 L38,10" stroke="#7c5431" stroke-width="0.8" opacity="0.4"/>
+    <!-- front strap -->
+    <path d="M-15,-12 Q0,-30 15,-12" fill="none" stroke="#774f2c" stroke-width="5" stroke-linecap="round"/>
+    <!-- back strap -->
+    <path d="M-25,-8 Q-35,-25 -10,-25 Q10,-28 15,-12" fill="none" stroke="#774f2c" stroke-width="4" stroke-linecap="round"/>
+    <!-- buckle -->
+    <rect x="-30" y="-18" width="8" height="6" rx="1" fill="#B8860B" stroke="#8B6914" stroke-width="1"/>
+  </g>
+</svg>

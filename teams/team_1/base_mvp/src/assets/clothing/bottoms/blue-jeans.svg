@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <rect width="200" height="200" rx="16" fill="#F8F6F3"/>
+  
+  <g transform="translate(100,100)">
+    <!-- waistband -->
+    <rect x="-40" y="-55" width="80" height="14" rx="3" fill="#3e73a9" stroke="#2c6197" stroke-width="2"/>
+    <!-- body -->
+    <path d="M-40,-41 L-42,55 L-8,55 L-2,-5 L2,-5 L8,55 L42,55 L40,-41 Z" fill="#4A7FB5" stroke="#2c6197" stroke-width="2"/>
+    <!-- fly -->
+    <line x1="0" y1="-41" x2="0" y2="-5" stroke="#2c6197" stroke-width="1.5"/>
+    <!-- pockets stitch -->
+    <path d="M-35,-41 Q-28,-30 -20,-41" fill="none" stroke="#689dd3" stroke-width="1"/>
+    <path d="M35,-41 Q28,-30 20,-41" fill="none" stroke="#689dd3" stroke-width="1"/>
+    <!-- belt loops -->
+    <rect x="-30" y="-57" width="4" height="18" rx="1" fill="#4277ad" stroke="#2c6197" stroke-width="0.5"/>
+    <rect x="-10" y="-57" width="4" height="18" rx="1" fill="#4277ad" stroke="#2c6197" stroke-width="0.5"/>
+    <rect x="10" y="-57" width="4" height="18" rx="1" fill="#4277ad" stroke="#2c6197" stroke-width="0.5"/>
+    <rect x="26" y="-57" width="4" height="18" rx="1" fill="#4277ad" stroke="#2c6197" stroke-width="0.5"/>
+    <!-- button -->
+    <circle cx="0" cy="-48" r="3" fill="#22578d"/>
+  </g>
+</svg>

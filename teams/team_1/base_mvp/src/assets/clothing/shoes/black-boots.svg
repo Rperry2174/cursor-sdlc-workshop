@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <rect width="200" height="200" rx="16" fill="#F8F6F3"/>
+  
+  <g transform="translate(100,108)">
+    <!-- sole -->
+    <path d="M-45,15 L-45,25 Q-45,32 -35,32 L50,32 Q58,32 60,25 L60,15 Z" fill="#4A4A4A" stroke="#333" stroke-width="2"/>
+    <!-- boot body -->
+    <path d="M-40,15 L-40,-45 Q-38,-50 -25,-52 L10,-52 Q30,-50 40,-35 L50,15 Z" fill="#2D2D2D" stroke="#0f0f0f" stroke-width="2"/>
+    <!-- toe cap -->
+    <path d="M30,15 Q45,5 50,15 L55,15 Q55,8 45,5 L30,5 Z" fill="#1e1e1e" stroke="#0f0f0f" stroke-width="1.5"/>
+    <!-- pull tab -->
+    <rect x="-20" y="-52" width="12" height="8" rx="2" fill="#414141" stroke="#0f0f0f" stroke-width="1"/>
+    <!-- lace eyelets -->
+    <circle cx="-5" cy="-38" r="2" fill="#666" stroke="#333" stroke-width="1"/>
+    <circle cx="5" cy="-38" r="2" fill="#666" stroke="#333" stroke-width="1"/>
+    <circle cx="-5" cy="-25" r="2" fill="#666" stroke="#333" stroke-width="1"/>
+    <circle cx="5" cy="-25" r="2" fill="#666" stroke="#333" stroke-width="1"/>
+    <circle cx="-5" cy="-12" r="2" fill="#666" stroke="#333" stroke-width="1"/>
+    <circle cx="5" cy="-12" r="2" fill="#666" stroke="#333" stroke-width="1"/>
+    <!-- laces -->
+    <line x1="-5" y1="-38" x2="5" y2="-32" stroke="#555" stroke-width="1"/>
+    <line x1="5" y1="-38" x2="-5" y2="-32" stroke="#555" stroke-width="1"/>
+    <line x1="-5" y1="-25" x2="5" y2="-19" stroke="#555" stroke-width="1"/>
+    <line x1="5" y1="-25" x2="-5" y2="-19" stroke="#555" stroke-width="1"/>
+  </g>
+</svg>
