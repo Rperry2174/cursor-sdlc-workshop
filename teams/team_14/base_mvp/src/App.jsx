@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import './App.css'
 
 const SYMBOLS = ['🎵', '🎸', '🎹', '🎺', '🥁', '🎻', '🎤', '🎧']
@@ -24,8 +24,29 @@ function App() {
   const [cards, setCards] = useState(createCards)
   const [flippedIds, setFlippedIds] = useState([])
   const [isLocked, setIsLocked] = useState(false)
+  const [elapsedSeconds, setElapsedSeconds] = useState(0)
+  const intervalRef = useRef(null)
 
   const allMatched = cards.every((card) => card.isMatched)
+
+  useEffect(() => {
+    if (allMatched) {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+        intervalRef.current = null
+      }
+      return
+    }
+    intervalRef.current = setInterval(() => {
+      setElapsedSeconds((prev) => prev + 1)
+    }, 1000)
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+        intervalRef.current = null
+      }
+    }
+  }, [allMatched])
 
   const handleCardClick = useCallback(
     (card) => {
@@ -74,10 +95,17 @@ function App() {
     [cards, flippedIds.length, isLocked]
   )
 
+  const m = Math.floor(elapsedSeconds / 60)
+  const s = elapsedSeconds % 60
+  const timerDisplay = `${m}:${String(s).padStart(2, '0')}`
+
   return (
     <div className="app">
       <h1>Memory Card Match</h1>
       <p className="subtitle">Find matching pairs by flipping cards</p>
+      <div className="timer" aria-live="polite">
+        Time: {timerDisplay}
+      </div>
 
       {allMatched ? (
         <div className="win-message">You win!</div>
