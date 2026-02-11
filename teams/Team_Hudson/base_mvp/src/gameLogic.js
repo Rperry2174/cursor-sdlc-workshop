@@ -40,6 +40,11 @@ export function createInitialState(width, height) {
     spawnIntervalMs: SPAWN_INTERVAL_MS,
     milesPerPixel: MILES_PER_PIXEL,
     milesToWin: MILES_TO_WIN,
+    // Power-up state (managed by powerUpLogic.js)
+    powerUps: [],
+    lastPowerUpSpawnTime: 0,
+    activePowerUp: null,
+    powerUpEndTime: 0,
   };
 }
 
