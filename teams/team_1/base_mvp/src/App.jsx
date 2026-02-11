@@ -1,23 +1,37 @@
 import { useState } from "react";
 import { TOPS, BOTTOMS, SHOES } from "./data/wardrobe";
+import OccasionSelector from "./components/OccasionSelector";
 import "./App.css";
 
 // Helper: pick a random item from an array
 function pickRandom(array) {
+  if (array.length === 0) return null;
   return array[Math.floor(Math.random() * array.length)];
+}
+
+// Helper: filter items by occasion tag; fallback to full array if none match
+function filterByOccasion(items, occasion) {
+  if (!occasion) return items;
+  const filtered = items.filter((item) => item.tags.includes(occasion));
+  return filtered.length > 0 ? filtered : items;
 }
 
 function App() {
   // The current outfit — one top, one bottom, one pair of shoes
   const [outfit, setOutfit] = useState(null);
+  const [selectedOccasion, setSelectedOccasion] = useState(null);
 
-  // Generate a random outfit by picking one from each category
+  // Generate a random outfit by picking one from each category (filtered by occasion when set)
   const generateOutfit = () => {
-    setOutfit({
-      top: pickRandom(TOPS),
-      bottom: pickRandom(BOTTOMS),
-      shoes: pickRandom(SHOES),
-    });
+    const tops = filterByOccasion(TOPS, selectedOccasion);
+    const bottoms = filterByOccasion(BOTTOMS, selectedOccasion);
+    const shoes = filterByOccasion(SHOES, selectedOccasion);
+    const top = pickRandom(tops);
+    const bottom = pickRandom(bottoms);
+    const shoe = pickRandom(shoes);
+    if (top && bottom && shoe) {
+      setOutfit({ top, bottom, shoes: shoe });
+    }
   };
 
   return (
@@ -27,6 +41,7 @@ function App() {
       <p className="app-subtitle">Click the button to generate a random outfit!</p>
 
       {/* --- Feature slots will plug in here (filters, palettes, etc.) --- */}
+      <OccasionSelector selectedOccasion={selectedOccasion} onChange={setSelectedOccasion} />
 
       {/* Outfit Card */}
       <div className="outfit-card">
