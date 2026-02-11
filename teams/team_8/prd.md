@@ -6,9 +6,9 @@
 
 ## Project Overview
 
-**Project Name:** Pong
+**Project Name:** Crossword Puzzle
 
-**One-line Description:** A classic two-player paddle-and-ball game played on the same keyboard.
+**One-line Description:** A browser-based crossword puzzle with a small grid, across/down clues, and letter input — buildable as a single-page React app.
 
 **Type:** Web App (React, Vite)
 
@@ -25,8 +25,8 @@
 
 ### Good Project Ideas
 
-**Pong** — classic paddle-and-ball game
-- _Example features:_ scoreboard, sound effects, difficulty/speed settings
+**Crossword Puzzle** — grid, clues, type letters in cells
+- _Example features:_ timer, check answers, clue highlighting, reveal letter/word, theme switcher
 
 **Memory Card Match** — flip cards to find matching pairs
 - _Example features:_ move counter, timer, win animation/confetti
@@ -54,16 +54,16 @@
 
 | Name | Task | Description |
 |------|------|-------------|
-| _[Name 1]_ | Scoreboard | Displays scores outside the canvas, optional game history, "New Game" button |
-| _[Name 2]_ | Sound Effects | Plays audio on paddle hit, wall bounce, and point scored |
-| _[Name 3]_ | Settings Panel | Sliders for ball speed, paddle size, and winning score threshold |
-| _[Name 4]_ | Pause / Restart Controls | Pause, resume, restart buttons; Space key to pause |
-| _[Name 5]_ | Win Animation | Confetti or celebration overlay when a player wins |
+| Jenna | Timer | Displays elapsed time (MM:SS); optional pause button. Receives `isPaused` and `onPause` from App. |
+| Max | Check / Validate | "Check" button that highlights correct letters (e.g. green) and incorrect (e.g. red). Receives grid state and exposes result or callback. |
+| Ryan Tan | Clue Highlighting | When a cell is focused, highlight the current word (across or down) in the grid and highlight the corresponding clue in the clue list. |
+| _[Name]_ | Reveal Help | "Reveal letter" and/or "Reveal word" buttons that fill in one letter or one word from the answer key. |
+| _[Name]_ | Theme / Styling | Theme selector (e.g. Light, Dark, Newspaper) that changes colors and fonts for the grid and clues. |
 
 ### Task Guidelines
 - Each task should add something **visible** to the project
 - Tasks should be **independent** — no dependencies on other tasks
-- Think: new button, new section, new color scheme, new text, etc.
+- Think: new button, new section, new component, new styling
 - Everyone should be able to work at the same time without conflicts
 
 ---
@@ -74,81 +74,42 @@
 
 **What the MVP includes:**
 - React app scaffolded with Vite, in `base_mvp/`
-- `App.jsx` — layout shell that renders `<GameCanvas />`
-- `GameCanvas.jsx` — HTML `<canvas>`, game loop via `requestAnimationFrame`, ball + two paddles, basic collision, scores drawn on canvas
-- Two-player controls: W/S for left paddle, Arrow Up/Down for right paddle
-- Minimal dark-background styling in `App.css`
-- **Image puck** — the ball is drawn using 6 provided images (see below); the image changes to the next one whenever the puck hits either paddle (cycling 0–5)
+- `App.jsx` — layout shell that renders `<CrosswordGrid />` and `<ClueList />` (or a single `<Crossword />` that contains both)
+- A **single small puzzle** hardcoded in JS: grid layout (which cells are black vs white), clue numbers, across clues, down clues, and answers
+- Grid: e.g. 5×5 or 7×7; black cells for blocks, white cells for input; each white cell can hold one letter
+- User can **click a cell** to focus it and **type a letter** to fill it; Backspace to clear; arrow keys or Tab to move between cells
+- Clues listed in two sections: "Across" and "Down", with numbers matching the grid
+- Minimal styling: readable font, clear grid lines, distinct clue areas
 
 **What it does NOT include:**
-- Scoreboard component (Feature 1)
-- Sound effects (Feature 2)
-- Settings panel (Feature 3)
-- Pause / restart controls (Feature 4)
-- Win animation (Feature 5)
+- Timer (Feature 1)
+- Check / validate answers (Feature 2)
+- Clue highlighting when cell is focused (Feature 3)
+- Reveal letter/word (Feature 4)
+- Theme switcher (Feature 5)
 
-### Game Mechanics (MVP)
+### Puzzle Data (MVP)
 
-#### Canvas and Layout
-- Canvas size: 800x500px, dark background (`#1a1a2e` or similar)
-- Paddles: 10px wide, 80px tall, positioned 20px from each edge
-- Ball/puck: 40px diameter (scaled from 512px images)
-- Center dashed line for visual separation
-- Scores drawn at top-center of each half
+Store one puzzle in a JS file (e.g. `src/data/puzzle.js` or inside the main component):
 
-#### Ball Physics
-- Ball starts at center with random direction (left or right) and slight vertical angle
-- Constant velocity vector `(vx, vy)`, initial speed ~4-5px/frame
-- Bounces off top/bottom walls: `vy = -vy`
-- Bounces off paddles: `vx = -vx`, adjust `vy` based on where it hits the paddle (hit near edge = steeper angle)
-- Speed increases slightly after each paddle hit (e.g. multiply by 1.05, cap at some max)
+- **Grid definition:** 2D array or flat array where each cell is `null` (block) or `''` (empty) or a number (clue number). Example 5×5:
+  - Row 0: 1, 2, block, 3, 4
+  - Row 1: empty, empty, empty, empty, empty
+  - etc.
+- **Clues:** arrays of `{ number, clue, answer }` for across and down (e.g. `1 Across: "Toy on a string" → KITE`).
+- **Answers:** same structure or derived so the app can check or reveal (only used by features, not required for MVP display).
 
-#### Paddle Movement
-- Left paddle: W (up) / S (down)
-- Right paddle: ArrowUp / ArrowDown
-- Track pressed keys via `keydown`/`keyup` event listeners on `window`
-- Move paddles each frame by a fixed speed (~5px/frame) while key is held
-- Clamp paddle position so it stays within canvas bounds
+### Grid and Input (MVP)
 
-#### Collision Detection
-- Paddle hit: ball overlaps paddle rectangle (check `ballX - radius` vs paddle right edge for left paddle, `ballX + radius` vs paddle left edge for right paddle, and `ballY` within paddle top/bottom)
-- Wall bounce: `ballY - radius <= 0` or `ballY + radius >= canvasHeight`
-- Score: `ballX < 0` (right player scores) or `ballX > canvasWidth` (left player scores)
+- Render the grid with `<input>` or `<div contentEditable>` per cell (input is simpler for one letter per cell).
+- Track "current cell" (focused) and "user answers" in state (e.g. object `{ "0-0": "K", "0-1": "I" }` or 2D array).
+- On keydown: if letter A–Z, put it in current cell and move to next; if Backspace, clear current and move to previous.
+- Only allow one character per cell; focus moves to next logical cell (right for across, down for down — MVP can keep it simple, e.g. always move right then down).
 
-#### Scoring and Reset
-- When ball passes a paddle, increment opponent's score
-- Reset ball to center with a new random direction
-- Reset puck image index to 0 on score
-- No win condition in MVP (that's Feature 5)
+### Layout (MVP)
 
-#### Game Loop
-- Use `requestAnimationFrame` inside a `useEffect`
-- Each frame: move paddles, move ball, check collisions, draw everything
-- Store all mutable game state in `useRef` (not `useState`) to avoid re-renders
-- Only use `useState` for score (to optionally expose to parent via callback)
-
-### Image Puck (MVP)
-
-Use 6 provided images as the puck instead of a drawn circle. The puck image **cycles to the next one** whenever it hits either paddle.
-
-**Source images** (copy from Cursor project assets into the repo):
-- `E09BJQ7MU86-U09RNG3UWKF-...png` → `puck-1.png`
-- `E09BJQ7MU86-U09EZB563A8-...png` → `puck-2.png`
-- `E09BJQ7MU86-U0AC6FGJYSJ-...png` → `puck-3.png`
-- `E09BJQ7MU86-U0917AD74Q3-...png` → `puck-4.png`
-- `E09BJQ7MU86-U08S7NAHV4K-...png` → `puck-5.png`
-- `E09BJQ7MU86-U098NUPGM1S-...png` → `puck-6.png`
-
-**Target:** `base_mvp/public/puck/puck-1.png` through `puck-6.png`
-
-**Implementation:**
-1. Copy the 6 images into `base_mvp/public/puck/`
-2. In `GameCanvas.jsx`, preload `Image` objects for all 6 in `useEffect`
-3. Replace `ctx.arc()` ball drawing with `ctx.drawImage(puckImages[currentIndex], x, y, size, size)`
-4. On paddle collision (left or right), set `currentIndex = (currentIndex + 1) % 6`
-5. Scale images to a reasonable puck size (e.g. 40–60px diameter); images are 512x512
-
-Use `ctx.drawImage(img, ballX - radius, ballY - radius, diameter, diameter)` so the puck is centered.
+- Grid on the left or top; clue list on the right or below.
+- Clue list shows "Across" and "Down" with numbered clues. No need to highlight or sync with grid in MVP.
 
 ---
 
@@ -156,30 +117,30 @@ Use `ctx.drawImage(img, ballX - radius, ballY - radius, diameter, diameter)` so 
 
 > These are the features team members will add. Design them to be **independent** so people can work in parallel.
 
-### Feature 1: Scoreboard
-- **Assigned to:** _[Team member]_
-- **Description:** Renders player scores, optional game/set history, and a "New Game" button outside the canvas. Receives score props from `App.jsx` and calls `onRestart` when the user clicks New Game.
-- **Files to modify/create:** `src/components/Scoreboard.jsx`, `src/components/Scoreboard.css`; update `App.jsx` to render `<Scoreboard />` and pass props
+### Feature 1: Timer
+- **Assigned to:** Jenna
+- **Description:** Displays elapsed time in MM:SS format. Optional pause button that stops the timer. Receives `isPaused` and `onPause` from `App.jsx`; timer starts when the puzzle first receives focus or on a "Start" action. No need to persist time across page reload.
+- **Files to modify/create:** `src/components/Timer.jsx`, `src/components/Timer.css`; update `App.jsx` to render `<Timer />` and pass props
 
-### Feature 2: Sound Effects
-- **Assigned to:** _[Team member]_
-- **Description:** Plays short audio clips on paddle hit, wall bounce, and point scored. Uses `new Audio()` with local or embedded audio files. Wraps game or listens to events via callbacks from `App.jsx` / `GameCanvas`.
-- **Files to modify/create:** `src/components/SoundEffects.jsx`; add `public/` or `src/assets/` audio files; update `App.jsx` to wire sound callbacks
+### Feature 2: Check / Validate
+- **Assigned to:** Max
+- **Description:** A "Check" button that compares current grid entries to the answer key and highlights cells: correct letters (e.g. green background), incorrect (e.g. red). Can be a single "Check" that runs once, or toggle "Check mode" on/off. Component receives grid state (user answers) and answer key from `App.jsx`.
+- **Files to modify/create:** `src/components/CheckAnswers.jsx`, `src/components/CheckAnswers.css`; update `App.jsx` to pass answers and render `<CheckAnswers />`
 
-### Feature 3: Settings Panel
-- **Assigned to:** _[Team member]_
-- **Description:** Sliders for ball speed, paddle size, and winning score threshold. Passes config as props to `App.jsx` / `GameCanvas` and applies on restart.
-- **Files to modify/create:** `src/components/Settings.jsx`, `src/components/Settings.css`; update `App.jsx` to render `<Settings />` and pass config down
+### Feature 3: Clue Highlighting
+- **Assigned to:** Ryan Tan
+- **Description:** When the user focuses a cell, highlight the full word that cell belongs to (across or down) in the grid, and highlight the corresponding clue in the clue list. Component receives `focusedCell`, grid definition, and clue list from `App.jsx`; can receive callbacks if clue list needs to scroll into view.
+- **Files to modify/create:** `src/components/ClueHighlight.jsx` (or integrate into existing ClueList/Grid); update `App.jsx` to pass focused cell and clue data
 
-### Feature 4: Pause / Restart Controls
+### Feature 4: Reveal Help
 - **Assigned to:** _[Team member]_
-- **Description:** Pause, resume, and restart buttons plus Space key to pause. Exposes `onPause`, `onResume`, `onRestart` and receives `isPaused` from `App.jsx`.
-- **Files to modify/create:** `src/components/GameControls.jsx`, `src/components/GameControls.css`; update `App.jsx` to render `<GameControls />` and wire callbacks
+- **Description:** "Reveal letter" and/or "Reveal word" buttons. Reveal letter fills the current focused cell with the correct letter; reveal word fills the entire current word (across or down). Component receives current cell, grid state, answer key, and callback to update grid from `App.jsx`.
+- **Files to modify/create:** `src/components/RevealHelp.jsx`, `src/components/RevealHelp.css`; update `App.jsx` to render `<RevealHelp />` and wire callbacks
 
-### Feature 5: Win Animation
+### Feature 5: Theme / Styling
 - **Assigned to:** _[Team member]_
-- **Description:** Confetti or celebration overlay when a player reaches the winning score. Receives `winner` (e.g. "left" | "right" | null) and `onDismiss` from `App.jsx`.
-- **Files to modify/create:** `src/components/WinAnimation.jsx`, `src/components/WinAnimation.css`; update `App.jsx` to render `<WinAnimation />` when there is a winner
+- **Description:** Theme selector (e.g. dropdown or buttons: Light, Dark, Newspaper) that changes the look of the grid and clue area (background color, text color, font). Use CSS variables or a class on a wrapper so the theme applies across the puzzle. Receives `theme` and `onThemeChange` from `App.jsx`.
+- **Files to modify/create:** `src/components/ThemeSelector.jsx`, `src/components/ThemeSelector.css`; update `App.jsx` to hold theme state and render `<ThemeSelector />`
 
 ---
 
