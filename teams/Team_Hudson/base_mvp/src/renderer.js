@@ -1,7 +1,8 @@
 /**
  * Canvas drawing for Hudson River Runner.
- * Draws river, banks, boat, icebergs, and HUD (distance meter).
+ * Draws river, banks, boat, icebergs, landmarks, and HUD (distance meter).
  */
+import { drawLandmarks } from './Landmarks';
 
 export function drawFrame(ctx, state) {
   const { width, height, riverLeft, riverRight, boat, icebergs, distance, milesToWin } = state;
@@ -25,6 +26,9 @@ export function drawFrame(ctx, state) {
   // River highlight (lighter strip)
   ctx.fillStyle = 'rgba(100, 180, 220, 0.2)';
   ctx.fillRect(riverLeft, 0, riverRight - riverLeft, height);
+
+  // Landmarks (Task 7: NYC landmarks on banks + "Now passing" text)
+  drawLandmarks(ctx, state);
 
   // Icebergs (white/gray with shadow)
   icebergs.forEach((ice) => {

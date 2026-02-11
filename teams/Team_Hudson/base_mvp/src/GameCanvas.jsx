@@ -11,7 +11,9 @@ import {
   detectCollision,
   hasWon,
 } from './gameLogic';
+import { updateNowPassingLandmark, preloadLandmarkImages } from './Landmarks';
 import { drawFrame } from './renderer';
+import { soundManager } from './soundManager';
 
 const CANVAS_WIDTH = 900;
 const CANVAS_HEIGHT = 560;
@@ -22,6 +24,7 @@ export default function GameCanvas({ onWin, onLose }) {
   const loopRef = useRef(null);
   const lastTimeRef = useRef(0);
   const keysRef = useRef({ left: false, right: false });
+  const soundStartedRef = useRef(false);
 
   const initState = useCallback(() => {
     if (!stateRef.current) {
@@ -30,6 +33,19 @@ export default function GameCanvas({ onWin, onLose }) {
       const fresh = createInitialState(CANVAS_WIDTH, CANVAS_HEIGHT);
       stateRef.current = fresh;
     }
+  }, []);
+
+  // Initialize sound manager (sound will start on first user interaction)
+  useEffect(() => {
+    soundManager.init();
+
+    return () => {
+      soundManager.stopWaterSound();
+    };
+  }, []);
+
+  useEffect(() => {
+    preloadLandmarkImages();
   }, []);
 
   useEffect(() => {
@@ -42,6 +58,15 @@ export default function GameCanvas({ onWin, onLose }) {
     canvas.height = CANVAS_HEIGHT;
 
     const handleKeyDown = (e) => {
+      // Start sound on first user interaction if not already started
+      if (!soundStartedRef.current) {
+        soundStartedRef.current = true;
+        soundManager.init();
+        soundManager.resumeIfNeeded().then(() => {
+          soundManager.startWaterSound();
+        });
+      }
+      
       if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keysRef.current.left = true;
       if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keysRef.current.right = true;
       e.preventDefault();
@@ -73,12 +98,16 @@ export default function GameCanvas({ onWin, onLose }) {
       maybeSpawnIceberg(state, timestamp);
       updateBoat(state);
       updateIcebergsAndDistance(state, deltaMs);
+      updateNowPassingLandmark(state, timestamp);
 
       if (detectCollision(state)) {
+        soundManager.stopWaterSound();
+        soundManager.playMyHeartWillGoOn();
         onLose();
         return;
       }
       if (hasWon(state)) {
+        soundManager.stopWaterSound();
         onWin();
         return;
       }
