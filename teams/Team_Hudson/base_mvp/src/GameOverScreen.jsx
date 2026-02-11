@@ -1,13 +1,14 @@
-function GameOverScreen({ won, onRestart }) {
+/**
+ * Win or lose screen with restart option.
+ */
+export default function GameOverScreen({ won, onRestart }) {
   return (
     <div className="game-over-screen">
-      <h1>{won ? 'You reached the ocean!' : 'Game Over'}</h1>
-      <p>{won ? 'You won!' : 'You hit an iceberg.'}</p>
-      <button type="button" onClick={onRestart}>
+      <h1>{won ? 'You made it to the ocean!' : 'You hit an iceberg!'}</h1>
+      <p>{won ? 'Victory!' : 'Try again.'}</p>
+      <button type="button" onClick={onRestart} className="restart-button">
         Play Again
       </button>
     </div>
-  )
+  );
 }
-
-export default GameOverScreen

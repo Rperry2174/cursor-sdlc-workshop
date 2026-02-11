@@ -1,59 +1,51 @@
-import { useState, useCallback, useEffect } from 'react'
-import GameCanvas from './GameCanvas'
-import GameOverScreen from './GameOverScreen'
-import DifficultySettings, { DIFFICULTY_CONFIGS } from './DifficultySettings'
-import { defaultDifficulty } from './gameLogic'
-import './App.css'
+/**
+ * Game state manager: start, playing, won, lost.
+ * Renders the appropriate screen and passes callbacks.
+ * Also lets the player pick a difficulty (Easy / Medium / Hard)
+ * before starting the game.
+ */
+import { useState } from 'react';
+import './App.css';
+import StartScreen from './StartScreen';
+import GameCanvas from './GameCanvas';
+import GameOverScreen from './GameOverScreen';
+import DifficultySettings, { DIFFICULTY_CONFIGS } from './DifficultySettings';
 
 export default function App() {
-  const [gameState, setGameState] = useState('start') // 'start' | 'playing' | 'won' | 'lost'
-  const [difficultyKey, setDifficultyKey] = useState('medium')
-  const difficultyConfig = DIFFICULTY_CONFIGS[difficultyKey] ?? defaultDifficulty
+  const [gameState, setGameState] = useState('start'); // 'start' | 'playing' | 'won' | 'lost'
+  const [difficultyKey, setDifficultyKey] = useState('medium');
 
-  const handleStart = useCallback(() => setGameState('playing'), [])
-  const handleWin = useCallback(() => setGameState('won'), [])
-  const handleLose = useCallback(() => setGameState('lost'), [])
-  const handleRestart = useCallback(() => setGameState('start'), [])
+  const handleStart = () => setGameState('playing');
+  const handleWin = () => setGameState('won');
+  const handleLose = () => setGameState('lost');
+  const handleRestart = () => setGameState('start');
 
-  useEffect(() => {
-    const onKey = (e) => {
-      if (e.key === ' ' && gameState === 'start') {
-        e.preventDefault()
-        handleStart()
-      }
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [gameState, handleStart])
+  const difficultyConfig = DIFFICULTY_CONFIGS[difficultyKey];
+
+  if (gameState === 'start') {
+    return (
+      <div className="app">
+        <StartScreen onStart={handleStart} />
+        <DifficultySettings selected={difficultyKey} onChange={setDifficultyKey} />
+      </div>
+    );
+  }
+
+  if (gameState === 'playing') {
+    return (
+      <div className="app">
+        <GameCanvas
+          onWin={handleWin}
+          onLose={handleLose}
+          difficultyConfig={difficultyConfig}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="app">
-      {gameState === 'start' && (
-        <div className="start-screen">
-          <h1>Hudson River Runner</h1>
-          <p>Dodge icebergs. Reach the Atlantic.</p>
-          <p className="controls">← → or A / D to steer</p>
-          <DifficultySettings selected={difficultyKey} onChange={setDifficultyKey} />
-          <button type="button" onClick={handleStart}>
-            Press Space or Click to Start
-          </button>
-        </div>
-      )}
-
-      {gameState === 'playing' && (
-        <div className="canvas-wrap">
-          <GameCanvas
-            isPlaying
-            onWin={handleWin}
-            onLose={handleLose}
-            difficultyConfig={difficultyConfig}
-          />
-        </div>
-      )}
-
-      {(gameState === 'won' || gameState === 'lost') && (
-        <GameOverScreen won={gameState === 'won'} onRestart={handleRestart} />
-      )}
+      <GameOverScreen won={gameState === 'won'} onRestart={handleRestart} />
     </div>
-  )
+  );
 }

@@ -1,51 +1,58 @@
-const RIVER_BLUE = '#1e5f8a'
-const BANK_LEFT = '#2d4a3e'
-const BANK_RIGHT = '#3d5a4e'
-const BOAT_COLOR = '#c4a35a'
-const ICEBERG_COLOR = '#e8f4fc'
+/**
+ * Canvas drawing for Hudson River Runner.
+ * Draws river, banks, boat, icebergs, and HUD (distance meter).
+ */
 
-export function drawRiver(ctx, width, height, scrollOffset) {
-  const riverW = width * 0.6
-  const left = (width - riverW) / 2
-  ctx.fillStyle = BANK_LEFT
-  ctx.fillRect(0, 0, left, height)
-  ctx.fillStyle = BANK_RIGHT
-  ctx.fillRect(width - left, 0, left, height)
-  ctx.fillStyle = RIVER_BLUE
-  ctx.fillRect(left, 0, riverW, height)
-}
+export function drawFrame(ctx, state) {
+  const { width, height, riverLeft, riverRight, boat, icebergs, distance, milesToWin } = state;
 
-export function drawBoat(ctx, boatX, boatY, width) {
-  const w = 40
-  const h = 24
-  const x = boatX - w / 2
-  const y = boatY - h / 2
-  ctx.fillStyle = BOAT_COLOR
-  ctx.beginPath()
-  ctx.moveTo(x + w / 2, y)
-  ctx.lineTo(x + w, y + h)
-  ctx.lineTo(x, y + h)
-  ctx.closePath()
-  ctx.fill()
-  ctx.strokeStyle = '#8b7355'
-  ctx.lineWidth = 2
-  ctx.stroke()
-}
+  // Sky / background
+  ctx.fillStyle = '#1a2a3a';
+  ctx.fillRect(0, 0, width, height);
 
-export function drawIceberg(ctx, iceberg) {
-  ctx.fillStyle = ICEBERG_COLOR
-  ctx.beginPath()
-  ctx.arc(iceberg.x, iceberg.y, iceberg.r, 0, Math.PI * 2)
-  ctx.fill()
-  ctx.strokeStyle = '#b0d0e8'
-  ctx.lineWidth = 2
-  ctx.stroke()
-}
+  // Left bank (green-gray)
+  ctx.fillStyle = '#3d5a4a';
+  ctx.fillRect(0, 0, riverLeft, height);
 
-export function drawHUD(ctx, distance, width) {
-  const text = `${distance.toFixed(1)} mi / 12 mi to the ocean`
-  ctx.fillStyle = '#fff'
-  ctx.font = '18px system-ui, sans-serif'
-  ctx.textAlign = 'center'
-  ctx.fillText(text, width / 2, 32)
+  // River (blue)
+  ctx.fillStyle = '#2a4a6a';
+  ctx.fillRect(riverLeft, 0, riverRight - riverLeft, height);
+
+  // Right bank
+  ctx.fillStyle = '#4a5a5a';
+  ctx.fillRect(riverRight, 0, width - riverRight, height);
+
+  // River highlight (lighter strip)
+  ctx.fillStyle = 'rgba(100, 180, 220, 0.2)';
+  ctx.fillRect(riverLeft, 0, riverRight - riverLeft, height);
+
+  // Icebergs (white/gray with shadow)
+  icebergs.forEach((ice) => {
+    ctx.fillStyle = '#a0b0c0';
+    ctx.fillRect(ice.x, ice.y, ice.width, ice.height);
+    ctx.strokeStyle = '#e8f0f8';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(ice.x, ice.y, ice.width, ice.height);
+  });
+
+  // Boat (simple rectangle, brown/white)
+  ctx.fillStyle = '#8b6914';
+  ctx.fillRect(boat.x, boat.y, boat.width, boat.height);
+  ctx.fillStyle = '#fff8dc';
+  ctx.fillRect(boat.x + 4, boat.y + 2, boat.width - 8, boat.height / 2);
+  ctx.strokeStyle = '#5a4a10';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(boat.x, boat.y, boat.width, boat.height);
+
+  // HUD: distance meter
+  const miles = (distance).toFixed(1);
+  ctx.fillStyle = 'rgba(0,0,0,0.5)';
+  ctx.fillRect(width / 2 - 100, 12, 200, 32);
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(width / 2 - 100, 12, 200, 32);
+  ctx.fillStyle = '#fff';
+  ctx.font = '16px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(`${miles} mi / ${milesToWin} mi to the ocean`, width / 2, 32);
 }
