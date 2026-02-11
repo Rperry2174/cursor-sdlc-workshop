@@ -65,7 +65,7 @@
 </head>
 <body>
   <h1>Snake</h1>
-  <p class="score">Score: <span id="score">0</span></p>
+  <p class="score">Score: <span id="score">0</span> &nbsp;|&nbsp; Speed: <span id="speed">1</span></p>
   <div id="game" role="application" aria-label="Snake game grid"></div>
 
   <div class="game-over" id="gameOver" aria-live="polite">
@@ -77,7 +77,12 @@
   <script>
     const COLS = 15;
     const ROWS = 15;
-    const TICK_MS = 150;
+
+    /* ── Speed Ramp Config ── */
+    const BASE_TICK_MS   = 150;   // starting speed (ms per tick)
+    const MIN_TICK_MS    = 60;    // fastest allowed speed
+    const SPEED_STEP_MS  = 10;    // ms to shave off each ramp
+    const RAMP_EVERY     = 5;     // ramp up every N points
 
     let gridEl;
     let snake = [];
@@ -87,6 +92,8 @@
     let score = 0;
     let tickId = null;
     let gameOver = false;
+    let currentTickMs = BASE_TICK_MS;
+    let speedLevel = 1;
 
     function initGrid() {
       gridEl = document.getElementById('game');
@@ -158,12 +165,30 @@
 
       if (head.x === food.x && head.y === food.y) {
         updateScore(score + 1);
+        maybeRampSpeed();
         spawnFood();
       } else {
         snake.pop();
       }
 
       draw();
+    }
+
+    function maybeRampSpeed() {
+      const newLevel = Math.floor(score / RAMP_EVERY) + 1;
+      if (newLevel !== speedLevel) {
+        speedLevel = newLevel;
+        currentTickMs = Math.max(MIN_TICK_MS, BASE_TICK_MS - (speedLevel - 1) * SPEED_STEP_MS);
+        // Restart interval with the faster tick
+        if (tickId) clearInterval(tickId);
+        tickId = setInterval(tick, currentTickMs);
+        updateSpeedDisplay();
+      }
+    }
+
+    function updateSpeedDisplay() {
+      const el = document.getElementById('speed');
+      if (el) el.textContent = speedLevel;
     }
 
     function endGame() {
@@ -178,12 +203,15 @@
       snake = [{ x: Math.floor(COLS / 2), y: Math.floor(ROWS / 2) }];
       direction = { x: 1, y: 0 };
       nextDirection = { x: 1, y: 0 };
+      currentTickMs = BASE_TICK_MS;
+      speedLevel = 1;
       updateScore(0);
+      updateSpeedDisplay();
       spawnFood();
       draw();
       document.getElementById('gameOver').classList.remove('visible');
       if (tickId) clearInterval(tickId);
-      tickId = setInterval(tick, TICK_MS);
+      tickId = setInterval(tick, currentTickMs);
     }
 
     document.addEventListener('keydown', (e) => {
