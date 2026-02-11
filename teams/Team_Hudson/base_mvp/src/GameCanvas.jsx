@@ -21,7 +21,9 @@ import {
   applyMagnetEffect,
   getBoatScale,
 } from './powerUpLogic';
+import { updateNowPassingLandmark, preloadLandmarkImages } from './Landmarks';
 import { drawFrame } from './renderer';
+import { soundManager } from './soundManager';
 
 const CANVAS_WIDTH = 900;
 const CANVAS_HEIGHT = 560;
@@ -33,9 +35,23 @@ export default function GameCanvas({ onWin, onLose, onTick }) {
   const lastTimeRef = useRef(0);
   const startTimeRef = useRef(null);
   const keysRef = useRef({ left: false, right: false });
+  const soundStartedRef = useRef(false);
 
   const initState = useCallback(() => {
     stateRef.current = createInitialState(CANVAS_WIDTH, CANVAS_HEIGHT);
+  }, []);
+
+  // Initialize sound manager (sound will start on first user interaction)
+  useEffect(() => {
+    soundManager.init();
+
+    return () => {
+      soundManager.stopWaterSound();
+    };
+  }, []);
+
+  useEffect(() => {
+    preloadLandmarkImages();
   }, []);
 
   useEffect(() => {
@@ -49,6 +65,15 @@ export default function GameCanvas({ onWin, onLose, onTick }) {
     canvas.height = CANVAS_HEIGHT;
 
     const handleKeyDown = (e) => {
+      // Start sound on first user interaction if not already started
+      if (!soundStartedRef.current) {
+        soundStartedRef.current = true;
+        soundManager.init();
+        soundManager.resumeIfNeeded().then(() => {
+          soundManager.startWaterSound();
+        });
+      }
+      
       if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keysRef.current.left = true;
       if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keysRef.current.right = true;
       e.preventDefault();
@@ -102,6 +127,7 @@ export default function GameCanvas({ onWin, onLose, onTick }) {
       const savedMPP = state.milesPerPixel;
       state.milesPerPixel = savedMPP * getDistanceMultiplier(state, timestamp);
       updateIcebergsAndDistance(state, deltaMs);
+      updateNowPassingLandmark(state, timestamp);
       state.scrollSpeed = savedSpeed;
       state.milesPerPixel = savedMPP;
 
@@ -138,11 +164,14 @@ export default function GameCanvas({ onWin, onLose, onTick }) {
               ),
           );
         } else {
+          soundManager.stopWaterSound();
+          soundManager.playMyHeartWillGoOn();
           onLose();
           return;
         }
       }
       if (hasWon(state)) {
+        soundManager.stopWaterSound();
         onWin();
         return;
       }

@@ -19,6 +19,16 @@
     }
     h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
     .score { font-size: 1rem; margin-bottom: 0.75rem; color: #94a3b8; }
+    .toolbar { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem; }
+    .toolbar button { padding: 0.4rem 0.75rem; font-size: 0.875rem; background: #334155; }
+    .high-scores-overlay {
+      position: fixed; inset: 0; background: rgba(15, 23, 42, 0.95); display: none;
+      flex-direction: column; align-items: center; justify-content: center; gap: 1rem;
+    }
+    .high-scores-overlay.visible { display: flex; }
+    .high-scores-overlay h3 { font-size: 1.25rem; }
+    .high-scores-overlay ul { list-style: none; text-align: center; color: #94a3b8; }
+    .high-scores-overlay ul li { margin: 0.35rem 0; }
     #game {
       display: grid;
       gap: 0;
@@ -51,6 +61,9 @@
     .game-over.visible { display: flex; }
     .game-over h2 { font-size: 1.5rem; }
     .game-over p { color: #94a3b8; }
+    .game-over .new-high { color: #22c55e; font-weight: 600; margin-top: 0.25rem; }
+    .game-over .high-list { font-size: 0.9rem; color: #94a3b8; list-style: none; text-align: center; margin-top: 0.5rem; }
+    .game-over .high-list li { margin: 0.2rem 0; }
     button {
       padding: 0.75rem 1.5rem;
       font-size: 1rem;
@@ -65,15 +78,27 @@
 </head>
 <body>
   <h1>Snake</h1>
-  <p class="score">Score: <span id="score">0</span></p>
+  <div class="toolbar">
+    <p class="score" style="margin-bottom: 0;">Score: <span id="score">0</span></p>
+    <button type="button" id="viewHighScores">View high scores</button>
+  </div>
   <div id="game" role="application" aria-label="Snake game grid"></div>
+
+  <div class="high-scores-overlay" id="highScoresOverlay" aria-label="High scores" aria-hidden="true">
+    <h3>High scores</h3>
+    <ul id="highScoresList"></ul>
+    <button type="button" id="closeHighScores">Close</button>
+  </div>
 
   <div class="game-over" id="gameOver" aria-live="polite">
     <h2>Game Over</h2>
     <p>Score: <span id="finalScore">0</span></p>
+    <p class="new-high" id="newHighMsg" aria-live="polite" style="display: none;"></p>
+    <ol class="high-list" id="highList" aria-label="Top high scores"></ol>
     <button id="restart">Play again</button>
   </div>
 
+  <script src="highScores.js"></script>
   <script>
     const COLS = 15;
     const ROWS = 15;
@@ -166,10 +191,30 @@
       draw();
     }
 
+    function renderHighList() {
+      const list = highScores.get();
+      const el = document.getElementById('highList');
+      el.innerHTML = '';
+      list.forEach((entry, i) => {
+        const li = document.createElement('li');
+        li.textContent = `${i + 1}. ${entry.score}`;
+        el.appendChild(li);
+      });
+    }
+
     function endGame() {
       gameOver = true;
       if (tickId) clearInterval(tickId);
       document.getElementById('finalScore').textContent = score;
+      const result = highScores.add(score);
+      const newHighEl = document.getElementById('newHighMsg');
+      if (result.added && result.rank != null) {
+        newHighEl.style.display = '';
+        newHighEl.textContent = result.rank === 1 ? 'New high score!' : `You made the list! #${result.rank}`;
+      } else {
+        newHighEl.style.display = 'none';
+      }
+      renderHighList();
       document.getElementById('gameOver').classList.add('visible');
     }
 
@@ -197,6 +242,28 @@
     });
 
     document.getElementById('restart').addEventListener('click', startGame);
+
+    document.getElementById('viewHighScores').addEventListener('click', () => {
+      const list = highScores.get();
+      const ul = document.getElementById('highScoresList');
+      ul.innerHTML = '';
+      list.forEach((entry, i) => {
+        const li = document.createElement('li');
+        li.textContent = `${i + 1}. ${entry.score}`;
+        ul.appendChild(li);
+      });
+      if (list.length === 0) {
+        const li = document.createElement('li');
+        li.textContent = 'No scores yet. Play a game!';
+        ul.appendChild(li);
+      }
+      document.getElementById('highScoresOverlay').classList.add('visible');
+      document.getElementById('highScoresOverlay').setAttribute('aria-hidden', 'false');
+    });
+    document.getElementById('closeHighScores').addEventListener('click', () => {
+      document.getElementById('highScoresOverlay').classList.remove('visible');
+      document.getElementById('highScoresOverlay').setAttribute('aria-hidden', 'true');
+    });
 
     initGrid();
     startGame();

@@ -1,0 +1,17 @@
+{"location":"GameCanvas.jsx:useEffect","message":"Effect re-run","data":{"runNumber":1},"timestamp":1770824523923,"hypothesisId":"A"}
+{"location":"GameCanvas.jsx:initState","message":"First init","data":{},"timestamp":1770824523924,"hypothesisId":"B"}
+{"location":"GameCanvas.jsx:useEffect","message":"Effect re-run","data":{"runNumber":2},"timestamp":1770824523924,"hypothesisId":"A"}
+{"location":"GameCanvas.jsx:initState","message":"STATE RESET (re-init)","data":{"hadIcebergs":0,"hadDistance":0},"timestamp":1770824523924,"hypothesisId":"B"}
+{"location":"GameCanvas.jsx:loop","message":"Frame data","data":{"deltaMs":32.700000000000045,"icebergCount":1,"distance":0.0173100375,"firstIcebergY":-10.368749999999991},"timestamp":1770824524504,"hypothesisId":"B-C-D"}
+{"location":"GameCanvas.jsx:loop","message":"Frame data","data":{"deltaMs":34.200000000000045,"icebergCount":1,"distance":0.023888475,"firstIcebergY":33.487500000000026},"timestamp":1770824524738,"hypothesisId":"B-C-D"}
+{"location":"GameCanvas.jsx:loop","message":"Frame data","data":{"deltaMs":33.30000000000018,"icebergCount":2,"distance":0.12326534999999991,"firstIcebergY":408.48750000000007},"timestamp":1770824528272,"hypothesisId":"B-C-D"}
+{"location":"GameCanvas.jsx:useEffect","message":"Effect re-run","data":{"runNumber":1},"timestamp":1770824602503,"hypothesisId":"A"}
+{"location":"GameCanvas.jsx:initState","message":"First init","data":{},"timestamp":1770824602503,"hypothesisId":"B"}
+{"location":"GameCanvas.jsx:useEffect","message":"Effect re-run","data":{"runNumber":2},"timestamp":1770824602504,"hypothesisId":"A"}
+{"location":"GameCanvas.jsx:initState","message":"STATE RESET (re-init)","data":{"hadIcebergs":0,"hadDistance":0},"timestamp":1770824602504,"hypothesisId":"B"}
+{"location":"GameCanvas.jsx:loop","message":"Frame data","data":{"deltaMs":33.29999999998836,"icebergCount":2,"distance":0.10638843749999995,"firstIcebergY":377.25},"timestamp":1770824606268,"hypothesisId":"B-C-D"}
+{"location":"GameCanvas.jsx:loop","message":"Frame data","data":{"deltaMs":33.39999999999418,"icebergCount":2,"distance":0.11763843749999994,"firstIcebergY":452.25},"timestamp":1770824606668,"hypothesisId":"B-C-D"}
+{"location":"GameCanvas.jsx:loop","message":"Frame data","data":{"deltaMs":33.89999999999418,"icebergCount":3,"distance":0.12982500000000002,"firstIcebergY":533.4937500000005},"timestamp":1770824607101,"hypothesisId":"B-C-D"}
+{"location":"GameCanvas.jsx:loop","message":"Frame data","data":{"deltaMs":33.30000000000291,"icebergCount":3,"distance":0.1382625,"firstIcebergY":589.7437500000005},"timestamp":1770824607401,"hypothesisId":"B-C-D"}
+{"location":"GameCanvas.jsx:loop","message":"Frame data","data":{"deltaMs":32.5,"icebergCount":2,"distance":0.15980062500000006,"firstIcebergY":452.0812500000011},"timestamp":1770824608167,"hypothesisId":"B-C-D"}
+{"location":"GameCanvas.jsx:loop","message":"Frame data","data":{"deltaMs":32.60000000000582,"icebergCount":3,"distance":0.1766784375000002,"firstIcebergY":564.6000000000022},"timestamp":1770824608769,"hypothesisId":"B-C-D"}

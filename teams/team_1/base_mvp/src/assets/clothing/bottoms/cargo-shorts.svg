@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <rect width="200" height="200" rx="16" fill="#F8F6F3"/>
+  
+  <g transform="translate(100,95)">
+    <!-- waistband -->
+    <rect x="-40" y="-40" width="80" height="12" rx="3" fill="#407051" stroke="#2c5c3d" stroke-width="2"/>
+    <!-- body -->
+    <path d="M-40,-28 L-44,40 L-4,40 L0,0 L4,40 L44,40 L40,-28 Z" fill="#4A7A5B" stroke="#2c5c3d" stroke-width="2"/>
+    <!-- cargo pockets -->
+    <rect x="-38" y="0" width="20" height="22" rx="3" fill="#3e6e4f" stroke="#2c5c3d" stroke-width="1.5"/>
+    <rect x="18" y="0" width="20" height="22" rx="3" fill="#3e6e4f" stroke="#2c5c3d" stroke-width="1.5"/>
+    <!-- pocket flaps -->
+    <rect x="-38" y="-2" width="20" height="6" rx="2" fill="#386849" stroke="#2c5c3d" stroke-width="1"/>
+    <rect x="18" y="-2" width="20" height="6" rx="2" fill="#386849" stroke="#2c5c3d" stroke-width="1"/>
+    <!-- button on pockets -->
+    <circle cx="-28" cy="1" r="2" fill="#225233"/>
+    <circle cx="28" cy="1" r="2" fill="#225233"/>
+    <!-- fly -->
+    <line x1="0" y1="-28" x2="0" y2="0" stroke="#2c5c3d" stroke-width="1.5"/>
+  </g>
+</svg>

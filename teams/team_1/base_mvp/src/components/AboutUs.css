@@ -1,0 +1,293 @@
+/* ============================================
+   About Us Page — Matches Wardrobe Generator theme
+   ============================================ */
+
+.about-us {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+/* ---------- Back Button ---------- */
+.back-btn {
+  background: transparent;
+  color: #667eea;
+  border: 2px solid #667eea;
+  border-radius: 12px;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-bottom: 1.5rem;
+}
+
+.back-btn:hover {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border-color: transparent;
+  transform: translateY(-2px);
+}
+
+/* ---------- Header ---------- */
+.about-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.about-tagline {
+  font-size: 1.1rem;
+  color: #888;
+  margin-bottom: 2rem;
+  font-weight: 500;
+}
+
+/* ---------- Cards ---------- */
+.about-card {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  text-align: left;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease;
+}
+
+.about-card:hover {
+  transform: translateY(-2px);
+}
+
+.about-description {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #ccc;
+  margin-bottom: 1rem;
+}
+
+.about-description:last-child {
+  margin-bottom: 0;
+}
+
+.about-description strong {
+  color: #667eea;
+}
+
+/* ---------- Section Titles ---------- */
+.about-section-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ---------- Features List ---------- */
+.features-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  font-size: 1rem;
+  color: #ddd;
+  transition: background 0.2s ease;
+}
+
+.feature-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ---------- Social Links ---------- */
+.about-social-subtitle {
+  color: #888;
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.social-links {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.social-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem 0.75rem;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.social-link:hover {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+}
+
+.social-link:hover .social-name,
+.social-link:hover .social-handle {
+  color: white;
+}
+
+.social-icon {
+  font-size: 1.75rem;
+  margin-bottom: 0.4rem;
+  transition: transform 0.2s ease;
+}
+
+.social-link:hover .social-icon {
+  transform: scale(1.15);
+}
+
+.social-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #ddd;
+  transition: color 0.2s ease;
+}
+
+.social-handle {
+  font-size: 0.75rem;
+  color: #888;
+  margin-top: 0.2rem;
+  transition: color 0.2s ease;
+}
+
+/* ---------- Stylists List ---------- */
+.stylists-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.stylist-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.stylist-item:hover {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+}
+
+.stylist-item:hover .stylist-name {
+  color: white;
+}
+
+.stylist-photo {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 0.5rem;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
+}
+
+.stylist-item:hover .stylist-photo {
+  transform: scale(1.1);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.stylist-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #ddd;
+  transition: color 0.2s ease;
+}
+
+/* ---------- Footer ---------- */
+.about-footer {
+  padding-top: 1rem;
+  margin-top: 0.5rem;
+}
+
+.about-footer p {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+/* ---------- Light mode overrides ---------- */
+@media (prefers-color-scheme: light) {
+  .about-card {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  }
+
+  .about-description {
+    color: #555;
+  }
+
+  .feature-item {
+    background: rgba(0, 0, 0, 0.03);
+    color: #444;
+  }
+
+  .feature-item:hover {
+    background: rgba(0, 0, 0, 0.06);
+  }
+
+  .social-link {
+    background: rgba(0, 0, 0, 0.03);
+  }
+
+  .social-name {
+    color: #333;
+  }
+
+  .social-handle {
+    color: #666;
+  }
+
+  .stylist-item {
+    background: rgba(0, 0, 0, 0.03);
+  }
+
+  .stylist-name {
+    color: #333;
+  }
+
+  .stylist-item:hover .stylist-name {
+    color: white;
+  }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 400px) {
+  .social-links {
+    grid-template-columns: 1fr;
+  }
+}

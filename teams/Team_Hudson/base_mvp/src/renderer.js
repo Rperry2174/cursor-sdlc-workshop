@@ -1,8 +1,9 @@
 /**
  * Canvas drawing for Hudson River Runner.
- * Draws river, banks, boat, icebergs, power-up pickups, and active-effect overlays.
+ * Draws river, banks, boat, icebergs, landmarks, power-up pickups, and active-effect overlays.
  */
 import { MAGNET_PUSH_RADIUS_RATIO } from './powerUpLogic';
+import { drawLandmarks } from './Landmarks';
 
 // ─── Color palette per power-up ──────────────────────────────
 const PU_COLORS = {
@@ -202,6 +203,9 @@ export function drawFrame(ctx, state, timestamp) {
       ctx.restore();
     });
   }
+
+  // Landmarks (Task 7: NYC landmarks on banks + "Now passing" text)
+  drawLandmarks(ctx, state);
 
   // ─── Icebergs ────────────────────────────────────────────
   icebergs.forEach((ice) => {

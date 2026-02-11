@@ -1,0 +1,3 @@
+# Landmark images (Nano Banana) go here.
+# Generate with: FAL_KEY=your_key npm run generate-landmarks
+# Get a key at https://fal.ai/dashboard/keys (fal.ai model: fal-ai/nano-banana)

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <rect width="200" height="200" rx="16" fill="#F8F6F3"/>
+  
+  <g transform="translate(100,105)">
+    <!-- body -->
+    <path d="M-42,-45 L-42,50 Q-42,55 -37,55 L37,55 Q42,55 42,50 L42,-45 L25,-45 Q20,-30 0,-28 Q-20,-30 -25,-45 Z" fill="#C9463D" stroke="#ab281f" stroke-width="2"/>
+    <!-- sleeves -->
+    <path d="M-42,-45 L-65,-25 L-55,-10 L-42,-18 Z" fill="#C9463D" stroke="#ab281f" stroke-width="2"/>
+    <path d="M42,-45 L65,-25 L55,-10 L42,-18 Z" fill="#C9463D" stroke="#ab281f" stroke-width="2"/>
+    <!-- plaid horizontal lines -->
+    <line x1="-42" y1="-15" x2="42" y2="-15" stroke="#97140b" stroke-width="2" opacity="0.4"/>
+    <line x1="-42" y1="5" x2="42" y2="5" stroke="#97140b" stroke-width="2" opacity="0.4"/>
+    <line x1="-42" y1="25" x2="42" y2="25" stroke="#97140b" stroke-width="2" opacity="0.4"/>
+    <line x1="-42" y1="45" x2="42" y2="45" stroke="#97140b" stroke-width="2" opacity="0.4"/>
+    <!-- plaid vertical lines -->
+    <line x1="-25" y1="-45" x2="-25" y2="55" stroke="#97140b" stroke-width="2" opacity="0.4"/>
+    <line x1="-5" y1="-28" x2="-5" y2="55" stroke="#97140b" stroke-width="2" opacity="0.4"/>
+    <line x1="15" y1="-45" x2="15" y2="55" stroke="#97140b" stroke-width="2" opacity="0.4"/>
+    <line x1="35" y1="-45" x2="35" y2="55" stroke="#97140b" stroke-width="2" opacity="0.4"/>
+    <!-- collar -->
+    <path d="M-25,-45 Q-28,-58 -15,-55 L0,-48 L15,-55 Q28,-58 25,-45 Q20,-30 0,-28 Q-20,-30 -25,-45 Z" fill="#dd5a51" stroke="#ab281f" stroke-width="1.5"/>
+    <!-- center line -->
+    <line x1="0" y1="-28" x2="0" y2="55" stroke="#ab281f" stroke-width="1.5"/>
+    <!-- buttons -->
+    <circle cx="0" cy="-15" r="2" fill="#ff8279"/>
+    <circle cx="0" cy="0" r="2" fill="#ff8279"/>
+    <circle cx="0" cy="15" r="2" fill="#ff8279"/>
+    <circle cx="0" cy="30" r="2" fill="#ff8279"/>
+  </g>
+</svg>

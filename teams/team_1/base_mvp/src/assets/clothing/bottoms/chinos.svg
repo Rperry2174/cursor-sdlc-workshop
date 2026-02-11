@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <rect width="200" height="200" rx="16" fill="#F8F6F3"/>
+  
+  <g transform="translate(100,100)">
+    <!-- waistband -->
+    <rect x="-38" y="-55" width="76" height="12" rx="3" fill="#b9a687" stroke="#a59273" stroke-width="2"/>
+    <!-- body -->
+    <path d="M-38,-43 L-40,55 L-6,55 L0,-5 L6,55 L40,55 L38,-43 Z" fill="#C3B091" stroke="#a59273" stroke-width="2"/>
+    <!-- crease lines -->
+    <line x1="-22" y1="-20" x2="-24" y2="55" stroke="#d7c4a5" stroke-width="1" opacity="0.5"/>
+    <line x1="22" y1="-20" x2="24" y2="55" stroke="#d7c4a5" stroke-width="1" opacity="0.5"/>
+    <!-- fly -->
+    <line x1="0" y1="-43" x2="0" y2="-5" stroke="#a59273" stroke-width="1"/>
+    <!-- pockets -->
+    <path d="M-33,-43 L-30,-30 L-20,-30 L-18,-43" fill="none" stroke="#a59273" stroke-width="1"/>
+    <path d="M33,-43 L30,-30 L20,-30 L18,-43" fill="none" stroke="#a59273" stroke-width="1"/>
+  </g>
+</svg>

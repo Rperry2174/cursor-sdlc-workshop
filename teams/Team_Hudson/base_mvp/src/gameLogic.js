@@ -30,6 +30,7 @@ export function createInitialState(width, height) {
     icebergs: [],
     distance: 0,
     lastSpawnTime: 0,
+    nowPassingLandmark: null,
     width,
     height,
     riverLeft,

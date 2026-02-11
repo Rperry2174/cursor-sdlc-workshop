@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <rect width="200" height="200" rx="16" fill="#F8F6F3"/>
+  
+  <g transform="translate(100,100)">
+    <!-- waistband -->
+    <rect x="-38" y="-55" width="76" height="12" rx="3" fill="#815936" stroke="#6d4522" stroke-width="2"/>
+    <!-- body -->
+    <path d="M-38,-43 L-40,55 L-5,55 L0,-5 L5,55 L40,55 L38,-43 Z" fill="#8B6340" stroke="#6d4522" stroke-width="2"/>
+    <!-- corduroy ridges (left leg) -->
+    <line x1="-35" y1="-43" x2="-37" y2="55" stroke="#7f5734" stroke-width="1" opacity="0.5"/>
+    <line x1="-30" y1="-43" x2="-32" y2="55" stroke="#7f5734" stroke-width="1" opacity="0.5"/>
+    <line x1="-25" y1="-43" x2="-27" y2="55" stroke="#7f5734" stroke-width="1" opacity="0.5"/>
+    <line x1="-20" y1="-43" x2="-22" y2="55" stroke="#7f5734" stroke-width="1" opacity="0.5"/>
+    <line x1="-15" y1="-43" x2="-15" y2="55" stroke="#7f5734" stroke-width="1" opacity="0.5"/>
+    <line x1="-10" y1="-43" x2="-10" y2="55" stroke="#7f5734" stroke-width="1" opacity="0.5"/>
+    <!-- corduroy ridges (right leg) -->
+    <line x1="10" y1="-43" x2="10" y2="55" stroke="#7f5734" stroke-width="1" opacity="0.5"/>
+    <line x1="15" y1="-43" x2="15" y2="55" stroke="#7f5734" stroke-width="1" opacity="0.5"/>
+    <line x1="20" y1="-43" x2="22" y2="55" stroke="#7f5734" stroke-width="1" opacity="0.5"/>
+    <line x1="25" y1="-43" x2="27" y2="55" stroke="#7f5734" stroke-width="1" opacity="0.5"/>
+    <line x1="30" y1="-43" x2="32" y2="55" stroke="#7f5734" stroke-width="1" opacity="0.5"/>
+    <line x1="35" y1="-43" x2="37" y2="55" stroke="#7f5734" stroke-width="1" opacity="0.5"/>
+    <!-- fly -->
+    <line x1="0" y1="-43" x2="0" y2="-5" stroke="#6d4522" stroke-width="1.5"/>
+    <!-- pockets -->
+    <path d="M-33,-43 L-30,-30 L-18,-30 L-15,-43" fill="none" stroke="#6d4522" stroke-width="1"/>
+    <path d="M33,-43 L30,-30 L18,-30 L15,-43" fill="none" stroke="#6d4522" stroke-width="1"/>
+  </g>
+</svg>
