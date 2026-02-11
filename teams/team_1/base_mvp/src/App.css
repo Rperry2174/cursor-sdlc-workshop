@@ -1,0 +1,120 @@
+/* ============================================
+   Wardrobe Generator — Base MVP Styles
+   ============================================ */
+
+/* Center everything on the page */
+.app {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+/* ---------- Header ---------- */
+.app-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.app-subtitle {
+  font-size: 1rem;
+  color: #888;
+  margin-bottom: 2rem;
+}
+
+/* ---------- Outfit Card ---------- */
+.outfit-card {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 2rem 1.5rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease;
+}
+
+.outfit-card:hover {
+  transform: translateY(-2px);
+}
+
+/* Each clothing slot (top / bottom / shoes) */
+.outfit-slot {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  transition: background 0.2s ease;
+}
+
+.outfit-slot:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.outfit-emoji {
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
+.outfit-label {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+/* Placeholder when no outfit has been generated yet */
+.outfit-placeholder {
+  color: #888;
+  font-size: 1rem;
+  padding: 2rem 0;
+}
+
+/* ---------- Generate Button ---------- */
+.generate-btn {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 0.85rem 2.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 4px 14px rgba(102, 126, 234, 0.35);
+}
+
+.generate-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+}
+
+.generate-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+/* ---------- Light mode overrides ---------- */
+@media (prefers-color-scheme: light) {
+  .outfit-card {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  }
+
+  .outfit-slot {
+    background: rgba(0, 0, 0, 0.03);
+  }
+
+  .outfit-slot:hover {
+    background: rgba(0, 0, 0, 0.06);
+  }
+}
