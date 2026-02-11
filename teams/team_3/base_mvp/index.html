@@ -64,6 +64,29 @@
     .game-over .new-high { color: #22c55e; font-weight: 600; margin-top: 0.25rem; }
     .game-over .high-list { font-size: 0.9rem; color: #94a3b8; list-style: none; text-align: center; margin-top: 0.5rem; }
     .game-over .high-list li { margin: 0.2rem 0; }
+    .start-screen {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.98);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+    }
+    .start-screen.hidden { display: none; }
+    .start-screen h2 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+    .start-screen fieldset {
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 1rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .start-screen legend { color: #94a3b8; font-size: 0.9rem; }
+    .start-screen label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; }
+    .start-screen input[type="radio"] { accent-color: #22c55e; }
     button {
       padding: 0.75rem 1.5rem;
       font-size: 1rem;
@@ -77,6 +100,22 @@
   </style>
 </head>
 <body>
+  <div class="start-screen" id="startScreen" aria-label="Select game mode">
+    <h2>Snake</h2>
+    <fieldset>
+      <legend>Game mode</legend>
+      <label>
+        <input type="radio" name="gameMode" value="classic" checked>
+        Classic — hit a wall and you die
+      </label>
+      <label>
+        <input type="radio" name="gameMode" value="wrap">
+        No walls — wrap around the edges
+      </label>
+    </fieldset>
+    <button type="button" id="startGameBtn">Start game</button>
+  </div>
+
   <h1>Snake</h1>
   <div class="toolbar">
     <p class="score" style="margin-bottom: 0;">Score: <span id="score">0</span></p>
@@ -99,6 +138,7 @@
   </div>
 
   <script src="highScores.js"></script>
+  <script src="gameModes.js"></script>
   <script>
     const COLS = 15;
     const ROWS = 15;
@@ -170,10 +210,15 @@
       head.x += direction.x;
       head.y += direction.y;
 
-      if (head.x < 0 || head.x >= COLS || head.y < 0 || head.y >= ROWS) {
+      const mode = gameModes.getCurrent();
+      const { gameOver: boundaryGameOver, head: adjustedHead } = gameModes.handleBoundary(head, COLS, ROWS, mode);
+      if (boundaryGameOver) {
         endGame();
         return;
       }
+      head.x = adjustedHead.x;
+      head.y = adjustedHead.y;
+
       if (snake.some(s => s.x === head.x && s.y === head.y)) {
         endGame();
         return;
@@ -219,6 +264,7 @@
     }
 
     function startGame() {
+      gameModes.setCurrent(gameModes.getSelected());
       gameOver = false;
       snake = [{ x: Math.floor(COLS / 2), y: Math.floor(ROWS / 2) }];
       direction = { x: 1, y: 0 };
@@ -227,6 +273,7 @@
       spawnFood();
       draw();
       document.getElementById('gameOver').classList.remove('visible');
+      document.getElementById('startScreen').classList.add('hidden');
       if (tickId) clearInterval(tickId);
       tickId = setInterval(tick, TICK_MS);
     }
@@ -241,7 +288,11 @@
       }
     });
 
-    document.getElementById('restart').addEventListener('click', startGame);
+    document.getElementById('restart').addEventListener('click', () => {
+      document.getElementById('gameOver').classList.remove('visible');
+      document.getElementById('startScreen').classList.remove('hidden');
+    });
+    document.getElementById('startGameBtn').addEventListener('click', startGame);
 
     document.getElementById('viewHighScores').addEventListener('click', () => {
       const list = highScores.get();
@@ -266,7 +317,7 @@
     });
 
     initGrid();
-    startGame();
+    // Game starts when user clicks "Start game" on the mode selector
   </script>
 </body>
 </html>
