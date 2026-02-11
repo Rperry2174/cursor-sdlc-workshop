@@ -1,0 +1,29 @@
+.weather-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  padding: 2rem 2.5rem;
+  min-width: 280px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.weather-card__location {
+  margin: 0 0 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.weather-card__temp {
+  margin: 0;
+  font-size: 3rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1.2;
+}
+
+.weather-card__condition {
+  margin: 0.5rem 0 0;
+  font-size: 1.125rem;
+  color: #555;
+}

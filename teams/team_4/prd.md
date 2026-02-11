@@ -6,11 +6,11 @@
 
 ## Project Overview
 
-**Project Name:** _[Give your project a name]_
+**Project Name:** Calm Call
 
-**One-line Description:** _[What does it do in one sentence?]_
+**One-line Description:** A quick breathing exercise app to help sales reps regain composure after a tough call.
 
-**Type:** _[e.g., Chrome Extension, Web App, CLI Tool, etc.]_
+**Type:** Web App (single page)
 
 ---
 
@@ -54,11 +54,11 @@
 
 | Name | Task | Description |
 |------|------|-------------|
-| _[Name 1]_ | _[Feature 1]_ | _[Brief description]_ |
-| _[Name 2]_ | _[Feature 2]_ | _[Brief description]_ |
-| _[Name 3]_ | _[Feature 3]_ | _[Brief description]_ |
-| _[Name 4]_ | _[Feature 4]_ | _[Brief description]_ |
-| _[Name 5]_ | _[Feature 5]_ | _[Brief description]_ |
+| Brookey | Breathing pattern selector | Add dropdown/buttons to choose 4-4-4, 4-7-8, or box breathing |
+| Pete | Calming theme | Soft gradient background with relaxing colors |
+| Jesse | Cycle counter | Show "Breath 3 of 5" and total breaths completed |
+| Parker | Visual breathing guide | Animated circle that expands (inhale) and contracts (exhale) |
+| Krista | Duration presets | Quick (30s), Standard (1 min), Deep reset (2 min) buttons |
 
 ### Task Guidelines
 - Each task should add something **visible** to the project
@@ -73,10 +73,18 @@
 > **One person** creates the foundation that everyone else builds on.
 
 **What the MVP includes:**
-- _[Describe the minimal working version]_
+- Single page with a simple breathing exercise
+- One default pattern: 4-4-4 (inhale 4 sec, hold 4 sec, exhale 4 sec)
+- Text cues: "Breathe in" / "Hold" / "Breathe out" that cycle on screen
+- Start and Stop buttons
+- Basic timer/cycle logic (no fancy animation required — a pulsing circle or simple visual is enough)
 
 **What it does NOT include:**
-- _[List features deliberately left out for team members to add]_
+- Pattern options (4-7-8, box breathing) — Feature 1
+- Calming background/theme — Feature 2
+- Cycle counter display — Feature 3
+- Animated breathing circle (expand/contract) — Feature 4
+- Duration preset buttons (30s, 1 min, 2 min) — Feature 5
 
 ---
 
@@ -84,30 +92,30 @@
 
 > These are the features team members will add. Design them to be **independent** so people can work in parallel.
 
-### Feature 1: _[Name]_
-- **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+### Feature 1: Breathing Pattern Selector
+- **Assigned to:** Brookey
+- **Description:** Add a dropdown or button group to choose between 4-4-4 (default), 4-7-8, and box breathing. Each pattern has different inhale/hold/exhale timings.
+- **Files to modify/create:** `App.jsx` or `BreathingExercise.jsx`, add a `patterns` config object and selector UI
 
-### Feature 2: _[Name]_
-- **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+### Feature 2: Calming Theme
+- **Assigned to:** Pete
+- **Description:** Apply a soft, relaxing gradient background (e.g., soft blue to lavender) and adjust text/button colors for a calming feel.
+- **Files to modify/create:** `App.css`, possibly a new `Theme.css` or theme variables in existing CSS
 
-### Feature 3: _[Name]_
-- **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+### Feature 3: Cycle Counter
+- **Assigned to:** Jesse
+- **Description:** Display "Breath 3 of 5" (or similar) and optionally total breaths completed during the session. Updates in real time as user cycles through breaths.
+- **Files to modify/create:** `App.jsx` (or main component), add state for cycle count and a small display section
 
-### Feature 4: _[Name]_
-- **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+### Feature 4: Animated Breathing Circle
+- **Assigned to:** Parker
+- **Description:** Add an animated circle that expands during "Breathe in," holds during "Hold," and contracts during "Breathe out." Sync timing with the active breathing pattern.
+- **Files to modify/create:** New `BreathingCircle.jsx` component, `App.css` for animation keyframes
 
-### Feature 5: _[Name]_
-- **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+### Feature 5: Duration Presets
+- **Assigned to:** Krista
+- **Description:** Add "Quick (30 sec)", "Standard (1 min)", and "Deep reset (2 min)" buttons. Selecting one sets how many breath cycles to run before auto-stopping (or showing a "Done" state).
+- **Files to modify/create:** `App.jsx`, add preset buttons and logic to limit total cycles based on selection
 
 ---
 

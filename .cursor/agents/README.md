@@ -1,3 +1,8 @@
+---
+name: README
+model: fast
+---
+
 ## `.cursor/agents/`
 
 Place agent-related docs and repo-specific templates here.

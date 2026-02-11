@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Snake — Team 3</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      background: #0f172a;
+      color: #e2e8f0;
+    }
+    h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+    .score { font-size: 1rem; margin-bottom: 0.75rem; color: #94a3b8; }
+    #game {
+      display: grid;
+      gap: 0;
+      width: min(90vmin, 400px);
+      height: min(90vmin, 400px);
+      background: #1e293b;
+      border: 2px solid #334155;
+    }
+    .cell {
+      background: #1e293b;
+    }
+    .snake {
+      background: #22c55e;
+      border-radius: 2px;
+    }
+    .food {
+      background: #ef4444;
+      border-radius: 50%;
+    }
+    .game-over {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.9);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+    }
+    .game-over.visible { display: flex; }
+    .game-over h2 { font-size: 1.5rem; }
+    .game-over p { color: #94a3b8; }
+    button {
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      background: #22c55e;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover { filter: brightness(1.1); }
+  </style>
+</head>
+<body>
+  <h1>Snake</h1>
+  <p class="score">Score: <span id="score">0</span></p>
+  <div id="game" role="application" aria-label="Snake game grid"></div>
+
+  <div class="game-over" id="gameOver" aria-live="polite">
+    <h2>Game Over</h2>
+    <p>Score: <span id="finalScore">0</span></p>
+    <button id="restart">Play again</button>
+  </div>
+
+  <script>
+    const COLS = 15;
+    const ROWS = 15;
+    const TICK_MS = 150;
+
+    let gridEl;
+    let snake = [];
+    let direction = { x: 1, y: 0 };
+    let nextDirection = { x: 1, y: 0 };
+    let food = { x: 0, y: 0 };
+    let score = 0;
+    let tickId = null;
+    let gameOver = false;
+
+    function initGrid() {
+      gridEl = document.getElementById('game');
+      gridEl.style.gridTemplateColumns = `repeat(${COLS}, 1fr)`;
+      gridEl.style.gridTemplateRows = `repeat(${ROWS}, 1fr)`;
+      gridEl.innerHTML = '';
+      for (let y = 0; y < ROWS; y++) {
+        for (let x = 0; x < COLS; x++) {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          cell.dataset.x = x;
+          cell.dataset.y = y;
+          gridEl.appendChild(cell);
+        }
+      }
+    }
+
+    function getCell(x, y) {
+      return gridEl.querySelector(`[data-x="${x}"][data-y="${y}"]`);
+    }
+
+    function randomEmptyCell() {
+      let x, y;
+      const occupied = new Set(snake.map(s => `${s.x},${s.y}`));
+      do {
+        x = Math.floor(Math.random() * COLS);
+        y = Math.floor(Math.random() * ROWS);
+      } while (occupied.has(`${x},${y}`));
+      return { x, y };
+    }
+
+    function spawnFood() {
+      food = randomEmptyCell();
+    }
+
+    function draw() {
+      document.querySelectorAll('.snake, .food').forEach(el => el.classList.remove('snake', 'food'));
+      snake.forEach(seg => {
+        const cell = getCell(seg.x, seg.y);
+        if (cell) cell.classList.add('snake');
+      });
+      const foodCell = getCell(food.x, food.y);
+      if (foodCell) foodCell.classList.add('food');
+    }
+
+    function updateScore(value) {
+      score = value;
+      document.getElementById('score').textContent = score;
+    }
+
+    function tick() {
+      if (gameOver) return;
+      direction = { ...nextDirection };
+
+      const head = { ...snake[0] };
+      head.x += direction.x;
+      head.y += direction.y;
+
+      if (head.x < 0 || head.x >= COLS || head.y < 0 || head.y >= ROWS) {
+        endGame();
+        return;
+      }
+      if (snake.some(s => s.x === head.x && s.y === head.y)) {
+        endGame();
+        return;
+      }
+
+      snake.unshift(head);
+
+      if (head.x === food.x && head.y === food.y) {
+        updateScore(score + 1);
+        spawnFood();
+      } else {
+        snake.pop();
+      }
+
+      draw();
+    }
+
+    function endGame() {
+      gameOver = true;
+      if (tickId) clearInterval(tickId);
+      document.getElementById('finalScore').textContent = score;
+      document.getElementById('gameOver').classList.add('visible');
+    }
+
+    function startGame() {
+      gameOver = false;
+      snake = [{ x: Math.floor(COLS / 2), y: Math.floor(ROWS / 2) }];
+      direction = { x: 1, y: 0 };
+      nextDirection = { x: 1, y: 0 };
+      updateScore(0);
+      spawnFood();
+      draw();
+      document.getElementById('gameOver').classList.remove('visible');
+      if (tickId) clearInterval(tickId);
+      tickId = setInterval(tick, TICK_MS);
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (gameOver) return;
+      switch (e.key) {
+        case 'ArrowUp':    if (direction.y === 0) nextDirection = { x: 0, y: -1 }; e.preventDefault(); break;
+        case 'ArrowDown':  if (direction.y === 0) nextDirection = { x: 0, y: 1 };  e.preventDefault(); break;
+        case 'ArrowLeft':  if (direction.x === 0) nextDirection = { x: -1, y: 0 }; e.preventDefault(); break;
+        case 'ArrowRight': if (direction.x === 0) nextDirection = { x: 1, y: 0 };  e.preventDefault(); break;
+      }
+    });
+
+    document.getElementById('restart').addEventListener('click', startGame);
+
+    initGrid();
+    startGame();
+  </script>
+</body>
+</html>

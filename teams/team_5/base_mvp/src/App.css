@@ -1,0 +1,82 @@
+.app {
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+h1 {
+  font-size: 1.75rem;
+  color: #26251e;
+  margin: 0 0 0.25rem;
+}
+
+.subtitle {
+  color: #26251e;
+  opacity: 0.6;
+  margin: 0 0 2rem;
+  font-size: 0.95rem;
+}
+
+.passage {
+  font-size: 1.25rem;
+  line-height: 1.8;
+  padding: 1.25rem 1rem;
+  background: #f2f1ed;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-family: ui-monospace, monospace;
+  letter-spacing: 0.02em;
+}
+
+.char {
+  transition: color 0.1s ease;
+}
+
+.char-pending {
+  color: #26251e;
+  opacity: 0.4;
+}
+
+.char-correct {
+  color: #26251e;
+  opacity: 1;
+}
+
+.char-incorrect {
+  color: #c53030;
+  background: rgba(197, 48, 48, 0.12);
+  border-radius: 2px;
+}
+
+.input {
+  width: 100%;
+  min-height: 120px;
+  padding: 1rem;
+  font-size: 1rem;
+  font-family: ui-monospace, monospace;
+  line-height: 1.6;
+  border: 2px solid #e1e0db;
+  border-radius: 8px;
+  background: #f7f7f4;
+  color: #26251e;
+  resize: vertical;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #f54e00;
+}
+
+.input:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.complete-message {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: #f2f1ed;
+  border-radius: 8px;
+  color: #26251e;
+  font-weight: 500;
+}

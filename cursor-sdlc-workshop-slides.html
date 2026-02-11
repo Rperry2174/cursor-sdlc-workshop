@@ -34,12 +34,26 @@
         }
 
         .slide-container {
+            position: absolute;
+            top: 0;
+            left: 0;
             height: 100vh;
             width: 100vw;
-            display: flex;
+            display: none;
             align-items: center;
             justify-content: center;
             padding: 60px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .slide-container:has(.slide.active) {
+            z-index: 1;
+            pointer-events: auto;
+        }
+
+        .slide-container.active {
+            display: flex;
         }
 
         .slide {
@@ -66,10 +80,14 @@
             font-size: 4rem;
             font-weight: 700;
             margin-bottom: 1rem;
+            color: var(--cursor-blue);
             background: linear-gradient(135deg, var(--cursor-blue), #64B5F6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+        }
+        @supports (background-clip: text) or (-webkit-background-clip: text) {
+            h1 { color: transparent; }
         }
 
         h2 {
@@ -110,6 +128,7 @@
         .title-slide h1 {
             font-size: 5rem;
             margin-bottom: 0.5rem;
+            color: #64B5F6;
         }
 
         .title-slide .tagline {
@@ -440,6 +459,7 @@
             border-radius: 100px;
             border: 1px solid rgba(255,255,255,0.1);
             backdrop-filter: blur(10px);
+            z-index: 100;
         }
 
         .nav-btn {
@@ -541,7 +561,7 @@
     <div class="progress-bar" id="progress"></div>
 
     <!-- Slide 1: Title -->
-    <div class="slide-container">
+    <div class="slide-container active">
         <div class="slide active title-slide" data-slide="1">
             <h1>CURSOR SDLC WORKSHOP</h1>
             <p class="tagline">Experience the Software Development Lifecycle Firsthand</p>
@@ -560,10 +580,8 @@
                 </div>
             </div>
         </div>
-    </div>
 
     <!-- Slide 2: Purpose -->
-    <div class="slide-container">
         <div class="slide" data-slide="2">
             <h2>Purpose</h2>
             <div class="key-points">
@@ -593,10 +611,8 @@
                 <strong>Note for ADMs:</strong> AEs are less technical than most customers—that's the point. Watch for friction that experienced users take for granted.
             </div>
         </div>
-    </div>
 
     <!-- Slide 3: Agenda -->
-    <div class="slide-container">
         <div class="slide" data-slide="3">
             <h2>Agenda</h2>
             <div class="timeline">
@@ -634,10 +650,8 @@
                 </div>
             </div>
         </div>
-    </div>
 
     <!-- Slide 4: SDLC Overview -->
-    <div class="slide-container">
         <div class="slide" data-slide="4">
             <h2>The Software Development Lifecycle</h2>
             <div class="sdlc-flow">
@@ -681,10 +695,8 @@
                 Today you'll experience <span class="highlight">every stage</span> — and learn how Cursor helps at each one.
             </p>
         </div>
-    </div>
 
     <!-- Slide 5: Pre-Work -->
-    <div class="slide-container">
         <div class="slide" data-slide="5">
             <div class="section-header">
                 <span class="section-badge prework">Pre-Work</span>
@@ -727,10 +739,8 @@
                 </div>
             </div>
         </div>
-    </div>
 
     <!-- Slide 6: Section 1 Intro -->
-    <div class="slide-container">
         <div class="slide" data-slide="6">
             <div class="section-header">
                 <span class="section-badge section1">Section 1</span>
@@ -758,10 +768,8 @@
                 </div>
             </div>
         </div>
-    </div>
 
     <!-- Slide 7: Phase 1 - Plan -->
-    <div class="slide-container">
         <div class="slide" data-slide="7">
             <div class="section-header">
                 <span class="section-badge section1">Section 1</span>
@@ -801,10 +809,8 @@
                 </div>
             </div>
         </div>
-    </div>
 
     <!-- Slide 8: Phase 2 - Design -->
-    <div class="slide-container">
         <div class="slide" data-slide="8">
             <div class="section-header">
                 <span class="section-badge section1">Section 1</span>
@@ -846,10 +852,8 @@
                 </div>
             </div>
         </div>
-    </div>
 
     <!-- Slide 9: Phase 3 - Develop -->
-    <div class="slide-container">
         <div class="slide" data-slide="9">
             <div class="section-header">
                 <span class="section-badge section1">Section 1</span>
@@ -887,10 +891,8 @@
                 </div>
             </div>
         </div>
-    </div>
 
     <!-- Slide 10: Phase 4 - Test -->
-    <div class="slide-container">
         <div class="slide" data-slide="10">
             <div class="section-header">
                 <span class="section-badge section1">Section 1</span>
@@ -926,10 +928,8 @@
                 <strong>✓ Section 1 Complete!</strong> You just experienced Plan → Design → Develop → Test.
             </div>
         </div>
-    </div>
 
     <!-- Slide 11: Section 2 Intro -->
-    <div class="slide-container">
         <div class="slide" data-slide="11">
             <div class="section-header">
                 <span class="section-badge section2">Section 2</span>
@@ -957,10 +957,8 @@
                 </div>
             </div>
         </div>
-    </div>
 
     <!-- Slide 12: Section 2 Step 1 -->
-    <div class="slide-container">
         <div class="slide" data-slide="12">
             <div class="section-header">
                 <span class="section-badge section2">Section 2</span>
@@ -991,10 +989,8 @@
                 </div>
             </div>
         </div>
-    </div>
 
     <!-- Slide 13: Section 2 Step 2 -->
-    <div class="slide-container">
         <div class="slide" data-slide="13">
             <div class="section-header">
                 <span class="section-badge section2">Section 2</span>
@@ -1020,10 +1016,8 @@
                 </div>
             </div>
         </div>
-    </div>
 
     <!-- Slide 14: Section 2 Step 3 -->
-    <div class="slide-container">
         <div class="slide" data-slide="14">
             <div class="section-header">
                 <span class="section-badge section2">Section 2</span>
@@ -1068,10 +1062,8 @@
                 </div>
             </div>
         </div>
-    </div>
 
     <!-- Slide 15: Section 3 Intro -->
-    <div class="slide-container">
         <div class="slide" data-slide="15">
             <div class="section-header">
                 <span class="section-badge section3">Section 3</span>
@@ -1083,10 +1075,8 @@
                 <span class="highlight">Who builds the best Netflix clone?</span>
             </div>
         </div>
-    </div>
 
     <!-- Slide 16: Section 3 Rules -->
-    <div class="slide-container">
         <div class="slide" data-slide="16">
             <div class="section-header">
                 <span class="section-badge section3">Section 3</span>
@@ -1117,10 +1107,8 @@
                 <strong>The Question:</strong> Will your team follow SDLC discipline... or descend into chaos?
             </div>
         </div>
-    </div>
 
     <!-- Slide 17: The Transformation -->
-    <div class="slide-container">
         <div class="slide" data-slide="17">
             <div class="section-header">
                 <span class="section-badge section3">Section 3</span>
@@ -1150,10 +1138,8 @@
                 </div>
             </div>
         </div>
-    </div>
 
     <!-- Slide 18: Key Takeaways -->
-    <div class="slide-container">
         <div class="slide" data-slide="18">
             <h2>Key Takeaways</h2>
             <div class="takeaway-grid">
@@ -1175,10 +1161,8 @@
                 </div>
             </div>
         </div>
-    </div>
 
     <!-- Slide 19: The Story -->
-    <div class="slide-container">
         <div class="slide" data-slide="19">
             <h2>The Story to Tell</h2>
             <div class="big-quote">
@@ -1191,10 +1175,8 @@
                 From small teams to enterprise scale.
             </p>
         </div>
-    </div>
 
     <!-- Slide 20: Go -->
-    <div class="slide-container">
         <div class="slide title-slide" data-slide="20">
             <h1 style="font-size: 6rem;">Now go tell the story.</h1>
         </div>
@@ -1215,12 +1197,16 @@
 
         function showSlide(n) {
             const slides = document.querySelectorAll('.slide');
+            const containers = document.querySelectorAll('.slide-container');
             
-            if (n > totalSlides) currentSlide = 1;
-            if (n < 1) currentSlide = totalSlides;
+            currentSlide = n;
+            if (currentSlide > totalSlides) currentSlide = 1;
+            if (currentSlide < 1) currentSlide = totalSlides;
             
             slides.forEach(slide => slide.classList.remove('active'));
+            containers.forEach(container => container.classList.remove('active'));
             slides[currentSlide - 1].classList.add('active');
+            containers[currentSlide - 1].classList.add('active');
             
             document.getElementById('currentSlide').textContent = currentSlide;
             document.getElementById('prevBtn').disabled = currentSlide === 1;
