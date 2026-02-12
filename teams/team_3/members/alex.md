@@ -1,4 +1,5 @@
 # Alex Zakoor
 
-**Role:** AA
+**Role:** Account Associate
 **GitHub:** [@alex-zakoor](https://github.com/alex-zakoor)
+**Fun fact:**
