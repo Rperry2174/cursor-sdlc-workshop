@@ -27,6 +27,12 @@ function App() {
 
   const allMatched = cards.every((card) => card.isMatched)
 
+  const handleRestart = () => {
+    setCards(createCards())
+    setFlippedIds([])
+    setIsLocked(false)
+  }
+
   const handleCardClick = useCallback(
     (card) => {
       if (card.isFlipped || card.isMatched || isLocked) return
@@ -78,7 +84,9 @@ function App() {
     <div className="app">
       <h1>Memory Card Match</h1>
       <p className="subtitle">Find matching pairs by flipping cards</p>
-
+      <button type="button" className="restart-btn" onClick={handleRestart}>
+        New Game
+      </button>
       {allMatched ? (
         <div className="win-message">You win!</div>
       ) : (
