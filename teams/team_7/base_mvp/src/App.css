@@ -102,6 +102,42 @@
   font-size: 1.1rem;
 }
 
+/* Download button */
+.download-section {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.download-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: #27ae60;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.download-button:hover:not(:disabled) {
+  background: #219a52;
+  transform: translateY(-1px);
+}
+
+.download-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.download-button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
 @media (max-width: 768px) {
   .app {
     padding: 1rem;
