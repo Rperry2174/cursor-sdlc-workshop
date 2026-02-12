@@ -63,7 +63,17 @@
       moto_body: '#e94560',
       moto_wheel: '#222',
       moto_light: '#ffdd57',
+      powerup_speed: '#ffdd57',
+      powerup_shield: '#4fc3f7',
     };
+
+    // ─── POWER-UPS ────────────────────────────────────────
+    // Tunable: POWERUP_DURATION_MS (time on road), POWERUP_SPAWN_INTERVAL_MS (spawn rate),
+    // speed boost duration in update() (4000), throttle in handleInput() (120 normal / 60 boosted).
+    const POWERUP_TYPES = { SPEED: 'speed', SHIELD: 'shield' };
+    const POWERUP_DURATION_MS = 5000;
+    const POWERUP_SPAWN_INTERVAL_MS = 8000;
+    const TRAFFIC_ROWS = [1, 2, 3, 4, 6, 7, 8, 9]; // rows that can spawn power-ups
 
     // ─── GAME STATE ──────────────────────────────────────
     const game = {
@@ -76,6 +86,11 @@
       highScore: parseInt(localStorage.getItem('motofrogger_highscore')) || 0,
       lives: 3,
       gameOver: false,
+      // Power-ups
+      activePowerUps: [],
+      speedBoostEndTime: 0,
+      hasShield: false,
+      lastPowerUpSpawn: 0,
     };
 
     // ─── LANE SETUP ──────────────────────────────────────
@@ -130,7 +145,8 @@
 
     function handleInput() {
       const now = performance.now();
-      if (now - game.lastMove < 120) return; // throttle movement
+      const throttleMs = (Date.now() < game.speedBoostEndTime) ? 60 : 120;
+      if (now - game.lastMove < throttleMs) return; // throttle movement
 
       let moved = false;
       if (keys['ArrowUp']    && game.moto.row > 0)        { game.moto.row--; moved = true; }
@@ -145,6 +161,24 @@
     function update(dt) {
       if (game.gameOver) return;
 
+      // Power-ups: expire old ones
+      const now = Date.now();
+      game.activePowerUps = game.activePowerUps.filter(
+        (p) => now - p.spawnTime < POWERUP_DURATION_MS
+      );
+
+      // Power-ups: spawn new one on interval
+      if (now - game.lastPowerUpSpawn >= POWERUP_SPAWN_INTERVAL_MS) {
+        game.lastPowerUpSpawn = now;
+        const types = [POWERUP_TYPES.SPEED, POWERUP_TYPES.SHIELD];
+        const type = types[Math.floor(Math.random() * types.length)];
+        const col = Math.floor(Math.random() * COLS);
+        const row = TRAFFIC_ROWS[Math.floor(Math.random() * TRAFFIC_ROWS.length)];
+        if (col !== game.moto.col || row !== game.moto.row) {
+          game.activePowerUps.push({ type, col, row, spawnTime: now });
+        }
+      }
+
       handleInput();
 
       // Move vehicles
@@ -158,6 +192,19 @@
         }
       }
 
+      // Power-ups: collect when motorcycle is on same cell
+      for (let i = game.activePowerUps.length - 1; i >= 0; i--) {
+        const p = game.activePowerUps[i];
+        if (p.col === game.moto.col && p.row === game.moto.row) {
+          game.activePowerUps.splice(i, 1);
+          if (p.type === POWERUP_TYPES.SPEED) {
+            game.speedBoostEndTime = Date.now() + 4000;
+          } else if (p.type === POWERUP_TYPES.SHIELD) {
+            game.hasShield = true;
+          }
+        }
+      }
+
       // Collision detection
       const lane = game.lanes[game.moto.row];
       if (lane.type === 'traffic') {
@@ -165,6 +212,10 @@
         const motoRight = game.moto.col + 0.85;
         for (const v of lane.vehicles) {
           if (motoRight > v.x && motoLeft < v.x + v.width) {
+            if (game.hasShield) {
+              game.hasShield = false;
+              return;
+            }
             // Hit! Lose a life
             game.lives--;
             if (game.lives <= 0) {
@@ -192,6 +243,7 @@
         }
         game.moto.col = 4;
         game.moto.row = ROWS - 1;
+        game.activePowerUps = []; // clean slate for next level
         initLanes(); // new traffic pattern each level
       }
     }
@@ -203,6 +255,10 @@
       game.gameOver = false;
       game.moto.col = 4;
       game.moto.row = ROWS - 1;
+      game.speedBoostEndTime = 0;
+      game.hasShield = false;
+      game.activePowerUps = [];
+      game.lastPowerUpSpawn = 0;
       initLanes();
     }
 
@@ -282,6 +338,28 @@
         }
       }
 
+      // Draw power-ups (on road, under motorcycle)
+      drawPowerUps();
+
+      // Power-up feedback: shield ring and speed glow around motorcycle
+      const motoX = game.moto.col * CELL + CELL / 2;
+      const motoY = game.moto.row * CELL + CELL / 2;
+      if (game.hasShield) {
+        ctx.strokeStyle = 'rgba(79, 195, 247, 0.8)';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(motoX, motoY, CELL * 0.45, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      if (Date.now() < game.speedBoostEndTime) {
+        ctx.fillStyle = 'rgba(255, 221, 87, 0.15)';
+        ctx.beginPath();
+        ctx.arc(motoX, motoY, CELL * 0.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.lineWidth = 1;
+      ctx.setLineDash([]);
+
       // Draw motorcycle
       drawMotorcycle(game.moto.col * CELL, game.moto.row * CELL);
 
@@ -291,6 +369,44 @@
       // ─── GAME OVER SCREEN ────────────────────────────────
       if (game.gameOver) {
         drawGameOver();
+      }
+    }
+
+    function drawPowerUps() {
+      for (const p of game.activePowerUps) {
+        const cx = p.col * CELL + CELL / 2;
+        const cy = p.row * CELL + CELL / 2;
+
+        if (p.type === POWERUP_TYPES.SPEED) {
+          // Yellow lightning bolt
+          ctx.fillStyle = COLORS.powerup_speed;
+          ctx.strokeStyle = '#b8860b';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          // Simple lightning zigzag (top-right, down to center, down-left, down to bottom)
+          const w = 14;
+          const h = 24;
+          ctx.moveTo(cx + w * 0.4, cy - h);
+          ctx.lineTo(cx - w * 0.3, cy);
+          ctx.lineTo(cx + w * 0.5, cy);
+          ctx.lineTo(cx - w * 0.4, cy + h);
+          ctx.lineTo(cx - w * 0.2, cy + h * 0.3);
+          ctx.lineTo(cx - w * 0.5, cy);
+          ctx.lineTo(cx + w * 0.3, cy);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+        } else if (p.type === POWERUP_TYPES.SHIELD) {
+          // Blue circle (shield)
+          const radius = 20;
+          ctx.fillStyle = COLORS.powerup_shield;
+          ctx.strokeStyle = '#1976d2';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        }
       }
     }
 
