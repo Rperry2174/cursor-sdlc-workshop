@@ -10,7 +10,7 @@
     <main class="app">
       <header>
         <h1>Cursor Deal Pricing Calculator</h1>
-        <p>Input seats, committed usage per user, and term to get ACV + CTR ranges.</p>
+        <p>Please input the number of seats, committed monthly usage per seat, and term length to see the pre-approved discounts for your deal.</p>
       </header>
 
       <section class="card">
@@ -22,28 +22,21 @@
           </label>
 
           <label>
-            Monthly Committed Usage / User
-            <select id="usage" required>
-              <option value="20">$20</option>
-              <option value="30">$30</option>
-              <option value="40">$40</option>
-              <option value="50">$50</option>
-              <option value="60">$60</option>
-              <option value="70">$70</option>
-              <option value="80">$80</option>
-              <option value="90">$90</option>
-              <option value="100">$100</option>
-            </select>
-          </label>
-
-          <label>
             Commitment Term
             <select id="term" required>
               <option value="1">1 Year</option>
               <option value="2">2 Years</option>
-              <option value="3">3+ Years</option>
+              <option value="3">3 Years</option>
             </select>
           </label>
+
+          <div class="usage-row" style="grid-column: 1 / -1;">
+            <label for="usage-slider" class="usage-label">Monthly Committed Usage / User</label>
+            <div class="usage-controls">
+              <input id="usage-slider" type="range" min="20" max="200" step="1" value="20" aria-valuemin="20" aria-valuemax="200" aria-valuenow="20" />
+              <input id="usage" type="number" value="20" required aria-label="Monthly committed usage per user in dollars" />
+            </div>
+          </div>
 
           <div class="actions">
             <button type="submit">Calculate</button>
@@ -55,7 +48,7 @@
 
       <section class="card">
         <h2>Results</h2>
-        <div class="actions">
+        <div class="actions results-actions">
           <button type="button" id="copy-summary-btn" class="secondary">Copy Summary</button>
         </div>
         <div id="results" class="results"></div>
