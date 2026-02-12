@@ -26,4 +26,48 @@
   margin: 0.5rem 0 0;
   font-size: 1.125rem;
   color: #555;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.condition-icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.condition-icon-wrap .condition-icon {
+  width: 1.5em;
+  height: 1.5em;
+  color: inherit;
+}
+
+.condition-icon--sunny {
+  color: #e6a800;
+}
+
+.condition-icon--cloudy {
+  color: #6b7280;
+}
+
+.condition-icon--rainy {
+  color: #3b82f6;
+}
+
+.condition-icon--partly-cloudy {
+  color: #9ca3af;
+}
+
+.condition-icon--snowy {
+  color: #93c5fd;
+}
+
+.condition-icon--stormy {
+  color: #4f46e5;
+}
+
+.condition-icon--foggy {
+  color: #9ca3af;
 }
