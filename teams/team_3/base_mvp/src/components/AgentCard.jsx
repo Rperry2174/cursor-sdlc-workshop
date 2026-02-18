@@ -45,17 +45,23 @@ export default function AgentCard({ agent, onDragStart }) {
   }, [loading, duration, startTime]);
 
   function handleDragStart(e) {
+    if (loading) {
+      e.preventDefault();
+      return;
+    }
     e.dataTransfer.effectAllowed = 'move';
     onDragStart(agent.id);
   }
 
   return (
     <div
-      className={`agent-card ${loading ? 'agent-card--loading' : ''} ${done ? 'agent-card--done' : ''}`}
-      draggable
+      className={`agent-card ${loading ? 'agent-card--loading agent-card--locked' : ''} ${done ? 'agent-card--done' : ''}`}
+      draggable={!loading}
       onDragStart={handleDragStart}
     >
-      <div className="agent-card__drag-handle">⠿</div>
+      <div className={`agent-card__drag-handle ${loading ? 'agent-card__drag-handle--locked' : ''}`}>
+        {loading ? '🔒' : '⠿'}
+      </div>
       <div className="agent-card__header">
         <div className="agent-avatar">{agent.name[0]}</div>
         <div className="agent-card__name">{agent.name}</div>

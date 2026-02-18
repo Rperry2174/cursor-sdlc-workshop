@@ -25,11 +25,31 @@
   font-size: 14px;
   letter-spacing: 1px;
   pointer-events: none;
+  transition: color 0.2s;
+}
+
+.agent-card__drag-handle--locked {
+  font-size: 13px;
+  animation: lock-pulse 2s ease-in-out infinite;
+}
+
+@keyframes lock-pulse {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 1; }
 }
 
 .agent-card--loading {
   border-color: #89b4fa;
   box-shadow: 0 0 12px rgba(137, 180, 250, 0.25);
+}
+
+.agent-card--locked {
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+
+.agent-card--locked:active {
+  cursor: not-allowed;
 }
 
 .agent-card--done {
