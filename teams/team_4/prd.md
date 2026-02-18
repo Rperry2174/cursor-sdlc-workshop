@@ -6,11 +6,11 @@
 
 ## Project Overview
 
-**Project Name:** _[Give your project a name]_
+**Project Name:** LinkedIn Tracker
 
-**One-line Description:** _[What does it do in one sentence?]_
+**One-line Description:** A single-page app to track LinkedIn follow-ups by date & time and accounts reached out to by week with notes.
 
-**Type:** _[e.g., Chrome Extension, Web App, CLI Tool, etc.]_
+**Type:** Web App (single-page, frontend only — no database, no auth, no API)
 
 ---
 
@@ -54,11 +54,11 @@
 
 | Name | Task | Description |
 |------|------|-------------|
-| _[Name 1]_ | _[Feature 1]_ | _[Brief description]_ |
-| _[Name 2]_ | _[Feature 2]_ | _[Brief description]_ |
-| _[Name 3]_ | _[Feature 3]_ | _[Brief description]_ |
-| _[Name 4]_ | _[Feature 4]_ | _[Brief description]_ |
-| _[Name 5]_ | _[Feature 5]_ | _[Brief description]_ |
+| Cameron | Add follow-up form | Form to add a new follow-up with date, time, and note; appends to the follow-ups list |
+| _[Name 2]_ | Add outreach entry | Form to add an account + week + notes to the "Outreach by week" section |
+| _[Name 3]_ | Filter follow-ups by date | Control (e.g. date picker or "Today / This week") to show only follow-ups in that range |
+| _[Name 4]_ | Week selector for outreach | Dropdown or buttons to choose which week to view in the outreach section |
+| _[Name 5]_ | Delete / edit items | Buttons to delete (or edit) a follow-up or an outreach entry |
 
 ### Task Guidelines
 - Each task should add something **visible** to the project
@@ -73,10 +73,18 @@
 > **One person** creates the foundation that everyone else builds on.
 
 **What the MVP includes:**
-- _[Describe the minimal working version]_
+- **Single page** with two clear sections: **Follow-ups** and **Outreach by week**.
+- **Follow-ups section:** A list of items, each showing **date**, **time**, and a short **note** (e.g. "Follow up with Jane at Acme"). Data from a stub array in JS (e.g. `src/data/followUps.js`).
+- **Outreach by week section:** A list grouped by week (e.g. "Week of Feb 17" or "2025-W07"), each with **accounts reached out to** and **notes**. Data from a stub array (e.g. `src/data/outreach.js`).
+- **No forms yet** — display only. State can be in React state or simple JS; optional: persist in `localStorage` so refreshes keep data.
+- Basic layout and styling so both sections are readable and clearly labeled.
 
 **What it does NOT include:**
-- _[List features deliberately left out for team members to add]_
+- No form to add follow-ups (Feature 1)
+- No form to add outreach entries (Feature 2)
+- No filter for follow-ups by date (Feature 3)
+- No week selector for outreach (Feature 4)
+- No delete/edit for items (Feature 5)
 
 ---
 
@@ -84,30 +92,30 @@
 
 > These are the features team members will add. Design them to be **independent** so people can work in parallel.
 
-### Feature 1: _[Name]_
-- **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+### Feature 1: Add follow-up form
+- **Assigned to:** Cameron
+- **Description:** A form (inputs for date, time, and note) that adds a new follow-up to the list. Submitting appends to the in-memory/list state and the new row appears in the Follow-ups section. Use a simple date and time input (or two text inputs) and a text area or input for the note.
+- **Files to modify/create:** `base_mvp/src/App.jsx` (or a parent component) for state and form submit handler; optionally `base_mvp/src/components/FollowUpForm.jsx` and `base_mvp/src/components/FollowUpList.jsx`.
 
-### Feature 2: _[Name]_
-- **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+### Feature 2: Add outreach entry
+- **Assigned to:** _[Name 2]_
+- **Description:** A form to add an outreach entry: account name (or identifier), week (e.g. week picker or "current week"), and notes. Submitting adds the entry to the Outreach by week data and displays it in the correct week.
+- **Files to modify/create:** `base_mvp/src/App.jsx` for outreach state and form handler; optionally `base_mvp/src/components/OutreachForm.jsx` and `base_mvp/src/components/OutreachList.jsx`.
 
-### Feature 3: _[Name]_
-- **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+### Feature 3: Filter follow-ups by date
+- **Assigned to:** _[Name 3]_
+- **Description:** A control (e.g. date picker, or buttons like "Today" / "This week" / "All") that filters the follow-ups list to show only items in the selected date range. Default can be "All".
+- **Files to modify/create:** `base_mvp/src/App.jsx` (or FollowUpList) for filter state and filtered list; optionally `base_mvp/src/components/FollowUpFilter.jsx`.
 
-### Feature 4: _[Name]_
-- **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+### Feature 4: Week selector for outreach
+- **Assigned to:** _[Name 4]_
+- **Description:** A dropdown or set of buttons to choose which week to display in the Outreach by week section (e.g. "Week of Feb 10", "Week of Feb 17"). Only the selected week’s accounts and notes are shown.
+- **Files to modify/create:** `base_mvp/src/App.jsx` for selected week state and filtering outreach by week; optionally `base_mvp/src/components/WeekSelector.jsx`.
 
-### Feature 5: _[Name]_
-- **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+### Feature 5: Delete / edit items
+- **Assigned to:** _[Name 5]_
+- **Description:** Each follow-up and each outreach entry has a "Delete" button (and optionally "Edit") so the user can remove or update an item. Editing can be inline or via a small modal; minimal scope is delete-only.
+- **Files to modify/create:** `base_mvp/src/App.jsx` for delete (and edit) handlers; list components or new `base_mvp/src/components/FollowUpItem.jsx` and outreach item component to show the button(s).
 
 ---
 
