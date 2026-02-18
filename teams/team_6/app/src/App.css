@@ -1,0 +1,383 @@
+/* Cursor-style palette */
+.app {
+  max-width: 32rem;
+  margin: 0 auto;
+  padding: 2rem 1.25rem;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+header h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #fafafa;
+  margin: 0 0 0.25rem 0;
+  letter-spacing: -0.02em;
+}
+
+.tagline {
+  font-size: 0.95rem;
+  color: #a1a1aa;
+  margin: 0;
+}
+
+/* Input form */
+.input-form {
+  background: #18181b;
+  border: 1px solid #27272a;
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.input-form h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fafafa;
+  margin: 0 0 0.75rem 0;
+}
+
+.input-form form {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.input-form input {
+  flex: 1;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #27272a;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 0.95rem;
+  background: #0d0d0f;
+  color: #fafafa;
+}
+
+.input-form input::placeholder {
+  color: #71717a;
+}
+
+.input-form input:focus {
+  outline: none;
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+}
+
+.input-form button {
+  padding: 0.6rem 1rem;
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #fff;
+  background: #8b5cf6;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.input-form button:hover {
+  background: #7c3aed;
+}
+
+.input-hint {
+  font-size: 0.8rem;
+  color: #71717a;
+  margin: 0.5rem 0 0 0;
+}
+
+/* Quick-add common tasks */
+.quick-add {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #27272a;
+}
+
+.quick-add-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #a1a1aa;
+  margin-bottom: 0.5rem;
+}
+
+.quick-add-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.quick-add-btn {
+  padding: 0.4rem 0.65rem;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #e4e4e7;
+  background: #27272a;
+  border: 1px solid #3f3f46;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.quick-add-btn:hover {
+  background: #3f3f46;
+  border-color: #52525b;
+  color: #fafafa;
+}
+
+/* Primary button */
+.actions {
+  margin-bottom: 1.5rem;
+}
+
+.actions .primary {
+  width: 100%;
+  padding: 0.85rem 1.25rem;
+  font: inherit;
+  font-weight: 600;
+  font-size: 1rem;
+  color: #fff;
+  background: #8b5cf6;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.actions .primary:hover:not(:disabled) {
+  background: #7c3aed;
+}
+
+.actions .primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Results block */
+.results {
+  background: #18181b;
+  border: 1px solid #27272a;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Score display */
+.score-display {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.score-number {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #8b5cf6;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.score-letter {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #a78bfa;
+  letter-spacing: -0.02em;
+}
+
+/* Score breakdown */
+.score-breakdown {
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.score-breakdown p {
+  font-size: 0.9rem;
+  color: #a1a1aa;
+  margin: 0;
+}
+
+/* Gauge */
+.score-gauge {
+  margin: 1rem 0 0 0;
+}
+
+.gauge-bar {
+  height: 8px;
+  background: #27272a;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.gauge-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.gauge-bar.gauge-low .gauge-fill {
+  background: #ef4444;
+}
+
+.gauge-bar.gauge-mid .gauge-fill {
+  background: #eab308;
+}
+
+.gauge-bar.gauge-high .gauge-fill {
+  background: #8b5cf6;
+}
+
+.gauge-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: #71717a;
+  margin-top: 0.25rem;
+}
+
+/* Summary list */
+.summary-list {
+  background: #18181b;
+  border: 1px solid #27272a;
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+.summary-list h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #fafafa;
+  margin: 0 0 0.75rem 0;
+}
+
+.summary-list ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.summary-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #27272a;
+  font-size: 0.9rem;
+  color: #e4e4e7;
+}
+
+.summary-list li:last-child {
+  border-bottom: none;
+}
+
+.summary-list li span {
+  flex: 1;
+  min-width: 0;
+}
+
+.summary-list button {
+  flex-shrink: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  font-size: 1.2rem;
+  line-height: 1;
+  color: #71717a;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.summary-list button:hover {
+  background: #27272a;
+  color: #fafafa;
+}
+
+/* Email score (Gmail) */
+.email-score.card {
+  background: #18181b;
+  border: 1px solid #27272a;
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.email-score h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fafafa;
+  margin: 0 0 0.75rem 0;
+}
+
+.email-score-muted {
+  font-size: 0.9rem;
+  color: #a1a1aa;
+  margin: 0 0 0.75rem 0;
+}
+
+.email-score-error {
+  font-size: 0.85rem;
+  color: #f87171;
+  margin: 0 0 0.5rem 0;
+}
+
+.email-connect-btn,
+.email-refresh-btn {
+  padding: 0.5rem 1rem;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+  background: #8b5cf6;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.email-connect-btn:hover,
+.email-refresh-btn:hover:not(:disabled) {
+  background: #7c3aed;
+}
+
+.email-refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.email-score-stats {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.email-score-number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #8b5cf6;
+  letter-spacing: -0.02em;
+}
+
+.email-score-letter {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #a78bfa;
+}
+
+.email-score-breakdown {
+  font-size: 0.9rem;
+  color: #a1a1aa;
+  margin: 0 0 0.5rem 0;
+}
+
+.email-score-meta {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.8rem;
+  color: #71717a;
+  margin-bottom: 0.75rem;
+}
