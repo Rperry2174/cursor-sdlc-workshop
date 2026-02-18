@@ -1,0 +1,131 @@
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 16px;
+}
+
+.modal {
+  background: #1e1e2e;
+  border: 1px solid #45475a;
+  border-radius: 16px;
+  padding: 28px;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+  animation: modal-in 0.18s ease;
+}
+
+@keyframes modal-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.modal__title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #cdd6f4;
+  margin: 0;
+}
+
+.modal__close {
+  background: none;
+  border: none;
+  color: #6c7086;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: color 0.15s, background 0.15s;
+}
+
+.modal__close:hover {
+  color: #cdd6f4;
+  background: #313244;
+}
+
+.modal__form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modal__label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #a6adc8;
+}
+
+.modal__input,
+.modal__textarea {
+  background: #181825;
+  border: 1px solid #313244;
+  border-radius: 8px;
+  color: #cdd6f4;
+  font-size: 14px;
+  padding: 10px 12px;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.15s;
+  resize: vertical;
+}
+
+.modal__input:focus,
+.modal__textarea:focus {
+  border-color: #89b4fa;
+}
+
+.modal__actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+.modal__btn {
+  padding: 9px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.15s, background 0.15s;
+}
+
+.modal__btn--cancel {
+  background: #313244;
+  color: #a6adc8;
+}
+
+.modal__btn--cancel:hover {
+  background: #45475a;
+}
+
+.modal__btn--primary {
+  background: #89b4fa;
+  color: #1e1e2e;
+}
+
+.modal__btn--primary:hover:not(:disabled) {
+  background: #b4d0ff;
+}
+
+.modal__btn--primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

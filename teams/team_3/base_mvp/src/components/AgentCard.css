@@ -1,0 +1,127 @@
+.agent-card {
+  background: #1e1e2e;
+  border: 1px solid #313244;
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 10px;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.agent-card--loading {
+  border-color: #89b4fa;
+  box-shadow: 0 0 12px rgba(137, 180, 250, 0.25);
+}
+
+.agent-card--done {
+  border-color: #a6e3a1;
+  box-shadow: 0 0 10px rgba(166, 227, 161, 0.2);
+}
+
+.agent-card__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.agent-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #89b4fa, #cba6f7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  color: #1e1e2e;
+  flex-shrink: 0;
+}
+
+.agent-card__name {
+  font-weight: 600;
+  font-size: 15px;
+  color: #cdd6f4;
+  flex: 1;
+}
+
+.agent-card__badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.agent-card__badge--working {
+  background: rgba(137, 180, 250, 0.15);
+  color: #89b4fa;
+  border: 1px solid #89b4fa;
+}
+
+.agent-card__badge--done {
+  background: rgba(166, 227, 161, 0.15);
+  color: #a6e3a1;
+  border: 1px solid #a6e3a1;
+}
+
+.agent-card__personality {
+  font-size: 12px;
+  color: #a6adc8;
+  line-height: 1.5;
+  margin: 0 0 10px;
+  font-style: italic;
+}
+
+.agent-card__progress-wrap {
+  position: relative;
+  height: 6px;
+  background: #313244;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.agent-card__progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #89b4fa, #cba6f7);
+  border-radius: 4px;
+  transition: width 0.2s ease;
+}
+
+.agent-card__progress-label {
+  position: absolute;
+  right: 0;
+  top: -16px;
+  font-size: 10px;
+  color: #89b4fa;
+}
+
+.agent-card__footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.agent-card__move-label {
+  font-size: 11px;
+  color: #6c7086;
+  white-space: nowrap;
+}
+
+.agent-card__select {
+  flex: 1;
+  background: #313244;
+  border: 1px solid #45475a;
+  border-radius: 6px;
+  color: #cdd6f4;
+  font-size: 12px;
+  padding: 4px 8px;
+  cursor: pointer;
+  outline: none;
+}
+
+.agent-card__select:focus {
+  border-color: #89b4fa;
+}
