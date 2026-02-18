@@ -1,21 +1,26 @@
 import { useState, useEffect } from 'react';
+import { UNASSIGNED_COLUMN_ID } from '../data';
 import './AgentCard.css';
 
-// Returns a random duration in ms between 5s and 60s
 function randomDuration() {
   return Math.floor(Math.random() * (60000 - 5000 + 1)) + 5000;
 }
 
-export default function AgentCard({ agent, columns, onMove }) {
+export default function AgentCard({ agent, onDragStart }) {
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [done, setDone] = useState(false);
   const [duration, setDuration] = useState(null);
   const [startTime, setStartTime] = useState(null);
 
-  // When agent is assigned to a column, start the loading timer
+  // Start loading animation when assigned to a real (non-unassigned) column
   useEffect(() => {
-    if (!agent.columnId) return;
+    if (!agent.columnId || agent.columnId === UNASSIGNED_COLUMN_ID) {
+      setLoading(false);
+      setDone(false);
+      setProgress(0);
+      return;
+    }
     const dur = randomDuration();
     setDuration(dur);
     setLoading(true);
@@ -24,7 +29,6 @@ export default function AgentCard({ agent, columns, onMove }) {
     setStartTime(Date.now());
   }, [agent.columnId]);
 
-  // Animate the progress bar
   useEffect(() => {
     if (!loading || !duration || !startTime) return;
     const interval = setInterval(() => {
@@ -40,10 +44,18 @@ export default function AgentCard({ agent, columns, onMove }) {
     return () => clearInterval(interval);
   }, [loading, duration, startTime]);
 
-  const currentColumn = columns.find((c) => c.id === agent.columnId);
+  function handleDragStart(e) {
+    e.dataTransfer.effectAllowed = 'move';
+    onDragStart(agent.id);
+  }
 
   return (
-    <div className={`agent-card ${loading ? 'agent-card--loading' : ''} ${done ? 'agent-card--done' : ''}`}>
+    <div
+      className={`agent-card ${loading ? 'agent-card--loading' : ''} ${done ? 'agent-card--done' : ''}`}
+      draggable
+      onDragStart={handleDragStart}
+    >
+      <div className="agent-card__drag-handle">⠿</div>
       <div className="agent-card__header">
         <div className="agent-avatar">{agent.name[0]}</div>
         <div className="agent-card__name">{agent.name}</div>
@@ -59,20 +71,6 @@ export default function AgentCard({ agent, columns, onMove }) {
           <span className="agent-card__progress-label">{Math.round(progress)}%</span>
         </div>
       )}
-
-      <div className="agent-card__footer">
-        <label className="agent-card__move-label">Move to:</label>
-        <select
-          className="agent-card__select"
-          value={agent.columnId || ''}
-          onChange={(e) => onMove(agent.id, e.target.value)}
-        >
-          <option value="" disabled>Select column…</option>
-          {columns.map((col) => (
-            <option key={col.id} value={col.id}>{col.name}</option>
-          ))}
-        </select>
-      </div>
     </div>
   );
 }

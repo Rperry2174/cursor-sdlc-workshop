@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import './Modal.css';
 
-export default function AddAgentModal({ columns, onAdd, onClose }) {
+export default function AddAgentModal({ onAdd, onClose }) {
   const [name, setName] = useState('');
   const [personality, setPersonality] = useState('');
-  const [columnId, setColumnId] = useState(columns[0]?.id || '');
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -13,7 +12,6 @@ export default function AddAgentModal({ columns, onAdd, onClose }) {
       id: `agent-${Date.now()}`,
       name: name.trim(),
       personality: personality.trim(),
-      columnId,
     });
     onClose();
   }
@@ -47,18 +45,7 @@ export default function AddAgentModal({ columns, onAdd, onClose }) {
               rows={4}
             />
           </label>
-          <label className="modal__label">
-            Assign to Column
-            <select
-              className="modal__input"
-              value={columnId}
-              onChange={(e) => setColumnId(e.target.value)}
-            >
-              {columns.map((col) => (
-                <option key={col.id} value={col.id}>{col.name}</option>
-              ))}
-            </select>
-          </label>
+          <p className="modal__hint">Agent will be placed in <strong>Unassigned</strong> — drag it to a column to start work.</p>
           <div className="modal__actions">
             <button type="button" className="modal__btn modal__btn--cancel" onClick={onClose}>Cancel</button>
             <button type="submit" className="modal__btn modal__btn--primary" disabled={!name.trim()}>Add Agent</button>

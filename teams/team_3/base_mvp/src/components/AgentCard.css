@@ -4,7 +4,27 @@
   border-radius: 12px;
   padding: 14px;
   margin-bottom: 10px;
-  transition: box-shadow 0.2s, border-color 0.2s;
+  transition: box-shadow 0.2s, border-color 0.2s, opacity 0.15s;
+  cursor: grab;
+  position: relative;
+}
+
+.agent-card:active {
+  cursor: grabbing;
+}
+
+.agent-card[draggable]:active {
+  opacity: 0.5;
+}
+
+.agent-card__drag-handle {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  color: #45475a;
+  font-size: 14px;
+  letter-spacing: 1px;
+  pointer-events: none;
 }
 
 .agent-card--loading {
@@ -97,31 +117,3 @@
   color: #89b4fa;
 }
 
-.agent-card__footer {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.agent-card__move-label {
-  font-size: 11px;
-  color: #6c7086;
-  white-space: nowrap;
-}
-
-.agent-card__select {
-  flex: 1;
-  background: #313244;
-  border: 1px solid #45475a;
-  border-radius: 6px;
-  color: #cdd6f4;
-  font-size: 12px;
-  padding: 4px 8px;
-  cursor: pointer;
-  outline: none;
-}
-
-.agent-card__select:focus {
-  border-color: #89b4fa;
-}

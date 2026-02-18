@@ -1,4 +1,11 @@
+export const UNASSIGNED_COLUMN_ID = 'col-unassigned';
+
 export const DEFAULT_COLUMNS = [
+  {
+    id: 'col-unassigned',
+    name: 'Unassigned',
+    context: 'Newly created agents land here. Drag them into a workflow column to get them started.',
+  },
   {
     id: 'col-researching',
     name: 'Researching',
