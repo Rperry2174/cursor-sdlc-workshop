@@ -1,12 +1,17 @@
 .agent-card {
-  background: #1e1e2e;
-  border: 1px solid #313244;
-  border-radius: 12px;
+  background: rgba(6, 10, 16, 0.8);
+  border: 1px solid #1a2535;
+  border-radius: 4px;
   padding: 14px;
-  margin-bottom: 10px;
-  transition: box-shadow 0.2s, border-color 0.2s, opacity 0.15s;
+  margin-bottom: 8px;
+  transition: border-color 0.2s, box-shadow 0.2s, opacity 0.15s;
   cursor: grab;
   position: relative;
+  backdrop-filter: blur(4px);
+}
+
+.agent-card:hover {
+  border-color: #2a3f55;
 }
 
 .agent-card:active {
@@ -14,49 +19,72 @@
 }
 
 .agent-card[draggable]:active {
-  opacity: 0.5;
+  opacity: 0.45;
 }
 
 .agent-card__drag-handle {
   position: absolute;
   top: 10px;
   right: 10px;
-  color: #45475a;
+  color: #1a2535;
   font-size: 14px;
   letter-spacing: 1px;
   pointer-events: none;
   transition: color 0.2s;
 }
 
+.agent-card:hover .agent-card__drag-handle:not(.agent-card__drag-handle--locked) {
+  color: #3d5a7a;
+}
+
 .agent-card__drag-handle--locked {
-  font-size: 13px;
+  font-size: 12px;
   animation: lock-pulse 2s ease-in-out infinite;
 }
 
 @keyframes lock-pulse {
-  0%, 100% { opacity: 0.5; }
+  0%, 100% { opacity: 0.4; }
   50%       { opacity: 1; }
 }
 
+/* ── Working state ── */
 .agent-card--loading {
-  border-color: #89b4fa;
-  box-shadow: 0 0 12px rgba(137, 180, 250, 0.25);
+  border-color: rgba(0, 230, 118, 0.35);
+  box-shadow: 0 0 16px rgba(0, 230, 118, 0.12);
 }
 
+/* ── Locked overlay ── */
 .agent-card--locked {
   cursor: not-allowed;
-  opacity: 0.85;
+  opacity: 0.9;
+}
+
+.agent-card--locked::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 6px,
+    rgba(0, 230, 118, 0.015) 6px,
+    rgba(0, 230, 118, 0.015) 12px
+  );
+  pointer-events: none;
 }
 
 .agent-card--locked:active {
   cursor: not-allowed;
 }
 
+/* ── Done state ── */
 .agent-card--done {
-  border-color: #a6e3a1;
-  box-shadow: 0 0 10px rgba(166, 227, 161, 0.2);
+  border-color: rgba(0, 230, 118, 0.5);
+  box-shadow: 0 0 12px rgba(0, 230, 118, 0.1);
 }
 
+/* ── Header ── */
 .agent-card__header {
   display: flex;
   align-items: center;
@@ -65,75 +93,90 @@
 }
 
 .agent-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #89b4fa, #cba6f7);
+  width: 30px;
+  height: 30px;
+  border-radius: 3px;
+  background: rgba(0, 230, 118, 0.1);
+  border: 1px solid rgba(0, 230, 118, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 14px;
-  color: #1e1e2e;
+  font-size: 13px;
+  color: #00e676;
   flex-shrink: 0;
+  text-shadow: 0 0 8px rgba(0, 230, 118, 0.5);
+  font-family: 'Space Mono', monospace;
 }
 
 .agent-card__name {
-  font-weight: 600;
-  font-size: 15px;
-  color: #cdd6f4;
+  font-weight: 700;
+  font-size: 13px;
+  color: #e2f0ff;
   flex: 1;
+  letter-spacing: 0.3px;
+  font-family: 'Space Mono', monospace;
 }
 
+/* ── Badges ── */
 .agent-card__badge {
-  font-size: 11px;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 20px;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 2px;
   white-space: nowrap;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  font-family: 'Space Mono', monospace;
 }
 
 .agent-card__badge--working {
-  background: rgba(137, 180, 250, 0.15);
-  color: #89b4fa;
-  border: 1px solid #89b4fa;
+  background: rgba(0, 230, 118, 0.08);
+  color: #00e676;
+  border: 1px solid rgba(0, 230, 118, 0.3);
+  text-shadow: 0 0 6px rgba(0, 230, 118, 0.5);
 }
 
 .agent-card__badge--done {
-  background: rgba(166, 227, 161, 0.15);
-  color: #a6e3a1;
-  border: 1px solid #a6e3a1;
+  background: rgba(0, 230, 118, 0.06);
+  color: #00e676;
+  border: 1px solid rgba(0, 230, 118, 0.2);
 }
 
+/* ── Personality ── */
 .agent-card__personality {
-  font-size: 12px;
-  color: #a6adc8;
-  line-height: 1.5;
+  font-size: 11px;
+  color: #3d5a7a;
+  line-height: 1.6;
   margin: 0 0 10px;
   font-style: italic;
 }
 
+/* ── Progress bar ── */
 .agent-card__progress-wrap {
   position: relative;
-  height: 6px;
-  background: #313244;
-  border-radius: 4px;
-  overflow: hidden;
-  margin-bottom: 10px;
+  height: 2px;
+  background: #1a2535;
+  border-radius: 1px;
+  overflow: visible;
+  margin-bottom: 14px;
+  margin-top: 4px;
 }
 
 .agent-card__progress-bar {
   height: 100%;
-  background: linear-gradient(90deg, #89b4fa, #cba6f7);
-  border-radius: 4px;
+  background: #00e676;
+  border-radius: 1px;
   transition: width 0.2s ease;
+  box-shadow: 0 0 8px rgba(0, 230, 118, 0.6);
 }
 
 .agent-card__progress-label {
   position: absolute;
   right: 0;
-  top: -16px;
-  font-size: 10px;
-  color: #89b4fa;
+  top: -18px;
+  font-size: 9px;
+  color: #00e676;
+  font-family: 'Space Mono', monospace;
+  letter-spacing: 0.5px;
 }
-
