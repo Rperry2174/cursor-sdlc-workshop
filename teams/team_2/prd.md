@@ -1,118 +1,92 @@
 # Product Requirements Document (PRD)
 
-> **Instructions:** This is your team's project specification. Fill in the sections below to define what you're building.
-
 ---
 
 ## Project Overview
 
-**Project Name:** _[Give your project a name]_
+**Project Name:** PageTurner
 
-**One-line Description:** _[What does it do in one sentence?]_
+**One-line Description:** A lightweight book tracker where you can browse a catalog, mark books as "read" or "want to read," and rate the ones you've finished.
 
-**Type:** _[e.g., Chrome Extension, Web App, CLI Tool, etc.]_
+**Type:** Web App (React, frontend-only)
 
 ---
 
-## Guidelines
+## How It Works
 
-### Keep It Small!
-- Your MVP should be buildable in **10 minutes** by one person
-- Think "proof of concept" not "production ready"
-- If it sounds ambitious, make it simpler
-- **Use Cursor to help you plan this!** You need a project that has at least 5 features so everyone on your team can pick one and add it
-- Feel free to take one of the ideas below — this exercise is about learning the git flow, collaborating as a team, and understanding where Cursor's features fit into the SDLC
-
-### Good Project Ideas
-
-**Pong** — classic paddle-and-ball game
-- _Example features:_ scoreboard, sound effects, difficulty/speed settings
-
-**Memory Card Match** — flip cards to find matching pairs
-- _Example features:_ move counter, timer, win animation/confetti
-
-**Drawing Pad** — simple canvas you can sketch on
-- _Example features:_ color picker, brush size slider, eraser tool
-
-**Typing Speed Game** — type a passage and measure your words per minute
-- _Example features:_ WPM display, accuracy tracker, difficulty levels
-
-**Trivia Quiz** — multiple choice questions with score tracking
-- _Example features:_ timer per question, category selector, results summary screen
-
-### Bad Project Ideas (Too Big!)
-- Anything with a database -- tell cursor to avoid this
-- Anything requiring authentication
-- Anything with multiple pages/screens
-- Anything that "needs" an API
+- A hardcoded catalog of ~20 books (title, author, cover color, genre) lives in a `data.js` file
+- Users browse the catalog, click a book to see details, and toggle shelf status ("Want to Read" / "Reading" / "Read")
+- All state lives in React `useState` — no database, no API, no auth
+- `localStorage` persists shelves and ratings across page refreshes
 
 ---
 
 ## Team Members & Tasks
 
-> **Important:** Each team member MUST have their own task. Tasks should be independent features that can be built in parallel without stepping on each other's toes.
-
 | Name | Task | Description |
 |------|------|-------------|
-| _[Name 1]_ | _[Feature 1]_ | _[Brief description]_ |
-| _[Name 2]_ | _[Feature 2]_ | _[Brief description]_ |
-| _[Name 3]_ | _[Feature 3]_ | _[Brief description]_ |
-| _[Name 4]_ | _[Feature 4]_ | _[Brief description]_ |
-| _[Name 5]_ | _[Feature 5]_ | _[Brief description]_ |
-
-### Task Guidelines
-- Each task should add something **visible** to the project
-- Tasks should be **independent** — no dependencies on other tasks
-- Think: new button, new section, new color scheme, new text, etc.
-- Everyone should be able to work at the same time without conflicts
+| Kevin | Base MVP | Catalog grid, book data, shelf toggle |
+| _[Name 2]_ | Star Ratings | Rate finished books 1–5 stars |
+| _[Name 3]_ | Search & Filter | Search by title/author, filter by genre |
+| _[Name 4]_ | Reading Stats | Dashboard showing books read, pages, genre breakdown |
+| _[Name 5]_ | Theme Switcher | Light/dark mode toggle with persisted preference |
 
 ---
 
 ## Base MVP (Phase 2)
 
-> **One person** creates the foundation that everyone else builds on.
+> **One person** (Kevin) creates the foundation that everyone else builds on.
 
 **What the MVP includes:**
-- _[Describe the minimal working version]_
+- A hardcoded book catalog in `src/data/books.js` (~20 books with title, author, genre, pages, cover color)
+- `BookCard` component — displays a book's cover, title, and author
+- `BookGrid` component — renders all books in a responsive grid
+- `ShelfBadge` component — shows current shelf status and lets you toggle between "Want to Read" / "Reading" / "Read"
+- State managed in `App.jsx` with `useState`, persisted to `localStorage`
+- Clean, modern CSS with a bookshelf-inspired palette
 
 **What it does NOT include:**
-- _[List features deliberately left out for team members to add]_
+- Star ratings (Feature 1)
+- Search or filtering (Feature 2)
+- Reading statistics (Feature 3)
+- Theme switching (Feature 4)
 
 ---
 
 ## Feature Slots (Phase 3)
 
-> These are the features team members will add. Design them to be **independent** so people can work in parallel.
+> Each feature is its own component file — teammates work in parallel with no merge conflicts.
 
-### Feature 1: _[Name]_
+### Feature 1: Star Ratings
 - **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+- **Description:** After marking a book as "Read," display a clickable 1–5 star rating. Ratings persist to `localStorage`. Stars appear on the book card and in a detail view.
+- **Files to create:** `src/components/StarRating.jsx`, `src/components/StarRating.css`
 
-### Feature 2: _[Name]_
+### Feature 2: Search & Filter
 - **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+- **Description:** A search bar at the top that filters books by title or author as you type. Genre filter buttons (e.g., Fiction, Sci-Fi, Non-Fiction) that narrow the displayed catalog.
+- **Files to create:** `src/components/SearchBar.jsx`, `src/components/GenreFilter.jsx`
 
-### Feature 3: _[Name]_
+### Feature 3: Reading Stats Dashboard
 - **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+- **Description:** A stats panel showing total books read, total pages, and a simple genre breakdown (e.g., "Fiction: 5, Sci-Fi: 3"). Reads shelf data from the same state in `App.jsx`.
+- **Files to create:** `src/components/ReadingStats.jsx`, `src/components/ReadingStats.css`
 
-### Feature 4: _[Name]_
+### Feature 4: Theme Switcher
 - **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+- **Description:** A toggle button in the header that switches between light and dark mode. Uses CSS variables so the entire app updates. Preference persists to `localStorage`.
+- **Files to create:** `src/components/ThemeSwitcher.jsx`, `src/styles/themes.css`
 
-### Feature 5: _[Name]_
+### Feature 5: Book Notes
 - **Assigned to:** _[Team member]_
-- **Description:** _[What it does]_
-- **Files to modify/create:** _[Be specific]_
+- **Description:** A small text area on each book card (when expanded) to jot down personal notes or a one-line review. Notes persist to `localStorage`.
+- **Files to create:** `src/components/BookNotes.jsx`, `src/components/BookNotes.css`
 
 ---
 
 ## Success Criteria
 
-- [ ] MVP runs locally
+- [ ] MVP runs locally with `npm run dev`
 - [ ] Each team member has merged at least one PR
 - [ ] All features work together without breaking the app
+- [ ] Shelves and ratings persist across page refreshes
