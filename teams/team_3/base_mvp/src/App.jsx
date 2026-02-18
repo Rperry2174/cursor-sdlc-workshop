@@ -3,6 +3,7 @@ import { DEFAULT_COLUMNS, DEFAULT_AGENTS, UNASSIGNED_COLUMN_ID } from './data';
 import KanbanColumn from './components/KanbanColumn';
 import AddColumnModal from './components/AddColumnModal';
 import AddAgentModal from './components/AddAgentModal';
+import ParticleBackground from './components/ParticleBackground';
 import './App.css';
 
 export default function App() {
@@ -10,7 +11,6 @@ export default function App() {
   const [agents, setAgents] = useState(DEFAULT_AGENTS);
   const [showAddColumn, setShowAddColumn] = useState(false);
   const [showAddAgent, setShowAddAgent] = useState(false);
-  // Track which agent is currently being dragged
   const draggingAgentId = useRef(null);
 
   function handleDragStart(agentId) {
@@ -33,58 +33,59 @@ export default function App() {
   }
 
   function handleAddAgent(newAgent) {
-    // New agents always land in Unassigned
     setAgents((prev) => [...prev, { ...newAgent, columnId: UNASSIGNED_COLUMN_ID }]);
   }
 
   return (
-    <div className="app">
-      <header className="app-header">
-        <div className="app-header__left">
-          <span className="app-logo">⬡</span>
-          <div>
-            <h1 className="app-title">AgentBoard</h1>
-            <p className="app-subtitle">AI Agent Workflow Manager</p>
+    <>
+      <ParticleBackground />
+      <div className="app">
+        <header className="app-header">
+          <div className="app-header__left">
+            <span className="app-logo">[AgentBoard]</span>
+            <div>
+              <h1 className="app-title">AgentBoard</h1>
+              <p className="app-subtitle">&gt; AI Agent Workflow Manager_</p>
+            </div>
           </div>
-        </div>
-        <div className="app-header__actions">
-          <button className="btn btn--secondary" onClick={() => setShowAddAgent(true)}>
-            + Add Agent
-          </button>
-          <button className="btn btn--primary" onClick={() => setShowAddColumn(true)}>
-            + Add Column
-          </button>
-        </div>
-      </header>
+          <div className="app-header__actions">
+            <button className="btn btn--secondary" onClick={() => setShowAddAgent(true)}>
+              + Add Agent
+            </button>
+            <button className="btn btn--primary" onClick={() => setShowAddColumn(true)}>
+              + Add Column
+            </button>
+          </div>
+        </header>
 
-      <main className="board-wrapper">
-        <div className="board">
-          {columns.map((col) => (
-            <KanbanColumn
-              key={col.id}
-              column={col}
-              agents={agents.filter((a) => a.columnId === col.id)}
-              onDragStart={handleDragStart}
-              onDrop={handleDrop}
-            />
-          ))}
-        </div>
-      </main>
+        <main className="board-wrapper">
+          <div className="board">
+            {columns.map((col) => (
+              <KanbanColumn
+                key={col.id}
+                column={col}
+                agents={agents.filter((a) => a.columnId === col.id)}
+                onDragStart={handleDragStart}
+                onDrop={handleDrop}
+              />
+            ))}
+          </div>
+        </main>
 
-      {showAddColumn && (
-        <AddColumnModal
-          onAdd={handleAddColumn}
-          onClose={() => setShowAddColumn(false)}
-        />
-      )}
+        {showAddColumn && (
+          <AddColumnModal
+            onAdd={handleAddColumn}
+            onClose={() => setShowAddColumn(false)}
+          />
+        )}
 
-      {showAddAgent && (
-        <AddAgentModal
-          columns={columns}
-          onAdd={handleAddAgent}
-          onClose={() => setShowAddAgent(false)}
-        />
-      )}
-    </div>
+        {showAddAgent && (
+          <AddAgentModal
+            onAdd={handleAddAgent}
+            onClose={() => setShowAddAgent(false)}
+          />
+        )}
+      </div>
+    </>
   );
 }
