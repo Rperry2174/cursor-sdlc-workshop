@@ -1,0 +1,48 @@
+.add-trial-form {
+  background: #f0fdf4;
+  border: 1px solid #22c55e;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-top: 1.5rem;
+}
+
+.form-title {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+}
+
+.form-row {
+  margin-bottom: 0.75rem;
+}
+
+.form-row label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.25rem;
+}
+
+.form-row input {
+  width: 100%;
+  max-width: 240px;
+  padding: 0.4rem 0.5rem;
+  font-size: 0.875rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.25rem;
+}
+
+.btn-submit {
+  margin-top: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  background: #22c55e;
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+
+.btn-submit:hover {
+  background: #16a34a;
+}

@@ -1,0 +1,22 @@
+.milestone-badges {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.badge {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.badge--reached {
+  background: #22c55e;
+  color: white;
+}
+
+.badge--pending {
+  background: #e5e7eb;
+  color: #6b7280;
+}
