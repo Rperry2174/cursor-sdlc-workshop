@@ -37,7 +37,7 @@ const Slide14Section2Step3 = () => (
               <div className="check-box"></div>
               <div>
                 <strong>Create a Hook</strong> — automate commit message
-                validation for your team
+                validation
               </div>
             </div>
             <div className="code-block">
@@ -48,7 +48,7 @@ const Slide14Section2Step3 = () => (
                 <br />
                 and validates the commit message starts with
                 <br />
-                our team name (e.g. 'team-1:')."
+                your username (e.g. 'username:')."
               </code>
             </div>
           </div>
@@ -57,14 +57,14 @@ const Slide14Section2Step3 = () => (
               <div className="check-box"></div>
               <div>
                 <strong>Pull your requirements from Notion</strong> — search
-                for your team's PRD and find your feature
+                for your PRD and find your feature
               </div>
             </div>
             <div className="code-block">
               <code>
                 <span className="comment">Ask Cursor:</span>
                 <br />
-                "Search Notion for our team's SDLC Workshop PRD
+                "Search Notion for your SDLC Workshop PRD
                 <br />
                 and find the feature assigned to me ([your GitHub
                 <br />

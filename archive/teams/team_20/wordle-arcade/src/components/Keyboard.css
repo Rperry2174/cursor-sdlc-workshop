@@ -1,0 +1,60 @@
+.keyboard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.keyboard-row {
+  display: flex;
+  gap: 5px;
+}
+
+.key {
+  min-width: 40px;
+  height: 54px;
+  border: none;
+  border-radius: 6px;
+  background: #818384;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-family: 'Press Start 2P', 'Courier New', monospace;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+  text-transform: uppercase;
+  transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+  user-select: none;
+}
+
+.key:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.key:active {
+  transform: translateY(1px);
+}
+
+.key.wide {
+  min-width: 65px;
+  font-size: 0.7rem;
+}
+
+.key.correct {
+  background: #538d4e;
+  box-shadow: 0 0 10px rgba(83, 141, 78, 0.4);
+}
+
+.key.present {
+  background: #b59f3b;
+  box-shadow: 0 0 10px rgba(181, 159, 59, 0.4);
+}
+
+.key.absent {
+  background: #3a3a4a;
+  color: #666;
+}

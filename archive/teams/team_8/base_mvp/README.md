@@ -1,16 +1,29 @@
-# React + Vite
+# Base MVP
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This folder is where your project code lives.
 
-Currently, two official plugins are available:
+## Phase 2: Design (One Person)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+**One team member** creates the base MVP here. This is the foundation everyone else builds on.
 
-## React Compiler
+### What to Build
+- A minimal, working version of your project
+- Should run locally and do *something* visible
+- Keep it simple — 10 minutes max!
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Good Examples
+- A Chrome extension with one button that does one thing
+- A web page with basic HTML/CSS/JS
+- A simple CLI script
 
-## Expanding the ESLint configuration
+### Instructions
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1. Tell Cursor to read the `prd.md` in your team folder
+2. Tell Cursor to generate the base MVP here
+3. Tell Cursor to run it locally and verify it works
+
+### After You're Done
+
+> **Ask Cursor:** "Commit all my changes with the message '[Team] - Base MVP scaffold', push to my fork, and open a PR to the original repo"
+
+Once the PR is merged, your teammates can build on top of it!

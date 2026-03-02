@@ -16,7 +16,7 @@ const Slide01Title = () => (
       </div>
       <div className="title-pill">
         <span className="pill-icon">👥</span>
-        <span>Teams of 5</span>
+        <span>Individual &amp; Teams</span>
       </div>
       <div className="title-pill">
         <span className="pill-icon">🚀</span>

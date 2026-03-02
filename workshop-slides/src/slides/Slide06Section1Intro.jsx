@@ -2,7 +2,7 @@ const Slide06Section1Intro = () => (
   <>
     <div className="section-header">
       <span className="section-badge section1">Section 1</span>
-      <span className="phase-badge">Greenfield Project • 25 min • Teams of 5</span>
+      <span className="phase-badge">Greenfield Project • 25 min • Individual</span>
     </div>
     <h2>Build Something From Scratch</h2>
     <div className="intro-callout cyan">
@@ -12,8 +12,8 @@ const Slide06Section1Intro = () => (
         testing — while learning how Cursor can assist at each stage.
       </p>
       <p>
-        You'll also practice <strong>git workflow</strong> in a collaborative team
-        setting, just like real engineering teams do every day.
+        You'll also practice <strong>git workflow</strong> in an individual
+        setting, just like real engineers do every day.
       </p>
     </div>
     <div className="two-col">
@@ -41,7 +41,7 @@ const Slide06Section1Intro = () => (
       </div>
       <div>
         <h3 style={{ fontSize: '0.9rem', marginBottom: '0.4rem' }}>
-          Pick a project (splits into 5 features):
+          Pick a project (splits into planned features):
         </h3>
         
         <div className="project-category">
@@ -136,7 +136,7 @@ const Slide06Section1Intro = () => (
           <span className="project-icon">✨</span>
           <div>
             <strong>Build Your Own!</strong>
-            <span>pitch your idea — needs 5 splittable features</span>
+            <span>pitch your idea — needs splittable features</span>
           </div>
         </div>
       </div>

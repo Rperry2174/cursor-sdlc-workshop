@@ -33,12 +33,12 @@ const SlideSection1Takeaway = () => (
         </div>
         <div className="tile-title">
           <span className="highlight-green">
-            One person built the foundation, five people shipped features
+            You built the foundation and shipped features
           </span>
         </div>
         <ul className="tile-bullets">
           <li>"I have an idea" → "I have something to show" in minutes</li>
-          <li>Teams can experiment and iterate way faster</li>
+          <li>You can experiment and iterate way faster</li>
         </ul>
       </div>
       <div className="tile cyan">
@@ -58,7 +58,7 @@ const SlideSection1Takeaway = () => (
     </div>
     <div className="discovery-callout cyan">
       <div className="discovery-label">
-        Ask in discovery: what does your team use for planning and development?
+        Ask in discovery: what do you use for planning and development?
       </div>
       <div className="tool-buckets">
         <div className="tool-bucket">

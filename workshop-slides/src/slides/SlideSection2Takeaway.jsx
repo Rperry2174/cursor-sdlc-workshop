@@ -7,9 +7,9 @@ const SlideSection2Takeaway = () => (
     <h2>It Was Working For You the Whole Time</h2>
     <div className="hero-callout">
       <div className="hero-text">
-        The best teams don't just <em>use</em> Cursor — they{' '}
+        The best engineers don't just <em>use</em> Cursor — they{' '}
         <span className="hero-highlight">
-          teach it how their team works
+          teach it how they work
         </span>.
       </div>
     </div>
@@ -62,7 +62,7 @@ const SlideSection2Takeaway = () => (
     </div>
     <div className="discovery-callout orange">
       <div className="discovery-label">
-        Ask in discovery: what does your team use for code review and testing?
+        Ask in discovery: what do you use for code review and testing?
       </div>
       <div className="tool-buckets">
         <div className="tool-bucket">
@@ -86,7 +86,7 @@ const SlideSection2Takeaway = () => (
     </div>
     <div className="emphasis-box orange">
       <strong>The takeaway:</strong> Any AI can generate code. Cursor lets you
-      teach it your team's way — same quality bar, automatically.
+      teach it your way — same quality bar, automatically.
     </div>
   </>
 )

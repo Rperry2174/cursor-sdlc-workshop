@@ -1,0 +1,129 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #121213;
+  color: #fff;
+  font-family: 'Press Start 2P', 'Courier New', monospace;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Scanline overlay for retro CRT feel */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.05) 2px,
+    rgba(0, 0, 0, 0.05) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  min-height: 100vh;
+}
+
+.header {
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.title {
+  font-size: 1.8rem;
+  letter-spacing: 4px;
+  color: #fff;
+  text-shadow:
+    0 0 10px rgba(255, 255, 255, 0.3),
+    0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+.title-accent {
+  color: #538d4e;
+  text-shadow:
+    0 0 10px rgba(83, 141, 78, 0.6),
+    0 0 30px rgba(83, 141, 78, 0.3),
+    0 0 50px rgba(83, 141, 78, 0.15);
+}
+
+.message-bar {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.message {
+  font-size: 0.65rem;
+  padding: 8px 16px;
+  border-radius: 6px;
+  letter-spacing: 1px;
+  animation: slideDown 0.3s ease;
+}
+
+.message.warning {
+  background: #b59f3b;
+  color: #000;
+}
+
+.message.game-over {
+  background: #538d4e;
+  color: #fff;
+  font-size: 0.8rem;
+  text-shadow: 0 0 8px rgba(83, 141, 78, 0.5);
+}
+
+.new-game-btn {
+  margin-top: 24px;
+  padding: 14px 32px;
+  font-family: 'Press Start 2P', 'Courier New', monospace;
+  font-size: 0.75rem;
+  background: linear-gradient(180deg, #538d4e, #3d6b39);
+  color: #fff;
+  border: 2px solid #6aaf64;
+  border-radius: 8px;
+  cursor: pointer;
+  letter-spacing: 2px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  box-shadow:
+    0 4px 12px rgba(83, 141, 78, 0.3),
+    0 0 20px rgba(83, 141, 78, 0.15);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.new-game-btn:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 6px 20px rgba(83, 141, 78, 0.5),
+    0 0 30px rgba(83, 141, 78, 0.25);
+}
+
+.new-game-btn:active {
+  transform: translateY(1px);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -1,0 +1,4 @@
+/* Global reset — keep this minimal, main styles live in App.css */
+:root {
+  color-scheme: dark;
+}

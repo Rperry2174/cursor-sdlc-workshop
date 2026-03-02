@@ -21,7 +21,7 @@ const Slide13Section2Step2 = () => (
               <code>
                 <span className="comment">Ask Cursor:</span>
                 <br />
-                "Create a branch called [team]/planning"
+                "Create a branch called [username]/planning"
               </code>
             </div>
           </div>
@@ -35,7 +35,7 @@ const Slide13Section2Step2 = () => (
               <div className="check-box"></div>
               <div>
                 <strong>Create a Skill</strong> — teach Cursor how to generate
-                improvement plans for your team
+                improvement plans for your project
               </div>
             </div>
             <div className="code-block">
@@ -46,9 +46,9 @@ const Slide13Section2Step2 = () => (
                 <br />
                 improvement plans for existing codebases.
                 <br />
-                It should suggest 5 parallel features, assign each
+                It should suggest several features you can build
                 <br />
-                to a team member, and output a structured plan."
+                and output a structured plan."
               </code>
             </div>
           </div>
@@ -58,7 +58,7 @@ const Slide13Section2Step2 = () => (
               <div>
                 <strong>Write your PRD to Notion</strong> — use the{' '}
                 <span className="highlight">Notion MCP</span> to create your
-                plan as a real Notion doc your teammates can find
+                plan as a real Notion doc you can find
               </div>
             </div>
             <div className="code-block">
@@ -67,15 +67,13 @@ const Slide13Section2Step2 = () => (
                 <br />
                 "Use the Notion MCP to create a page titled
                 <br />
-                <strong>'[SDLC Workshop] Team [X] — Improvements PRD'</strong>.
+                <strong>'[SDLC Workshop] [your-username] — Improvements PRD'</strong>.
                 <br />
-                Include 5 features we can build in parallel.
+                Include several features you can build.
                 <br />
-                For each feature, add a clear heading with the
+                For each feature, add a clear heading with a
                 <br />
-                assignee's GitHub username, a description of what
-                <br />
-                to build, and which files to touch."
+                description of what to build and which files to touch."
               </code>
             </div>
           </div>
@@ -84,18 +82,18 @@ const Slide13Section2Step2 = () => (
               <div className="check-box"></div>
               <div>
                 <strong>Create GitHub issues</strong> — one per feature, assigned
-                by GitHub username
+                to your GitHub username
               </div>
             </div>
             <div className="code-block">
               <code>
                 <span className="comment">Ask Cursor:</span>
                 <br />
-                "Create a GitHub issue for each feature in our
+                "Create a GitHub issue for each feature in your
                 <br />
-                Notion PRD. Assign each to the right team member's
+                Notion PRD. Assign each to your GitHub username.
                 <br />
-                GitHub username. Link back to the Notion page."
+                Link back to the Notion page."
               </code>
             </div>
           </div>
@@ -115,7 +113,7 @@ const Slide13Section2Step2 = () => (
               <code>
                 <span className="comment">Ask Cursor:</span>
                 <br />
-                "Commit with message '[Team] - Feature plan',
+                "Commit with message '[username] - Feature plan',
                 <br />
                 push and open a PR"
               </code>

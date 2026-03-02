@@ -9,20 +9,18 @@ The raw git commands are included below as a reference so you can see what the a
 ## 🚀 Tell Cursor What You Need
 
 ### Getting Started (Fork + Clone)
-> **Ask Cursor:** "Fork this repo [REPO_URL], clone my fork, and create a branch called [team]/setup"
+> **Ask Cursor:** "Fork this repo https://github.com/Rperry2174/cursor-sdlc-workshop and clone my fork"
 
 This tells the agent to:
 1. Create your own copy (fork) of the workshop repo
 2. Download it to your computer
-3. Set up a branch for your work
 
 ### Syncing (Before Starting New Work)
-> **Ask Cursor:** "Sync my fork with upstream, pull the latest changes, and create a branch called [branch-name]"
+> **Ask Cursor:** "Sync my fork with upstream and pull the latest changes"
 
 This tells the agent to:
 1. Get the latest updates from the original repo into your fork
 2. Download them to your computer
-3. Create a fresh branch for your next task
 
 ### Saving & Sharing Your Work
 > **Ask Cursor:** "Commit all my changes with the message '[description]', push to my fork, and open a PR to the original repo"
@@ -46,7 +44,7 @@ The commands below are what the agent runs for you. They're here so you can foll
 ### Fork & Clone (One Time)
 ```bash
 # The agent does this when you ask it to fork and clone:
-gh repo fork [REPO_URL] --clone
+gh repo fork https://github.com/Rperry2174/cursor-sdlc-workshop --clone
 cd sdlc-workshop
 ```
 **What it does:** Creates your own copy of the repo on GitHub and downloads it.
@@ -74,7 +72,7 @@ git pull origin main             # Download synced changes locally
 ```bash
 git add .                        # Stage all changes
 git commit -m "Your message"     # Save with a description
-git push origin [branch-name]    # Upload to your fork
+git push origin main             # Upload to your fork
 ```
 
 ### Opening a PR
@@ -106,9 +104,9 @@ gh pr create --title "..." --body "..."
 
 | What You Want | Tell Cursor |
 |---------------|-------------|
-| Get started | "Fork this repo [URL], clone my fork, and create a branch called [name]" |
+| Get started | "Fork this repo https://github.com/Rperry2174/cursor-sdlc-workshop and clone my fork" |
 | Get latest changes | "Sync my fork with upstream and pull the latest" |
 | Save your work | "Commit my changes with message '[msg]'" |
 | Share your work | "Push to my fork and open a PR to the original repo" |
-| Start new task | "Sync my fork, pull latest, and create a branch called [name]" |
+| Start new task | "Sync my fork with upstream and pull the latest" |
 | Fix a problem | "I'm stuck — [describe what happened]" |

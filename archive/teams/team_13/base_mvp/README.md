@@ -1,18 +1,6 @@
-# Base MVP — World Cup Prediction
-
-**Team 13** — setup branch.
+# Base MVP
 
 This folder is where your project code lives.
-
-## How to run
-
-```bash
-cd teams/team_13/base_mvp
-npm install
-npm run dev
-```
-
-Then open the URL Vite prints (e.g. **http://localhost:5176**).
 
 ## Phase 2: Design (One Person)
 

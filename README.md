@@ -30,11 +30,11 @@ When less technical team members struggle with git, debugging, or code review, t
 
 ## Workshop Structure
 
-| Section | Name | Duration | Team Size | Focus |
-|:--------|:-----|:---------|:----------|:------|
+| Section | Name | Duration | Group Size | Focus |
+|:--------|:-----|:---------|:-----------|:------|
 | 0 | Pre-Work Setup | 10 min | Individual | Install Cursor, CLI, brew, git |
-| 1 | Greenfield Project | 45 min | 5 people | Build from scratch through full SDLC |
-| 2 | Legacy Codebase | 30 min | 5 people | Add features using BugBot, Hooks, Skills, Agents |
+| 1 | Greenfield Project | 45 min | Individual | Build from scratch through full SDLC |
+| 2 | Legacy Codebase | 30 min | Individual | Add features using BugBot, Hooks, Skills, Agents |
 | 3 | Real-World Chaos | 35 min | 20+ people | CursorFlix Clash — Netflix clone competition |
 | — | Closing | 10 min | All | Connect experience to customer conversations |
 
@@ -74,7 +74,7 @@ Since participants aren't collaborators on the workshop repo, they fork it first
 ┌─────────────────────────────────────────────────────────┐
 │  Ask Cursor:                                            │
 │  "Fork this repo [URL], clone my fork,                  │
-│   and create a branch called [team]/setup"              │
+│   and create a branch called <username>/setup"           │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -117,16 +117,14 @@ cursor-sdlc-workshop/
 │   └── cursor-sdlc-slides.html      # Interactive HTML slide deck
 ├── docs/
 │   └── cursor-sdlc-workshop.docx    # Comprehensive facilitator guide
-├── startup-stress-test/             # Example app: Startup Idea Stress Tester
-│   └── src/
-│       ├── App.jsx                  # Main app with form/results toggle
-│       ├── components/              # Scorecard, RadarChart, ReportSummary
-│       └── data/                    # Scoring engine and industry data
-└── teams/                           # Created during workshop
-    └── [team-name]/
-        ├── members/
-        │   └── [name].md
-        └── prd.md
+└── projects/                        # Participant projects
+    ├── project_template/            # Copy this to get started
+    │   ├── prd.md
+    │   ├── base_mvp/
+    │   └── github_command_cheatsheet.md
+    └── <github-username>/           # Your project folder
+        ├── prd.md
+        └── base_mvp/
 ```
 
 ### Slides
@@ -177,38 +175,38 @@ Participants install their development environment:
 ---
 
 ### Section 1: Greenfield Project
-*45 minutes · Teams of 5*
+*45 minutes · Individual*
 
-Teams build a simple application from scratch.
+Each participant builds a simple application from scratch.
 
 **Phase 1 — Plan** (10 min)
-- Fork repo, clone your fork, create team folder
-- Write PRD with MVP + 5 tasks (one per person)
+- Fork repo, clone your fork, create your project folder (`projects/<your-github-username>/`)
+- Write PRD with MVP scope and planned features
 - Practice full git workflow: fork → branch → work → PR → merge
 
 **Phase 2 — Design** (10 min)
-- ONE person creates base MVP
-- Team watches and agrees on approach
-- Merge foundation for everyone to build on
+- Create the base MVP
+- Get it running locally
+- Merge foundation to build features on
 
 **Phase 3 — Develop** (20 min)
-- EACH person implements their assigned task
-- Use Plan Mode to architect their section
-- Create individual branches and PRs
+- Add features to your project
+- Use Plan Mode to architect each feature
+- Create branches and PRs for each change
 
 **Phase 4 — Test** (5 min)
 - Merge all PRs
 - Run complete application
-- Fix integration issues together
+- Fix any integration issues
 
 **Key insight:** Cursor assists at every stage of the SDLC, not just code writing.
 
 ---
 
 ### Section 2: Legacy Codebase
-*30 minutes · Teams of 5*
+*30 minutes · Individual*
 
-Teams receive another team's project and must navigate unfamiliar code.
+Participants receive an unfamiliar project and must navigate the code.
 
 **Step 1 — Enable Advanced Features** (10 min)
 - Turn on BugBot (using docs)
@@ -298,7 +296,7 @@ By workshop end, participants can:
 ## Success Metrics
 
 - All participants complete at least one merged PR
-- Teams successfully deploy working applications
+- Participants successfully deploy working applications
 - Participants can articulate where each Cursor feature fits in SDLC
 - Onboarding feedback collected and delivered to eng team
 

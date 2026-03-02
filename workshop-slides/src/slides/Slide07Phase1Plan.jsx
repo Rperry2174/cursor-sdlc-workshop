@@ -39,17 +39,15 @@ const Slide07Phase1Plan = () => (
             <div className="check-header">
               <div className="check-box"></div>
               <div>
-                <strong>Claim your team folder</strong> &amp;{' '}
-                <strong>add yourself</strong>
+                <strong>Create your project folder</strong> at{' '}
+                <code>projects/&lt;your-github-username&gt;/</code>
               </div>
             </div>
             <div className="code-block">
               <code>
                 <span className="comment">Ask Cursor:</span>
                 <br />
-                "My name is [name] and I'm on team [X].
-                <br />
-                Add me to the team."
+                "Create a project folder for me at projects/[my-github-username]"
               </code>
             </div>
           </div>
@@ -58,19 +56,16 @@ const Slide07Phase1Plan = () => (
               <div className="check-box"></div>
               <div>
                 <strong>Create a PRD</strong> with{' '}
-                <span className="highlight">5 specific tasks</span> (one per
-                team member, assigned by name)
+                <span className="highlight">planned features</span>
               </div>
             </div>
             <div className="code-block">
               <code>
                 <span className="comment">Ask Cursor:</span>
                 <br />
-                "Read the prd.md template in our team folder
+                "Read the prd.md template in projects/[my-github-username]
                 <br />
-                and help us fill it out. We want to build [idea].
-                <br />
-                Our team members are [names]."
+                and help me fill it out. I want to build [idea]."
               </code>
             </div>
           </div>
@@ -92,7 +87,7 @@ const Slide07Phase1Plan = () => (
                 <br />
                 "Commit all my changes with the message
                 <br />
-                '[Team] - Initial setup and PRD',
+                '[username] - Initial setup and PRD',
                 <br />
                 push to my fork, and open a PR to the original repo"
               </code>

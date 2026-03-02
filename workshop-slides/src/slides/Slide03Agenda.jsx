@@ -14,7 +14,7 @@ const Slide03Agenda = () => (
         <div className="timeline-number green">1</div>
         <div className="timeline-content">
           <div className="timeline-title">Greenfield Project</div>
-          <div className="timeline-desc">Build something new from scratch as a team</div>
+          <div className="timeline-desc">Build something new from scratch individually</div>
         </div>
         <div className="timeline-duration">25 min</div>
       </div>

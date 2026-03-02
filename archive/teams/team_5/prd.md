@@ -6,11 +6,11 @@
 
 ## Project Overview
 
-**Project Name:** Speed Typing Game
+**Project Name:** _[Give your project a name]_
 
-**One-line Description:** Type a passage as fast as you can and see how you measure up.
+**One-line Description:** _[What does it do in one sentence?]_
 
-**Type:** Web App (React)
+**Type:** _[e.g., Chrome Extension, Web App, CLI Tool, etc.]_
 
 ---
 
@@ -54,11 +54,11 @@
 
 | Name | Task | Description |
 |------|------|-------------|
-| Alex | WPM Display | Show real-time words per minute as the user types |
-| Sasha | Accuracy Tracker | Show % of characters typed correctly vs incorrectly |
-| Adam | Difficulty Levels | Add easy/medium/hard passages (different lengths) with a selector |
-| Sabhia | Timer Display | Show elapsed time (seconds) while typing |
-| Alison | Results Summary Screen | Show final WPM, accuracy, and time when the passage is complete |
+| _[Name 1]_ | _[Feature 1]_ | _[Brief description]_ |
+| _[Name 2]_ | _[Feature 2]_ | _[Brief description]_ |
+| _[Name 3]_ | _[Feature 3]_ | _[Brief description]_ |
+| _[Name 4]_ | _[Feature 4]_ | _[Brief description]_ |
+| _[Name 5]_ | _[Feature 5]_ | _[Brief description]_ |
 
 ### Task Guidelines
 - Each task should add something **visible** to the project
@@ -73,17 +73,10 @@
 > **One person** creates the foundation that everyone else builds on.
 
 **What the MVP includes:**
-- A fixed passage of text to type (e.g., "The quick brown fox jumps over the lazy dog.")
-- A text input area where the user types
-- Visual feedback: correct characters in one color, incorrect in another (or highlight errors)
-- Detection of when the passage is completed
+- _[Describe the minimal working version]_
 
 **What it does NOT include:**
-- WPM display
-- Accuracy percentage
-- Difficulty selector or alternate passages
-- Visible timer
-- Results/summary screen after completion
+- _[List features deliberately left out for team members to add]_
 
 ---
 
@@ -91,30 +84,30 @@
 
 > These are the features team members will add. Design them to be **independent** so people can work in parallel.
 
-### Feature 1: WPM Display
-- **Assigned to:** Alex
-- **Description:** Display real-time words per minute as the user types. Update continuously based on words completed and time elapsed.
-- **Files to modify/create:** Main game component (e.g., `App.tsx` or `TypingGame.tsx`), add a WPM readout element
+### Feature 1: _[Name]_
+- **Assigned to:** _[Team member]_
+- **Description:** _[What it does]_
+- **Files to modify/create:** _[Be specific]_
 
-### Feature 2: Accuracy Tracker
-- **Assigned to:** Sasha
-- **Description:** Show the percentage of characters typed correctly vs incorrectly. Update as the user types.
-- **Files to modify/create:** Main game component, add an accuracy percentage element
+### Feature 2: _[Name]_
+- **Assigned to:** _[Team member]_
+- **Description:** _[What it does]_
+- **Files to modify/create:** _[Be specific]_
 
-### Feature 3: Difficulty Levels
-- **Assigned to:** Adam
-- **Description:** Add a selector (e.g., dropdown or buttons) for easy/medium/hard. Each level uses a different passage length. Easy = short (1–2 sentences), medium = paragraph, hard = longer passage.
-- **Files to modify/create:** Add passage data (e.g., `passages.ts` or inline), add selector UI to the game component
+### Feature 3: _[Name]_
+- **Assigned to:** _[Team member]_
+- **Description:** _[What it does]_
+- **Files to modify/create:** _[Be specific]_
 
-### Feature 4: Timer Display
-- **Assigned to:** Sabhia
-- **Description:** Show elapsed time in seconds (and optionally minutes) from when the user starts typing until they finish.
-- **Files to modify/create:** Main game component, add a timer element that starts on first keystroke
+### Feature 4: _[Name]_
+- **Assigned to:** _[Team member]_
+- **Description:** _[What it does]_
+- **Files to modify/create:** _[Be specific]_
 
-### Feature 5: Results Summary Screen
-- **Assigned to:** Alison
-- **Description:** When the user completes the passage, show a summary screen with final WPM, accuracy, and total time. Include a "Try Again" button to reset and start over.
-- **Files to modify/create:** Create a `ResultsScreen.tsx` component (or similar), integrate into main game component to show on completion
+### Feature 5: _[Name]_
+- **Assigned to:** _[Team member]_
+- **Description:** _[What it does]_
+- **Files to modify/create:** _[Be specific]_
 
 ---
 

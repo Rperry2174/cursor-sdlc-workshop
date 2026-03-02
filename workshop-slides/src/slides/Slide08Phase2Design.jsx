@@ -43,7 +43,7 @@ const Slide08Phase2Design = () => (
             <div className="check-header">
               <div className="check-box"></div>
               <div>
-                <strong>ONE PERSON:</strong> Create the base MVP application from{' '}
+                <strong>Create the base MVP</strong> application from{' '}
                 <span className="highlight">prd.md</span> using Cursor
               </div>
             </div>
@@ -51,11 +51,9 @@ const Slide08Phase2Design = () => (
               <code>
                 <span className="comment">Ask Cursor:</span>
                 <br />
-                "Read the prd.md in our team folder and build the
+                "Read the prd.md in projects/[my-github-username] and build the
                 <br />
-                base MVP. Keep it minimal — leave features for
-                <br />
-                teammates to add. Put the code in base_mvp/."
+                base MVP. Keep it minimal. Put the code in base_mvp/."
               </code>
             </div>
           </div>
@@ -76,19 +74,16 @@ const Slide08Phase2Design = () => (
             <div className="check-header">
               <div className="check-box"></div>
               <div>
-                <strong>Create GitHub issues</strong> — one issue per team member,{' '}
-                assigned by <span className="highlight">GitHub username</span>
+                <strong>Create GitHub issues</strong> — one issue per planned feature
               </div>
             </div>
             <div className="code-block">
               <code>
                 <span className="comment">Ask Cursor:</span>
                 <br />
-                "Read our prd.md and create a GitHub issue for
+                "Read my prd.md and create a GitHub issue for
                 <br />
-                each feature task. Assign each issue to the
-                <br />
-                team member's GitHub username from the PRD."
+                each planned feature."
               </code>
             </div>
           </div>
@@ -102,7 +97,6 @@ const Slide08Phase2Design = () => (
               <div className="check-box"></div>
               <div>
                 <strong>Tell Cursor to commit, push, and open a PR</strong>
-                {' '}— this becomes the foundation for everyone
               </div>
             </div>
             <div className="code-block">
@@ -111,7 +105,7 @@ const Slide08Phase2Design = () => (
                 <br />
                 "Commit all my changes with the message
                 <br />
-                '[Team] - Base MVP scaffold',
+                '[username] - Base MVP scaffold',
                 <br />
                 push to my fork, and open a PR to the original repo"
               </code>

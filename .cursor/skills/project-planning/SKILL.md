@@ -1,6 +1,6 @@
 ---
 name: project-planning
-description: Guides project planning and code generation for the SDLC workshop. Enforces frontend-only React apps, recommends stubbing over real backends, and ensures projects stay small and parallelizable. Use when planning a project, generating a PRD, scaffolding an MVP, or when the user asks what to build.
+description: Guides project planning and code generation for the SDLC workshop. Enforces frontend-only React apps, recommends stubbing over real backends, and ensures projects stay small. Use when planning a project, generating a PRD, scaffolding an MVP, or when the user asks what to build.
 ---
 
 # Project Planning (SDLC Workshop)
@@ -8,7 +8,7 @@ description: Guides project planning and code generation for the SDLC workshop. 
 ## When to use
 
 Activate whenever:
-- A team is deciding what to build or filling out their PRD
+- A participant is deciding what to build or filling out their PRD
 - Generating or scaffolding a base MVP
 - Planning features or breaking work into tasks
 - The user asks Cursor to build, create, or implement something for the workshop
@@ -88,16 +88,16 @@ Use `Math.random()`, shuffle arrays, or rotate through hardcoded lists. No serve
 ### User input
 Use React event handlers and state. That's the whole "backend."
 
-## Parallelizable features
+## Modular features
 
-Every project must support **5 people working independently at the same time**. When helping a team plan:
+Design features as independent, self-contained components. This is good architecture practice and keeps the codebase clean:
 
-1. **The base MVP should be minimal** — just enough to run and show something. Leave all the interesting parts as features for teammates.
-2. **Each feature should be its own component** — one person per component file means no merge conflicts.
+1. **The base MVP should be minimal** — just enough to run and show something. Leave interesting features for later iterations.
+2. **Each feature should be its own component** — one component per file keeps things organized and avoids conflicts if collaborating.
 3. **Features should be additive** — adding a `<Scoreboard />` component should not require changing how the game loop works in `App.jsx`.
 
 ### Good feature pattern
-Each person creates a new component in its own file:
+Each feature lives in its own file:
 - `Scoreboard.jsx` — displays and tracks scores
 - `Settings.jsx` — difficulty slider, theme picker
 - `SoundEffects.jsx` — plays sounds on game events
@@ -105,7 +105,7 @@ Each person creates a new component in its own file:
 - `Animations.jsx` — confetti on win, shake on miss
 
 ### Bad feature pattern
-Everyone editing `App.jsx` or the same shared component — this causes merge conflicts and blocks teammates.
+Putting everything in `App.jsx` or a single shared component — this gets messy fast.
 
 ## When generating code
 

@@ -10,8 +10,8 @@ const Slide12Section2Step1 = () => (
         <div className="check-item">
           <div className="check-box"></div>
           <div>
-            <strong>Navigate to the other team's project folder</strong> — find
-            their code in the file tree
+            <strong>Navigate to an unfamiliar project folder</strong> — find
+            the code in the file tree (projects/[username])
           </div>
         </div>
         <div className="check-item has-code">
@@ -76,7 +76,7 @@ const Slide12Section2Step1 = () => (
           <div className="check-header">
             <div className="check-box"></div>
             <div>
-              <strong>Create a Rule</strong> — teach Cursor your team's coding
+              <strong>Create a Rule</strong> — teach Cursor your coding
               standards for this project
             </div>
           </div>

@@ -1,28 +1,29 @@
-# Calm Call — Base MVP
+# Base MVP
 
-A minimal breathing exercise app to help reps regain composure after a tough call.
+This folder is where your project code lives.
 
-## What's Included
+## Phase 2: Design (One Person)
 
-- **4-4-4 breathing:** Inhale 4 sec → Hold 4 sec → Exhale 4 sec
-- **Text cues:** "Breathe in" / "Hold" / "Breathe out"
-- **Start / Stop** buttons
-- **Placeholder circle** (teammates can add animation)
+**One team member** creates the base MVP here. This is the foundation everyone else builds on.
 
-## How to Run
+### What to Build
+- A minimal, working version of your project
+- Should run locally and do *something* visible
+- Keep it simple — 10 minutes max!
 
-Open `index.html` in your browser:
+### Good Examples
+- A Chrome extension with one button that does one thing
+- A web page with basic HTML/CSS/JS
+- A simple CLI script
 
-```bash
-open index.html
-```
+### Instructions
 
-Or right-click the file → Open With → your browser.
+1. Tell Cursor to read the `prd.md` in your team folder
+2. Tell Cursor to generate the base MVP here
+3. Tell Cursor to run it locally and verify it works
 
-## Left for Teammates
+### After You're Done
 
-- Breathing pattern selector (4-7-8, box breathing)
-- Calming theme / gradient background
-- Cycle counter ("Breath 3 of 5")
-- Animated breathing circle (expand/contract)
-- Duration presets (30s, 1 min, 2 min)
+> **Ask Cursor:** "Commit all my changes with the message '[Team] - Base MVP scaffold', push to my fork, and open a PR to the original repo"
+
+Once the PR is merged, your teammates can build on top of it!

@@ -1,45 +1,69 @@
 # Product Requirements Document (PRD)
 
+> **Instructions:** This is your team's project specification. Fill in the sections below to define what you're building.
+
 ---
 
 ## Project Overview
 
-**Project Name:** Wardrobe Generator
+**Project Name:** _[Give your project a name]_
 
-**One-line Description:** A single-page React app that randomly generates outfits from a hardcoded wardrobe of tops, bottoms, and shoes — displayed on a visual mannequin you can re-roll with one click.
+**One-line Description:** _[What does it do in one sentence?]_
 
-**Type:** Web App (React, frontend-only)
+**Type:** _[e.g., Chrome Extension, Web App, CLI Tool, etc.]_
 
 ---
 
 ## Guidelines
 
 ### Keep It Small!
-- The MVP is buildable in **10 minutes** by one person
-- Frontend-only — no database, no server, no API calls
-- All clothing data is hardcoded in a JS file
-- Single page, no routing
-- State managed with React `useState` — no extra libraries
+- Your MVP should be buildable in **10 minutes** by one person
+- Think "proof of concept" not "production ready"
+- If it sounds ambitious, make it simpler
+- **Use Cursor to help you plan this!** You need a project that has at least 5 features so everyone on your team can pick one and add it
+- Feel free to take one of the ideas below — this exercise is about learning the git flow, collaborating as a team, and understanding where Cursor's features fit into the SDLC
+
+### Good Project Ideas
+
+**Pong** — classic paddle-and-ball game
+- _Example features:_ scoreboard, sound effects, difficulty/speed settings
+
+**Memory Card Match** — flip cards to find matching pairs
+- _Example features:_ move counter, timer, win animation/confetti
+
+**Drawing Pad** — simple canvas you can sketch on
+- _Example features:_ color picker, brush size slider, eraser tool
+
+**Typing Speed Game** — type a passage and measure your words per minute
+- _Example features:_ WPM display, accuracy tracker, difficulty levels
+
+**Trivia Quiz** — multiple choice questions with score tracking
+- _Example features:_ timer per question, category selector, results summary screen
+
+### Bad Project Ideas (Too Big!)
+- Anything with a database -- tell cursor to avoid this
+- Anything requiring authentication
+- Anything with multiple pages/screens
+- Anything that "needs" an API
 
 ---
 
 ## Team Members & Tasks
 
-> **Important:** Each team member has their own independent feature. All features are separate components that plug into the MVP without conflicting with each other.
+> **Important:** Each team member MUST have their own task. Tasks should be independent features that can be built in parallel without stepping on each other's toes.
 
 | Name | Task | Description |
 |------|------|-------------|
-| Faisal | Weather / Season Filter | Add a season selector that filters clothing items to weather-appropriate choices |
-| Noah Zender | Saved Outfits Gallery | Add ability to favorite/save generated outfits and view them in a gallery strip |
-| Ryan Aznar | Color Palette Matcher | Add a color-theme picker that constrains generated outfits to complementary color palettes |
-| Zoë | Occasion Selector | Add an occasion picker (Casual, Work, Party, Sport) that filters items by dress code |
-| Audrey | Outfit History | Add a "recently generated" timeline that shows the last several outfits you rolled |
-| Will | Randomize Animation | Add a fun slot-machine spin animation when generating a new outfit |
+| _[Name 1]_ | _[Feature 1]_ | _[Brief description]_ |
+| _[Name 2]_ | _[Feature 2]_ | _[Brief description]_ |
+| _[Name 3]_ | _[Feature 3]_ | _[Brief description]_ |
+| _[Name 4]_ | _[Feature 4]_ | _[Brief description]_ |
+| _[Name 5]_ | _[Feature 5]_ | _[Brief description]_ |
 
 ### Task Guidelines
 - Each task should add something **visible** to the project
 - Tasks should be **independent** — no dependencies on other tasks
-- Each feature lives in its own component file to avoid merge conflicts
+- Think: new button, new section, new color scheme, new text, etc.
 - Everyone should be able to work at the same time without conflicts
 
 ---
@@ -49,19 +73,10 @@
 > **One person** creates the foundation that everyone else builds on.
 
 **What the MVP includes:**
-- A React app scaffolded with Vite (`npm create vite@latest -- --template react`)
-- A hardcoded wardrobe data file (`src/data/wardrobe.js`) containing arrays of tops, bottoms, and shoes — each item has a `name`, `color`, `emoji`, and `tags` (e.g., `["summer", "casual"]`)
-- An `App.jsx` that displays a simple visual outfit card (emoji-based mannequin showing the selected top, bottom, and shoes)
-- A **"Generate Outfit"** button that randomly picks one item from each category
-- Basic, clean styling in `App.css` — centered layout, modern fonts, card-style outfit display
+- _[Describe the minimal working version]_
 
 **What it does NOT include:**
-- No weather/season filtering (Faisal's feature)
-- No saved outfits or favorites (Noah's feature)
-- No color coordination or palette matching (Ryan's feature)
-- No occasion/dress-code filtering (Zoë's feature)
-- No outfit history timeline (Audrey's feature)
-- No spin/shuffle animation (Will's feature)
+- _[List features deliberately left out for team members to add]_
 
 ---
 
@@ -69,85 +84,35 @@
 
 > These are the features team members will add. Design them to be **independent** so people can work in parallel.
 
-### Feature 1: Weather / Season Filter
-- **Assigned to:** Faisal ([@F-shaikh](https://github.com/F-shaikh))
-- **Description:** Adds a row of season buttons (Summer, Winter, Spring, Fall) above the outfit card. When a season is selected, the "Generate Outfit" logic filters the wardrobe data to only include items whose `tags` array contains the selected season. A highlighted button shows the active filter. An "All Seasons" option clears the filter. The component renders the filter UI and exposes the selected season via a callback prop so `App.jsx` can pass it to the generate logic.
-- **Files to modify/create:**
-  - Create `src/components/SeasonFilter.jsx` — the filter button row component
-  - Create `src/components/SeasonFilter.css` — styling for the filter buttons
-  - Modify `App.jsx` — import `SeasonFilter`, add state for `selectedSeason`, pass it to the generate function
+### Feature 1: _[Name]_
+- **Assigned to:** _[Team member]_
+- **Description:** _[What it does]_
+- **Files to modify/create:** _[Be specific]_
 
-### Feature 2: Saved Outfits Gallery
-- **Assigned to:** Noah Zender ([@noah-zender](https://github.com/noah-zender))
-- **Description:** Adds a "Save Outfit" heart/bookmark button on the outfit card. Clicking it saves the current outfit to a list stored in `localStorage`. Below the main outfit card, a horizontal gallery strip displays saved outfits as small thumbnail cards. Clicking a saved outfit loads it back into the main display. A small "x" button on each thumbnail removes it from saved outfits.
-- **Files to modify/create:**
-  - Create `src/components/SavedOutfits.jsx` — the gallery strip component
-  - Create `src/components/SavedOutfits.css` — styling for the gallery thumbnails
-  - Modify `App.jsx` — import `SavedOutfits`, add state for `savedOutfits`, add the save button and wire up localStorage read/write
+### Feature 2: _[Name]_
+- **Assigned to:** _[Team member]_
+- **Description:** _[What it does]_
+- **Files to modify/create:** _[Be specific]_
 
-### Feature 3: Color Palette Matcher
-- **Assigned to:** Ryan Aznar ([@raznar](https://github.com/raznar))
-- **Description:** Adds a color-theme dropdown or set of palette swatches (e.g., "Monochrome", "Earth Tones", "Bold & Bright", "Pastels"). When a palette is selected, the generate logic only picks items whose `color` field matches one of the colors in that palette. Each palette is defined as a hardcoded mapping of palette name to allowed color values. An "Any Colors" option disables the filter. The active palette visually previews its colors as small circles.
-- **Files to modify/create:**
-  - Create `src/components/ColorPalette.jsx` — the palette picker component
-  - Create `src/components/ColorPalette.css` — styling for the swatches and dropdown
-  - Modify `App.jsx` — import `ColorPalette`, add state for `selectedPalette`, pass it to the generate function
+### Feature 3: _[Name]_
+- **Assigned to:** _[Team member]_
+- **Description:** _[What it does]_
+- **Files to modify/create:** _[Be specific]_
 
-### Feature 4: Occasion Selector
-- **Assigned to:** Zoë ([@zoe-barnswell](https://github.com/zoe-barnswell))
-- **Description:** Adds a row of occasion/dress-code buttons (Casual, Work, Party, Sport) above or beside the outfit card. When an occasion is selected, the generate logic filters wardrobe items to only those whose `tags` array includes the selected occasion. A highlighted pill shows the active occasion. An "Any Occasion" option clears the filter. Works independently from the Season Filter — both can be active at the same time since they both filter on the `tags` array.
-- **Files to modify/create:**
-  - Create `src/components/OccasionSelector.jsx` — the occasion button row component
-  - Create `src/components/OccasionSelector.css` — styling for the occasion pills
-  - Modify `App.jsx` — import `OccasionSelector`, add state for `selectedOccasion`, pass it to the generate function
+### Feature 4: _[Name]_
+- **Assigned to:** _[Team member]_
+- **Description:** _[What it does]_
+- **Files to modify/create:** _[Be specific]_
 
-### Feature 5: Outfit History
-- **Assigned to:** Audrey ([@pippi888](https://github.com/pippi888))
-- **Description:** Adds a "Recently Generated" section below the main outfit card that shows the last 5 outfits you rolled as small cards in a horizontal row (newest on the left). Each history card displays the three emojis stacked vertically. Clicking a history card loads that outfit back into the main display. The history resets on page refresh (kept in React state only, no localStorage). A small "Clear History" button lets you wipe the list.
-- **Files to modify/create:**
-  - Create `src/components/OutfitHistory.jsx` — the history timeline component
-  - Create `src/components/OutfitHistory.css` — styling for the history strip
-  - Modify `App.jsx` — import `OutfitHistory`, add state for `outfitHistory` array, push to it each time "Generate Outfit" is clicked
-
-### Feature 6: Randomize Animation
-- **Assigned to:** Will
-- **Description:** Adds a fun slot-machine-style spin animation when the "Generate Outfit" button is clicked. Each clothing slot (top, bottom, shoes) rapidly cycles through random emojis for about 1 second before landing on the final pick, with each slot stopping in sequence (top first, then bottom, then shoes). Uses CSS keyframes and `setTimeout` — no animation libraries needed. While the animation is playing, the "Generate" button shows a spinner and is disabled to prevent double-clicks.
-- **Files to modify/create:**
-  - Create `src/components/SpinAnimation.jsx` — the animated outfit display component (wraps the emoji slots)
-  - Create `src/components/SpinAnimation.css` — keyframe animations and transition styles
-  - Modify `App.jsx` — import `SpinAnimation`, add `isSpinning` state, use `SpinAnimation` in place of the static emoji display when generating
-
----
-
-## Wardrobe Data Shape
-
-For reference, each item in `src/data/wardrobe.js` should follow this shape so all features can rely on the same structure:
-
-```js
-export const TOPS = [
-  { name: "White T-Shirt", emoji: "👕", color: "white", tags: ["summer", "spring", "casual", "sport"] },
-  { name: "Black Hoodie", emoji: "🧥", color: "black", tags: ["winter", "fall", "casual"] },
-  { name: "Blazer", emoji: "🧥", color: "navy", tags: ["fall", "spring", "work", "party"] },
-  // ...
-];
-
-export const BOTTOMS = [
-  { name: "Blue Jeans", emoji: "👖", color: "blue", tags: ["winter", "fall", "spring", "casual"] },
-  { name: "Chinos", emoji: "👖", color: "khaki", tags: ["spring", "fall", "work", "casual"] },
-  // ...
-];
-
-export const SHOES = [
-  { name: "White Sneakers", emoji: "👟", color: "white", tags: ["summer", "spring", "casual"] },
-  // ...
-];
-```
+### Feature 5: _[Name]_
+- **Assigned to:** _[Team member]_
+- **Description:** _[What it does]_
+- **Files to modify/create:** _[Be specific]_
 
 ---
 
 ## Success Criteria
 
-- [ ] MVP runs locally with `npm run dev`
+- [ ] MVP runs locally
 - [ ] Each team member has merged at least one PR
-- [ ] All six features work together without breaking the app
-- [ ] Outfit generation works with any combination of filters active
+- [ ] All features work together without breaking the app

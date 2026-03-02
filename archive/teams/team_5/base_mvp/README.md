@@ -1,28 +1,29 @@
-# Base MVP — Speed Typing Game
+# Base MVP
 
-A minimal typing game with a fixed passage, text input, character-by-character feedback, and completion detection.
+This folder is where your project code lives.
 
-## What's Included
+## Phase 2: Design (One Person)
 
-- Fixed passage: "The quick brown fox jumps over the lazy dog."
-- Text input area for typing
-- Visual feedback: correct characters in dark text, incorrect in red with highlight
-- Detection of when the passage is complete
+**One team member** creates the base MVP here. This is the foundation everyone else builds on.
 
-## Run Locally
+### What to Build
+- A minimal, working version of your project
+- Should run locally and do *something* visible
+- Keep it simple — 10 minutes max!
 
-```bash
-npm install
-npm run dev
-```
+### Good Examples
+- A Chrome extension with one button that does one thing
+- A web page with basic HTML/CSS/JS
+- A simple CLI script
 
-Then open http://localhost:3005
+### Instructions
 
-## Phase 3: Teammate Features
+1. Tell Cursor to read the `prd.md` in your team folder
+2. Tell Cursor to generate the base MVP here
+3. Tell Cursor to run it locally and verify it works
 
-These are left for teammates to add:
-- **WPM Display** (Alex)
-- **Accuracy Tracker** (Sasha)
-- **Difficulty Levels** (Adam)
-- **Timer Display** (Sabhia)
-- **Results Summary Screen** (Alison)
+### After You're Done
+
+> **Ask Cursor:** "Commit all my changes with the message '[Team] - Base MVP scaffold', push to my fork, and open a PR to the original repo"
+
+Once the PR is merged, your teammates can build on top of it!

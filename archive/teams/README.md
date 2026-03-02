@@ -53,7 +53,5 @@ teams/team_X/
 # [Your Name]
 
 **Role:** [AE/FE/ADM]
-**GitHub:** [@your-username](https://github.com/your-username)
+**Fun fact:** [Something about you]
 ```
-
-> **Don't know your GitHub username?** Ask Cursor to run `gh api user --jq .login` — it'll find it for you.
