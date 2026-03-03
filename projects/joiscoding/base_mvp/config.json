@@ -1,0 +1,10 @@
+{
+  "slack_mcp_server": "plugin-slack-slack",
+  "fallback_mcp_server": "dashboard-team-1-Slack",
+  "channels": "all",
+  "exclude_channels": ["social-random", "random"],
+  "lookback_hours": 24,
+  "summary_format": "bullets",
+  "save_summaries": true,
+  "summaries_dir": "summaries"
+}
