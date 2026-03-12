@@ -1,81 +1,49 @@
 import { currentUser, groups, savedItems, events } from '../data/mockData'
 
 function LeftSidebar() {
-  // Get initials for avatar
-  const initials = currentUser.name
-    .split(' ')
-    .map(n => n[0])
-    .join('')
-
   return (
-    <>
-      {/* Profile Card */}
-      <div className="card profile-card">
-        <div className="profile-cover" />
-        <div className="profile-avatar">{initials}</div>
-        <div className="profile-name">{currentUser.name}</div>
-        <div className="profile-headline">{currentUser.headline}</div>
+    <div>
+      <h3>My Profile</h3>
+      <p>[PROFILE PHOTO]</p>
+      <b>{currentUser.name}</b><br />
+      {currentUser.headline}<br />
+      {currentUser.location}<br />
+      <hr />
+      <b>Profile viewers:</b> {currentUser.profileViewers.toLocaleString()}<br />
+      <b>Post impressions:</b> {currentUser.postImpressions.toLocaleString()}<br />
+      <hr />
+      <b>Connections:</b> {currentUser.connections}<br />
+      <b>Following:</b> {currentUser.following}<br />
+      <b>Followers:</b> {currentUser.followers}<br />
+      <hr />
 
-        <div className="profile-stats">
-          <div className="profile-stat">
-            <div className="profile-stat-value">{currentUser.connections}</div>
-            <div className="profile-stat-label">Connections</div>
-          </div>
-          <div className="profile-stat">
-            <div className="profile-stat-value">{currentUser.profileViewers.toLocaleString()}</div>
-            <div className="profile-stat-label">Profile views</div>
-          </div>
-          <div className="profile-stat">
-            <div className="profile-stat-value">{currentUser.postImpressions.toLocaleString()}</div>
-            <div className="profile-stat-label">Impressions</div>
-          </div>
-        </div>
-      </div>
+      <h4>My Groups</h4>
+      <ul>
+        {groups.map(group => (
+          <li key={group.id}>
+            {group.name} ({group.members.toLocaleString()} members)
+          </li>
+        ))}
+      </ul>
 
-      {/* Groups */}
-      <div className="card">
-        <div className="sidebar-section">
-          <div className="sidebar-section-title">My Groups</div>
-          <ul className="sidebar-list">
-            {groups.map(group => (
-              <li key={group.id} className="sidebar-list-item">
-                {group.name}
-                <div className="sidebar-list-item-meta">
-                  {group.members.toLocaleString()} members
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
+      <h4>Saved Items</h4>
+      <ul>
+        {savedItems.map(item => (
+          <li key={item.id}>
+            {item.title} - saved {item.savedAgo}
+          </li>
+        ))}
+      </ul>
 
-      {/* Saved & Events */}
-      <div className="card">
-        <div className="sidebar-section">
-          <div className="sidebar-section-title">Saved Items</div>
-          <ul className="sidebar-list">
-            {savedItems.map(item => (
-              <li key={item.id} className="sidebar-list-item">
-                {item.title}
-                <div className="sidebar-list-item-meta">{item.savedAgo}</div>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <hr className="divider" style={{ margin: '0 16px' }} />
-        <div className="sidebar-section">
-          <div className="sidebar-section-title">Events</div>
-          <ul className="sidebar-list">
-            {events.map(event => (
-              <li key={event.id} className="sidebar-list-item">
-                {event.name}
-                <div className="sidebar-list-item-meta">{event.date}</div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </>
+      <h4>Events</h4>
+      <ul>
+        {events.map(event => (
+          <li key={event.id}>
+            {event.name} - {event.date}
+          </li>
+        ))}
+      </ul>
+    </div>
   )
 }
 

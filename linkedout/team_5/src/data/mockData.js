@@ -38,7 +38,7 @@ export const users = [
   {
     id: 'user-brian',
     name: 'Brian McCarthy',
-    headline: 'New Hire | Father of Many | Survivor of Too Many Siblings | Follically Challenged',
+    headline: 'New Hire | Father of 5 | Survivor of 10 Siblings | Follically Challenged',
     avatar: null,
     connectionDegree: '1st',
   },
@@ -214,8 +214,8 @@ export const users = [
 
 // --- Feed Posts ---
 export const posts = [
-  { id: 'post-brian', authorId: 'user-brian', authorName: 'Brian McCarthy', authorHeadline: 'New Hire | Father of Many | Survivor of Too Many Siblings | Follically Challenged', connectionDegree: '1st', timeAgo: '1h ago', visibility: 'public',
-    content: 'Thrilled to announce I\'m starting a new chapter! \n\nA little about me: I\'m one of a LOT of kids (yes, Irish Catholic, yes, we needed a scheduling algorithm for the bathroom). I got married at 22 because when you grow up in a house that loud, you learn to commit to things fast.\n\nWhat I lack in hair follicles I make up for in enthusiasm and sheer volume of dad jokes. The bald spot has been "building character" since 2018. My kids call it my solar panel for wisdom. I call it genetics and stress, in that order.\n\nIf I can survive Sunday dinners with that many siblings, a house where you had to book bathroom time, and the great Christmas Gift Exchange Spreadsheet Incident of 2019, I can survive anything. Let\'s go!',
+  { id: 'post-brian', authorId: 'user-brian', authorName: 'Brian McCarthy', authorHeadline: 'New Hire | Father of 5 | Survivor of 10 Siblings | Follically Challenged', connectionDegree: '1st', timeAgo: '1h ago', visibility: 'public',
+    content: 'Thrilled to announce I\'m starting a new chapter! \n\nA little about me: I\'m one of 10 kids (yes, Irish Catholic, yes, we needed a scheduling algorithm for the bathroom). I got married at 22 because when you grow up in a house that loud, you learn to commit to things fast.\n\nMy wife and I now have 5 kids of our own, because apparently I thought "go big or go home" was a family planning strategy.\n\nWhat I lack in hair follicles I make up for in enthusiasm and sheer volume of dad jokes. The bald spot has been "building character" since 2018. My kids call it my solar panel for wisdom. I call it genetics and stress, in that order.\n\nIf I can survive Sunday dinners with 10 siblings, a 3-bathroom house with 12 people, and the great Christmas Gift Exchange Spreadsheet Incident of 2019, I can survive anything. Let\'s go!',
     image: null, likes: 847, likedBy: 'Everyone in the office', comments: 156, reposts: 43, type: 'jobChange', reactions: ['👍', '🎉', '❤️', '😂'],
     topComments: [
       { authorId: 'user-lee', authorName: 'Lee', authorHeadline: 'Enablement & Ops', content: 'Welcome Brian! I\'ve already added you to 14 onboarding docs, 6 Looms, and a quiz. You\'re welcome.', likes: 89, replies: 3 },
@@ -417,7 +417,7 @@ export const notifications = [
 
 // --- People You May Know ---
 export const suggestedConnections = [
-  { id: 'user-brian', name: 'Brian McCarthy', headline: 'New Hire | Father of Many | Follically Challenged', mutualConnections: 14, avatar: null },
+  { id: 'user-brian', name: 'Brian McCarthy', headline: 'New Hire | Father of 5 | Follically Challenged', mutualConnections: 14, avatar: null },
   { id: 'user-tomer', name: 'Tomer', headline: 'Engineering', mutualConnections: 12, avatar: null },
   { id: 'user-14', name: 'Sofia Rodriguez', headline: 'UX Researcher @ Figma', mutualConnections: 7, avatar: null },
   { id: 'user-diggory', name: 'Diggory Rycroft', headline: 'Sales Engineering / GTM', mutualConnections: 9, avatar: null },

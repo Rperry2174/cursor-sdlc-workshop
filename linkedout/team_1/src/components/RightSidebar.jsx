@@ -10,200 +10,131 @@ import {
 
 function RightSidebar() {
   return (
-    <>
+    <div>
       {/* News */}
-      <div className="card right-section">
-        <div className="right-section-title">
-          <span className="right-section-title-icon">📰</span>
-          LinkedOut News
-        </div>
-        <ul className="news-list">
-          {news.map(item => (
-            <li key={item.id} className="news-item">
-              <div className="news-title">{item.title}</div>
-              <div className="news-meta">
-                {item.timeAgo} &middot; {item.readers.toLocaleString()} readers
-              </div>
-            </li>
-          ))}
-        </ul>
-        <span className="show-more">Show more &rarr;</span>
-      </div>
+      <h3>LinkedOut News</h3>
+      <b>Top Stories</b>
+      <ul>
+        {news.map(item => (
+          <li key={item.id}>
+            <b>{item.title}</b><br />
+            <small>{item.timeAgo} &bull; {item.readers.toLocaleString()} readers</small>
+          </li>
+        ))}
+      </ul>
+      <a href="#">Show more →</a>
+      <hr />
 
       {/* Games */}
-      <div className="card right-section">
-        <div className="right-section-title">
-          <span className="right-section-title-icon">🎮</span>
-          Today&apos;s Games
-        </div>
-        <div className="games-list">
+      <h3>🎮 Today&apos;s Games</h3>
+      <table border="1" cellPadding="5" width="100%">
+        <tbody>
           {games.map(game => (
-            <div key={game.id} className="game-item">
-              <div className="game-emoji">{game.emoji}</div>
-              <div className="game-info">
-                <div className="game-name">{game.name} #{game.number}</div>
-                <div className="game-subtitle">{game.subtitle}</div>
-              </div>
-              <span className="game-play">Play</span>
-            </div>
+            <tr key={game.id}>
+              <td>
+                {game.emoji} <b>{game.name} #{game.number}</b><br />
+                <small>{game.subtitle}</small>
+              </td>
+              <td><a href="#">Play →</a></td>
+            </tr>
           ))}
-        </div>
-      </div>
+        </tbody>
+      </table>
+      <hr />
 
       {/* Messaging */}
-      <div className="card right-section">
-        <div className="right-section-title">
-          <span className="right-section-title-icon">💬</span>
-          Messaging
-        </div>
-        <div className="message-list">
-          {messages.map(msg => {
-            const msgInitials = msg.senderName
-              .split(' ')
-              .map(n => n[0])
-              .join('')
-
-            return (
-              <div
-                key={msg.id}
-                className={`message-item${msg.unread ? ' unread' : ''}`}
-              >
-                {msg.unread && <div className="message-unread-dot" />}
-                <div className="avatar avatar-sm">{msgInitials}</div>
-                <div className="message-content">
-                  <div className="message-sender">
-                    {msg.senderName}
-                    {msg.unreadCount > 0 && (
-                      <span className="badge badge-primary" style={{ marginLeft: 4 }}>
-                        {msg.unreadCount} new
-                      </span>
-                    )}
-                  </div>
-                  <div className="message-preview">{msg.preview}</div>
-                </div>
-                <div className="message-time">{msg.timeAgo}</div>
-              </div>
-            )
-          })}
-        </div>
-        <span className="show-more">Open all messages</span>
-      </div>
+      <h3>💬 Messaging</h3>
+      <table border="1" cellPadding="5" width="100%">
+        <tbody>
+          {messages.map(msg => (
+            <tr key={msg.id}>
+              <td style={msg.unread ? { backgroundColor: '#ffffcc' } : {}}>
+                <b>{msg.senderName}</b>
+                {msg.unread && (
+                  <small> ({msg.unreadCount ? `${msg.unreadCount} new` : 'unread'})</small>
+                )}
+                <br />
+                <small>{msg.preview}</small><br />
+                <small>{msg.timeAgo}</small>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <a href="#">Open all messages</a>
+      <hr />
 
       {/* Jobs */}
-      <div className="card right-section">
-        <div className="right-section-title">
-          <span className="right-section-title-icon">💼</span>
-          Jobs For You
-        </div>
-        <div className="job-list">
-          {jobs.slice(0, 3).map(job => (
-            <div key={job.id} className="job-item">
-              <div className="job-title">{job.title}</div>
-              <div className="job-company">
-                {job.company} &middot; {job.location}
-              </div>
-              <div className="job-details">
-                {job.salary} &middot; {job.applicants} applicants
-              </div>
-              <div className="job-connections">
-                💡 {job.connectionsAtCompany} connections work here
-              </div>
-              <div className="job-actions">
-                <button className="btn btn-sm btn-outline">Save</button>
-                <button className="btn btn-sm btn-filled">
-                  {job.easyApply ? 'Easy Apply' : 'Apply'}
-                </button>
-              </div>
-            </div>
+      <h3>💼 Jobs For You</h3>
+      <table border="1" cellPadding="5" width="100%">
+        <tbody>
+          {jobs.map(job => (
+            <tr key={job.id}>
+              <td>
+                <b>{job.title}</b><br />
+                {job.company} &bull; {job.location}<br />
+                <small>{job.salary} &bull; Posted {job.postedAgo} &bull; {job.applicants} applicants</small><br />
+                <small>💡 {job.connectionsAtCompany} connections work here</small><br />
+                <button>Save</button>{' '}
+                <button>{job.easyApply ? 'Easy Apply' : 'Apply'}</button>
+              </td>
+            </tr>
           ))}
-        </div>
-        <span className="show-more">See all recommendations &rarr;</span>
-      </div>
-
-      {/* People You May Know */}
-      <div className="card right-section">
-        <div className="right-section-title">
-          <span className="right-section-title-icon">👥</span>
-          People You May Know
-        </div>
-        <div className="connections-grid">
-          {suggestedConnections.slice(0, 4).map(person => {
-            const personInitials = person.name
-              .split(' ')
-              .map(n => n[0])
-              .join('')
-
-            return (
-              <div key={person.id} className="connection-card">
-                <div className="avatar avatar-sm" style={{ margin: '0 auto' }}>
-                  {personInitials}
-                </div>
-                <div className="connection-name">{person.name}</div>
-                <div className="connection-headline">{person.headline}</div>
-                <div className="connection-mutual">
-                  {person.mutualConnections} mutual
-                </div>
-                <button
-                  className="btn btn-sm btn-outline"
-                  style={{ marginTop: 8, width: '100%' }}
-                >
-                  + Connect
-                </button>
-              </div>
-            )
-          })}
-        </div>
-      </div>
+        </tbody>
+      </table>
+      <a href="#">See all job recommendations →</a>
+      <hr />
 
       {/* Notifications */}
-      <div className="card right-section">
-        <div className="right-section-title">
-          <span className="right-section-title-icon">🔔</span>
-          Notifications
-        </div>
-        <div className="notification-list">
-          {notifications.map(notif => (
-            <div key={notif.id} className="notification-item">
-              <div className="notification-dot" />
-              <div>
-                {notif.text}
-                <span className="notification-time"> &middot; {notif.timeAgo}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-        <span className="show-more">See all notifications &rarr;</span>
-      </div>
+      <h3>🔔 Notifications</h3>
+      <ul>
+        {notifications.map(notif => (
+          <li key={notif.id}>
+            {notif.text} <small>({notif.timeAgo})</small>
+          </li>
+        ))}
+      </ul>
+      <a href="#">See all notifications →</a>
+      <hr />
+
+      {/* People You May Know */}
+      <h3>👥 People You May Know</h3>
+      <table border="1" cellPadding="5" width="100%">
+        <tbody>
+          <tr>
+            {suggestedConnections.slice(0, 2).map(person => (
+              <td key={person.id}>
+                [PHOTO]<br />
+                <b>{person.name}</b><br />
+                <small>{person.headline}</small><br />
+                <small>{person.mutualConnections} mutual connections</small><br />
+                <button>+ Connect</button>
+              </td>
+            ))}
+          </tr>
+        </tbody>
+      </table>
+      <hr />
 
       {/* Promoted */}
-      <div className="card right-section">
-        <div className="promoted-label">Promoted</div>
-        <div className="promoted-card">
-          <div className="promoted-image">✨</div>
-          <div className="promoted-body">
-            <div className="promoted-title">{promoted.title}</div>
-            <div className="promoted-desc">{promoted.description}</div>
-            <button className="btn btn-sm btn-filled" style={{ marginTop: 8 }}>
-              Learn More
-            </button>
-          </div>
-        </div>
-      </div>
+      <h3>Promoted</h3>
+      <table border="1" cellPadding="5" width="100%">
+        <tbody>
+          <tr>
+            <td>
+              {promoted.image}<br />
+              <b>{promoted.title}</b><br />
+              <small>{promoted.description}</small><br />
+              <button>Learn More</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
 
-      {/* Footer */}
-      <div className="footer-links">
-        <a href="#">About</a> &middot;{' '}
-        <a href="#">Accessibility</a> &middot;{' '}
-        <a href="#">Help Center</a> &middot;{' '}
-        <a href="#">Privacy</a> &middot;{' '}
-        <a href="#">Terms</a>
-        <br />
-        <a href="#">Ad Choices</a> &middot;{' '}
-        <a href="#">Advertising</a> &middot;{' '}
-        <a href="#">Business Services</a>
-        <div className="footer-copyright">LinkedOut Corporation &copy; 2025</div>
-      </div>
-    </>
+      <hr />
+      <small>About &bull; Accessibility &bull; Help Center &bull; Privacy &bull; Terms &bull; Ad Choices &bull; Advertising &bull; Business Services</small><br />
+      <small>LinkedOut Corporation &copy; 2025</small>
+    </div>
   )
 }
 
