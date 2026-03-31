@@ -2,6 +2,8 @@
 
 This folder is where your project code lives.
 
+**Mini Sudoku MVP:** `index.html`, `styles.css`, and `app.js` — open `index.html` in a browser (double-click or **File → Open**), or from this folder run `python3 -m http.server 8080` and visit `http://localhost:8080`.
+
 ## What to Build
 - A minimal, working version of your project
 - Should run locally and do *something* visible

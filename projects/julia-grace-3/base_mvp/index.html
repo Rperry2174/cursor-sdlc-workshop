@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mini Sudoku</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <div class="app-card">
+        <h1>Mini Sudoku</h1>
+        <p class="hint">
+          Select a cell (or use <strong>arrow keys</strong> to move), then type 1–9 or use the pad.
+          Turn on <strong>Notes</strong> to add or remove small candidates (press <kbd>N</kbd> to toggle).
+          Givens are locked.
+        </p>
+        <div class="toolbar">
+          <button
+            type="button"
+            id="notes-toggle"
+            class="notes-toggle"
+            aria-pressed="false"
+            aria-label="Toggle pencil notes mode"
+          >
+            <span class="notes-toggle__icon-wrap" aria-hidden="true">
+              <span class="notes-toggle__icon">✏️</span>
+            </span>
+            <span class="notes-toggle__text">
+              <span class="notes-toggle__title">Pencil notes</span>
+              <span id="notes-state-label" class="notes-toggle__badge">Off</span>
+            </span>
+          </button>
+        </div>
+        <div id="status" class="status" role="status"></div>
+        <div
+          id="grid"
+          class="grid"
+          role="grid"
+          aria-label="Sudoku board 9 by 9"
+        ></div>
+        <div class="pad" aria-label="Number entry">
+          <button type="button" data-digit="1">1</button>
+          <button type="button" data-digit="2">2</button>
+          <button type="button" data-digit="3">3</button>
+          <button type="button" data-digit="4">4</button>
+          <button type="button" data-digit="5">5</button>
+          <button type="button" data-digit="6">6</button>
+          <button type="button" data-digit="7">7</button>
+          <button type="button" data-digit="8">8</button>
+          <button type="button" data-digit="9">9</button>
+          <button type="button" id="clear" class="clear">Clear</button>
+        </div>
+      </div>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>
