@@ -15,6 +15,11 @@ const ui = {
   playBtn: document.getElementById("playBtn"),
   editorBtn: document.getElementById("editorBtn"),
   mapBackBtn: document.getElementById("mapBackBtn"),
+  mapBoard: document.getElementById("mapBoard"),
+  mapPaths: document.getElementById("mapPaths"),
+  mapDecor: document.getElementById("mapDecor"),
+  chapterBanners: document.getElementById("chapterBanners"),
+  mapBirdToken: document.getElementById("mapBirdToken"),
   levelGrid: document.getElementById("levelGrid"),
   levelLabel: document.getElementById("levelLabel"),
   status: document.getElementById("status"),
@@ -130,6 +135,7 @@ const app = {
   lastFrame: performance.now(),
   audioCtx: null,
   lastOinkAt: 0,
+  lastMapHoverAt: 0,
   audioPrimed: false,
 };
 
@@ -334,6 +340,53 @@ function playVictoryJingle() {
   }
 }
 
+function playMapHoverSfx() {
+  initAudio();
+  if (!app.audioCtx) return;
+  const ctxAudio = app.audioCtx;
+  const now = ctxAudio.currentTime;
+  const osc = ctxAudio.createOscillator();
+  const gain = ctxAudio.createGain();
+  osc.type = "sine";
+  osc.frequency.setValueAtTime(680, now);
+  osc.frequency.exponentialRampToValueAtTime(820, now + 0.06);
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.exponentialRampToValueAtTime(0.05, now + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.08);
+  osc.connect(gain);
+  gain.connect(ctxAudio.destination);
+  osc.start(now);
+  osc.stop(now + 0.09);
+}
+
+function maybePlayMapHoverSfx() {
+  const now = performance.now();
+  if (now - app.lastMapHoverAt < 80) return;
+  app.lastMapHoverAt = now;
+  playMapHoverSfx();
+}
+
+function playMapSelectSfx() {
+  initAudio();
+  if (!app.audioCtx) return;
+  const ctxAudio = app.audioCtx;
+  const now = ctxAudio.currentTime;
+  const notes = [540, 680, 860];
+  for (let i = 0; i < notes.length; i += 1) {
+    const osc = ctxAudio.createOscillator();
+    const gain = ctxAudio.createGain();
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(notes[i], now + i * 0.055);
+    gain.gain.setValueAtTime(0.0001, now + i * 0.055);
+    gain.gain.exponentialRampToValueAtTime(0.08, now + i * 0.055 + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.055 + 0.08);
+    osc.connect(gain);
+    gain.connect(ctxAudio.destination);
+    osc.start(now + i * 0.055);
+    osc.stop(now + i * 0.055 + 0.09);
+  }
+}
+
 function maybePlayOink(cooldownMs = 170) {
   const now = performance.now();
   if (now - app.lastOinkAt < cooldownMs) return;
@@ -365,19 +418,150 @@ function starsForScore(score, thresholds) {
   return 0;
 }
 
+function computeMapPositions(total) {
+  const cols = Math.min(5, Math.max(3, Math.ceil(Math.sqrt(total))));
+  const rows = Math.max(1, Math.ceil(total / cols));
+  const xMin = 90;
+  const xMax = 910;
+  const yMin = 70;
+  const yMax = 370;
+  const yStep = rows <= 1 ? 0 : (yMax - yMin) / (rows - 1);
+  const positions = [];
+
+  for (let row = 0; row < rows; row += 1) {
+    const remaining = total - positions.length;
+    const countThisRow = Math.min(cols, remaining);
+    const rowForward = row % 2 === 0;
+    const xStep = countThisRow <= 1 ? 0 : (xMax - xMin) / (countThisRow - 1);
+    for (let col = 0; col < countThisRow; col += 1) {
+      const logicalCol = rowForward ? col : countThisRow - 1 - col;
+      positions.push({
+        x: xMin + logicalCol * xStep,
+        y: yMin + row * yStep,
+      });
+    }
+  }
+  return positions;
+}
+
+function computeChapters(total) {
+  const names = ["Graveyard Marsh", "Moonlit Ruins", "Phantom Ridge"];
+  const chapters = [];
+  const size = Math.ceil(total / names.length);
+  let start = 0;
+  for (let i = 0; i < names.length && start < total; i += 1) {
+    const end = Math.min(total - 1, start + size - 1);
+    chapters.push({
+      chapter: `World ${i + 1}`,
+      name: names[i],
+      start,
+      end,
+    });
+    start = end + 1;
+  }
+  return chapters;
+}
+
 function updateMapScreen() {
   ui.levelGrid.innerHTML = "";
+  const points = computeMapPositions(app.levels.length);
+  const pathPieces = [];
+  const markerPieces = [];
+  for (let i = 0; i < points.length - 1; i += 1) {
+    const a = points[i];
+    const b = points[i + 1];
+    const mx = (a.x + b.x) / 2;
+    const my = ((a.y + b.y) / 2) - 28;
+    pathPieces.push(
+      `<path d="M ${a.x} ${a.y} Q ${mx} ${my} ${b.x} ${b.y}" class="map-link-back" />`,
+      `<path d="M ${a.x} ${a.y} Q ${mx} ${my} ${b.x} ${b.y}" class="map-link" />`,
+    );
+  }
+  for (const point of points) {
+    markerPieces.push(`<circle cx="${point.x}" cy="${point.y}" r="8" class="map-pin" />`);
+  }
+  ui.mapPaths.innerHTML = `
+    <defs>
+      <linearGradient id="roadGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.9" />
+        <stop offset="50%" stop-color="#a855f7" stop-opacity="0.95" />
+        <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.9" />
+      </linearGradient>
+      <filter id="mapGlow">
+        <feGaussianBlur stdDeviation="4" result="blur" />
+        <feMerge>
+          <feMergeNode in="blur" />
+          <feMergeNode in="SourceGraphic" />
+        </feMerge>
+      </filter>
+    </defs>
+    ${pathPieces.join("")}
+    ${markerPieces.join("")}
+  `;
+
+  const landmarks = [
+    { icon: "🏰", label: "Haunted Keep", x: 88, y: 78, size: "lg", twinkle: "a" },
+    { icon: "🪦", label: "Old Graves", x: 18, y: 64, size: "sm", twinkle: "b" },
+    { icon: "🎃", label: "Pumpkin Patch", x: 30, y: 28, size: "sm", twinkle: "c" },
+    { icon: "🦇", label: "Bat Swarm", x: 56, y: 16, size: "sm", twinkle: "d" },
+    { icon: "🌕", label: "Blood Moon", x: 13, y: 18, size: "lg", twinkle: "e" },
+    { icon: "👻", label: "Ghost Trail", x: 73, y: 70, size: "sm", twinkle: "f" },
+  ];
+  ui.mapDecor.innerHTML = landmarks
+    .map(
+      (l) =>
+        `<div class="map-landmark ${l.size} twinkle-${l.twinkle}" style="left:${l.x}%; top:${l.y}%;" title="${l.label}">${l.icon}<span>${l.label}</span></div>`,
+    )
+    .join("");
+
+  const chapters = computeChapters(app.levels.length);
+  ui.chapterBanners.innerHTML = chapters
+    .map((chapter) => {
+      const slice = points.slice(chapter.start, chapter.end + 1);
+      const avgX = slice.reduce((sum, p) => sum + p.x, 0) / slice.length;
+      const minY = Math.min(...slice.map((p) => p.y));
+      const y = Math.max(48, minY - 42);
+      return `<div class="map-banner" style="left:${avgX / 10}%; top:${y / 4.4}%;"><strong>${chapter.chapter}</strong><span>${chapter.name}</span></div>`;
+    })
+    .join("");
+
   app.levels.forEach((level, idx) => {
     const unlocked = idx + 1 <= app.save.unlocked;
+    const point = points[idx];
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.className = `level-btn${unlocked ? "" : " locked"}`;
+    const isCurrent = idx + 1 === app.save.unlocked;
+    btn.className = `level-btn${unlocked ? "" : " locked"}${isCurrent ? " current" : ""}`;
     const best = app.save.best[level.id];
-    btn.innerHTML = `<strong>${level.name}</strong><span>${best ? `${starsString(best.stars)} · ${best.score}` : "Not cleared"}</span>`;
+    btn.style.left = `${point.x / 10}%`;
+    btn.style.top = `${point.y / 4.4}%`;
+    btn.innerHTML = `<strong>Level ${idx + 1}</strong><span>${best ? `${starsString(best.stars)}` : unlocked ? "Start" : "Locked"}</span>`;
+    btn.title = level.name;
     btn.disabled = !unlocked;
-    btn.addEventListener("click", () => startLevel(idx));
+    if (unlocked) {
+      btn.addEventListener("mouseenter", () => {
+        primeAudioIfNeeded();
+        maybePlayMapHoverSfx();
+      });
+      btn.addEventListener("focus", () => {
+        primeAudioIfNeeded();
+        maybePlayMapHoverSfx();
+      });
+    }
+    btn.addEventListener("click", () => {
+      primeAudioIfNeeded();
+      if (unlocked) playMapSelectSfx();
+      startLevel(idx);
+    });
     ui.levelGrid.appendChild(btn);
   });
+
+  const tokenIdx = Math.min(app.save.unlocked - 1, points.length - 1);
+  const tokenPoint = points[Math.max(0, tokenIdx)];
+  if (tokenPoint) {
+    ui.mapBirdToken.style.left = `${tokenPoint.x / 10}%`;
+    ui.mapBirdToken.style.top = `${tokenPoint.y / 4.4}%`;
+  }
 }
 
 function spawnBird(typeName) {

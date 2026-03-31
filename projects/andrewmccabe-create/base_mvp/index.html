@@ -22,7 +22,13 @@
       <section class="card hidden" data-screen="map">
         <h2>World Map</h2>
         <p class="sub">Complete levels to unlock the next one.</p>
-        <div id="levelGrid" class="level-grid" aria-label="Level select"></div>
+        <div id="mapBoard" class="map-board" aria-label="Level map board">
+          <svg id="mapPaths" class="map-paths" viewBox="0 0 1000 440" preserveAspectRatio="none"></svg>
+          <div id="mapDecor" class="map-decor" aria-hidden="true"></div>
+          <div id="chapterBanners" class="map-banners" aria-hidden="true"></div>
+          <div id="mapBirdToken" class="map-bird-token" aria-hidden="true"><span>YOU</span></div>
+          <div id="levelGrid" class="map-nodes" aria-label="Level select"></div>
+        </div>
         <div class="row">
           <button id="mapBackBtn" class="btn btn-secondary">Back</button>
         </div>
