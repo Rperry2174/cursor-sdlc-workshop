@@ -1,0 +1,16 @@
+<svg width="900" height="700" viewBox="0 0 900 700" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Summer field placeholder artwork</title>
+  <desc id="desc">Warm abstract field at golden hour.</desc>
+  <defs>
+    <linearGradient id="skySummer" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFE6B8"/>
+      <stop offset="1" stop-color="#FFF7E8"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="700" fill="url(#skySummer)"/>
+  <rect y="360" width="900" height="340" fill="#F3CF7A"/>
+  <path d="M0 420 Q 180 380 360 400 T 900 380 V460 Q 680 420 360 400 T 0 420Z" fill="#E6B85C"/>
+  <path d="M80 380 Q 120 340 180 330" stroke="#C9953A" stroke-width="4" stroke-linecap="round"/>
+  <path d="M260 430 Q 300 370 360 360" stroke="#C9953A" stroke-width="4" stroke-linecap="round"/>
+</svg>
+
