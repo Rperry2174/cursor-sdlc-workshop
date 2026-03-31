@@ -1,0 +1,15 @@
+<svg width="900" height="700" viewBox="0 0 900 700" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Winter bay placeholder artwork</title>
+  <desc id="desc">Minimal landscape with bay, hills, and winter sky.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#DDE5F0"/>
+      <stop offset="1" stop-color="#FAFAF8"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="700" fill="url(#sky)"/>
+  <path d="M0 420 Q 220 360 420 380 T 900 350 V700 H0Z" fill="#BED2E0"/>
+  <path d="M0 360 Q 200 300 420 320 T 900 280 V360 Q 700 300 420 320 T0 360Z" fill="#9EAFBF"/>
+  <rect x="80" y="520" width="140" height="6" rx="3" fill="#C7B8A2" opacity="0.6"/>
+</svg>
+
