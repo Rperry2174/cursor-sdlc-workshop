@@ -1,0 +1,56 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+
+:root {
+  color-scheme: light;
+  /* Greens on Q–aligned palette (theme-color #011e2b from greensonq.com) */
+  --brand-navy: #011e2b;
+  --brand-navy-mid: #063445;
+  --brand-navy-soft: #0a4a5c;
+  --bg: #eef2f4;
+  --surface: #ffffff;
+  --surface-elevated: #f8fafb;
+  --text: #011e2b;
+  --muted: #5a6d76;
+  --accent: #0f6b4d;
+  --accent-hover: #0d5a41;
+  --accent-soft: #e4f4ee;
+  --border: #d1dde3;
+  --border-strong: #b8cad3;
+  --danger: #b3261e;
+  --header-text: #f4f8fa;
+  --header-muted: rgba(244, 248, 250, 0.82);
+  font-family:
+    'Montserrat',
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+}
+
+#root {
+  min-height: 100vh;
+}
+
+button {
+  font-family: inherit;
+}
+
+input[type='number'] {
+  font-variant-numeric: tabular-nums;
+}
