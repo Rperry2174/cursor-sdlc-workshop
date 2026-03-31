@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pleasant Hill Age-5 Camp Finder</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>Pleasant Hill Age-5 Summer Camp Signup Guide</h1>
+      <p class="note">
+        Prototype dataset only. Verify dates and registration details on official camp websites.
+      </p>
+
+      <section class="controls">
+        <label for="age">Child age</label>
+        <input id="age" type="number" min="5" max="5" value="5" readonly />
+      </section>
+
+      <section
+        id="week-calendar"
+        class="week-calendar"
+        aria-label="Summer week overview: camp by week"
+      ></section>
+
+      <h2>Camp options</h2>
+      <section id="legend" class="legend" aria-label="Signup window overlap legend"></section>
+      <div id="results"></div>
+    </main>
+
+    <script src="./camps.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
