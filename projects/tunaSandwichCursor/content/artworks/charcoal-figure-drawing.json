@@ -1,0 +1,14 @@
+{
+  "id": "charcoal-figure-drawing",
+  "title": "Figure Study in Charcoal",
+  "category": "drawing",
+  "medium": "Charcoal on paper",
+  "year": 2022,
+  "dimensions": "18×24 in",
+  "description": "Gestural study focusing on light and shadow.",
+  "image": "/images/artworks/charcoal-figure.svg",
+  "featured": true,
+  "collections": ["studio-favorites"],
+  "inquirable": true
+}
+

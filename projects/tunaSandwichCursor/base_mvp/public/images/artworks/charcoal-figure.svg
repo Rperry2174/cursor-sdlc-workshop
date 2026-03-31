@@ -1,0 +1,16 @@
+<svg width="700" height="900" viewBox="0 0 700 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Charcoal figure placeholder artwork</title>
+  <desc id="desc">Loose charcoal-style lines suggesting a standing figure.</desc>
+  <rect width="700" height="900" fill="#F7F5F2"/>
+  <path d="M340 160 C 310 190 305 230 310 270" stroke="#444" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <circle cx="345" cy="150" r="40" stroke="#333" stroke-width="4" fill="none"/>
+  <path d="M310 270 Q 330 330 320 400" stroke="#444" stroke-width="4" fill="none"/>
+  <path d="M380 270 Q 370 340 380 400" stroke="#444" stroke-width="4" fill="none"/>
+  <path d="M320 330 Q 280 360 260 410" stroke="#555" stroke-width="4" fill="none"/>
+  <path d="M380 330 Q 420 360 440 410" stroke="#555" stroke-width="4" fill="none"/>
+  <path d="M315 400 Q 330 470 310 540" stroke="#444" stroke-width="4" fill="none"/>
+  <path d="M380 400 Q 365 470 385 540" stroke="#444" stroke-width="4" fill="none"/>
+  <path d="M310 540 Q 295 600 290 660" stroke="#444" stroke-width="4" fill="none"/>
+  <path d="M385 540 Q 400 600 410 660" stroke="#444" stroke-width="4" fill="none"/>
+</svg>
+
