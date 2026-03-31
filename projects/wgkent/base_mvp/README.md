@@ -1,23 +1,27 @@
-# Base MVP
+# SubSpend — Base MVP
 
-This folder is where your project code lives.
+Minimal subscription list with **monthly total** and **localStorage** (no server).
 
-## What to Build
-- A minimal, working version of your project
-- Should run locally and do *something* visible
-- Keep it simple — 10 minutes max!
+## Run locally
 
-### Good Examples
-- A Chrome extension with one button that does one thing
-- A web page with basic HTML/CSS/JS
-- A simple CLI script
+From this folder:
 
-### Instructions
+```bash
+open index.html
+```
 
-1. Tell Cursor to read the `prd.md` in your project folder
-2. Tell Cursor to generate the base MVP here
-3. Tell Cursor to run it locally and verify it works
+Or serve over HTTP (optional):
 
-### After You're Done
+```bash
+python3 -m http.server 8080
+```
 
-> **Ask Cursor:** "Commit all my changes with the message 'Base MVP scaffold', push to my fork, and open a PR to the original repo"
+Then open [http://localhost:8080](http://localhost:8080).
+
+## Files
+
+| File | Role |
+|------|------|
+| `index.html` | Form + table + total |
+| `styles.css` | Layout and readability |
+| `app.js` | Add row, persist, monthly math |
