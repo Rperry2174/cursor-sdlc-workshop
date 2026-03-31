@@ -22,6 +22,28 @@ function formatCurrency(value) {
   }).format(value);
 }
 
+function appendTextWithGreenCurrency(container, text) {
+  const currencyPattern = /(\$[\d,]+(?:\.\d{1,2})?)/g;
+  const currencyMatch = /^\$[\d,]+(?:\.\d{1,2})?$/;
+  const parts = text.split(currencyPattern);
+
+  parts.forEach((part) => {
+    if (!part) {
+      return;
+    }
+
+    if (currencyMatch.test(part)) {
+      const moneySpan = document.createElement("span");
+      moneySpan.className = "money";
+      moneySpan.textContent = part;
+      container.appendChild(moneySpan);
+      return;
+    }
+
+    container.appendChild(document.createTextNode(part));
+  });
+}
+
 function getTotalMonthlySpend(data) {
   return data.reduce((sum, item) => sum + item.amount, 0);
 }
@@ -94,6 +116,9 @@ function renderSummary() {
     const value = document.createElement("p");
     value.className = "metric-value";
     value.textContent = metric.value;
+    if (metric.value.startsWith("$")) {
+      value.classList.add("money");
+    }
 
     metricCard.appendChild(label);
     metricCard.appendChild(value);
@@ -112,6 +137,7 @@ function renderExpenseTable() {
 
     const amountCell = document.createElement("td");
     amountCell.textContent = formatCurrency(item.amount);
+    amountCell.className = "money";
 
     row.appendChild(categoryCell);
     row.appendChild(amountCell);
@@ -124,9 +150,13 @@ function renderAdvice() {
   const subscriptionsTotal = getTotalSubscriptions(subscriptionItems);
   const adviceItems = getAdvice(expenses, subscriptionsTotal);
 
+  const encouragementItem = document.createElement("li");
+  encouragementItem.textContent = "You can do this! Small changes each month add up.";
+  adviceList.appendChild(encouragementItem);
+
   adviceItems.forEach((text) => {
     const listItem = document.createElement("li");
-    listItem.textContent = text;
+    appendTextWithGreenCurrency(listItem, text);
     adviceList.appendChild(listItem);
   });
 }

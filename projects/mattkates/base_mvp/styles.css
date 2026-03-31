@@ -15,6 +15,19 @@ body {
   padding: 24px 16px 40px;
 }
 
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.vault-image {
+  width: 88px;
+  height: 88px;
+  flex-shrink: 0;
+}
+
 h1 {
   margin: 0;
 }
@@ -53,6 +66,11 @@ h1 {
 
 .metric-value {
   font-size: 20px;
+  font-weight: 700;
+}
+
+.money {
+  color: #16a34a;
   font-weight: 700;
 }
 
