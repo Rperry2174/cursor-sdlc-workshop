@@ -1,6 +1,6 @@
 :root {
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-  color: #0f172a;
+  color: #e2e8f0;
 }
 
 * {
@@ -10,7 +10,7 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background: radial-gradient(circle at top, #dbeafe 0%, #f8fafc 45%, #fef9c3 100%);
+  background: radial-gradient(circle at top, #312e81 0%, #111827 45%, #030712 100%);
 }
 
 .app-shell {
@@ -20,8 +20,8 @@ body {
 }
 
 .card {
-  background: #ffffffd8;
-  border: 1px solid #cbd5e1;
+  background: #0f172acc;
+  border: 1px solid #334155;
   border-radius: 14px;
   padding: 1rem;
   box-shadow: 0 10px 28px rgb(15 23 42 / 0.12);
@@ -39,7 +39,7 @@ h2 {
 
 .sub {
   margin: 0 0 1rem;
-  color: #475569;
+  color: #cbd5e1;
 }
 
 .row {
@@ -49,8 +49,8 @@ h2 {
 }
 
 .btn {
-  border: 1px solid #0f172a;
-  background: #0f172a;
+  border: 1px solid #7c3aed;
+  background: #581c87;
   color: #f8fafc;
   border-radius: 8px;
   padding: 0.42rem 0.85rem;
@@ -58,16 +58,17 @@ h2 {
 }
 
 .btn:hover {
-  background: #1e293b;
+  background: #6b21a8;
 }
 
 .btn-secondary {
-  background: #f8fafc;
-  color: #0f172a;
+  background: #1e293b;
+  color: #e2e8f0;
+  border-color: #475569;
 }
 
 .btn-secondary:hover {
-  background: #e2e8f0;
+  background: #334155;
 }
 
 .btn:focus-visible {
@@ -87,7 +88,7 @@ h2 {
 }
 
 #status {
-  color: #334155;
+  color: #cbd5e1;
   font-size: 0.93rem;
 }
 
@@ -99,11 +100,46 @@ h2 {
 }
 
 .chip {
-  border: 1px solid #cbd5e1;
-  background: #f8fafc;
+  border: 1px solid #475569;
+  background: #1e293b;
   border-radius: 999px;
   padding: 0.2rem 0.6rem;
   font-size: 0.88rem;
+}
+
+.queue-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.queue-text {
+  color: #cbd5e1;
+}
+
+.bird-dot {
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 999px;
+  border: 1px solid #0f172a;
+  display: inline-block;
+  position: relative;
+}
+
+.bird-dot.now {
+  box-shadow: 0 0 0 2px #f8fafc;
+}
+
+.bird-red {
+  background: #dc2626;
+}
+
+.bird-blue {
+  background: #2563eb;
+}
+
+.bird-yellow {
+  background: #facc15;
 }
 
 #game {
@@ -111,9 +147,9 @@ h2 {
   width: 100%;
   max-width: 960px;
   height: auto;
-  border: 3px solid #0f172a;
+  border: 3px solid #312e81;
   border-radius: 12px;
-  background: #8ed5ef;
+  background: #0b1120;
 }
 
 .level-grid {
@@ -124,9 +160,10 @@ h2 {
 }
 
 .level-btn {
-  border: 1px solid #94a3b8;
+  border: 1px solid #475569;
   border-radius: 10px;
-  background: #f8fafc;
+  background: #1e293b;
+  color: #e2e8f0;
   padding: 0.45rem 0.6rem;
   text-align: left;
   cursor: pointer;
@@ -159,14 +196,16 @@ label {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  color: #1e293b;
+  color: #e2e8f0;
 }
 
 select,
 textarea {
-  border: 1px solid #94a3b8;
+  border: 1px solid #475569;
   border-radius: 8px;
   font: inherit;
+  background: #0f172a;
+  color: #e2e8f0;
 }
 
 textarea {
@@ -178,6 +217,6 @@ textarea {
 
 .hint {
   margin: 0.5rem 0 0;
-  color: #475569;
+  color: #cbd5e1;
   font-size: 0.9rem;
 }

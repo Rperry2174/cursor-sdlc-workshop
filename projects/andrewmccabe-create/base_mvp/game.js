@@ -1,4 +1,4 @@
-const STORAGE_KEY = "flickshot-save-v1";
+const STORAGE_KEY = "scary-birds-save-v1";
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
@@ -45,10 +45,11 @@ const ui = {
 const W = canvas.width;
 const H = canvas.height;
 const GROUND_Y = H - 56;
-const G = 0.42;
+const G = 0.39;
 const AIR_DRAG = 0.996;
 const REST_GROUND = 0.68;
-const MAX_PULL = 124;
+const MAX_PULL = 118;
+const WIN_CELEBRATION_FRAMES = 320;
 const DEFAULT_SLING = { x: 140, y: GROUND_Y - 95 };
 
 const MATERIALS = {
@@ -58,15 +59,15 @@ const MATERIALS = {
 };
 
 const BIRDS = {
-  red: { radius: 15, mass: 4.2, launchMult: 0.18, color: "#dc2626", label: "Red" },
-  blue: { radius: 12, mass: 2.2, launchMult: 0.21, color: "#2563eb", label: "Blue" },
-  yellow: { radius: 13, mass: 3.1, launchMult: 0.19, color: "#facc15", label: "Yellow" },
+  red: { radius: 15, mass: 4.2, launchMult: 0.168, color: "#dc2626", label: "Red" },
+  blue: { radius: 12, mass: 2.2, launchMult: 0.178, color: "#2563eb", label: "Blue" },
+  yellow: { radius: 13, mass: 3.1, launchMult: 0.172, color: "#facc15", label: "Yellow" },
 };
 
 const BASE_LEVELS = [
   {
     id: "w1-1",
-    name: "1-1 Starter Stack",
+    name: "1-1 Graveyard Stack",
     sling: { ...DEFAULT_SLING },
     camera: { minX: 0, maxX: W },
     birds: ["red", "red", "blue"],
@@ -80,7 +81,7 @@ const BASE_LEVELS = [
   },
   {
     id: "w1-2",
-    name: "1-2 Glass Tower",
+    name: "1-2 Haunted Glass Tower",
     sling: { ...DEFAULT_SLING },
     camera: { minX: 0, maxX: W },
     birds: ["red", "yellow", "blue"],
@@ -96,7 +97,7 @@ const BASE_LEVELS = [
   },
   {
     id: "w1-3",
-    name: "1-3 Stone Nest",
+    name: "1-3 Crypt of Stone",
     sling: { ...DEFAULT_SLING },
     camera: { minX: 0, maxX: W },
     birds: ["yellow", "blue", "red", "red"],
@@ -127,6 +128,9 @@ const app = {
   editorSelectedId: null,
   pointerId: null,
   lastFrame: performance.now(),
+  audioCtx: null,
+  lastOinkAt: 0,
+  audioPrimed: false,
 };
 
 function loadSave() {
@@ -210,7 +214,7 @@ function levelToSimulation(level) {
         vx: 0,
         vy: 0,
         m: 2.8,
-        hp: 40,
+        hp: 62,
       });
     }
   }
@@ -223,11 +227,15 @@ function levelToSimulation(level) {
     birdsQueue: [...(level.birds || ["red", "red"])],
     activeBird: null,
     particles: [],
+    scorePopups: [],
     blocks,
     pigs,
     score: 0,
     launchedBirds: 0,
     shotInProgress: false,
+    celebratingWin: false,
+    celebrationFrames: 0,
+    winBonusApplied: false,
     result: null,
   };
 }
@@ -236,11 +244,117 @@ function setStatus(text) {
   ui.status.textContent = text;
 }
 
+function initAudio() {
+  if (!app.audioCtx) {
+    const AudioCtor = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtor) return;
+    app.audioCtx = new AudioCtor();
+  }
+  if (app.audioCtx.state === "suspended") {
+    app.audioCtx.resume().catch(() => {});
+  }
+}
+
+function primeAudioIfNeeded() {
+  initAudio();
+  if (!app.audioCtx || app.audioPrimed) return;
+  const now = app.audioCtx.currentTime;
+  const osc = app.audioCtx.createOscillator();
+  const gain = app.audioCtx.createGain();
+  osc.type = "sine";
+  osc.frequency.setValueAtTime(440, now);
+  gain.gain.setValueAtTime(0.00001, now);
+  osc.connect(gain);
+  gain.connect(app.audioCtx.destination);
+  osc.start(now);
+  osc.stop(now + 0.02);
+  app.audioPrimed = true;
+}
+
+function playPigOink() {
+  initAudio();
+  if (!app.audioCtx) return;
+  const ctxAudio = app.audioCtx;
+  const now = ctxAudio.currentTime;
+
+  const osc1 = ctxAudio.createOscillator();
+  const osc2 = ctxAudio.createOscillator();
+  const gain = ctxAudio.createGain();
+  const filter = ctxAudio.createBiquadFilter();
+
+  osc1.type = "sawtooth";
+  osc2.type = "square";
+  osc1.frequency.setValueAtTime(310, now);
+  osc1.frequency.exponentialRampToValueAtTime(180, now + 0.14);
+  osc2.frequency.setValueAtTime(220, now);
+  osc2.frequency.exponentialRampToValueAtTime(130, now + 0.16);
+
+  filter.type = "bandpass";
+  filter.frequency.setValueAtTime(800, now);
+  filter.Q.value = 1.8;
+
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.exponentialRampToValueAtTime(0.28, now + 0.03);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.2);
+
+  osc1.connect(filter);
+  osc2.connect(filter);
+  filter.connect(gain);
+  gain.connect(ctxAudio.destination);
+
+  osc1.start(now);
+  osc2.start(now);
+  osc1.stop(now + 0.22);
+  osc2.stop(now + 0.22);
+}
+
+function playVictoryJingle() {
+  initAudio();
+  if (!app.audioCtx) return;
+  const ctxAudio = app.audioCtx;
+  const notes = [
+    { f: 523.25, t: 0.0, d: 0.18 },
+    { f: 659.25, t: 0.2, d: 0.18 },
+    { f: 783.99, t: 0.42, d: 0.2 },
+    { f: 1046.5, t: 0.68, d: 0.45 },
+  ];
+  const now = ctxAudio.currentTime;
+  for (const note of notes) {
+    const osc = ctxAudio.createOscillator();
+    const gain = ctxAudio.createGain();
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(note.f, now + note.t);
+    gain.gain.setValueAtTime(0.0001, now + note.t);
+    gain.gain.exponentialRampToValueAtTime(0.3, now + note.t + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + note.t + note.d);
+    osc.connect(gain);
+    gain.connect(ctxAudio.destination);
+    osc.start(now + note.t);
+    osc.stop(now + note.t + note.d + 0.02);
+  }
+}
+
+function maybePlayOink(cooldownMs = 170) {
+  const now = performance.now();
+  if (now - app.lastOinkAt < cooldownMs) return;
+  app.lastOinkAt = now;
+  playPigOink();
+}
+
 function updateHud() {
   const sim = app.simulation;
   if (!sim) return;
   ui.levelLabel.textContent = sim.levelName;
-  ui.birdsQueue.textContent = `Birds: ${sim.birdsQueue.map((b) => BIRDS[b].label[0]).join(" ") || "-"}`;
+  const queue = [];
+  if (sim.activeBird && !sim.activeBird.launched) queue.push(sim.activeBird.type);
+  queue.push(...sim.birdsQueue);
+  const dots = queue
+    .map(
+      (type, idx) =>
+        `<span class="bird-dot bird-${type}${idx === 0 ? " now" : ""}" title="${BIRDS[type].label}"></span>`,
+    )
+    .join("");
+  ui.birdsQueue.innerHTML = `<span class="queue-wrap"><span class="queue-text">Up next:</span>${dots || "-"}</span>`;
   ui.score.textContent = `Score: ${Math.round(sim.score)}`;
 }
 
@@ -384,6 +498,10 @@ function resolveCircleCircle(a, b, hitScale) {
   return Math.abs(j) * hitScale;
 }
 
+function circlesTouch(a, b) {
+  return dist(a.x, a.y, b.x, b.y) <= a.r + b.r;
+}
+
 function resolveBoxBox(a, b) {
   if (a.x + a.w < b.x || b.x + b.w < a.x || a.y + a.h < b.y || b.y + b.h < a.y) return;
   const overlapX = Math.min(a.x + a.w - b.x, b.x + b.w - a.x);
@@ -442,8 +560,8 @@ function useBirdAbility() {
   const b = sim?.activeBird;
   if (!b || !b.launched || b.usedAbility) return;
   if (b.type === "yellow") {
-    b.vx *= 1.6;
-    b.vy *= 1.6;
+    b.vx *= 1.32;
+    b.vy *= 1.32;
     b.usedAbility = true;
     setStatus("Yellow boost!");
   } else if (b.type === "blue") {
@@ -494,6 +612,18 @@ function spawnNextBirdIfNeeded() {
 function updateSim() {
   const sim = app.simulation;
   if (!sim || sim.result || app.paused || app.screen !== "game") return;
+
+  if (sim.celebratingWin) {
+    sim.celebrationFrames -= 1;
+    if (sim.celebrationFrames % 8 === 0) {
+      spawnDebris(130 + Math.random() * (W - 260), 110 + Math.random() * 120, 5);
+    }
+    if (sim.celebrationFrames <= 0) {
+      finishLevel(true);
+      return;
+    }
+  }
+
   const birds = [sim.activeBird, ...(sim.extraBirds || [])].filter(Boolean);
 
   for (const b of birds) {
@@ -523,20 +653,31 @@ function updateSim() {
     if (!b) continue;
     for (const block of sim.blocks) {
       const damage = resolveCircleBox(b, block, true, 0.2);
-      if (damage > 0) block.hp -= damage;
+      if (damage > 3.5) block.hp -= damage;
     }
     for (const pig of sim.pigs) {
+      // Arcade rule: if a launched bird touches a pig, pig is defeated immediately.
+      if (b.launched && circlesTouch(b, pig)) {
+        pig.hp = 0;
+        maybePlayOink(0);
+        continue;
+      }
       const damage = resolveCircleCircle(b, pig, 0.26);
-      if (damage > 0) pig.hp -= damage;
+      if (damage > 2.6) {
+        pig.hp -= damage * 2.1;
+        maybePlayOink(140);
+        // Big direct hits should reliably finish a pig.
+        if (damage > 18) pig.hp = 0;
+      }
     }
   }
 
   for (const pig of sim.pigs) {
     for (const block of sim.blocks) {
       const damage = resolveCircleBox(pig, block, true, 0.12);
-      if (damage > 0) {
-        pig.hp -= damage * 0.5;
-        block.hp -= damage * 0.4;
+      if (damage > 9.5) {
+        pig.hp -= damage * 0.1;
+        block.hp -= damage * 0.35;
       }
     }
   }
@@ -564,12 +705,20 @@ function updateSim() {
 
   const removedPigs = [];
   sim.pigs = sim.pigs.filter((pig) => {
-    const dead = pig.hp <= 0 || pig.y > H + 50 || pig.x < -60;
+    const dead = pig.hp <= 0 || pig.y > H + 120 || pig.x < -220 || pig.x > W + 220;
     if (dead) removedPigs.push(pig);
     return !dead;
   });
   for (const pig of removedPigs) {
     sim.score += 1000;
+    maybePlayOink(0);
+    setStatus("Pig defeated! +1000");
+    sim.scorePopups.push({
+      x: pig.x,
+      y: pig.y - pig.r - 8,
+      text: "+1000",
+      life: 58,
+    });
     spawnDebris(pig.x, pig.y, 11);
   }
 
@@ -581,9 +730,26 @@ function updateSim() {
   }
   sim.particles = sim.particles.filter((p) => p.life > 0);
 
+  for (const pop of sim.scorePopups) {
+    pop.y -= 0.75;
+    pop.life -= 1;
+  }
+  sim.scorePopups = sim.scorePopups.filter((pop) => pop.life > 0);
+
   if (sim.pigs.length === 0) {
-    sim.score += sim.birdsQueue.length * 450;
-    finishLevel(true);
+    if (!sim.celebratingWin) {
+      sim.celebratingWin = true;
+      sim.celebrationFrames = WIN_CELEBRATION_FRAMES;
+      if (!sim.winBonusApplied) {
+        sim.score += sim.birdsQueue.length * 450;
+        sim.winBonusApplied = true;
+      }
+      setStatus("Level cleared! Spooky celebration!");
+      playVictoryJingle();
+      spawnDebris(W * 0.45, H * 0.35, 24);
+      spawnDebris(W * 0.58, H * 0.3, 24);
+    }
+    updateHud();
     return;
   }
 
@@ -600,18 +766,60 @@ function updateSim() {
     }
   }
 
-  spawnNextBirdIfNeeded();
+  if (!sim.celebratingWin) {
+    spawnNextBirdIfNeeded();
+  }
   updateHud();
 }
 
 function drawBird(bird) {
   const def = BIRDS[bird.type];
+  const eyeY = bird.y - bird.r * 0.18;
+  const eyeX = bird.x + bird.r * 0.28;
+
+  // Body
   ctx.beginPath();
   ctx.fillStyle = def.color;
   ctx.arc(bird.x, bird.y, bird.r, 0, Math.PI * 2);
   ctx.fill();
-  ctx.strokeStyle = "#1f2937";
+  ctx.strokeStyle = "#111827";
   ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Angry brow
+  ctx.strokeStyle = "#111827";
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(eyeX - 7, eyeY - 5);
+  ctx.lineTo(eyeX + 3, eyeY - 1);
+  ctx.stroke();
+
+  // Eye
+  ctx.beginPath();
+  ctx.fillStyle = "#f8fafc";
+  ctx.arc(eyeX, eyeY, 3.8, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.fillStyle = "#111827";
+  ctx.arc(eyeX + 1, eyeY, 1.8, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Beak
+  ctx.beginPath();
+  ctx.fillStyle = "#f59e0b";
+  ctx.moveTo(bird.x + bird.r * 0.95, bird.y);
+  ctx.lineTo(bird.x + bird.r * 0.35, bird.y - 4);
+  ctx.lineTo(bird.x + bird.r * 0.35, bird.y + 4);
+  ctx.closePath();
+  ctx.fill();
+
+  // Spooky tuft
+  ctx.strokeStyle = "#0f172a";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(bird.x - 2, bird.y - bird.r);
+  ctx.lineTo(bird.x + 1, bird.y - bird.r - 8);
+  ctx.lineTo(bird.x + 5, bird.y - bird.r - 2);
   ctx.stroke();
 }
 
@@ -661,14 +869,53 @@ function drawSling() {
 function drawScene() {
   ctx.clearRect(0, 0, W, H);
   const g = ctx.createLinearGradient(0, 0, 0, H);
-  g.addColorStop(0, "#7dd3fc");
-  g.addColorStop(1, "#bfdbfe");
+  g.addColorStop(0, "#0b1024");
+  g.addColorStop(0.45, "#1f1b4d");
+  g.addColorStop(1, "#111827");
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, W, H);
 
-  ctx.fillStyle = "#4d7c0f";
+  // Moon glow
+  ctx.beginPath();
+  ctx.fillStyle = "rgba(226, 232, 240, 0.18)";
+  ctx.arc(W - 120, 90, 56, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.fillStyle = "#e2e8f0";
+  ctx.arc(W - 120, 90, 34, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.fillStyle = "#0b1024";
+  ctx.arc(W - 108, 84, 32, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Distant hills
+  ctx.fillStyle = "#0f172a";
+  ctx.beginPath();
+  ctx.moveTo(0, GROUND_Y);
+  ctx.quadraticCurveTo(140, GROUND_Y - 80, 300, GROUND_Y - 40);
+  ctx.quadraticCurveTo(420, GROUND_Y - 10, 560, GROUND_Y - 60);
+  ctx.quadraticCurveTo(700, GROUND_Y - 95, W, GROUND_Y - 25);
+  ctx.lineTo(W, GROUND_Y);
+  ctx.closePath();
+  ctx.fill();
+
+  // Tiny bats
+  ctx.strokeStyle = "rgba(226,232,240,0.45)";
+  ctx.lineWidth = 1.5;
+  const batY = 130 + Math.sin(performance.now() * 0.0025) * 5;
+  for (let i = 0; i < 4; i += 1) {
+    const bx = 220 + i * 60;
+    ctx.beginPath();
+    ctx.moveTo(bx - 8, batY + i * 2);
+    ctx.quadraticCurveTo(bx - 2, batY - 6 + i * 2, bx + 4, batY + i * 2);
+    ctx.quadraticCurveTo(bx + 10, batY - 6 + i * 2, bx + 16, batY + i * 2);
+    ctx.stroke();
+  }
+
+  ctx.fillStyle = "#2f4f2f";
   ctx.fillRect(0, GROUND_Y, W, H - GROUND_Y);
-  ctx.fillStyle = "#3f6212";
+  ctx.fillStyle = "#1f2937";
   ctx.fillRect(0, GROUND_Y, W, 6);
 
   if (app.screen === "editor" && ui.gridSnap.checked) {
@@ -706,13 +953,42 @@ function drawScene() {
   }
 
   for (const pig of sim.pigs) {
+    // Pig body
     ctx.beginPath();
-    ctx.fillStyle = "#86efac";
+    ctx.fillStyle = "#6ee7b7";
     ctx.arc(pig.x, pig.y, pig.r, 0, Math.PI * 2);
     ctx.fill();
-    ctx.strokeStyle = "#166534";
+    ctx.strokeStyle = "#065f46";
     ctx.lineWidth = 2;
     ctx.stroke();
+    // Ears
+    ctx.beginPath();
+    ctx.fillStyle = "#34d399";
+    ctx.moveTo(pig.x - 9, pig.y - pig.r + 2);
+    ctx.lineTo(pig.x - 3, pig.y - pig.r - 9);
+    ctx.lineTo(pig.x + 1, pig.y - pig.r + 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(pig.x + 9, pig.y - pig.r + 2);
+    ctx.lineTo(pig.x + 3, pig.y - pig.r - 9);
+    ctx.lineTo(pig.x - 1, pig.y - pig.r + 2);
+    ctx.fill();
+    // Snout
+    ctx.beginPath();
+    ctx.fillStyle = "#fda4af";
+    ctx.ellipse(pig.x, pig.y + 3, 8, 6, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#7f1d1d";
+    ctx.beginPath();
+    ctx.arc(pig.x - 3, pig.y + 3, 1.2, 0, Math.PI * 2);
+    ctx.arc(pig.x + 3, pig.y + 3, 1.2, 0, Math.PI * 2);
+    ctx.fill();
+    // Eyes
+    ctx.fillStyle = "#111827";
+    ctx.beginPath();
+    ctx.arc(pig.x - 5, pig.y - 4, 1.7, 0, Math.PI * 2);
+    ctx.arc(pig.x + 5, pig.y - 4, 1.7, 0, Math.PI * 2);
+    ctx.fill();
     if (app.screen === "editor" && pig.id === app.editorSelectedId) {
       ctx.strokeStyle = "#f59e0b";
       ctx.lineWidth = 3;
@@ -731,6 +1007,35 @@ function drawScene() {
   for (const p of sim.particles) {
     ctx.fillStyle = `rgba(251,191,36,${Math.max(0, p.life / 90)})`;
     ctx.fillRect(p.x, p.y, 3, 3);
+  }
+
+  for (const pop of sim.scorePopups || []) {
+    const alpha = Math.max(0, pop.life / 58);
+    ctx.fillStyle = `rgba(251, 191, 36, ${alpha})`;
+    ctx.strokeStyle = `rgba(15, 23, 42, ${alpha})`;
+    ctx.lineWidth = 2;
+    ctx.font = "bold 22px system-ui, sans-serif";
+    ctx.textAlign = "center";
+    ctx.strokeText(pop.text, pop.x, pop.y);
+    ctx.fillText(pop.text, pop.x, pop.y);
+    ctx.textAlign = "left";
+  }
+
+  if (sim.celebratingWin) {
+    const pulse = 0.72 + Math.sin(performance.now() * 0.01) * 0.08;
+    ctx.fillStyle = `rgba(15, 23, 42, ${pulse})`;
+    ctx.fillRect(0, H / 2 - 60, W, 120);
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#fef08a";
+    ctx.strokeStyle = "#1f2937";
+    ctx.lineWidth = 3;
+    ctx.font = "bold 40px system-ui, sans-serif";
+    ctx.strokeText("LEVEL CLEARED!", W / 2, H / 2 - 8);
+    ctx.fillText("LEVEL CLEARED!", W / 2, H / 2 - 8);
+    ctx.fillStyle = "#f8fafc";
+    ctx.font = "600 20px system-ui, sans-serif";
+    ctx.fillText("Prepare for the next nightmare...", W / 2, H / 2 + 28);
+    ctx.textAlign = "left";
   }
 }
 
@@ -772,7 +1077,7 @@ function addEditorEntity(point, tool) {
   const x = ui.gridSnap.checked ? toGrid(point.x) : point.x;
   const y = ui.gridSnap.checked ? toGrid(point.y) : point.y;
   if (tool === "pig") {
-    const pig = { id: crypto.randomUUID(), x, y, r: 16, vx: 0, vy: 0, m: 2.8, hp: 40 };
+    const pig = { id: crypto.randomUUID(), x, y, r: 16, vx: 0, vy: 0, m: 2.8, hp: 62 };
     sim.pigs.push(pig);
     app.editorSelectedId = pig.id;
   } else {
@@ -839,6 +1144,7 @@ function openEditor(sourceLevel = null) {
 }
 
 function handlePointerDown(ev) {
+  primeAudioIfNeeded();
   const point = pointToCanvas(ev);
   if (app.screen === "game") {
     const bird = app.simulation?.activeBird;
@@ -931,10 +1237,14 @@ function handlePointerUp(ev) {
 
 function bindEvents() {
   ui.playBtn.addEventListener("click", () => {
+    primeAudioIfNeeded();
     updateMapScreen();
     showScreen("map");
   });
-  ui.editorBtn.addEventListener("click", () => openEditor(app.levels[0]));
+  ui.editorBtn.addEventListener("click", () => {
+    primeAudioIfNeeded();
+    openEditor(app.levels[0]);
+  });
   ui.mapBackBtn.addEventListener("click", () => showScreen("title"));
   ui.pauseBtn.addEventListener("click", () => {
     app.paused = !app.paused;
@@ -986,7 +1296,10 @@ function bindEvents() {
   canvas.addEventListener("pointerup", handlePointerUp);
   canvas.addEventListener("pointercancel", handlePointerUp);
   canvas.addEventListener("click", () => {
-    if (app.screen === "game") useBirdAbility();
+    if (app.screen === "game") {
+      primeAudioIfNeeded();
+      useBirdAbility();
+    }
   });
 }
 
