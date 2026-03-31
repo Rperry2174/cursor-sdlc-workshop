@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fairway Match</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Fairway Match</p>
+          <h1>Find a golf partner for your next round.</h1>
+        </div>
+        <div class="topbar-badge">Golf buddy MVP</div>
+      </header>
+
+      <section class="hero">
+        <div class="hero-copy-wrap">
+          <p class="hero-copy">
+            Swipe through local golfers, spot the best vibe and schedule match, and save the ones you would actually want to tee off with.
+          </p>
+          <div class="hero-highlights">
+            <span class="hero-chip">Swipe-style discovery</span>
+            <span class="hero-chip">Skill-based hints</span>
+            <span class="hero-chip">Simple matches rail</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="content-grid">
+        <section class="discovery-shell">
+          <div class="discovery-header">
+            <div>
+              <p class="section-kicker">Discovery</p>
+              <h2>Your next possible foursome invite</h2>
+            </div>
+            <span id="profile-count" class="pill"></span>
+          </div>
+
+          <div class="card-stage">
+            <div class="card-shadow card-shadow-back"></div>
+            <div class="card-shadow card-shadow-mid"></div>
+            <article id="profile-card" class="profile-card" aria-live="polite"></article>
+          </div>
+
+          <div class="actions">
+            <button id="pass-button" class="icon-button button-pass" type="button" aria-label="Pass profile">
+              <span class="icon-button-symbol">X</span>
+              <span class="icon-button-label">Pass</span>
+            </button>
+            <button id="like-button" class="icon-button button-like" type="button" aria-label="Like profile">
+              <span class="icon-button-symbol">♥</span>
+              <span class="icon-button-label">Like</span>
+            </button>
+          </div>
+        </section>
+
+        <aside class="matches-shell">
+          <div class="matches-header">
+            <div>
+              <p class="section-kicker">Saved picks</p>
+              <h2>Players you liked</h2>
+            </div>
+            <span id="match-count" class="pill">0 liked</span>
+          </div>
+          <ul id="matches-list" class="matches-list"></ul>
+        </aside>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

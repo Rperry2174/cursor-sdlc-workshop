@@ -1,0 +1,250 @@
+.app {
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 3rem;
+}
+
+.app h1 {
+  margin: 0 0 0.25rem;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1b4332;
+}
+
+.subtitle {
+  margin: 0 0 1rem;
+  color: #52796f;
+  font-size: 0.95rem;
+}
+
+.hint {
+  margin: 0 0 1.5rem;
+  padding: 0.75rem 1rem;
+  background: #e8f0eb;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: #2d6a4f;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+  padding: 1.25rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.08);
+}
+
+.form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #344e41;
+}
+
+.form input,
+.form-select {
+  padding: 0.5rem 0.65rem;
+  border: 1px solid #b7c4b0;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: #fff;
+}
+
+.form-select {
+  cursor: pointer;
+}
+
+.form input:focus,
+.form-select:focus {
+  outline: 2px solid #40916c;
+  outline-offset: 1px;
+}
+
+.field-hint {
+  font-weight: 400;
+  font-size: 0.78rem;
+  color: #52796f;
+}
+
+.form button[type='submit'] {
+  align-self: flex-start;
+  margin-top: 0.25rem;
+  padding: 0.55rem 1.1rem;
+  border: none;
+  border-radius: 8px;
+  background: #2d6a4f;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.form button[type='submit']:hover {
+  background: #1b4332;
+}
+
+.list-section {
+  margin-bottom: 2rem;
+}
+
+.list-section h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.1rem;
+  color: #1b4332;
+}
+
+.section-lede {
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem;
+  color: #52796f;
+}
+
+.empty {
+  margin: 0;
+  padding: 1rem;
+  background: #fff;
+  border-radius: 12px;
+  color: #52796f;
+  font-size: 0.95rem;
+}
+
+.reminder-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.reminder-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1rem 1.1rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.08);
+}
+
+@media (min-width: 520px) {
+  .reminder-card {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+}
+
+.reminder-card-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.reminder-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.reminder-title-row strong {
+  color: #1b4332;
+  font-size: 1rem;
+}
+
+.reminder-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.45rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.badge-overdue {
+  background: #fff0f0;
+  color: #9b2226;
+  border: 1px solid #e07a7a;
+}
+
+.badge-due-today {
+  background: #fff8e6;
+  color: #9a6700;
+  border: 1px solid #e9c46a;
+}
+
+.badge-this-week {
+  background: #e8f0eb;
+  color: #2d6a4f;
+  border: 1px solid #95d5b2;
+}
+
+.reminder-meta {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  font-size: 0.85rem;
+  color: #52796f;
+}
+
+.meta-pill {
+  display: inline-block;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: #f4f7f4;
+  border: 1px solid #b7c4b0;
+  font-weight: 600;
+  color: #344e41;
+}
+
+.reminder-actions {
+  display: flex;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.btn-done {
+  padding: 0.4rem 0.75rem;
+  border: none;
+  border-radius: 8px;
+  background: #2d6a4f;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-done:hover {
+  background: #1b4332;
+}
+
+.btn-remove {
+  padding: 0.4rem 0.75rem;
+  border: 1px solid #c1121f;
+  border-radius: 8px;
+  background: #fff;
+  color: #c1121f;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-remove:hover {
+  background: #fff0f0;
+}

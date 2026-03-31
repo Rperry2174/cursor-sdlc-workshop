@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-hidden="true">
+  <rect width="200" height="200" fill="var(--diagram-bg)" rx="12" />
+  <circle cx="100" cy="84" r="36" fill="none" stroke="var(--diagram-stroke)" stroke-width="3" />
+  <path d="M 72 58 Q 78 34 90 54" fill="none" stroke="var(--diagram-stroke)" stroke-width="3" stroke-linecap="round" />
+  <path d="M 128 58 Q 122 34 110 54" fill="none" stroke="var(--diagram-stroke)" stroke-width="3" stroke-linecap="round" />
+  <ellipse cx="88" cy="80" rx="6" ry="8" fill="var(--diagram-stroke)" />
+  <ellipse cx="112" cy="80" rx="6" ry="8" fill="var(--diagram-stroke)" />
+  <path d="M 94 94 L 100 100 L 106 94" fill="none" stroke="var(--diagram-stroke)" stroke-width="2" stroke-linejoin="round" />
+  <path d="M 92 104 Q 100 110 108 104" fill="none" stroke="var(--diagram-stroke)" stroke-width="2" stroke-linecap="round" />
+  <ellipse cx="100" cy="150" rx="48" ry="40" fill="none" stroke="var(--diagram-stroke)" stroke-width="3" />
+</svg>
