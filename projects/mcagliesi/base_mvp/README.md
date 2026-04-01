@@ -1,16 +1,23 @@
-# Base MVP (minimal)
+# Base MVP
 
-Implements the core loop from `../prd.md`:
+This folder is where your project code lives.
 
-- Short **match list** with a one-line tactical fingerprint
-- **Match detail** as a **segment timeline** (time range, game context, phase, in/out-of-possession shape labels, trigger, roles, confidence)
-- **Shape glossary** (text only — no diagrams in this MVP)
+## What to Build
+- A minimal, working version of your project
+- Should run locally and do *something* visible
+- Keep it simple — 10 minutes max!
 
-Data in `src/data.js` is **fictional** demo content.
+### Good Examples
+- A Chrome extension with one button that does one thing
+- A web page with basic HTML/CSS/JS
+- A simple CLI script
 
-```bash
-npm install
-npm run dev
-```
+### Instructions
 
-Default dev server: [http://localhost:5180](http://localhost:5180) (see `vite.config.js`).
+1. Tell Cursor to read the `prd.md` in your project folder
+2. Tell Cursor to generate the base MVP here
+3. Tell Cursor to run it locally and verify it works
+
+### After You're Done
+
+> **Ask Cursor:** "Commit all my changes with the message 'Base MVP scaffold', push to my fork, and open a PR to the original repo"
