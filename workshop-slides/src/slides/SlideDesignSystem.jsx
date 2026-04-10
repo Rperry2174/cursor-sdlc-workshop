@@ -2,7 +2,7 @@ const SlideDesignSystem = () => (
   <>
     <div className="phase-header">
       <div className="phase-number design">02</div>
-      <h2>Design — What a Design System Looks Like</h2>
+      <h2>Context: A Designer's Typical Day</h2>
     </div>
     <p className="small" style={{ marginBottom: '0.75rem' }}>
       A day in the life of a designer building and maintaining a design system
@@ -39,7 +39,7 @@ const SlideDesignSystem = () => (
           <div className="discovery-card">
             <span className="dq-icon" style={{ fontSize: '1.2rem' }}>🎨</span>
             <span className="dq-text" style={{ fontStyle: 'normal' }}>
-              <strong>Midday:</strong> Design new components in Figma using established tokens — colors, spacing, typography. Ensure consistency with the system.
+              <strong>Midday:</strong> Design new components in Figma using established tokens - colors, spacing, typography. Ensure consistency with the system.
             </span>
           </div>
           <div className="discovery-card">

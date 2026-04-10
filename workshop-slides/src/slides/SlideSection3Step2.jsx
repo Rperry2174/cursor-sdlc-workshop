@@ -36,7 +36,7 @@ const SlideSection3Step2 = () => (
             <div className="check-header">
               <div className="check-box"></div>
               <div>
-                <strong>Pull design context for your task</strong> — let Figma
+                <strong>Pull design context for your task</strong>  - let Figma
                 tell Cursor exactly what to build
               </div>
             </div>
@@ -55,21 +55,21 @@ const SlideSection3Step2 = () => (
           <div className="check-item">
             <div className="check-box"></div>
             <div>
-              <strong>Run the app</strong> — <code>npm install && npm run dev</code>{' '}
+              <strong>Run the app</strong>  - <code>npm install && npm run dev</code>{' '}
               in your team folder
             </div>
           </div>
           <div className="check-item">
             <div className="check-box"></div>
             <div>
-              <strong>Iterate with Agent Mode</strong> — refine the design,
+              <strong>Iterate with Agent Mode</strong>  - refine the design,
               fix issues, match the Figma annotations
             </div>
           </div>
           <div className="check-item">
             <div className="check-box"></div>
             <div>
-              <strong>Test in browser</strong> — verify your feature works
+              <strong>Test in browser</strong>  - verify your feature works
               before committing
             </div>
           </div>

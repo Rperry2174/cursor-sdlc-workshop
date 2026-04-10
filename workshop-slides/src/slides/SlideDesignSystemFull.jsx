@@ -2,7 +2,7 @@ const SlideDesignSystemFull = () => (
   <>
     <div className="phase-header" style={{ marginBottom: '0.5rem' }}>
       <div className="phase-number design">02</div>
-      <h2 style={{ marginBottom: 0 }}>Design — What a Design System Looks Like</h2>
+      <h2 style={{ marginBottom: 0 }}>Example: A Design System in Figma</h2>
     </div>
 
     <div style={{

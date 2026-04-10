@@ -7,7 +7,7 @@ const SlideSection2Takeaway = () => (
     <h2>It Was Working For You the Whole Time</h2>
     <div className="hero-callout">
       <div className="hero-text">
-        The best engineers don't just <em>use</em> Cursor — they{' '}
+        The best engineers don't just <em>use</em> Cursor  - they{' '}
         <span className="hero-highlight">
           teach it how they work
         </span>.
@@ -54,7 +54,7 @@ const SlideSection2Takeaway = () => (
           </span>
         </div>
         <ul className="tile-bullets">
-          <li>Created a Rule, a Skill, and a Hook — your own guardrails</li>
+          <li>Created a Rule, a Skill, and a Hook  - your own guardrails</li>
           <li>Senior engineers' knowledge stays even when they leave</li>
           <li>The AI carries the standards forward automatically</li>
         </ul>
@@ -86,7 +86,7 @@ const SlideSection2Takeaway = () => (
     </div>
     <div className="emphasis-box orange">
       <strong>The takeaway:</strong> Any AI can generate code. Cursor lets you
-      teach it your way — same quality bar, automatically.
+      teach it your way  - same quality bar, automatically.
     </div>
   </>
 )

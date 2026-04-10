@@ -36,7 +36,7 @@ const Slide14Section2Step3 = () => (
             <div className="check-header">
               <div className="check-box"></div>
               <div>
-                <strong>Create a Hook</strong> — automate commit message
+                <strong>Create a Hook</strong>  - automate commit message
                 validation
               </div>
             </div>
@@ -56,7 +56,7 @@ const Slide14Section2Step3 = () => (
             <div className="check-header">
               <div className="check-box"></div>
               <div>
-                <strong>Pull your requirements from Notion</strong> — search
+                <strong>Pull your requirements from Notion</strong>  - search
                 for your PRD and find your feature
               </div>
             </div>
@@ -75,21 +75,21 @@ const Slide14Section2Step3 = () => (
           <div className="check-item">
             <div className="check-box"></div>
             <div>
-              <strong>Use Plan Mode first</strong> — design your approach before
+              <strong>Use Plan Mode first</strong>  - design your approach before
               writing code, using the requirements from Notion
             </div>
           </div>
           <div className="check-item">
             <div className="check-box"></div>
             <div>
-              <strong>Implement using Agent Mode</strong> — tell Cursor what to
+              <strong>Implement using Agent Mode</strong>  - tell Cursor what to
               build and let it work
             </div>
           </div>
           <div className="check-item">
             <div className="check-box"></div>
             <div>
-              <strong>Test it</strong> — run the app and verify your feature
+              <strong>Test it</strong>  - run the app and verify your feature
               works before committing
             </div>
           </div>
@@ -118,9 +118,9 @@ const Slide14Section2Step3 = () => (
         </div>
       </div>
       <div className="emphasis-box orange">
-        <strong>Section 2 Complete</strong> — You explored unfamiliar code,
+        <strong>Section 2 Complete</strong>  - You explored unfamiliar code,
         created your own Rule, Skill, and Hook, then planned and shipped
-        improvements. You didn't just use Cursor — you customized it.
+        improvements. You didn't just use Cursor  - you customized it.
       </div>
     </div>
   </>

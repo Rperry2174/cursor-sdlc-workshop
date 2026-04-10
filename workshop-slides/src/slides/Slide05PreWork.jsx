@@ -10,7 +10,7 @@ const Slide05PreWork = () => (
         <div className="check-header">
           <div className="check-box"></div>
           <div>
-            <strong>Download &amp; Install Cursor</strong> — should already be on
+            <strong>Download &amp; Install Cursor</strong>  - should already be on
             your machine
           </div>
         </div>
@@ -48,7 +48,7 @@ const Slide05PreWork = () => (
         <div className="check-header">
           <div className="check-box"></div>
           <div>
-            <strong>Run the setup script</strong> — installs everything
+            <strong>Run the setup script</strong>  - installs everything
             (Homebrew, Git, GitHub CLI, Node.js, Cursor CLI)
           </div>
         </div>
@@ -74,7 +74,7 @@ const Slide05PreWork = () => (
     </div>
     <div className="emphasis-box">
       <strong>The script handles everything:</strong> Homebrew, Git, GitHub CLI,
-      Node.js, and the Cursor CLI — all in one command.
+      Node.js, and the Cursor CLI  - all in one command.
     </div>
   </>
 )

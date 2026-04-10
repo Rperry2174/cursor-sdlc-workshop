@@ -2,10 +2,10 @@ const SlideDeployDeepDive = () => (
   <>
     <div className="phase-header">
       <div className="phase-number deploy">06</div>
-      <h2>Deploy</h2>
+      <h2>Problem: Deployment is Manual, Risky, and Slow</h2>
     </div>
     <p className="small" style={{ marginBottom: '0.5rem' }}>
-      Getting code to production — and the infrastructure complexity that slows teams down
+      Getting code to production - and the infrastructure complexity that slows teams down
     </p>
 
     <div className="deepdive-cols">
@@ -34,15 +34,15 @@ const SlideDeployDeepDive = () => (
         <div className="pain-list">
           <div className="pain-item">
             <span className="pain-icon">🏗️</span>
-            <span className="pain-text"><strong>Infrastructure complexity</strong> — Terraform, Docker, K8s, CI/CD — the deployment stack is as complex as the app itself. Few people understand it all.</span>
+            <span className="pain-text"><strong>Infrastructure complexity</strong> - Terraform, Docker, K8s, CI/CD - the deployment stack is as complex as the app itself. Few people understand it all.</span>
           </div>
           <div className="pain-item">
             <span className="pain-icon">😨</span>
-            <span className="pain-text"><strong>Deploy fear</strong> — teams deploy infrequently because it's risky. Bigger batches mean bigger failures. The cycle reinforces itself.</span>
+            <span className="pain-text"><strong>Deploy fear</strong> - teams deploy infrequently because it's risky. Bigger batches mean bigger failures. The cycle reinforces itself.</span>
           </div>
           <div className="pain-item">
             <span className="pain-icon">🔧</span>
-            <span className="pain-text"><strong>Config drift</strong> — environment differences between dev, staging, and prod cause "works on my machine" bugs that only appear in production.</span>
+            <span className="pain-text"><strong>Config drift</strong> - environment differences between dev, staging, and prod cause "works on my machine" bugs that only appear in production.</span>
           </div>
         </div>
       </div>
@@ -61,11 +61,11 @@ const SlideDeployDeepDive = () => (
             </div>
             <div className="solution-step">
               <span className="step-num" style={{ background: 'var(--red)' }}>2</span>
-              <span>MCPs connect Cursor to cloud providers and deployment platforms — query status, trigger deploys, read logs without leaving the IDE</span>
+              <span>MCPs connect Cursor to cloud providers and deployment platforms - query status, trigger deploys, read logs without leaving the IDE</span>
             </div>
             <div className="solution-step">
               <span className="step-num" style={{ background: 'var(--red)' }}>3</span>
-              <span>When deploys fail, Cursor reads error logs and suggests fixes — closing the loop between "it broke" and "here's the fix"</span>
+              <span>When deploys fail, Cursor reads error logs and suggests fixes - closing the loop between "it broke" and "here's the fix"</span>
             </div>
           </div>
         </div>
@@ -84,7 +84,7 @@ const SlideDeployDeepDive = () => (
         <div className="outcome-callout" style={{ background: 'linear-gradient(135deg, rgba(220, 50, 47, 0.1), rgba(220, 50, 47, 0.03))', borderColor: 'rgba(220, 50, 47, 0.25)' }}>
           <div className="outcome-label" style={{ color: 'var(--red)' }}>Outcome</div>
           <div className="outcome-text">
-            Infrastructure stops being a <strong style={{ color: 'var(--red)' }}>black box owned by 2 people</strong> — any engineer can confidently work with deployment configs because AI understands them
+            Infrastructure stops being a <strong style={{ color: 'var(--red)' }}>black box owned by 2 people</strong> - any engineer can confidently work with deployment configs because AI understands them
           </div>
         </div>
       </div>

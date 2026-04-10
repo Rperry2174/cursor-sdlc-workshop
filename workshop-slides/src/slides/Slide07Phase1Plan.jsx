@@ -14,7 +14,7 @@ const Slide07Phase1Plan = () => (
             <div className="check-header">
               <div className="check-box"></div>
               <div>
-                <strong>Tell Cursor to fork &amp; clone the repo</strong> — this
+                <strong>Tell Cursor to fork &amp; clone the repo</strong>  - this
                 creates your own copy and downloads it
               </div>
             </div>

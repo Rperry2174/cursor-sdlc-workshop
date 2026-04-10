@@ -31,14 +31,14 @@ const Slide08Phase2Design = () => (
           <div className="check-item">
             <div className="check-box"></div>
             <div>
-              <strong>Run locally</strong> — Ask Cursor:{' '}
+              <strong>Run locally</strong>  - Ask Cursor:{' '}
               <em>"How do I run this project?"</em>
             </div>
           </div>
           <div className="check-item">
             <div className="check-box"></div>
             <div>
-              <strong>Verify it works</strong> — make sure the base MVP runs before moving on
+              <strong>Verify it works</strong>  - make sure the base MVP runs before moving on
             </div>
           </div>
         </div>

@@ -14,7 +14,7 @@ const Slide12Section2Step1 = () => (
             <div className="check-header">
               <div className="check-box"></div>
               <div>
-                <strong>Pull the latest changes from main</strong> — everyone's
+                <strong>Pull the latest changes from main</strong>  - everyone's
                 merged PRs are now in the repo
               </div>
             </div>
@@ -36,7 +36,7 @@ const Slide12Section2Step1 = () => (
           <div className="check-item">
             <div className="check-box"></div>
             <div>
-              <strong>Pick someone else's project</strong> — browse the{' '}
+              <strong>Pick someone else's project</strong>  - browse the{' '}
               <code>projects/</code> folder and find a project that isn't yours
             </div>
           </div>
@@ -44,7 +44,7 @@ const Slide12Section2Step1 = () => (
             <div className="check-header">
               <div className="check-box"></div>
               <div>
-                <strong>Use Ask Mode to understand it</strong> — explore without
+                <strong>Use Ask Mode to understand it</strong>  - explore without
                 changing anything
               </div>
             </div>
@@ -62,7 +62,7 @@ const Slide12Section2Step1 = () => (
             <div className="check-header">
               <div className="check-box"></div>
               <div>
-                <strong>Run it</strong> — get their project working in your browser
+                <strong>Run it</strong>  - get their project working in your browser
               </div>
             </div>
             <div className="code-block">
@@ -76,7 +76,7 @@ const Slide12Section2Step1 = () => (
           <div className="check-item">
             <div className="check-box"></div>
             <div>
-              <strong>See it live</strong> — you should have someone else's app
+              <strong>See it live</strong>  - you should have someone else's app
               running in your browser right now
             </div>
           </div>

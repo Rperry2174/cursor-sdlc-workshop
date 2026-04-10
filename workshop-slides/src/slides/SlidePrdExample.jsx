@@ -131,7 +131,7 @@ const SlidePrdExample = () => (
 
     <div className="emphasis-box green" style={{ marginTop: '0.75rem' }}>
       <strong>Your turn:</strong> There should already be a <code>prd.md</code> in{' '}
-      <code>projects/&lt;your-github-username&gt;/</code> — Cursor helped you fill it out in the last step.
+      <code>projects/&lt;your-github-username&gt;/</code>  - Cursor helped you fill it out in the last step.
       Make sure it has your project idea, a base MVP, and at least 2-3 features.
     </div>
   </>

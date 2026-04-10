@@ -8,7 +8,7 @@ const SlideS2AddFeature = () => (
     <div className="intro-callout orange">
       <p>
         Now that you understand the project and have it running, your job is to
-        <strong> add one feature</strong> to their app. Think small — something
+        <strong> add one feature</strong> to their app. Think small  - something
         fun you can finish in a few minutes.
       </p>
     </div>
@@ -104,7 +104,7 @@ const SlideS2AddFeature = () => (
         <div className="check-item">
           <div className="check-box"></div>
           <div>
-            <strong>Test it</strong> — run the app and make sure your feature works
+            <strong>Test it</strong>  - run the app and make sure your feature works
           </div>
         </div>
       </div>

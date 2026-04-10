@@ -23,7 +23,7 @@ const Slide16Section3Rules = () => (
           <span className="highlight-purple">Get as many people contributing as possible</span>
         </div>
         <div className="tile-desc">
-          Just like at a real company — most team members should try to ship something
+          Just like at a real company  - most team members should try to ship something
         </div>
       </div>
       <div className="tile purple">

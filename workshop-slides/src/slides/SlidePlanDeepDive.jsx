@@ -50,10 +50,10 @@ const SlidePlanDeepDive = () => (
       <div>
         <div className="phase-header" style={{ marginBottom: '0.2rem' }}>
           <div className="phase-number plan">01</div>
-          <h2 style={{ marginBottom: 0 }}>Plan</h2>
+          <h2 style={{ marginBottom: 0 }}>Problem: Specs Take Weeks and Drift From Reality</h2>
         </div>
         <p className="small" style={{ marginBottom: 0 }}>
-          How teams go from idea to actionable work — and where it breaks down
+          How teams go from idea to actionable work, and where it breaks down
         </p>
       </div>
       <div style={{
@@ -97,6 +97,7 @@ const SlidePlanDeepDive = () => (
             {numBadge(1)}
             <span className="dq-text" style={{ fontSize: '0.8rem' }}>
               "How do you turn a {kw('business request')} into a {kw('ticket or spec')} an engineer can act on?"
+            
             </span>
           </div>
           <div className="discovery-card" style={cardStyle}>
@@ -161,31 +162,31 @@ const SlidePlanDeepDive = () => (
           <div className="pain-item" style={painStyle}>
             <span className="pain-icon" style={{ fontSize: '1.1rem' }}>🐢</span>
             <span className="pain-text" style={{ fontSize: '0.8rem' }}>
-              {kw('Slow spec handoff', 'var(--red)')} — weeks of meetings, docs, and Slack threads before a single line of code
+              {kw('Slow spec handoff', 'var(--red)')} - weeks of meetings, docs, and Slack threads before a single line of code
             </span>
           </div>
           <div className="pain-item" style={painStyle}>
             <span className="pain-icon" style={{ fontSize: '1.1rem' }}>🔄</span>
             <span className="pain-text" style={{ fontSize: '0.8rem' }}>
-              {kw('Ambiguous requirements', 'var(--red)')} — PMs describe intent; engineers need precision. Context is lost in translation.
+              {kw('Ambiguous requirements', 'var(--red)')} - PMs describe intent; engineers need precision. Context is lost in translation.
             </span>
           </div>
           <div className="pain-item" style={painStyle}>
             <span className="pain-icon" style={{ fontSize: '1.1rem' }}>📋</span>
             <span className="pain-text" style={{ fontSize: '0.8rem' }}>
-              {kw('Ticket sprawl', 'var(--red)')} — stories and subtasks multiply, dependencies tangle, nobody has the full picture
+              {kw('Ticket sprawl', 'var(--red)')} - stories and subtasks multiply, dependencies tangle, nobody has the full picture
             </span>
           </div>
           <div className="pain-item" style={painStyle}>
             <span className="pain-icon" style={{ fontSize: '1.1rem' }}>🔁</span>
             <span className="pain-text" style={{ fontSize: '0.8rem' }}>
-              {kw('Stale docs', 'var(--red)')} — specs written in Confluence or Notion drift from reality within days of engineering starting
+              {kw('Stale docs', 'var(--red)')} - specs written in Confluence or Notion drift from reality within days of engineering starting
             </span>
           </div>
           <div className="pain-item" style={painStyle}>
             <span className="pain-icon" style={{ fontSize: '1.1rem' }}>⏳</span>
             <span className="pain-text" style={{ fontSize: '0.8rem' }}>
-              {kw('Blocked engineers', 'var(--red)')} — waiting for PM clarification before they can write code
+              {kw('Blocked engineers', 'var(--red)')} - waiting for PM clarification before they can write code
             </span>
           </div>
         </div>

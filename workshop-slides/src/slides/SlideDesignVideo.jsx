@@ -24,14 +24,14 @@ const SlideDesignVideo = () => (
   <>
     <div className="phase-header">
       <div className="phase-number design">02</div>
-      <h2>Design — Real-World Proof Point</h2>
+      <h2>Real World: The Design-to-Code Cycle</h2>
     </div>
 
     <div className="deepdive-cols">
       <div className="deepdive-col">
         <h3 style={{ color: 'var(--purple)', fontSize: '1rem', marginBottom: '0.35rem' }}>The Design-to-Code Cycle</h3>
         <p className="small" style={{ marginBottom: '0.5rem' }}>
-          Multiple people, multiple tools, multiple handoffs — round and round
+          Multiple people, multiple tools, multiple handoffs - round and round
         </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
@@ -101,7 +101,7 @@ const SlideDesignVideo = () => (
           }}>
             <span style={{ fontSize: '1.1rem' }}>🔄</span>
             <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--red)' }}>
-              Repeat 5–10 times — weeks or months per feature
+              Repeat 5 -10 times - weeks or months per feature
             </span>
             <span style={{ fontSize: '1.1rem' }}>↩️</span>
           </div>
@@ -129,7 +129,7 @@ const SlideDesignVideo = () => (
           />
         </div>
         <p className="small" style={{ marginTop: '0.4rem', textAlign: 'center', fontStyle: 'italic' }}>
-          Malt — Design-to-code with Cursor + Figma MCP
+          Malt - Design-to-code with Cursor + Figma MCP
         </p>
       </div>
     </div>

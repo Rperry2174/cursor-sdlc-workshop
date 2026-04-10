@@ -70,7 +70,7 @@ const SlideTestAnalogy = () => (
   <>
     <div className="phase-header">
       <div className="phase-number test">04</div>
-      <h2>Test — Why It Matters</h2>
+      <h2>Context: Why Testing Gets Skipped</h2>
     </div>
     <p className="small" style={{ marginBottom: '0.5rem' }}>
       Two industries, same lesson: skip quality control, pay billions
@@ -98,7 +98,7 @@ const SlideTestAnalogy = () => (
           borderRadius: '100px',
           background: 'rgba(101, 123, 131, 0.1)',
           color: 'var(--text-secondary)',
-        }}>2010 — Wright County Egg Co.</span>
+        }}>2010 - Wright County Egg Co.</span>
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'nowrap' }}>
@@ -110,7 +110,7 @@ const SlideTestAnalogy = () => (
         {arrow()}
         {timelineStep('🚛', 'Ship')}
         {arrow()}
-        {timelineStep('🦠', '550M eggs recalled — salmonella', { danger: true })}
+        {timelineStep('🦠', '550M eggs recalled - salmonella', { danger: true })}
         {investArrow()}
         {timelineStep('💰', '$100M+ losses, criminal charges', { investment: true })}
         {arrow()}
@@ -140,7 +140,7 @@ const SlideTestAnalogy = () => (
           borderRadius: '100px',
           background: 'rgba(203, 75, 22, 0.1)',
           color: 'var(--orange)',
-        }}>2024 — CrowdStrike</span>
+        }}>2024 - CrowdStrike</span>
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'nowrap' }}>

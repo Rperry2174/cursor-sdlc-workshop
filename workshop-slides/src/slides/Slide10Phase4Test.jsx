@@ -44,7 +44,7 @@ const Slide10Phase4Test = () => (
     </div>
     <div className="emphasis-box green" style={{ marginTop: '1rem' }}>
       <strong>The big idea:</strong> Testing is how you prove your software works the way
-      you <em>think</em> it works — before it reaches real users.
+      you <em>think</em> it works  - before it reaches real users.
     </div>
   </>
 )

@@ -34,7 +34,7 @@ const Slide13Section2Step2 = () => (
             <div className="check-header">
               <div className="check-box"></div>
               <div>
-                <strong>Create a Skill</strong> — teach Cursor how to generate
+                <strong>Create a Skill</strong>  - teach Cursor how to generate
                 improvement plans for your project
               </div>
             </div>
@@ -56,7 +56,7 @@ const Slide13Section2Step2 = () => (
             <div className="check-header">
               <div className="check-box"></div>
               <div>
-                <strong>Write your PRD to Notion</strong> — use the{' '}
+                <strong>Write your PRD to Notion</strong>  - use the{' '}
                 <span className="highlight">Notion MCP</span> to create your
                 plan as a real Notion doc you can find
               </div>
@@ -67,7 +67,7 @@ const Slide13Section2Step2 = () => (
                 <br />
                 "Use the Notion MCP to create a page titled
                 <br />
-                <strong>'[SDLC Workshop] [your-username] — Improvements PRD'</strong>.
+                <strong>'[SDLC Workshop] [your-username]  - Improvements PRD'</strong>.
                 <br />
                 Include several features you can build.
                 <br />
@@ -81,7 +81,7 @@ const Slide13Section2Step2 = () => (
             <div className="check-header">
               <div className="check-box"></div>
               <div>
-                <strong>Create GitHub issues</strong> — one per feature, assigned
+                <strong>Create GitHub issues</strong>  - one per feature, assigned
                 to your GitHub username
               </div>
             </div>

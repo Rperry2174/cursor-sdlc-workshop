@@ -8,8 +8,8 @@ const Slide06Section1Intro = () => (
     <div className="intro-callout cyan">
       <p>
         <strong>In this section</strong>, you'll experience the{' '}
-        <strong>complete software development lifecycle</strong> — from planning to
-        testing — while learning how Cursor can assist at each stage.
+        <strong>complete software development lifecycle</strong>  - from planning to
+        testing  - while learning how Cursor can assist at each stage.
       </p>
       <p>
         You'll also practice <strong>git workflow</strong> in an individual
@@ -136,7 +136,7 @@ const Slide06Section1Intro = () => (
           <span className="project-icon">✨</span>
           <div>
             <strong>Build Your Own!</strong>
-            <span>pitch your idea — needs splittable features</span>
+            <span>pitch your idea  - needs splittable features</span>
           </div>
         </div>
       </div>

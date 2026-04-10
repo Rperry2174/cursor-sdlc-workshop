@@ -26,10 +26,10 @@ const SlideDesignDeepDive = () => (
       <div>
         <div className="phase-header" style={{ marginBottom: '0.2rem' }}>
           <div className="phase-number design">02</div>
-          <h2 style={{ marginBottom: 0 }}>Design</h2>
+          <h2 style={{ marginBottom: 0 }}>Problem: Design Handoffs Lose Fidelity</h2>
         </div>
         <p className="small" style={{ marginBottom: 0 }}>
-          How visual design becomes working code — and why the handoff is so painful
+          How visual design becomes working code - and why the handoff is so painful
         </p>
       </div>
       <div style={{

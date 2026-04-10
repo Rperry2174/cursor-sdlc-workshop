@@ -24,7 +24,7 @@ const SlidePlanTools = () => (
   <>
     <div className="phase-header">
       <div className="phase-number plan">01</div>
-      <h2>Plan — Real-World Proof Point</h2>
+      <h2>Real World: A PM Built This Entire App</h2>
     </div>
 
     <div className="deepdive-cols">
@@ -130,7 +130,7 @@ const SlidePlanTools = () => (
           />
         </div>
         <p className="small" style={{ marginTop: '0.4rem', textAlign: 'center', fontStyle: 'italic' }}>
-          A PM built this entire app — no engineer needed. Just Cursor + an idea.
+          A PM built this entire app - no engineer needed. Just Cursor + an idea.
         </p>
       </div>
     </div>

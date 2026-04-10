@@ -43,7 +43,7 @@ const PacManWithFeature = () => (
       overflow: 'hidden',
       padding: '12px',
     }}>
-      {/* Score header — now with 2x multiplier */}
+      {/* Score header  - now with 2x multiplier */}
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
@@ -100,7 +100,7 @@ const PacManWithFeature = () => (
         <rect x="160" y="160" width="80" height="20" rx="4" fill="none" stroke="#1a1aff" strokeWidth="2.5" />
         <rect x="300" y="160" width="60" height="20" rx="4" fill="none" stroke="#1a1aff" strokeWidth="2.5" />
 
-        {/* Fewer dots — Pac-Man has been eating */}
+        {/* Fewer dots  - Pac-Man has been eating */}
         {[280, 320].map(x => (
           <circle key={`d1-${x}`} cx={x} cy={62} r="2" fill="#ffb8ae" />
         ))}
@@ -115,13 +115,13 @@ const PacManWithFeature = () => (
         <circle cx="20" cy="190" r="5" fill="#ffb8ae" />
         <circle cx="380" cy="190" r="5" fill="#ffb8ae" />
 
-        {/* Pac-Man — further along, eating */}
+        {/* Pac-Man  - further along, eating */}
         <path d="M 245 100 L 258 91 A 14 14 0 1 0 258 109 Z" fill="#ffeb3b" />
 
         {/* Floating +20 score text */}
         <text x="220" y="88" fill="#ffab00" fontSize="10" fontWeight="900" fontFamily="Courier New">+20</text>
 
-        {/* Scared ghosts (blue — power pellet active) */}
+        {/* Scared ghosts (blue  - power pellet active) */}
         <g transform="translate(310, 90)">
           <path d="M 0 14 L 0 4 Q 0 -4 8 -4 L 8 -4 Q 16 -4 16 4 L 16 14 L 13 11 L 10 14 L 7 11 L 4 14 L 0 14" fill="#2222ff" />
           <rect x="3" y="2" width="4" height="2" rx="0.5" fill="white" />
@@ -153,11 +153,11 @@ const SlideS2FeatureResult = () => (
     </div>
     <h2>You Just Shipped to Someone Else's Codebase</h2>
     <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.75rem', textAlign: 'center' }}>
-      The 2x power-up is live — ghosts are scared, points are doubled:
+      The 2x power-up is live  - ghosts are scared, points are doubled:
     </p>
     <PacManWithFeature />
     <div className="emphasis-box orange" style={{ marginTop: '1rem', textAlign: 'center' }}>
-      <strong>You just did what professional engineers do every day</strong> —
+      <strong>You just did what professional engineers do every day</strong>  -
       read unfamiliar code, understand it, add value, and ship.
     </div>
   </>

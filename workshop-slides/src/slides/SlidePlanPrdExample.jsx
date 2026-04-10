@@ -8,7 +8,7 @@ const SlidePlanPrdExample = () => (
     }}>
       <div className="phase-header" style={{ marginBottom: 0 }}>
         <div className="phase-number plan">01</div>
-        <h2 style={{ marginBottom: 0 }}>Plan — What a PRD Looks Like</h2>
+        <h2 style={{ marginBottom: 0 }}>Example: A Real PRD From the Cursor Team</h2>
       </div>
       <a
         href="https://www.notion.so/cursorai/Auto-Premium-Model-Routing-326da74ef045808a9ad0e306e7dbc4d0"
@@ -22,7 +22,7 @@ const SlidePlanPrdExample = () => (
           fontStyle: 'normal',
         }}
       >
-        Real example from the Cursor team — Open in Notion ↗
+        Real example from the Cursor team - Open in Notion ↗
       </a>
     </div>
 
@@ -36,7 +36,7 @@ const SlidePlanPrdExample = () => (
     }}>
       <img
         src="/images/prd-example-notion.png"
-        alt="PRD example in Notion — Auto Premium Model Routing"
+        alt="PRD example in Notion - Auto Premium Model Routing"
         style={{
           width: '100%',
           height: '100%',

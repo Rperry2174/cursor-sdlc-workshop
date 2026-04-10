@@ -24,7 +24,7 @@ const Slide18KeyTakeaways = () => (
           <span className="highlight">You were productive immediately</span>
         </div>
         <div className="tile-desc">
-          No custom scripts or config sprawl — just works out of the box for the whole org
+          No custom scripts or config sprawl  - just works out of the box for the whole org
         </div>
       </div>
       <div className="tile">

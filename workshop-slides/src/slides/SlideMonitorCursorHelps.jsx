@@ -3,7 +3,7 @@ const SlideMonitorCursorHelps = () => (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
       <div className="phase-header" style={{ marginBottom: 0 }}>
         <div className="phase-number" style={{ background: 'var(--yellow)' }}>07</div>
-        <h2 style={{ marginBottom: 0 }}>Monitor — Cursor Closes the Loop</h2>
+        <h2 style={{ marginBottom: 0 }}>Solution: Cursor Closes the SDLC Loop</h2>
       </div>
     </div>
 
@@ -20,11 +20,11 @@ const SlideMonitorCursorHelps = () => (
           <div className="solution-steps">
             <div className="solution-step">
               <span className="step-num" style={{ background: 'var(--yellow)' }}>1</span>
-              <span>Datadog, Sentry, or PagerDuty MCP surfaces the alert directly in Cursor — logs, traces, and metrics in context</span>
+              <span>Datadog, Sentry, or PagerDuty MCP surfaces the alert directly in Cursor - logs, traces, and metrics in context</span>
             </div>
             <div className="solution-step">
               <span className="step-num" style={{ background: 'var(--yellow)' }}>2</span>
-              <span>Cursor correlates the production data with the codebase — pinpoints the root cause, not just the symptom</span>
+              <span>Cursor correlates the production data with the codebase - pinpoints the root cause, not just the symptom</span>
             </div>
             <div className="solution-step">
               <span className="step-num" style={{ background: 'var(--yellow)' }}>3</span>
@@ -32,7 +32,7 @@ const SlideMonitorCursorHelps = () => (
             </div>
             <div className="solution-step">
               <span className="step-num" style={{ background: 'var(--yellow)' }}>4</span>
-              <span>BugBot reviews the fix, CI runs, and the PR is ready for a human to approve — the whole loop closes automatically</span>
+              <span>BugBot reviews the fix, CI runs, and the PR is ready for a human to approve - the whole loop closes automatically</span>
             </div>
           </div>
         </div>
@@ -52,7 +52,7 @@ const SlideMonitorCursorHelps = () => (
           background: 'linear-gradient(135deg, rgba(181, 137, 0, 0.12), rgba(181, 137, 0, 0.04))',
           borderColor: 'rgba(181, 137, 0, 0.25)',
         }}>
-          <strong style={{ color: 'var(--yellow)' }}>Key shift:</strong> The SDLC becomes a <em>closed loop</em>. Production issues don't just get logged — they get fixed, automatically.
+          <strong style={{ color: 'var(--yellow)' }}>Key shift:</strong> The SDLC becomes a <em>closed loop</em>. Production issues don't just get logged - they get fixed, automatically.
         </div>
       </div>
 
@@ -84,7 +84,7 @@ const SlideMonitorCursorHelps = () => (
             <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--yellow)', lineHeight: 1 }}>On-call unblocked</div>
             <div style={{ fontSize: '0.85rem', fontWeight: 600, marginTop: '0.35rem', color: 'var(--text-primary)' }}>Any engineer can debug any system</div>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.25rem', lineHeight: 1.4 }}>
-              Cursor understands the full codebase. You don't need the original author to fix the bug — anyone (or an agent) can.
+              Cursor understands the full codebase. You don't need the original author to fix the bug - anyone (or an agent) can.
             </div>
           </div>
 
@@ -110,7 +110,7 @@ const SlideMonitorCursorHelps = () => (
         }}>
           <div className="outcome-label" style={{ color: 'var(--yellow)' }}>Bottom Line</div>
           <div className="outcome-text">
-            Cursor closes the SDLC loop. Production issues don't just get triaged — they get fixed.
+            Cursor closes the SDLC loop. Production issues don't just get triaged - they get fixed.
             The gap between "something is broken" and "it's deployed" shrinks to minutes.
           </div>
         </div>

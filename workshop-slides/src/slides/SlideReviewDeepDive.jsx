@@ -50,10 +50,10 @@ const SlideReviewDeepDive = () => (
       <div>
         <div className="phase-header" style={{ marginBottom: '0.2rem' }}>
           <div className="phase-number review">05</div>
-          <h2 style={{ marginBottom: 0 }}>Review</h2>
+          <h2 style={{ marginBottom: 0 }}>Problem: Code Review is the Biggest Queue</h2>
         </div>
         <p className="small" style={{ marginBottom: 0 }}>
-          Code review is the quality gate — but it's also the biggest queue in the pipeline
+          Code review is the quality gate - but it's also the biggest queue in the pipeline
         </p>
       </div>
       <div style={{
@@ -161,31 +161,31 @@ const SlideReviewDeepDive = () => (
           <div className="pain-item" style={painStyle}>
             <span className="pain-icon" style={{ fontSize: '1.1rem' }}>⏳</span>
             <span className="pain-text" style={{ fontSize: '0.8rem' }}>
-              {kw('Review bottleneck', 'var(--red)')} — avg time-to-merge is 41 hours. PRs sit for days waiting for overloaded senior engineers.
+              {kw('Review bottleneck', 'var(--red)')} - avg time-to-merge is 41 hours. PRs sit for days waiting for overloaded senior engineers.
             </span>
           </div>
           <div className="pain-item" style={painStyle}>
             <span className="pain-icon" style={{ fontSize: '1.1rem' }}>🔍</span>
             <span className="pain-text" style={{ fontSize: '0.8rem' }}>
-              {kw('Shallow reviews', 'var(--red)')} — reviewers skim 500+ line diffs and rubber-stamp. Real bugs slip through.
+              {kw('Shallow reviews', 'var(--red)')} - reviewers skim 500+ line diffs and rubber-stamp. Real bugs slip through.
             </span>
           </div>
           <div className="pain-item" style={painStyle}>
             <span className="pain-icon" style={{ fontSize: '1.1rem' }}>🤖</span>
             <span className="pain-text" style={{ fontSize: '0.8rem' }}>
-              {kw('AI outpaces review', 'var(--red)')} — AI-generated PRs are growing faster than teams can review them. The bottleneck shifts downstream.
+              {kw('AI outpaces review', 'var(--red)')} - AI-generated PRs are growing faster than teams can review them. The bottleneck shifts downstream.
             </span>
           </div>
           <div className="pain-item" style={painStyle}>
             <span className="pain-icon" style={{ fontSize: '1.1rem' }}>🔗</span>
             <span className="pain-text" style={{ fontSize: '0.8rem' }}>
-              {kw('Serial workflow', 'var(--red)')} — one PR at a time, manual iteration on feedback, engineers blocked waiting in queue.
+              {kw('Serial workflow', 'var(--red)')} - one PR at a time, manual iteration on feedback, engineers blocked waiting in queue.
             </span>
           </div>
           <div className="pain-item" style={painStyle}>
             <span className="pain-icon" style={{ fontSize: '1.1rem' }}>💥</span>
             <span className="pain-text" style={{ fontSize: '0.8rem' }}>
-              {kw('Broken main', 'var(--red)')} — semantic merge conflicts break the trunk. Existing merge queues can't handle monorepo scale.
+              {kw('Broken main', 'var(--red)')} - semantic merge conflicts break the trunk. Existing merge queues can't handle monorepo scale.
             </span>
           </div>
         </div>
@@ -202,7 +202,7 @@ const SlideReviewDeepDive = () => (
     }}>
       <span style={{ fontSize: '1.1rem' }}>💡</span>
       <span style={{ fontSize: '0.8rem', color: 'var(--text-primary)', lineHeight: 1.5 }}>
-        <strong style={{ color: 'var(--green)' }}>Sound familiar?</strong> AI is creating more code than ever — but review hasn't scaled to match. The next slides show what's changing.
+        <strong style={{ color: 'var(--green)' }}>Sound familiar?</strong> AI is creating more code than ever - but review hasn't scaled to match. The next slides show what's changing.
       </span>
     </div>
   </>

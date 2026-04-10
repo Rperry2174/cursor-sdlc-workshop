@@ -2,7 +2,7 @@ const SlideTestCursorHelps = () => (
   <>
     <div className="phase-header">
       <div className="phase-number test">04</div>
-      <h2>Test — How Cursor Helps</h2>
+      <h2>Solution: Cursor Writes Tests Alongside Code</h2>
     </div>
 
     <div className="deepdive-cols">
@@ -18,11 +18,11 @@ const SlideTestCursorHelps = () => (
           <div className="solution-steps">
             <div className="solution-step">
               <span className="step-num" style={{ background: 'var(--orange)' }}>1</span>
-              <span>Cursor generates meaningful tests alongside feature code — unit, integration, and edge-case tests based on actual implementation</span>
+              <span>Cursor generates meaningful tests alongside feature code - unit, integration, and edge-case tests based on actual implementation</span>
             </div>
             <div className="solution-step">
               <span className="step-num" style={{ background: 'var(--orange)' }}>2</span>
-              <span>When tests fail, Cursor reads the failure output and fixes the code or the test — right in the IDE, no context-switching</span>
+              <span>When tests fail, Cursor reads the failure output and fixes the code or the test - right in the IDE, no context-switching</span>
             </div>
             <div className="solution-step">
               <span className="step-num" style={{ background: 'var(--orange)' }}>3</span>
@@ -30,7 +30,7 @@ const SlideTestCursorHelps = () => (
             </div>
             <div className="solution-step">
               <span className="step-num" style={{ background: 'var(--orange)' }}>4</span>
-              <span>Tests run automatically in the loop — Cursor writes, runs, reads failures, and fixes until the suite passes</span>
+              <span>Tests run automatically in the loop - Cursor writes, runs, reads failures, and fixes until the suite passes</span>
             </div>
           </div>
         </div>
@@ -40,7 +40,7 @@ const SlideTestCursorHelps = () => (
           background: 'linear-gradient(135deg, rgba(203, 75, 22, 0.1), rgba(203, 75, 22, 0.03))',
           borderColor: 'rgba(203, 75, 22, 0.25)',
         }}>
-          <strong style={{ color: 'var(--orange)' }}>Key shift:</strong> Testing stops being a chore engineers skip under pressure — it becomes an automatic part of building every feature.
+          <strong style={{ color: 'var(--orange)' }}>Key shift:</strong> Testing stops being a chore engineers skip under pressure - it becomes an automatic part of building every feature.
         </div>
       </div>
 
@@ -55,10 +55,10 @@ const SlideTestCursorHelps = () => (
             borderRadius: '10px',
             padding: '1rem 1.25rem',
           }}>
-            <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--orange)', lineHeight: 1 }}>2–3x</div>
+            <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--orange)', lineHeight: 1 }}>2 -3x</div>
             <div style={{ fontSize: '0.85rem', fontWeight: 600, marginTop: '0.35rem', color: 'var(--text-primary)' }}>Higher test coverage</div>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.25rem', lineHeight: 1.4 }}>
-              From 20–40% to 70–90% — without adding headcount or slowing velocity
+              From 20 -40% to 70 -90% - without adding headcount or slowing velocity
             </div>
           </div>
 
@@ -86,7 +86,7 @@ const SlideTestCursorHelps = () => (
             <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--orange)', lineHeight: 1 }}>Fewer</div>
             <div style={{ fontSize: '0.85rem', fontWeight: 600, marginTop: '0.35rem', color: 'var(--text-primary)' }}>Production incidents</div>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.25rem', lineHeight: 1.4 }}>
-              Bugs caught before they ship — not after they page your on-call at 2 AM
+              Bugs caught before they ship - not after they page your on-call at 2 AM
             </div>
           </div>
         </div>
@@ -98,7 +98,7 @@ const SlideTestCursorHelps = () => (
         }}>
           <div className="outcome-label" style={{ color: 'var(--orange)' }}>Bottom Line</div>
           <div className="outcome-text">
-            Back to the factory: Cursor is like upgrading from manual spot-checks to <strong style={{ color: 'var(--orange)' }}>automated quality-control scanners on every inch of the line</strong> — faster, more thorough, and every batch gets inspected.
+            Back to the factory: Cursor is like upgrading from manual spot-checks to <strong style={{ color: 'var(--orange)' }}>automated quality-control scanners on every inch of the line</strong> - faster, more thorough, and every batch gets inspected.
           </div>
         </div>
       </div>

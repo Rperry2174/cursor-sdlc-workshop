@@ -50,10 +50,10 @@ const SlideMonitorDeepDive = () => (
       <div>
         <div className="phase-header" style={{ marginBottom: '0.2rem' }}>
           <div className="phase-number" style={{ background: 'var(--yellow)' }}>07</div>
-          <h2 style={{ marginBottom: 0 }}>Monitor</h2>
+          <h2 style={{ marginBottom: 0 }}>Problem: Alert to Fix Takes Hours of Tool-Hopping</h2>
         </div>
         <p className="small" style={{ marginBottom: 0 }}>
-          Production is where the real bugs live — and where response time is everything
+          Production is where the real bugs live - and where response time is everything
         </p>
       </div>
       <div style={{
@@ -161,31 +161,31 @@ const SlideMonitorDeepDive = () => (
           <div className="pain-item" style={painStyle}>
             <span className="pain-icon" style={{ fontSize: '1.1rem' }}>🔥</span>
             <span className="pain-text" style={{ fontSize: '0.8rem' }}>
-              {kw('Slow incident response', 'var(--red)')} — alert fires, engineer scrambles to understand the system, hours pass before a fix ships
+              {kw('Slow incident response', 'var(--red)')} - alert fires, engineer scrambles to understand the system, hours pass before a fix ships
             </span>
           </div>
           <div className="pain-item" style={painStyle}>
             <span className="pain-icon" style={{ fontSize: '1.1rem' }}>🔍</span>
             <span className="pain-text" style={{ fontSize: '0.8rem' }}>
-              {kw('Tool-hopping', 'var(--red)')} — jump from Datadog to logs to code to Slack to Jira. Context is scattered across 5+ tools.
+              {kw('Tool-hopping', 'var(--red)')} - jump from Datadog to logs to code to Slack to Jira. Context is scattered across 5+ tools.
             </span>
           </div>
           <div className="pain-item" style={painStyle}>
             <span className="pain-icon" style={{ fontSize: '1.1rem' }}>🧠</span>
             <span className="pain-text" style={{ fontSize: '0.8rem' }}>
-              {kw('Knowledge silos', 'var(--red)')} — only the original author knows the code well enough to debug it. Everyone else is guessing.
+              {kw('Knowledge silos', 'var(--red)')} - only the original author knows the code well enough to debug it. Everyone else is guessing.
             </span>
           </div>
           <div className="pain-item" style={painStyle}>
             <span className="pain-icon" style={{ fontSize: '1.1rem' }}>📋</span>
             <span className="pain-text" style={{ fontSize: '0.8rem' }}>
-              {kw('Bug report → fix gap', 'var(--red)')} — reports land in Slack, get triaged into tickets, wait in a queue, eventually get assigned days later.
+              {kw('Bug report → fix gap', 'var(--red)')} - reports land in Slack, get triaged into tickets, wait in a queue, eventually get assigned days later.
             </span>
           </div>
           <div className="pain-item" style={painStyle}>
             <span className="pain-icon" style={{ fontSize: '1.1rem' }}>😴</span>
             <span className="pain-text" style={{ fontSize: '0.8rem' }}>
-              {kw('On-call burnout', 'var(--red)')} — paging the same senior engineers at 2am because nobody else can debug the system.
+              {kw('On-call burnout', 'var(--red)')} - paging the same senior engineers at 2am because nobody else can debug the system.
             </span>
           </div>
         </div>

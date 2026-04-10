@@ -2,10 +2,10 @@ const SlideMonitorInternalUse = () => (
   <>
     <div className="phase-header">
       <div className="phase-number" style={{ background: 'var(--yellow)' }}>07</div>
-      <h2>Monitor — How We Use This at Cursor</h2>
+      <h2>Real World: How We Use This at Cursor</h2>
     </div>
     <p className="small" style={{ marginBottom: '0.75rem' }}>
-      Two real workflows from the Cursor team — from alert to fix without leaving the flow
+      Two real workflows from the Cursor team - from alert to fix without leaving the flow
     </p>
 
     <div className="deepdive-cols" style={{ gap: '1.5rem' }}>
@@ -41,7 +41,7 @@ const SlideMonitorInternalUse = () => (
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: '0.6rem', fontWeight: 700, flexShrink: 0, marginTop: '0.1rem',
             }}>1</span>
-            <span>Ask Cursor to query Datadog via MCP — investigate logs, metrics, traces without leaving the IDE</span>
+            <span>Ask Cursor to query Datadog via MCP - investigate logs, metrics, traces without leaving the IDE</span>
           </div>
           <div style={{
             display: 'flex', alignItems: 'flex-start', gap: '0.5rem',
@@ -102,7 +102,7 @@ const SlideMonitorInternalUse = () => (
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: '0.6rem', fontWeight: 700, flexShrink: 0, marginTop: '0.1rem',
             }}>2</span>
-            <span>Cloud Agent picks it up, identifies the bug, and pushes a fix — all within minutes</span>
+            <span>Cloud Agent picks it up, identifies the bug, and pushes a fix - all within minutes</span>
           </div>
         </div>
       </div>
@@ -117,7 +117,7 @@ const SlideMonitorInternalUse = () => (
       textAlign: 'center',
     }}>
       <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--yellow)' }}>
-        From "something is broken" to "fix is pushed" — without an engineer manually investigating
+        From "something is broken" to "fix is pushed" - without an engineer manually investigating
       </div>
     </div>
   </>

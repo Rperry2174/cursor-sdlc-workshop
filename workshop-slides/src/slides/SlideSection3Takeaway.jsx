@@ -20,11 +20,11 @@ const SlideSection3Takeaway = () => (
         </div>
         <div className="tile-title">
           <span className="highlight-purple">
-            The teams with process shipped more — and faster
+            The teams with process shipped more  - and faster
           </span>
         </div>
         <ul className="tile-bullets">
-          <li>Same codebase, same tools — coordination made the difference</li>
+          <li>Same codebase, same tools  - coordination made the difference</li>
           <li>Clear branches, small PRs, rules. That's how teams move fast</li>
         </ul>
       </div>
@@ -38,7 +38,7 @@ const SlideSection3Takeaway = () => (
           </span>
         </div>
         <ul className="tile-bullets">
-          <li>Rules, Skills, Hooks, Bugbot — real problems at scale</li>
+          <li>Rules, Skills, Hooks, Bugbot  - real problems at scale</li>
           <li>Model agnostic = best model per task, no vendor lock-in</li>
         </ul>
       </div>
@@ -53,7 +53,7 @@ const SlideSection3Takeaway = () => (
         </div>
         <ul className="tile-bullets">
           <li>Plan, Ask, Agent, Rules, Skills, Hooks, Bugbot, GitHub</li>
-          <li>Used them under pressure — that changes how you talk to customers</li>
+          <li>Used them under pressure  - that changes how you talk to customers</li>
         </ul>
       </div>
     </div>

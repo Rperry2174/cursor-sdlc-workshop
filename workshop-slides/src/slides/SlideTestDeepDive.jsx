@@ -50,10 +50,10 @@ const SlideTestDeepDive = () => (
       <div>
         <div className="phase-header" style={{ marginBottom: '0.2rem' }}>
           <div className="phase-number test">04</div>
-          <h2 style={{ marginBottom: 0 }}>Test</h2>
+          <h2 style={{ marginBottom: 0 }}>Problem: Everyone Agrees Tests Matter, Nobody Has Time</h2>
         </div>
         <p className="small" style={{ marginBottom: 0 }}>
-          Catching bugs before they ship — and why test coverage stays low despite good intentions
+          Catching bugs before they ship - and why test coverage stays low despite good intentions
         </p>
       </div>
       <div style={{
@@ -102,7 +102,7 @@ const SlideTestDeepDive = () => (
           <div className="discovery-card" style={cardStyle}>
             {numBadge(2)}
             <span className="dq-text" style={{ fontSize: '0.8rem' }}>
-              "Who writes tests — the same {kw('engineer')} who wrote the feature, or a {kw('QA team')}?"
+              "Who writes tests - the same {kw('engineer')} who wrote the feature, or a {kw('QA team')}?"
             </span>
           </div>
           <div className="discovery-card" style={cardStyle}>
@@ -161,31 +161,31 @@ const SlideTestDeepDive = () => (
           <div className="pain-item" style={painStyle}>
             <span className="pain-icon" style={{ fontSize: '1.1rem' }}>📉</span>
             <span className="pain-text" style={{ fontSize: '0.8rem' }}>
-              {kw('Low test coverage', 'var(--red)')} — writing tests is tedious, so it gets skipped under deadline pressure. Coverage stays at 20–40%.
+              {kw('Low test coverage', 'var(--red)')} - writing tests is tedious, so it gets skipped under deadline pressure. Coverage stays at 20 -40%.
             </span>
           </div>
           <div className="pain-item" style={painStyle}>
             <span className="pain-icon" style={{ fontSize: '1.1rem' }}>🧪</span>
             <span className="pain-text" style={{ fontSize: '0.8rem' }}>
-              {kw('Brittle tests', 'var(--red)')} — break on refactors but miss real bugs. High maintenance, low value.
+              {kw('Brittle tests', 'var(--red)')} - break on refactors but miss real bugs. High maintenance, low value.
             </span>
           </div>
           <div className="pain-item" style={painStyle}>
             <span className="pain-icon" style={{ fontSize: '1.1rem' }}>⏱️</span>
             <span className="pain-text" style={{ fontSize: '0.8rem' }}>
-              {kw('Slow CI feedback', 'var(--red)')} — 30–60 min pipelines mean devs context-switch away and come back to failures they've forgotten.
+              {kw('Slow CI feedback', 'var(--red)')} - 30 -60 min pipelines mean devs context-switch away and come back to failures they've forgotten.
             </span>
           </div>
           <div className="pain-item" style={painStyle}>
             <span className="pain-icon" style={{ fontSize: '1.1rem' }}>🚀</span>
             <span className="pain-text" style={{ fontSize: '0.8rem' }}>
-              {kw('Ship-it culture wins', 'var(--red)')} — when the choice is tests or deadline, tests lose every time. The debt compounds silently.
+              {kw('Ship-it culture wins', 'var(--red)')} - when the choice is tests or deadline, tests lose every time. The debt compounds silently.
             </span>
           </div>
           <div className="pain-item" style={painStyle}>
             <span className="pain-icon" style={{ fontSize: '1.1rem' }}>🔄</span>
             <span className="pain-text" style={{ fontSize: '0.8rem' }}>
-              {kw('Manual QA bottleneck', 'var(--red)')} — QA team can't keep up with engineering velocity. Releases wait in a queue.
+              {kw('Manual QA bottleneck', 'var(--red)')} - QA team can't keep up with engineering velocity. Releases wait in a queue.
             </span>
           </div>
         </div>

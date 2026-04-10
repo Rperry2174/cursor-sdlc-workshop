@@ -24,7 +24,7 @@ const Slide02Purpose = () => (
           <span className="highlight">Be productive immediately</span>
         </div>
         <div className="tile-desc">
-          No setup sprawl — just open Cursor and start building
+          No setup sprawl  - just open Cursor and start building
         </div>
       </div>
       <div className="tile">
@@ -39,7 +39,7 @@ const Slide02Purpose = () => (
     </div>
     <div className="emphasis-box" style={{ marginTop: '1rem' }}>
       <strong>Note for ADMs & FEs:</strong> AEs are less technical than most
-      customers—that's the point. Watch for friction that developers take for
+      customers -that's the point. Watch for friction that developers take for
       granted.
     </div>
   </>

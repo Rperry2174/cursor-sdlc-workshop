@@ -9,7 +9,7 @@ const SlideSection1Takeaway = () => (
       <div className="hero-text">
         You just went from{' '}
         <span className="hero-highlight">zero to working software</span> in
-        25 minutes — and you're not developers.
+        25 minutes  - and you're not developers.
       </div>
     </div>
     <div className="tiles">
@@ -23,7 +23,7 @@ const SlideSection1Takeaway = () => (
           </span>
         </div>
         <ul className="tile-bullets">
-          <li>PRD, tasks, GitHub issues — all before writing code</li>
+          <li>PRD, tasks, GitHub issues  - all before writing code</li>
           <li>Most AI tools start when you code. Cursor starts when you think</li>
         </ul>
       </div>
@@ -51,7 +51,7 @@ const SlideSection1Takeaway = () => (
           </span>
         </div>
         <ul className="tile-bullets">
-          <li>Fork, branch, commit, push, PR — through conversation</li>
+          <li>Fork, branch, commit, push, PR  - through conversation</li>
           <li>Nobody memorized a command. Hours of overhead gone</li>
         </ul>
       </div>
@@ -89,7 +89,7 @@ const SlideSection1Takeaway = () => (
     </div>
     <div className="emphasis-box green">
       <strong>The takeaway:</strong> Copilot = type faster. Cursor = plan,
-      build, test, ship — the whole SDLC.
+      build, test, ship  - the whole SDLC.
     </div>
   </>
 )

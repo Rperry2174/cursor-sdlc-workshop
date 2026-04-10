@@ -3,7 +3,7 @@ const SlideReviewCursorHelps = () => (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
       <div className="phase-header" style={{ marginBottom: 0 }}>
         <div className="phase-number review">05</div>
-        <h2 style={{ marginBottom: 0 }}>Review — BugBot + Cursor Review</h2>
+        <h2 style={{ marginBottom: 0 }}>Solution: BugBot + Cursor Review</h2>
       </div>
     </div>
 
@@ -20,19 +20,19 @@ const SlideReviewCursorHelps = () => (
           <div className="solution-steps">
             <div className="solution-step">
               <span className="step-num" style={{ background: 'var(--green)' }}>1</span>
-              <span>BugBot automatically reviews every PR — catches bugs, security issues, and logic errors that humans miss during quick scans</span>
+              <span>BugBot automatically reviews every PR - catches bugs, security issues, and logic errors that humans miss during quick scans</span>
             </div>
             <div className="solution-step">
               <span className="step-num" style={{ background: 'var(--green)' }}>2</span>
-              <span>Code tours walk reviewers through changes so they can review quickly and with confidence — no more deciphering raw diffs</span>
+              <span>Code tours walk reviewers through changes so they can review quickly and with confidence - no more deciphering raw diffs</span>
             </div>
             <div className="solution-step">
               <span className="step-num" style={{ background: 'var(--green)' }}>3</span>
-              <span>Cloud Agents self-heal CI failures and iterate on reviewer feedback autonomously — reducing the manual back-and-forth loop</span>
+              <span>Cloud Agents self-heal CI failures and iterate on reviewer feedback autonomously - reducing the manual back-and-forth loop</span>
             </div>
             <div className="solution-step">
               <span className="step-num" style={{ background: 'var(--green)' }}>4</span>
-              <span>Stacked diffs break large changes into small, focused PRs — each reviewable in minutes, not hours</span>
+              <span>Stacked diffs break large changes into small, focused PRs - each reviewable in minutes, not hours</span>
             </div>
           </div>
         </div>
@@ -85,7 +85,7 @@ const SlideReviewCursorHelps = () => (
             <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--green)', lineHeight: 1 }}>Seniors unblocked</div>
             <div style={{ fontSize: '0.85rem', fontWeight: 600, marginTop: '0.35rem', color: 'var(--text-primary)' }}>From review bottleneck to final approver</div>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.25rem', lineHeight: 1.4 }}>
-              BugBot catches the mechanical issues. Senior engineers focus on architecture and logic — the things only humans can judge.
+              BugBot catches the mechanical issues. Senior engineers focus on architecture and logic - the things only humans can judge.
             </div>
           </div>
 
@@ -99,7 +99,7 @@ const SlideReviewCursorHelps = () => (
             <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--green)', lineHeight: 1 }}>Scale with AI</div>
             <div style={{ fontSize: '0.85rem', fontWeight: 600, marginTop: '0.35rem', color: 'var(--text-primary)' }}>Review keeps pace with agent-generated code</div>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.25rem', lineHeight: 1.4 }}>
-              As Cloud Agents generate more PRs, the review process scales with them — not against them.
+              As Cloud Agents generate more PRs, the review process scales with them - not against them.
             </div>
           </div>
         </div>

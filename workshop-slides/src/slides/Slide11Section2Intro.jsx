@@ -11,7 +11,7 @@ const Slide11Section2Intro = () => (
         you didn't write. This is <strong>90% of what engineers do</strong> day-to-day.
       </p>
       <p>
-        You'll follow the same SDLC process as Section 1 — but this time
+        You'll follow the same SDLC process as Section 1  - but this time
         with someone else's codebase.
       </p>
     </div>

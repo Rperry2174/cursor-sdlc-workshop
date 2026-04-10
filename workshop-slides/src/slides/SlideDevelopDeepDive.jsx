@@ -2,10 +2,10 @@ const SlideDevelopDeepDive = () => (
   <>
     <div className="phase-header">
       <div className="phase-number develop">03</div>
-      <h2>Develop</h2>
+      <h2>Problem: Engineers Spend 70% of Time Reading, Not Writing</h2>
     </div>
     <p className="small" style={{ marginBottom: '0.5rem' }}>
-      Where the actual code gets written — the core of engineering time and cost
+      Where the actual code gets written - the core of engineering time and cost
     </p>
 
     <div className="deepdive-cols">
@@ -34,15 +34,15 @@ const SlideDevelopDeepDive = () => (
         <div className="pain-list">
           <div className="pain-item">
             <span className="pain-icon">🧠</span>
-            <span className="pain-text"><strong>Context switching</strong> — devs spend more time reading and navigating code than writing it. Understanding a large codebase is the real bottleneck.</span>
+            <span className="pain-text"><strong>Context switching</strong> - devs spend more time reading and navigating code than writing it. Understanding a large codebase is the real bottleneck.</span>
           </div>
           <div className="pain-item">
             <span className="pain-icon">🐢</span>
-            <span className="pain-text"><strong>Slow ramp-up</strong> — new hires take months to become productive. Institutional knowledge lives in people's heads, not in tooling.</span>
+            <span className="pain-text"><strong>Slow ramp-up</strong> - new hires take months to become productive. Institutional knowledge lives in people's heads, not in tooling.</span>
           </div>
           <div className="pain-item">
             <span className="pain-icon">🔧</span>
-            <span className="pain-text"><strong>Boilerplate & toil</strong> — repetitive patterns, config files, migrations — engineers spend hours on work that's necessary but not creative.</span>
+            <span className="pain-text"><strong>Boilerplate & toil</strong> - repetitive patterns, config files, migrations - engineers spend hours on work that's necessary but not creative.</span>
           </div>
         </div>
       </div>
@@ -57,15 +57,15 @@ const SlideDevelopDeepDive = () => (
           <div className="solution-steps">
             <div className="solution-step">
               <span className="step-num" style={{ background: 'var(--cursor-blue)' }}>1</span>
-              <span>Codebase-aware AI understands your entire repo — ask questions, navigate, and get accurate answers grounded in your actual code</span>
+              <span>Codebase-aware AI understands your entire repo - ask questions, navigate, and get accurate answers grounded in your actual code</span>
             </div>
             <div className="solution-step">
               <span className="step-num" style={{ background: 'var(--cursor-blue)' }}>2</span>
-              <span>Agent mode handles multi-file changes end-to-end — describe what you want, Cursor implements across files, runs tests, iterates</span>
+              <span>Agent mode handles multi-file changes end-to-end - describe what you want, Cursor implements across files, runs tests, iterates</span>
             </div>
             <div className="solution-step">
               <span className="step-num" style={{ background: 'var(--cursor-blue)' }}>3</span>
-              <span>Background Agents work in parallel — spin up tasks that run asynchronously while you work on other things</span>
+              <span>Background Agents work in parallel - spin up tasks that run asynchronously while you work on other things</span>
             </div>
             <div className="solution-step">
               <span className="step-num" style={{ background: 'var(--cursor-blue)' }}>4</span>
@@ -87,7 +87,7 @@ const SlideDevelopDeepDive = () => (
         <div className="outcome-callout">
           <div className="outcome-label">Outcome</div>
           <div className="outcome-text">
-            Engineers go from <strong style={{ color: 'var(--cursor-blue)' }}>spending 70% of time reading code</strong> to having an AI pair that already understands the whole codebase — dramatically accelerating both new and experienced developers
+            Engineers go from <strong style={{ color: 'var(--cursor-blue)' }}>spending 70% of time reading code</strong> to having an AI pair that already understands the whole codebase - dramatically accelerating both new and experienced developers
           </div>
         </div>
       </div>

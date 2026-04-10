@@ -11,7 +11,7 @@ const SlideSection3Step1 = () => (
           <div className="check-header">
             <div className="check-box"></div>
             <div>
-              <strong>Add the Figma MCP</strong> — connect Cursor to the design
+              <strong>Add the Figma MCP</strong>  - connect Cursor to the design
               file
             </div>
           </div>
@@ -25,7 +25,7 @@ const SlideSection3Step1 = () => (
           <div className="check-header">
             <div className="check-box"></div>
             <div>
-              <strong>Navigate to your team folder</strong> —{' '}
+              <strong>Navigate to your team folder</strong>  -{' '}
               <code>linkedout/team_X/</code>
             </div>
           </div>
@@ -41,7 +41,7 @@ const SlideSection3Step1 = () => (
           <div className="check-header">
             <div className="check-box"></div>
             <div>
-              <strong>Add your member file</strong> — just like Section 1
+              <strong>Add your member file</strong>  - just like Section 1
             </div>
           </div>
           <div className="code-block">
@@ -58,7 +58,7 @@ const SlideSection3Step1 = () => (
           <div className="check-header">
             <div className="check-box"></div>
             <div>
-              <strong>Pull the Figma design breakdown</strong> — see every
+              <strong>Pull the Figma design breakdown</strong>  - see every
               section annotated with what to build
             </div>
           </div>
@@ -78,7 +78,7 @@ const SlideSection3Step1 = () => (
           <div className="check-header">
             <div className="check-box"></div>
             <div>
-              <strong>Generate your PRD</strong> — write it to{' '}
+              <strong>Generate your PRD</strong>  - write it to{' '}
               <span className="highlight-purple">Notion</span> and/or create{' '}
               <span className="highlight-purple">GitHub Issues</span>
             </div>
@@ -91,7 +91,7 @@ const SlideSection3Step1 = () => (
               <br />
               our team. Write it to Notion and/or create GitHub
               <br />
-              Issues — one per task, assigned to team members.
+              Issues  - one per task, assigned to team members.
               <br />
               Also save as prd.md in our team folder."
             </code>

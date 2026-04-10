@@ -41,7 +41,7 @@ const Slide09Phase3Develop = () => (
             <div className="check-header">
               <div className="check-box"></div>
               <div>
-                <strong>Find your issue</strong> — grab the task assigned to you
+                <strong>Find your issue</strong>  - grab the task assigned to you
               </div>
             </div>
             <div className="code-block">
@@ -57,7 +57,7 @@ const Slide09Phase3Develop = () => (
           <div className="check-item">
             <div className="check-box"></div>
             <div>
-              <strong>Run the project</strong> — make sure the base MVP works
+              <strong>Run the project</strong>  - make sure the base MVP works
               before you start
             </div>
           </div>
@@ -70,13 +70,13 @@ const Slide09Phase3Develop = () => (
           <div className="check-item">
             <div className="check-box"></div>
             <div>
-              <strong>Implement your feature</strong> — tell Cursor what to build using Agent mode
+              <strong>Implement your feature</strong>  - tell Cursor what to build using Agent mode
             </div>
           </div>
           <div className="check-item">
             <div className="check-box"></div>
             <div>
-              <strong>Test it</strong> — run the app and verify your feature works
+              <strong>Test it</strong>  - run the app and verify your feature works
             </div>
           </div>
         </div>

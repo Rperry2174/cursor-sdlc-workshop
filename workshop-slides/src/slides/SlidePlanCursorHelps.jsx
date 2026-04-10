@@ -3,7 +3,7 @@ const SlidePlanCursorHelps = () => (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
       <div className="phase-header" style={{ marginBottom: 0 }}>
         <div className="phase-number plan">01</div>
-        <h2 style={{ marginBottom: 0 }}>Plan — Cursor Turns PMs into Builders</h2>
+        <h2 style={{ marginBottom: 0 }}>Solution: Cursor Turns PMs into Builders</h2>
       </div>
     </div>
 
@@ -20,15 +20,15 @@ const SlidePlanCursorHelps = () => (
           <div className="solution-steps">
             <div className="solution-step">
               <span className="step-num" style={{ background: 'var(--cyan)' }}>1</span>
-              <span>PM writes requirements in Notion, Linear, or Jira — the tools they already use every day</span>
+              <span>PM writes requirements in Notion, Linear, or Jira - the tools they already use every day</span>
             </div>
             <div className="solution-step">
               <span className="step-num" style={{ background: 'var(--cyan)' }}>2</span>
-              <span>Cursor reads the spec via MCP and understands the intent — no copy-pasting, no stale docs</span>
+              <span>Cursor reads the spec via MCP and understands the intent - no copy-pasting, no stale docs</span>
             </div>
             <div className="solution-step">
               <span className="step-num" style={{ background: 'var(--cyan)' }}>3</span>
-              <span>The PM can prototype the feature themselves — building a working version of what they're imagining, not just describing it in words</span>
+              <span>The PM can prototype the feature themselves - building a working version of what they're imagining, not just describing it in words</span>
             </div>
             <div className="solution-step">
               <span className="step-num" style={{ background: 'var(--cyan)' }}>4</span>
@@ -70,7 +70,7 @@ const SlidePlanCursorHelps = () => (
             <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--cyan)', lineHeight: 1 }}>Minutes</div>
             <div style={{ fontSize: '0.85rem', fontWeight: 600, marginTop: '0.35rem', color: 'var(--text-primary)' }}>Not weeks to a working prototype</div>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.25rem', lineHeight: 1.4 }}>
-              PMs can prototype the feature themselves — what used to require an engineer sprint now takes an afternoon
+              PMs can prototype the feature themselves - what used to require an engineer sprint now takes an afternoon
             </div>
           </div>
 

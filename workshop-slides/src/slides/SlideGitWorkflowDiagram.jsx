@@ -61,8 +61,8 @@ const SlideGitWorkflowDiagram = () => (
     </div>
 
     <div className="emphasis-box" style={{ marginTop: '1rem' }}>
-      <strong>Key point:</strong> The PR is the “suggesting changes” layer —
-      visible, reviewable, and safe — but not live until it’s merged.
+      <strong>Key point:</strong> The PR is the “suggesting changes” layer  -
+      visible, reviewable, and safe  - but not live until it’s merged.
     </div>
   </>
 )

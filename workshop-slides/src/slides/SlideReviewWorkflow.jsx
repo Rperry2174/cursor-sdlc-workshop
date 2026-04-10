@@ -36,7 +36,7 @@ const SlideReviewWorkflow = () => (
   <>
     <div className="phase-header">
       <div className="phase-number review">05</div>
-      <h2>Review — GitHub vs. Cursor Review</h2>
+      <h2>Evolution: GitHub to Graphite to Cursor Review</h2>
     </div>
     <p className="small" style={{ marginBottom: '0.75rem' }}>
       How the review workflow evolves from serial and manual to parallel and agent-driven
@@ -50,7 +50,7 @@ const SlideReviewWorkflow = () => (
     }}>
       {/* Column 1: GitHub Today */}
       <div>
-        {colHeader('🐙', 'GitHub Today', 'var(--text-secondary)', 'Serial — one PR at a time')}
+        {colHeader('🐙', 'GitHub Today', 'var(--text-secondary)', 'Serial - one PR at a time')}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
           <div style={stepStyle('var(--text-secondary)')}>Engineer writes code &amp; opens PR</div>
           <div style={arrowDown}>↓</div>
@@ -69,7 +69,7 @@ const SlideReviewWorkflow = () => (
 
       {/* Column 2: Graphite */}
       <div>
-        {colHeader('💎', 'Graphite', 'var(--cyan)', 'Parallel — stacked PRs + AI review')}
+        {colHeader('💎', 'Graphite', 'var(--cyan)', 'Parallel - stacked PRs + AI review')}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
           <div style={stepStyle('var(--cyan)')}>Stacked diffs → small, focused PRs</div>
           <div style={arrowDown}>↓</div>
@@ -88,7 +88,7 @@ const SlideReviewWorkflow = () => (
 
       {/* Column 3: Cursor Review */}
       <div>
-        {colHeader('⚡', 'Cursor Review', 'var(--green)', 'Massively parallel — agents create & iterate')}
+        {colHeader('⚡', 'Cursor Review', 'var(--green)', 'Massively parallel - agents create & iterate')}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
           <div style={stepStyle('var(--green)')}>Agent creates PR from ticket or Slack</div>
           <div style={arrowDown}>↓</div>

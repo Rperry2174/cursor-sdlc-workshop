@@ -2,7 +2,7 @@ const Slide19Story = () => (
   <>
     <h2>The Story to Tell</h2>
     <div className="big-quote">
-      "Cursor isn't just a code editor—
+      "Cursor isn't just a code editor -
       <br />
       it's an <span className="highlight">engineering force multiplier</span>
       <br />
