@@ -1,91 +1,209 @@
+const kw = (text, color = 'var(--green)') => (
+  <span style={{
+    display: 'inline-block',
+    padding: '0.05rem 0.35rem',
+    borderRadius: '4px',
+    background: color === 'var(--green)'
+      ? 'rgba(133, 153, 0, 0.12)'
+      : 'rgba(220, 50, 47, 0.1)',
+    color,
+    fontWeight: 700,
+    fontStyle: 'normal',
+    fontSize: '0.78rem',
+  }}>{text}</span>
+)
+
+const numBadge = (n) => (
+  <span style={{
+    width: '22px', height: '22px', borderRadius: '50%',
+    background: 'var(--green)', color: 'white',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    fontSize: '0.6rem', fontWeight: 700, flexShrink: 0,
+  }}>{n}</span>
+)
+
+const cardStyle = {
+  borderLeft: '3px solid var(--green)',
+  padding: '0.55rem 0.75rem',
+  minHeight: '58px',
+  display: 'flex',
+  alignItems: 'center',
+}
+
+const painStyle = {
+  padding: '0.55rem 0.75rem',
+  minHeight: '58px',
+  display: 'flex',
+  alignItems: 'center',
+}
+
 const SlideReviewDeepDive = () => (
   <>
-    <div className="phase-header">
-      <div className="phase-number review">05</div>
-      <h2>Review</h2>
+    <div style={{
+      display: 'flex',
+      alignItems: 'flex-end',
+      justifyContent: 'space-between',
+      marginBottom: '1rem',
+      paddingBottom: '0.75rem',
+      borderBottom: '2px solid rgba(133, 153, 0, 0.15)',
+    }}>
+      <div>
+        <div className="phase-header" style={{ marginBottom: '0.2rem' }}>
+          <div className="phase-number review">05</div>
+          <h2 style={{ marginBottom: 0 }}>Review</h2>
+        </div>
+        <p className="small" style={{ marginBottom: 0 }}>
+          Code review is the quality gate — but it's also the biggest queue in the pipeline
+        </p>
+      </div>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.5rem',
+        padding: '0.4rem 0.75rem',
+        background: 'linear-gradient(135deg, rgba(133, 153, 0, 0.1), rgba(133, 153, 0, 0.04))',
+        border: '1px solid rgba(133, 153, 0, 0.2)',
+        borderRadius: '100px',
+        flexShrink: 0,
+      }}>
+        <span style={{ fontSize: '0.85rem' }}>🔍</span>
+        <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--green)', letterSpacing: '0.5px' }}>
+          PR → Ship
+        </span>
+        <span style={{ fontSize: '0.85rem' }}>🚀</span>
+      </div>
     </div>
-    <p className="small" style={{ marginBottom: '0.5rem' }}>
-      Code review is the quality gate — but it's also the biggest queue in the pipeline
-    </p>
 
-    <div className="deepdive-cols">
-      <div className="deepdive-col">
-        <h3 style={{ color: 'var(--green)' }}>Discovery Questions</h3>
-        <div className="pain-list">
-          <div className="discovery-card">
-            <span className="dq-icon">💬</span>
-            <span className="dq-text">"How long do PRs sit waiting for review? What's your average time-to-merge?"</span>
-          </div>
-          <div className="discovery-card">
-            <span className="dq-icon">💬</span>
-            <span className="dq-text">"How many people need to approve a PR before it merges? Is that bottleneck-ing your senior engineers?"</span>
-          </div>
-          <div className="discovery-card">
-            <span className="dq-icon">💬</span>
-            <span className="dq-text">"What kinds of issues do code reviews actually catch? Style nits, logic bugs, security gaps?"</span>
-          </div>
-          <div className="discovery-card">
-            <span className="dq-icon">💬</span>
-            <span className="dq-text">"Do you have review standards or checklists, or is it ad-hoc?"</span>
-          </div>
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: '1fr 60px 1fr',
+      gap: '0',
+      alignItems: 'stretch',
+    }}>
+      {/* Left: Discovery Questions */}
+      <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.6rem' }}>
+          <h3 style={{ color: 'var(--green)', marginBottom: 0, fontSize: '1rem' }}>Discovery Questions</h3>
+          <span style={{
+            fontSize: '0.55rem', fontWeight: 600,
+            padding: '0.15rem 0.45rem', borderRadius: '100px',
+            background: 'rgba(133, 153, 0, 0.1)', color: 'var(--green)',
+            letterSpacing: '0.5px',
+          }}>ASK THESE</span>
         </div>
 
-        <h3 style={{ color: 'var(--red)', marginTop: '0.75rem' }}>Common Pain Points</h3>
-        <div className="pain-list">
-          <div className="pain-item">
-            <span className="pain-icon">⏳</span>
-            <span className="pain-text"><strong>Review bottleneck</strong> — PRs sit for days waiting for a senior engineer who's already overloaded. It's the #1 source of development delay.</span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <div className="discovery-card" style={cardStyle}>
+            {numBadge(1)}
+            <span className="dq-text" style={{ fontSize: '0.8rem' }}>
+              "Walk me through how engineers go from {kw('writing code')} to {kw('merging a PR')} today."
+            </span>
           </div>
-          <div className="pain-item">
-            <span className="pain-icon">🔍</span>
-            <span className="pain-text"><strong>Shallow reviews</strong> — reviewers skim large diffs and rubber-stamp. Real bugs slip through because nobody has time to deeply read 500-line PRs.</span>
+          <div className="discovery-card" style={cardStyle}>
+            {numBadge(2)}
+            <span className="dq-text" style={{ fontSize: '0.8rem' }}>
+              "How long do PRs sit before getting reviewed? What's your {kw('time-to-merge')}?"
+            </span>
           </div>
-          <div className="pain-item">
-            <span className="pain-icon">🎨</span>
-            <span className="pain-text"><strong>Bikeshedding</strong> — reviews devolve into style debates instead of catching real issues. Wastes everyone's time and energy.</span>
+          <div className="discovery-card" style={cardStyle}>
+            {numBadge(3)}
+            <span className="dq-text" style={{ fontSize: '0.8rem' }}>
+              "Are your engineers using {kw('AI to write code')}? How are you keeping up with {kw('reviewing that output')}?"
+            </span>
           </div>
-        </div>
-      </div>
-
-      <div className="deepdive-col">
-        <h3 style={{ color: 'var(--green)' }}>How Cursor Helps</h3>
-        <div className="solution-card" style={{ borderColor: 'rgba(133, 153, 0, 0.2)', background: 'linear-gradient(135deg, rgba(133, 153, 0, 0.08), rgba(133, 153, 0, 0.02))' }}>
-          <div className="solution-header">
-            <span className="solution-icon">🤖</span>
-            <span className="solution-title" style={{ color: 'var(--green)' }}>Bugbot + AI-Assisted Review</span>
+          <div className="discovery-card" style={cardStyle}>
+            {numBadge(4)}
+            <span className="dq-text" style={{ fontSize: '0.8rem' }}>
+              "Do you have a {kw('monorepo')}? Is there a {kw('platform team')} managing the developer workflow?"
+            </span>
           </div>
-          <div className="solution-steps">
-            <div className="solution-step">
-              <span className="step-num" style={{ background: 'var(--green)' }}>1</span>
-              <span>Bugbot automatically reviews every PR — catches bugs, security issues, and logic errors that humans miss during quick scans</span>
-            </div>
-            <div className="solution-step">
-              <span className="step-num" style={{ background: 'var(--green)' }}>2</span>
-              <span>AI-generated PR descriptions and summaries help reviewers understand changes without reading every line</span>
-            </div>
-            <div className="solution-step">
-              <span className="step-num" style={{ background: 'var(--green)' }}>3</span>
-              <span>Style and convention issues are caught by rules and linting, not by humans in review — freeing reviewers to focus on logic and architecture</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="competitor-row">
-          <span className="competitor-label">Tools today</span>
-          <div className="tool-pills">
-            <span className="tool-pill">GitHub PRs</span>
-            <span className="tool-pill">CodeRabbit</span>
-            <span className="tool-pill">SonarQube</span>
-          </div>
-        </div>
-
-        <div className="outcome-callout" style={{ background: 'linear-gradient(135deg, rgba(133, 153, 0, 0.1), rgba(133, 153, 0, 0.03))', borderColor: 'rgba(133, 153, 0, 0.25)' }}>
-          <div className="outcome-label" style={{ color: 'var(--green)' }}>Outcome</div>
-          <div className="outcome-text">
-            Senior engineers spend <strong style={{ color: 'var(--green)' }}>less time reviewing</strong> while code quality <strong style={{ color: 'var(--green)' }}>goes up</strong> — AI handles the tedious checks so humans focus on what matters
+          <div className="discovery-card" style={cardStyle}>
+            {numBadge(5)}
+            <span className="dq-text" style={{ fontSize: '0.8rem' }}>
+              "What's your biggest {kw('pain point')} in {kw('code review')} right now?"
+            </span>
           </div>
         </div>
       </div>
+
+      {/* Center: Arrow connector */}
+      <div style={{
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+        justifyContent: 'center', gap: '0.25rem', paddingTop: '2rem',
+      }}>
+        <div style={{
+          width: '2px', flex: '1',
+          background: 'linear-gradient(to bottom, transparent, rgba(220, 50, 47, 0.3), rgba(220, 50, 47, 0.3), transparent)',
+        }} />
+        <div style={{
+          width: '44px', height: '44px', borderRadius: '50%',
+          background: 'linear-gradient(135deg, rgba(220, 50, 47, 0.12), rgba(220, 50, 47, 0.06))',
+          border: '2px solid rgba(220, 50, 47, 0.25)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: '1.2rem', flexShrink: 0,
+        }}>→</div>
+        <div style={{
+          fontSize: '0.55rem', fontWeight: 700, textTransform: 'uppercase',
+          letterSpacing: '0.5px', color: 'var(--red)', textAlign: 'center',
+          lineHeight: 1.3, maxWidth: '55px',
+        }}>surfaces these</div>
+        <div style={{
+          width: '2px', flex: '1',
+          background: 'linear-gradient(to bottom, transparent, rgba(220, 50, 47, 0.3), rgba(220, 50, 47, 0.3), transparent)',
+        }} />
+      </div>
+
+      {/* Right: Pain Points */}
+      <div>
+        <h3 style={{ color: 'var(--red)', marginBottom: '0.6rem', fontSize: '1rem' }}>Common Pain Points</h3>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <div className="pain-item" style={painStyle}>
+            <span className="pain-icon" style={{ fontSize: '1.1rem' }}>⏳</span>
+            <span className="pain-text" style={{ fontSize: '0.8rem' }}>
+              {kw('Review bottleneck', 'var(--red)')} — avg time-to-merge is 41 hours. PRs sit for days waiting for overloaded senior engineers.
+            </span>
+          </div>
+          <div className="pain-item" style={painStyle}>
+            <span className="pain-icon" style={{ fontSize: '1.1rem' }}>🔍</span>
+            <span className="pain-text" style={{ fontSize: '0.8rem' }}>
+              {kw('Shallow reviews', 'var(--red)')} — reviewers skim 500+ line diffs and rubber-stamp. Real bugs slip through.
+            </span>
+          </div>
+          <div className="pain-item" style={painStyle}>
+            <span className="pain-icon" style={{ fontSize: '1.1rem' }}>🤖</span>
+            <span className="pain-text" style={{ fontSize: '0.8rem' }}>
+              {kw('AI outpaces review', 'var(--red)')} — AI-generated PRs are growing faster than teams can review them. The bottleneck shifts downstream.
+            </span>
+          </div>
+          <div className="pain-item" style={painStyle}>
+            <span className="pain-icon" style={{ fontSize: '1.1rem' }}>🔗</span>
+            <span className="pain-text" style={{ fontSize: '0.8rem' }}>
+              {kw('Serial workflow', 'var(--red)')} — one PR at a time, manual iteration on feedback, engineers blocked waiting in queue.
+            </span>
+          </div>
+          <div className="pain-item" style={painStyle}>
+            <span className="pain-icon" style={{ fontSize: '1.1rem' }}>💥</span>
+            <span className="pain-text" style={{ fontSize: '0.8rem' }}>
+              {kw('Broken main', 'var(--red)')} — semantic merge conflicts break the trunk. Existing merge queues can't handle monorepo scale.
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style={{
+      marginTop: '0.75rem',
+      display: 'flex', alignItems: 'center', gap: '0.6rem',
+      padding: '0.6rem 0.85rem',
+      background: 'linear-gradient(135deg, rgba(133, 153, 0, 0.08), rgba(133, 153, 0, 0.03))',
+      border: '1px solid rgba(133, 153, 0, 0.2)',
+      borderRadius: '8px',
+    }}>
+      <span style={{ fontSize: '1.1rem' }}>💡</span>
+      <span style={{ fontSize: '0.8rem', color: 'var(--text-primary)', lineHeight: 1.5 }}>
+        <strong style={{ color: 'var(--green)' }}>Sound familiar?</strong> AI is creating more code than ever — but review hasn't scaled to match. The next slides show what's changing.
+      </span>
     </div>
   </>
 )

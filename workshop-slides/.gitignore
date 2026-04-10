@@ -12,8 +12,9 @@ dist
 dist-ssr
 *.local
 
-# Video files (too large for public repo)
+# Media files (too large / sensitive for public repo)
 public/videos/
+public/images/
 
 # Editor directories and files
 .vscode/*

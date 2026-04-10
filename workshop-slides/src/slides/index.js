@@ -11,7 +11,9 @@ import {
   SdlcHighlightDeploy,
 } from './SlideSdlcHighlight.jsx'
 import SlidePlanDeepDive from './SlidePlanDeepDive.jsx'
-import SlidePlanVideo from './SlidePlanVideo.jsx'
+import SlidePlanPrdExample from './SlidePlanPrdExample.jsx'
+import SlidePlanTools from './SlidePlanTools.jsx'
+import SlidePlanCursorHelps from './SlidePlanCursorHelps.jsx'
 import SlideDesignDeepDive from './SlideDesignDeepDive.jsx'
 import SlideDesignSystemFull from './SlideDesignSystemFull.jsx'
 import SlideDesignSystem from './SlideDesignSystem.jsx'
@@ -23,6 +25,8 @@ import SlideTestDeepDive from './SlideTestDeepDive.jsx'
 import SlideTestAnalogy from './SlideTestAnalogy.jsx'
 import SlideTestCursorHelps from './SlideTestCursorHelps.jsx'
 import SlideReviewDeepDive from './SlideReviewDeepDive.jsx'
+import SlideReviewWorkflow from './SlideReviewWorkflow.jsx'
+import SlideReviewCursorHelps from './SlideReviewCursorHelps.jsx'
 import SlideDeployDeepDive from './SlideDeployDeepDive.jsx'
 import Slide05PreWork from './Slide05PreWork.jsx'
 import SlideGitWorkflowDiagram from './SlideGitWorkflowDiagram.jsx'
@@ -58,7 +62,9 @@ export const slides = [
   // SDLC deep-dive: Plan
   { id: 4.01, component: SdlcHighlightPlan },
   { id: 4.1, component: SlidePlanDeepDive },
-  { id: 4.11, component: SlidePlanVideo },
+  { id: 4.11, component: SlidePlanPrdExample },
+  { id: 4.12, component: SlidePlanTools },
+  { id: 4.13, component: SlidePlanCursorHelps },
 
   // SDLC deep-dive: Design
   { id: 4.19, component: SdlcHighlightDesign },
@@ -82,6 +88,8 @@ export const slides = [
   // SDLC deep-dive: Review
   { id: 4.49, component: SdlcHighlightReview },
   { id: 4.5, component: SlideReviewDeepDive },
+  { id: 4.52, component: SlideReviewWorkflow },
+  { id: 4.53, component: SlideReviewCursorHelps },
 
   // SDLC deep-dive: Deploy
   { id: 4.59, component: SdlcHighlightDeploy },
