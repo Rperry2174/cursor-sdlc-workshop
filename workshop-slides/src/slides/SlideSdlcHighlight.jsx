@@ -23,10 +23,12 @@ const highlightColors = {
   Test:    'var(--orange)',
   Review:  'var(--green)',
   Deploy:  'var(--red)',
+  Monitor: 'var(--yellow)',
 }
 
 const SdlcHighlight = ({ highlight }) => {
   const color = highlightColors[highlight] || 'var(--cursor-blue)'
+  const isMonitor = highlight === 'Monitor'
 
   return (
     <>
@@ -34,14 +36,14 @@ const SdlcHighlight = ({ highlight }) => {
       <div className="sdlc-flow">
         {phases.map((phase, i) => {
           const isActive = phase.name === highlight
-          const dimmed = !isActive
+          const dimmed = !isActive && !isMonitor
 
           return (
             <span key={phase.num} style={{ display: 'contents' }}>
               <div
                 className="sdlc-item"
                 style={{
-                  opacity: dimmed ? 0.35 : 1,
+                  opacity: dimmed ? 0.35 : isMonitor ? 0.35 : 1,
                   border: isActive ? `2px solid ${color}` : undefined,
                   boxShadow: isActive ? `0 4px 20px ${color}22` : undefined,
                   transform: isActive ? 'scale(1.04)' : undefined,
@@ -74,7 +76,7 @@ const SdlcHighlight = ({ highlight }) => {
                 )}
               </div>
               {i < phases.length - 1 && (
-                <div className="sdlc-arrow" style={{ opacity: dimmed ? 0.25 : 0.6 }}>→</div>
+                <div className="sdlc-arrow" style={{ opacity: dimmed ? 0.25 : isMonitor ? 0.25 : 0.6 }}>→</div>
               )}
             </span>
           )
@@ -82,9 +84,21 @@ const SdlcHighlight = ({ highlight }) => {
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem', paddingRight: '1rem' }}>
-        <div className="sdlc-item" style={{ opacity: 0.25, borderStyle: 'dashed' }}>
-          <div className="sdlc-icon">{monitor.num}</div>
-          <div className="sdlc-name">{monitor.name}</div>
+        <div
+          className="sdlc-item"
+          style={isMonitor ? {
+            opacity: 1,
+            border: `2px solid ${color}`,
+            boxShadow: `0 4px 20px ${color}22`,
+            transform: 'scale(1.04)',
+            borderStyle: 'solid',
+          } : {
+            opacity: 0.25,
+            borderStyle: 'dashed',
+          }}
+        >
+          <div className="sdlc-icon" style={isMonitor ? { color, opacity: 1 } : undefined}>{monitor.num}</div>
+          <div className="sdlc-name" style={isMonitor ? { color } : undefined}>{monitor.name}</div>
           <div className="tool-pills">
             {monitor.tools.map((t) => (
               <span key={t} className="tool-pill">{t}</span>
@@ -111,3 +125,4 @@ export const SdlcHighlightDevelop = () => <SdlcHighlight highlight="Develop" />
 export const SdlcHighlightTest    = () => <SdlcHighlight highlight="Test" />
 export const SdlcHighlightReview  = () => <SdlcHighlight highlight="Review" />
 export const SdlcHighlightDeploy  = () => <SdlcHighlight highlight="Deploy" />
+export const SdlcHighlightMonitor = () => <SdlcHighlight highlight="Monitor" />

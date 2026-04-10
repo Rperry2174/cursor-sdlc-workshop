@@ -9,6 +9,7 @@ import {
   SdlcHighlightTest,
   SdlcHighlightReview,
   SdlcHighlightDeploy,
+  SdlcHighlightMonitor,
 } from './SlideSdlcHighlight.jsx'
 import SlidePlanDeepDive from './SlidePlanDeepDive.jsx'
 import SlidePlanPrdExample from './SlidePlanPrdExample.jsx'
@@ -28,6 +29,9 @@ import SlideReviewDeepDive from './SlideReviewDeepDive.jsx'
 import SlideReviewWorkflow from './SlideReviewWorkflow.jsx'
 import SlideReviewCursorHelps from './SlideReviewCursorHelps.jsx'
 import SlideDeployDeepDive from './SlideDeployDeepDive.jsx'
+import SlideMonitorDeepDive from './SlideMonitorDeepDive.jsx'
+import SlideMonitorInternalUse from './SlideMonitorInternalUse.jsx'
+import SlideMonitorCursorHelps from './SlideMonitorCursorHelps.jsx'
 import Slide05PreWork from './Slide05PreWork.jsx'
 import SlideGitWorkflowDiagram from './SlideGitWorkflowDiagram.jsx'
 import Slide06Section1Intro from './Slide06Section1Intro.jsx'
@@ -94,6 +98,12 @@ export const slides = [
   // SDLC deep-dive: Deploy
   { id: 4.59, component: SdlcHighlightDeploy },
   { id: 4.6, component: SlideDeployDeepDive },
+
+  // SDLC deep-dive: Monitor
+  { id: 4.69, component: SdlcHighlightMonitor },
+  { id: 4.7, component: SlideMonitorDeepDive },
+  { id: 4.72, component: SlideMonitorInternalUse },
+  { id: 4.73, component: SlideMonitorCursorHelps },
 
   { id: 5, component: SlideGitWorkflowDiagram },
   { id: 5.5, component: Slide05PreWork },
