@@ -1,23 +1,47 @@
-# Base MVP
+# Ink Memory Match — Base MVP
 
-This folder is where your project code lives.
+Terminal Memory Card Match game, rendered with [Ink](https://github.com/vadimdemedes/ink) (React for CLIs).
 
-## What to Build
-- A minimal, working version of your project
-- Should run locally and do *something* visible
-- Keep it simple — 10 minutes max!
+See `../prd.md` for the full product spec.
 
-### Good Examples
-- A Chrome extension with one button that does one thing
-- A web page with basic HTML/CSS/JS
-- A simple CLI script
+## Stack
 
-### Instructions
+- Node.js + TypeScript
+- Ink (React renderer for terminal UIs)
+- `tsx` for running TypeScript directly (no build step)
 
-1. Tell Cursor to read the `prd.md` in your project folder
-2. Tell Cursor to generate the base MVP here
-3. Tell Cursor to run it locally and verify it works
+## Layout
 
-### After You're Done
+```
+base_mvp/
+├── src/
+│   ├── cli.tsx      # entrypoint (renders <App />)
+│   └── App.tsx      # top-level component
+├── package.json
+├── tsconfig.json
+└── .gitignore
+```
 
-> **Ask Cursor:** "Commit all my changes with the message 'Base MVP scaffold', push to my fork, and open a PR to the original repo"
+## Run it
+
+From `base_mvp/`:
+
+```bash
+npm install      # first time only
+npm start        # runs src/cli.tsx via tsx
+```
+
+You should see the starter placeholder screen. Press `Ctrl+C` to quit.
+
+Other scripts:
+
+- `npm run dev` — watch mode (auto-restarts on file changes)
+- `npm run typecheck` — type-check without emitting JS
+
+## Next steps (from the PRD)
+
+1. Build the 4×3 board and card state.
+2. Add arrow-key navigation + `Space`/`Enter` to flip.
+3. Implement match / mismatch / win logic.
+
+Then move on to the planned features: move counter, timer, and difficulty selector.
