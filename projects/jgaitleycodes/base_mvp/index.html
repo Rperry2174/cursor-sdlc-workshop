@@ -152,6 +152,34 @@
   }
   .btn-ghost:hover { background: #1e293b; }
 
+  .difficulty-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .difficulty-label {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .difficulty-select {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.95rem;
+    color: #e2e8f0;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .difficulty-select:focus { border-color: #38bdf8; }
+  .difficulty-select:disabled { opacity: 0.4; cursor: not-allowed; }
+
   .result-banner {
     background: linear-gradient(135deg, rgba(74, 222, 128, 0.1), rgba(56, 189, 248, 0.1));
     border: 1px solid rgba(74, 222, 128, 0.3);
@@ -182,6 +210,15 @@
 <div class="container">
   <h1>TypeRush</h1>
   <p class="tagline">How fast can you type? Hit Start and find out.</p>
+
+  <div class="difficulty-row">
+    <span class="difficulty-label">Difficulty</span>
+    <select id="difficulty" class="difficulty-select">
+      <option value="easy">Easy</option>
+      <option value="medium" selected>Medium</option>
+      <option value="hard">Hard</option>
+    </select>
+  </div>
 
   <div class="passage-box" id="passage"></div>
 
@@ -236,13 +273,13 @@
   </div>
 </div>
 
+<script src="js/passages.js"></script>
+<script src="js/difficulty.js"></script>
 <script src="js/accuracy.js"></script>
 <script>
 (function () {
-  const PASSAGE =
-    "The quick brown fox jumps over the lazy dog. " +
-    "Pack my box with five dozen liquor jugs. " +
-    "How vexingly quick daft zebras jump!";
+  var passage = getSelectedPassage();
+  var difficultyEl = document.getElementById("difficulty");
 
   const passageEl = document.getElementById("passage");
   const inputEl = document.getElementById("typingInput");
@@ -264,7 +301,7 @@
   let finished = false;
 
   function renderPassage(typed) {
-    const chars = PASSAGE.split("");
+    const chars = passage.split("");
     const spans = chars.map(function (ch, i) {
       let cls = "char pending";
       if (i < typed.length) {
@@ -289,7 +326,7 @@
     if (seconds <= 0) return 0;
     var correctChars = 0;
     for (var i = 0; i < typed.length; i++) {
-      if (typed[i] === PASSAGE[i]) correctChars++;
+      if (typed[i] === passage[i]) correctChars++;
     }
     return Math.round((correctChars / 5) / (seconds / 60));
   }
@@ -340,16 +377,20 @@
     startBtn.style.display = "inline-block";
     startBtn.disabled = false;
     resetBtn.style.display = "none";
+    difficultyEl.disabled = false;
+    passage = getSelectedPassage();
     renderPassage("");
   }
 
   function startRound() {
+    passage = getSelectedPassage();
     finished = false;
     startTime = Date.now();
     inputEl.disabled = false;
     inputEl.value = "";
     inputEl.focus();
     startBtn.disabled = true;
+    difficultyEl.disabled = true;
     timerInterval = setInterval(tickTimer, 100);
     renderPassage("");
   }
@@ -360,7 +401,7 @@
 
     if (typed.length > prevInputLen) {
       var idx = typed.length - 1;
-      accuracy.recordKey(PASSAGE[idx], typed[idx]);
+      accuracy.recordKey(passage[idx], typed[idx]);
     } else if (typed.length < prevInputLen) {
       accuracy.recordKey(null, "backspace");
     }
@@ -369,7 +410,7 @@
     accuracyEl.textContent = accuracy.getAccuracy() + "%";
     renderPassage(typed);
 
-    if (typed.length >= PASSAGE.length) {
+    if (typed.length >= passage.length) {
       finishRound();
     }
   });
@@ -377,6 +418,13 @@
   // Prevent pasting
   inputEl.addEventListener("paste", function (e) {
     e.preventDefault();
+  });
+
+  difficultyEl.addEventListener("change", function () {
+    if (!finished && !startTime) {
+      passage = getSelectedPassage();
+      renderPassage("");
+    }
   });
 
   startBtn.addEventListener("click", startRound);
