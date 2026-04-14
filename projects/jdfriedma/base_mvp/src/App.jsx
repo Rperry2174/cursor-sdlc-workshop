@@ -7,7 +7,32 @@ import {
 import DifficultyPicker from './components/DifficultyPicker.jsx'
 import WpmDisplay from './components/WpmDisplay.jsx'
 import AccuracyTracker from './components/AccuracyTracker.jsx'
+import MarvisMascot from './components/MarvisMascot.jsx'
 import './App.css'
+
+/**
+ * Split passage into words, spaces, and newlines so each word can be wrapped in
+ * a non-breaking span — per-character spans otherwise allow line breaks mid-word.
+ */
+function segmentPassage(str) {
+  const segments = []
+  let i = 0
+  while (i < str.length) {
+    const ch = str[i]
+    if (ch === '\n') {
+      segments.push({ type: 'newline', index: i })
+      i++
+    } else if (ch === ' ') {
+      segments.push({ type: 'space', index: i })
+      i++
+    } else {
+      const start = i
+      while (i < str.length && str[i] !== ' ' && str[i] !== '\n') i++
+      segments.push({ type: 'word', start, end: i })
+    }
+  }
+  return segments
+}
 
 export default function App() {
   const [difficulty, setDifficulty] = useState(DEFAULT_DIFFICULTY)
@@ -122,13 +147,24 @@ export default function App() {
         ((sessionEndMs - startTimeMs) / 60_000)
       : null
 
-  const chars = Array.from(passage)
+  const passageSegments = useMemo(() => segmentPassage(passage), [passage])
+
+  function glyphStatusClass(i, targetCh) {
+    const isTyped = i < typed.length
+    const isCursor = i === typed.length && !finished
+    if (isTyped) return typed[i] === targetCh ? 'correct' : 'wrong'
+    if (isCursor) return 'cursor-cell'
+    return 'upcoming'
+  }
 
   return (
     <div className="app">
       <header className="header">
         <h1 className="title">Marvis Bacon Judges Typing</h1>
-        <p className="tagline">Retype the passage. Marvis is watching.</p>
+        <MarvisMascot />
+        <p className="tagline">
+          Retype the passage. Marvis is watching.
+        </p>
       </header>
 
       <main className="main">
@@ -152,67 +188,96 @@ export default function App() {
             />
           </div>
 
-          <div className="passage" role="presentation">
-            {chars.map((targetCh, i) => {
-              const isTyped = i < typed.length
-              const isCursor = i === typed.length && !finished
-              let statusClass = 'upcoming'
-              if (isTyped) {
-                statusClass = typed[i] === targetCh ? 'correct' : 'wrong'
-              } else if (isCursor) {
-                statusClass = 'cursor-cell'
-              }
-              if (targetCh === '\n') {
-                return (
-                  <span
-                    key={`${passageLayoutKey}-${i}`}
-                    className={`glyph glyph--newline ${statusClass}`}
-                  >
-                    <br />
-                  </span>
-                )
-              }
-              const display = targetCh === ' ' ? '\u00a0' : targetCh
-              return (
-                <span
-                  key={`${passageLayoutKey}-${i}`}
-                  className={`glyph ${statusClass}`}
-                >
-                  {display}
-                </span>
-              )
-            })}
-          </div>
+          <div className="typing-workspace">
+            <div className="document-zone" aria-label="Reference passage">
+              <p className="document-zone__eyebrow" aria-hidden="true">
+                Reference file — read only
+              </p>
+              <div className="passage" role="presentation">
+                {passageSegments.map((seg) => {
+                  if (seg.type === 'newline') {
+                    const i = seg.index
+                    const statusClass = glyphStatusClass(i, passage[i])
+                    return (
+                      <span
+                        key={`${passageLayoutKey}-${i}`}
+                        className={`glyph glyph--newline ${statusClass}`}
+                      >
+                        <br />
+                      </span>
+                    )
+                  }
 
-          {finished && (
-            <p className="finished-banner" role="status">
-              Finished!
-            </p>
-          )}
+                  if (seg.type === 'space') {
+                    const i = seg.index
+                    const statusClass = glyphStatusClass(i, passage[i])
+                    return (
+                      <span
+                        key={`${passageLayoutKey}-${i}`}
+                        className={`glyph ${statusClass}`}
+                      >
+                        {' '}
+                      </span>
+                    )
+                  }
 
-          <label className="sr-only" htmlFor="typing-input">
-            Type the passage
-          </label>
-          <textarea
-            id="typing-input"
-            ref={inputRef}
-            className="typing-input"
-            value={typed}
-            onChange={handleChange}
-            onPaste={(e) => e.preventDefault()}
-            spellCheck={false}
-            autoComplete="off"
-            autoCorrect="off"
-            autoCapitalize="off"
-            rows={difficulty === 'hard' ? 8 : 3}
-            readOnly={finished}
-            aria-label="Type the passage"
-          />
+                  return (
+                    <span
+                      key={`${passageLayoutKey}-w-${seg.start}`}
+                      className="glyph-word"
+                    >
+                      {Array.from(
+                        { length: seg.end - seg.start },
+                        (_, j) => seg.start + j,
+                      ).map((i) => {
+                        const targetCh = passage[i]
+                        const statusClass = glyphStatusClass(i, targetCh)
+                        return (
+                          <span
+                            key={`${passageLayoutKey}-${i}`}
+                            className={`glyph ${statusClass}`}
+                          >
+                            {targetCh}
+                          </span>
+                        )
+                      })}
+                    </span>
+                  )
+                })}
+              </div>
+            </div>
 
-          <div className="actions">
-            <button type="button" className="btn-reset" onClick={handleReset}>
-              Start over
-            </button>
+            {finished && (
+              <p className="finished-banner" role="status">
+                Finished!
+              </p>
+            )}
+
+            <div className="desk-zone">
+              <label className="desk-zone__label" htmlFor="typing-input">
+                Entry field
+              </label>
+              <textarea
+                id="typing-input"
+                ref={inputRef}
+                className="typing-input"
+                value={typed}
+                onChange={handleChange}
+                onPaste={(e) => e.preventDefault()}
+                spellCheck={false}
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="off"
+                rows={difficulty === 'hard' ? 8 : 3}
+                readOnly={finished}
+              />
+
+              <div className="actions">
+                <button type="button" className="btn-reset" onClick={handleReset}>
+                  Start over
+                </button>
+              </div>
+            </div>
           </div>
         </section>
       </main>
