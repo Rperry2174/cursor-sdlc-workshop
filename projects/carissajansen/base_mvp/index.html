@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diving Destinations</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #06090f;
+    --surface: rgba(255,255,255,0.04);
+    --surface-hover: rgba(255,255,255,0.06);
+    --border: rgba(255,255,255,0.06);
+    --border-hover: rgba(255,255,255,0.10);
+    --text: #e8eaed;
+    --text-secondary: rgba(255,255,255,0.50);
+    --text-muted: rgba(255,255,255,0.30);
+    --accent: #36d6b5;
+    --accent-dim: rgba(54,214,181,0.12);
+    --gold: #facc15;
+    --radius: 20px;
+    --radius-sm: 12px;
+  }
+
+  body {
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Hero */
+  .hero {
+    padding: 72px 24px 20px;
+    text-align: center;
+    position: relative;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    top: -200px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 800px;
+    height: 500px;
+    background: radial-gradient(ellipse, rgba(54,214,181,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .logo { font-size: 40px; margin-bottom: 8px; display: block; }
+
+  .hero h1 {
+    font-size: clamp(36px, 5vw, 56px);
+    font-weight: 700;
+    letter-spacing: -1.5px;
+    line-height: 1.1;
+    color: var(--text);
+    margin-bottom: 14px;
+  }
+
+  .hero h1 span {
+    background: linear-gradient(135deg, var(--accent), #6dd5ed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero p {
+    font-size: 17px;
+    color: var(--text-secondary);
+    max-width: 420px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* Picker */
+  .picker {
+    max-width: 520px;
+    margin: 36px auto 56px;
+    padding: 0 24px;
+  }
+
+  .picker-inner {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 28px 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: flex-end;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    min-width: 140px;
+  }
+
+  .field label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-muted);
+  }
+
+  .field input[type="date"] {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    font-size: 15px;
+    color: var(--text);
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    color-scheme: dark;
+    width: 100%;
+  }
+
+  .field input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-dim);
+  }
+
+  .go-btn {
+    background: var(--accent);
+    color: #06090f;
+    border: none;
+    height: 46px;
+    padding: 0 32px;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .go-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+  .go-btn:active { transform: translateY(0); }
+  .go-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; filter: none; }
+
+  /* Results */
+  .results {
+    max-width: 1060px;
+    margin: 0 auto;
+    padding: 0 24px 100px;
+  }
+
+  .results-head {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .results-head h2 {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+  }
+
+  .results-head .sub {
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+
+  .grid { display: flex; flex-direction: column; gap: 20px; }
+
+  /* Card */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+  }
+
+  .card:hover {
+    border-color: var(--border-hover);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+  }
+
+  /* Photo mosaic */
+  .photos {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 2px;
+    min-height: 240px;
+  }
+
+  .photos .ph {
+    background-size: cover;
+    background-position: center;
+    background-color: rgba(255,255,255,0.03);
+  }
+
+  .photos .ph:first-child { grid-row: 1 / 3; }
+
+  .rank {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 2;
+    background: rgba(6,9,15,0.72);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--gold);
+    font-weight: 700;
+    font-size: 13px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Info */
+  .info {
+    padding: 24px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .dest-name {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    line-height: 1.2;
+  }
+
+  .dest-loc {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 3px;
+  }
+
+  .score-ring {
+    flex-shrink: 0;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+    position: relative;
+    background: var(--bg);
+  }
+
+  .score-ring svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+  }
+
+  .score-ring circle {
+    fill: none;
+    stroke-width: 3;
+    cx: 26;
+    cy: 26;
+    r: 24;
+  }
+
+  .score-ring .bg { stroke: rgba(255,255,255,0.06); }
+  .score-ring .fg { stroke-linecap: round; transition: stroke-dashoffset 0.6s ease; }
+
+  .desc {
+    font-size: 13.5px;
+    color: var(--text-secondary);
+    line-height: 1.65;
+    flex: 1;
+  }
+
+  .factors {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    margin-top: auto;
+  }
+
+  .f {
+    text-align: center;
+    padding: 10px 2px 8px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.03);
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .f:hover { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.06); }
+
+  .f-icon { font-size: 16px; margin-bottom: 3px; }
+
+  .f-val {
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .f-lbl {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text-muted);
+    margin-top: 3px;
+  }
+
+  /* Score bar mini */
+  .f-bar {
+    width: 28px;
+    height: 3px;
+    border-radius: 2px;
+    background: rgba(255,255,255,0.06);
+    margin: 5px auto 0;
+    overflow: hidden;
+  }
+
+  .f-bar-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
+
+  /* Loading */
+  .loading {
+    text-align: center;
+    padding: 80px 24px;
+  }
+
+  .ldots { display: inline-flex; gap: 6px; margin-bottom: 16px; }
+
+  .ldots span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: bounce 1s ease-in-out infinite;
+  }
+
+  .ldots span:nth-child(2) { animation-delay: 0.15s; }
+  .ldots span:nth-child(3) { animation-delay: 0.3s; }
+
+  @keyframes bounce {
+    0%, 80%, 100% { opacity: 0.25; transform: scale(0.8); }
+    40% { opacity: 1; transform: scale(1); }
+  }
+
+  .loading p { font-size: 14px; color: var(--text-muted); }
+
+  /* Empty */
+  .empty {
+    text-align: center;
+    padding: 100px 24px 60px;
+  }
+
+  .empty .e-icon { font-size: 52px; margin-bottom: 16px; opacity: 0.7; }
+
+  .empty p {
+    font-size: 15px;
+    color: var(--text-muted);
+    max-width: 320px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* Responsive */
+  @media (max-width: 800px) {
+    .card { grid-template-columns: 1fr; }
+    .photos { min-height: 200px; }
+    .hero { padding: 48px 20px 12px; }
+    .factors { gap: 4px; }
+    .f { padding: 8px 2px 6px; }
+  }
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <span class="logo">🤿</span>
+  <h1>Find your next <span>dive</span></h1>
+  <p>Pick your travel window and we'll rank the world's best scuba destinations for those dates.</p>
+</section>
+
+<section class="picker">
+  <div class="picker-inner">
+    <div class="field">
+      <label for="d1">From</label>
+      <input type="date" id="d1">
+    </div>
+    <div class="field">
+      <label for="d2">To</label>
+      <input type="date" id="d2">
+    </div>
+    <button class="go-btn" id="goBtn" disabled>Search</button>
+  </div>
+</section>
+
+<section class="results" id="results">
+  <div class="empty" id="empty">
+    <div class="e-icon">🌊</div>
+    <p>Select your travel dates above to discover top-ranked diving destinations</p>
+  </div>
+</section>
+
+<script>
+const DESTS = [
+  {
+    name: "Raja Ampat",
+    loc: "West Papua, Indonesia",
+    desc: "The crown jewel of marine biodiversity — more species than anywhere on Earth. Manta rays, wobbegong sharks, pygmy seahorses, and endless pristine coral gardens.",
+    imgs: ["images/raja-ampat-1.jpg","images/raja-ampat-2.jpg","images/raja-ampat-3.jpg"],
+    m:[{t:8,w:6,v:7,c:6,l:9},{t:8,w:5,v:7,c:6,l:9},{t:8,w:6,v:8,c:7,l:9},{t:9,w:7,v:8,c:7,l:9},{t:9,w:8,v:8,c:8,l:9},{t:8,w:8,v:7,c:7,l:8},{t:8,w:9,v:7,c:7,l:8},{t:8,w:9,v:8,c:8,l:9},{t:9,w:9,v:9,c:8,l:10},{t:9,w:9,v:9,c:9,l:10},{t:9,w:8,v:9,c:8,l:10},{t:9,w:7,v:8,c:7,l:9}]
+  },
+  {
+    name: "Great Barrier Reef",
+    loc: "Queensland, Australia",
+    desc: "The world's largest reef system: 2,300 km of coral. Reef sharks, turtles, giant clams, and kaleidoscopic formations across hundreds of dive sites.",
+    imgs: ["images/barrier-reef-1.jpg","images/barrier-reef-2.jpg","images/barrier-reef-3.jpg"],
+    m:[{t:9,w:5,v:6,c:6,l:8},{t:9,w:5,v:6,c:6,l:8},{t:9,w:6,v:7,c:7,l:8},{t:8,w:7,v:8,c:8,l:7},{t:7,w:8,v:9,c:8,l:7},{t:7,w:9,v:9,c:9,l:8},{t:6,w:9,v:10,c:9,l:9},{t:7,w:9,v:10,c:9,l:9},{t:7,w:9,v:9,c:9,l:9},{t:8,w:8,v:8,c:8,l:9},{t:9,w:7,v:7,c:7,l:8},{t:9,w:6,v:6,c:6,l:8}]
+  },
+  {
+    name: "Galápagos Islands",
+    loc: "Ecuador",
+    desc: "Hammerhead sharks, marine iguanas, sea lions, whale sharks, penguins. Nutrient-rich currents create one of the most unique ecosystems on the planet.",
+    imgs: ["images/galapagos-1.jpg","images/galapagos-2.jpg","images/galapagos-3.jpg"],
+    m:[{t:7,w:7,v:7,c:5,l:9},{t:8,w:7,v:7,c:5,l:8},{t:8,w:7,v:7,c:6,l:8},{t:8,w:7,v:7,c:6,l:8},{t:7,w:8,v:8,c:7,l:9},{t:6,w:8,v:8,c:6,l:10},{t:5,w:7,v:9,c:6,l:10},{t:5,w:7,v:9,c:6,l:10},{t:5,w:8,v:9,c:7,l:10},{t:6,w:8,v:8,c:7,l:9},{t:7,w:8,v:8,c:6,l:9},{t:7,w:7,v:7,c:6,l:9}]
+  },
+  {
+    name: "Blue Hole",
+    loc: "Belize",
+    desc: "A giant marine sinkhole over 300 m across. Stalactites, reef sharks, groupers, and pristine wall dives surrounded by Lighthouse Reef.",
+    imgs: ["images/blue-hole-1.jpg","images/blue-hole-2.jpg","images/blue-hole-3.jpg"],
+    m:[{t:7,w:7,v:8,c:8,l:6},{t:7,w:8,v:9,c:8,l:6},{t:7,w:9,v:9,c:9,l:7},{t:8,w:9,v:10,c:9,l:7},{t:8,w:9,v:10,c:9,l:8},{t:9,w:6,v:7,c:6,l:7},{t:9,w:6,v:7,c:7,l:7},{t:9,w:6,v:7,c:7,l:7},{t:9,w:5,v:6,c:6,l:7},{t:8,w:5,v:7,c:6,l:7},{t:8,w:7,v:8,c:7,l:6},{t:7,w:7,v:8,c:8,l:6}]
+  },
+  {
+    name: "Maldives",
+    loc: "Indian Ocean",
+    desc: "Crystal-clear atolls with manta ray cleaning stations, whale sharks, and vibrant thilas. World-class drift diving through channels teeming with pelagic life.",
+    imgs: ["images/maldives-1.jpg","images/maldives-2.jpg","images/maldives-3.jpg"],
+    m:[{t:8,w:9,v:9,c:8,l:9},{t:9,w:9,v:10,c:9,l:9},{t:9,w:9,v:10,c:9,l:10},{t:9,w:8,v:9,c:8,l:10},{t:9,w:6,v:7,c:6,l:8},{t:8,w:4,v:5,c:5,l:7},{t:8,w:4,v:5,c:5,l:7},{t:8,w:5,v:6,c:5,l:7},{t:8,w:5,v:6,c:5,l:7},{t:8,w:6,v:7,c:6,l:8},{t:8,w:7,v:8,c:7,l:9},{t:8,w:8,v:9,c:8,l:9}]
+  },
+  {
+    name: "Red Sea",
+    loc: "Sharm el-Sheikh, Egypt",
+    desc: "Legendary wreck diving at the SS Thistlegorm, dramatic walls at Ras Mohammed. Warm year-round with incredible visibility and abundant reef life.",
+    imgs: ["images/red-sea-1.jpg","images/red-sea-2.jpg","images/red-sea-3.jpg"],
+    m:[{t:6,w:8,v:9,c:8,l:6},{t:6,w:8,v:9,c:8,l:6},{t:7,w:9,v:9,c:8,l:7},{t:7,w:9,v:9,c:9,l:7},{t:8,w:9,v:9,c:9,l:8},{t:9,w:10,v:10,c:9,l:8},{t:9,w:10,v:10,c:9,l:8},{t:10,w:10,v:10,c:9,l:9},{t:9,w:10,v:10,c:9,l:9},{t:8,w:9,v:9,c:9,l:8},{t:7,w:9,v:9,c:8,l:7},{t:6,w:8,v:9,c:8,l:6}]
+  },
+  {
+    name: "Cozumel",
+    loc: "Quintana Roo, Mexico",
+    desc: "Drift diving through crystal-clear Caribbean waters. Spectacular coral, nurse sharks, eagle rays, and the splendid toadfish found nowhere else on Earth.",
+    imgs: ["images/cozumel-1.jpg","images/cozumel-2.jpg","images/cozumel-3.jpg"],
+    m:[{t:7,w:8,v:9,c:9,l:7},{t:7,w:9,v:9,c:9,l:7},{t:7,w:9,v:10,c:9,l:7},{t:8,w:9,v:10,c:9,l:8},{t:8,w:8,v:9,c:8,l:8},{t:9,w:6,v:7,c:7,l:7},{t:9,w:6,v:7,c:7,l:7},{t:9,w:6,v:7,c:7,l:7},{t:9,w:5,v:6,c:6,l:7},{t:8,w:5,v:7,c:7,l:7},{t:8,w:7,v:8,c:8,l:7},{t:7,w:8,v:9,c:9,l:7}]
+  },
+  {
+    name: "Komodo National Park",
+    loc: "Flores, Indonesia",
+    desc: "Thrilling currents attract manta rays, reef sharks, and massive schools of fish. Vibrant coral pinnacles above and Komodo dragons on land.",
+    imgs: ["images/komodo-1.jpg","images/komodo-2.jpg","images/komodo-3.jpg"],
+    m:[{t:8,w:5,v:6,c:5,l:8},{t:8,w:5,v:6,c:5,l:8},{t:8,w:6,v:7,c:6,l:8},{t:9,w:8,v:8,c:7,l:9},{t:8,w:8,v:8,c:7,l:9},{t:8,w:9,v:8,c:7,l:8},{t:7,w:9,v:8,c:7,l:8},{t:7,w:9,v:9,c:8,l:9},{t:8,w:9,v:9,c:8,l:9},{t:8,w:9,v:9,c:8,l:9},{t:8,w:7,v:7,c:6,l:8},{t:8,w:6,v:6,c:5,l:8}]
+  },
+  {
+    name: "Sipadan Island",
+    loc: "Sabah, Malaysia",
+    desc: "Cousteau's 'untouched piece of art.' A 600 m vertical wall swarming with barracuda tornados, hawksbill turtles, and bumphead parrotfish.",
+    imgs: ["images/sipadan-1.jpg","images/sipadan-2.jpg","images/sipadan-3.jpg"],
+    m:[{t:8,w:6,v:7,c:7,l:9},{t:8,w:7,v:7,c:7,l:9},{t:9,w:8,v:8,c:8,l:9},{t:9,w:9,v:9,c:8,l:10},{t:9,w:8,v:8,c:8,l:9},{t:8,w:7,v:7,c:7,l:8},{t:8,w:7,v:7,c:7,l:8},{t:8,w:7,v:7,c:7,l:8},{t:8,w:7,v:7,c:7,l:9},{t:8,w:6,v:6,c:6,l:9},{t:8,w:5,v:6,c:6,l:9},{t:8,w:6,v:6,c:7,l:9}]
+  },
+  {
+    name: "Azores",
+    loc: "Portugal (Atlantic)",
+    desc: "Mid-Atlantic volcanic islands with blue sharks, manta rays, mobula rays, and sperm whales. Dramatic arches, caves, and seamounts in deep blue water.",
+    imgs: ["images/azores-1.jpg","images/azores-2.jpg","images/azores-3.jpg"],
+    m:[{t:4,w:4,v:6,c:5,l:4},{t:4,w:4,v:6,c:5,l:4},{t:4,w:5,v:7,c:6,l:5},{t:5,w:6,v:7,c:6,l:6},{t:5,w:7,v:8,c:7,l:7},{t:6,w:8,v:9,c:8,l:9},{t:7,w:9,v:10,c:8,l:10},{t:8,w:9,v:10,c:8,l:10},{t:7,w:8,v:9,c:8,l:9},{t:6,w:7,v:8,c:7,l:7},{t:5,w:5,v:7,c:6,l:5},{t:4,w:4,v:6,c:5,l:4}]
+  },
+  {
+    name: "Palau",
+    loc: "Micronesia",
+    desc: "Rock islands, blue holes, WWII wrecks, and Jellyfish Lake. Massive walls crusted with soft coral, grey reef sharks patrolling every channel.",
+    imgs: ["images/palau-1.jpg","images/palau-2.jpg","images/palau-3.jpg"],
+    m:[{t:8,w:7,v:8,c:6,l:8},{t:8,w:8,v:8,c:7,l:8},{t:9,w:8,v:9,c:7,l:9},{t:9,w:9,v:9,c:8,l:9},{t:9,w:8,v:8,c:7,l:9},{t:8,w:6,v:7,c:6,l:8},{t:8,w:6,v:7,c:6,l:8},{t:8,w:6,v:7,c:6,l:8},{t:8,w:7,v:8,c:7,l:8},{t:8,w:7,v:8,c:7,l:9},{t:8,w:8,v:8,c:7,l:9},{t:8,w:7,v:8,c:6,l:8}]
+  },
+  {
+    name: "Cenotes",
+    loc: "Yucatán, Mexico",
+    desc: "Crystal-clear freshwater sinkholes connect to underground river systems. Dramatic light beams, stalactites, and haloclines create otherworldly cave dives.",
+    imgs: ["images/cenotes-1.jpg","images/cenotes-2.jpg","images/cenotes-3.jpg"],
+    m:[{t:7,w:8,v:10,c:10,l:4},{t:7,w:9,v:10,c:10,l:4},{t:7,w:9,v:10,c:10,l:4},{t:8,w:9,v:10,c:10,l:5},{t:8,w:8,v:10,c:10,l:5},{t:8,w:6,v:9,c:10,l:5},{t:9,w:6,v:9,c:10,l:5},{t:9,w:6,v:9,c:10,l:5},{t:8,w:5,v:9,c:10,l:5},{t:8,w:6,v:10,c:10,l:4},{t:7,w:7,v:10,c:10,l:4},{t:7,w:8,v:10,c:10,l:4}]
+  },
+  {
+    name: "Sardine Run",
+    loc: "KwaZulu-Natal, South Africa",
+    desc: "One of nature's greatest spectacles: billions of sardines, hunted by dolphins, sharks, whales, and diving gannets. A once-a-year adrenaline event.",
+    imgs: ["images/sardine-run-1.jpg","images/sardine-run-2.jpg","images/sardine-run-3.jpg"],
+    m:[{t:7,w:6,v:5,c:4,l:4},{t:7,w:6,v:5,c:4,l:4},{t:7,w:6,v:6,c:5,l:5},{t:6,w:7,v:6,c:5,l:5},{t:5,w:7,v:7,c:6,l:8},{t:4,w:7,v:8,c:6,l:10},{t:4,w:7,v:8,c:6,l:10},{t:5,w:7,v:7,c:6,l:7},{t:5,w:7,v:7,c:5,l:6},{t:6,w:7,v:6,c:5,l:5},{t:7,w:6,v:5,c:4,l:5},{t:7,w:6,v:5,c:4,l:4}]
+  },
+  {
+    name: "Tubbataha Reef",
+    loc: "Palawan, Philippines",
+    desc: "UNESCO World Heritage site in the heart of the Coral Triangle. Pristine walls, massive pelagics, and one of the highest concentrations of marine species on Earth.",
+    imgs: ["images/tubbataha-1.jpg","images/tubbataha-2.jpg","images/tubbataha-3.jpg"],
+    m:[{t:8,w:5,v:5,c:5,l:8},{t:8,w:6,v:6,c:6,l:8},{t:9,w:8,v:8,c:8,l:9},{t:9,w:9,v:9,c:9,l:10},{t:9,w:9,v:9,c:8,l:10},{t:8,w:6,v:7,c:6,l:9},{t:8,w:5,v:6,c:5,l:8},{t:8,w:5,v:6,c:5,l:8},{t:8,w:5,v:6,c:5,l:8},{t:8,w:5,v:6,c:6,l:8},{t:8,w:5,v:5,c:5,l:8},{t:8,w:5,v:5,c:5,l:8}]
+  },
+  {
+    name: "Bonaire",
+    loc: "Caribbean Netherlands",
+    desc: "The shore-diving capital of the world. Drive your truck to a numbered yellow stone, walk in, and you're on an immaculate reef. 24/7 access, no boat needed.",
+    imgs: ["images/bonaire-1.jpg","images/bonaire-2.jpg","images/bonaire-3.jpg"],
+    m:[{t:7,w:8,v:9,c:9,l:6},{t:7,w:9,v:9,c:9,l:6},{t:7,w:9,v:9,c:9,l:6},{t:8,w:9,v:9,c:9,l:7},{t:8,w:8,v:9,c:8,l:7},{t:8,w:8,v:8,c:8,l:6},{t:8,w:8,v:8,c:8,l:6},{t:9,w:7,v:8,c:8,l:6},{t:9,w:6,v:8,c:7,l:7},{t:8,w:6,v:8,c:7,l:7},{t:8,w:7,v:9,c:8,l:6},{t:7,w:8,v:9,c:9,l:6}]
+  },
+  {
+    name: "Socorro Islands",
+    loc: "Baja California, Mexico",
+    desc: "The Mexican Galápagos. Giant Pacific mantas that seek out divers, humpback whales, dolphins, hammerheads, and whale sharks in deep oceanic blue.",
+    imgs: ["images/socorro-1.jpg","images/socorro-2.jpg","images/socorro-3.jpg"],
+    m:[{t:6,w:8,v:8,c:7,l:9},{t:6,w:8,v:9,c:7,l:10},{t:7,w:9,v:9,c:8,l:10},{t:7,w:9,v:9,c:8,l:9},{t:8,w:8,v:8,c:7,l:8},{t:8,w:7,v:7,c:6,l:6},{t:8,w:5,v:6,c:5,l:5},{t:8,w:5,v:6,c:5,l:5},{t:8,w:5,v:6,c:5,l:5},{t:7,w:6,v:7,c:6,l:6},{t:7,w:7,v:8,c:7,l:8},{t:6,w:8,v:8,c:7,l:9}]
+  },
+  {
+    name: "Fiji",
+    loc: "South Pacific",
+    desc: "The soft coral capital of the world. Riot of color in nutrient-rich currents with bull sharks, mantas, and kaleidoscopic walls dripping with dendronephthya.",
+    imgs: ["images/fiji-1.jpg","images/fiji-2.jpg","images/fiji-3.jpg"],
+    m:[{t:9,w:5,v:6,c:6,l:8},{t:9,w:5,v:6,c:6,l:8},{t:9,w:6,v:6,c:6,l:8},{t:8,w:7,v:7,c:7,l:8},{t:7,w:8,v:8,c:8,l:8},{t:7,w:8,v:8,c:8,l:9},{t:6,w:9,v:9,c:8,l:9},{t:6,w:9,v:9,c:9,l:9},{t:7,w:9,v:9,c:8,l:9},{t:8,w:8,v:8,c:7,l:8},{t:8,w:7,v:7,c:7,l:8},{t:9,w:6,v:6,c:6,l:8}]
+  },
+  {
+    name: "Cocos Island",
+    loc: "Costa Rica",
+    desc: "Remote Pacific island 36 hours from shore. Schooling hammerheads by the hundreds, whale sharks, mantas, and dolphins in an untouched marine wilderness.",
+    imgs: ["images/cocos-1.jpg","images/cocos-2.jpg","images/cocos-3.jpg"],
+    m:[{t:7,w:7,v:7,c:6,l:8},{t:7,w:7,v:7,c:6,l:8},{t:8,w:8,v:7,c:6,l:8},{t:8,w:7,v:7,c:6,l:8},{t:8,w:6,v:6,c:5,l:9},{t:7,w:5,v:6,c:5,l:10},{t:7,w:5,v:6,c:5,l:10},{t:7,w:5,v:7,c:5,l:10},{t:7,w:5,v:7,c:5,l:10},{t:7,w:5,v:7,c:6,l:9},{t:7,w:6,v:7,c:6,l:9},{t:7,w:7,v:7,c:6,l:8}]
+  },
+  {
+    name: "Zanzibar",
+    loc: "Tanzania",
+    desc: "Warm Indian Ocean reefs with dolphins, whale sharks (seasonal), turtles, and colourful reef fish. Relaxed diving with spice-island culture ashore.",
+    imgs: ["images/zanzibar-1.jpg","images/zanzibar-2.jpg","images/zanzibar-3.jpg"],
+    m:[{t:9,w:6,v:7,c:7,l:7},{t:9,w:6,v:7,c:7,l:7},{t:9,w:5,v:6,c:6,l:7},{t:8,w:4,v:5,c:5,l:6},{t:7,w:5,v:6,c:6,l:6},{t:7,w:7,v:8,c:8,l:7},{t:7,w:8,v:9,c:8,l:7},{t:7,w:8,v:9,c:8,l:7},{t:7,w:8,v:9,c:8,l:8},{t:8,w:8,v:8,c:8,l:8},{t:9,w:7,v:7,c:7,l:8},{t:9,w:6,v:7,c:7,l:8}]
+  },
+  {
+    name: "Tonga",
+    loc: "South Pacific",
+    desc: "One of the few places on Earth where you can swim with humpback whale mothers and calves. Crystal-clear water and gentle giants just metres away.",
+    imgs: ["images/tonga-1.jpg","images/tonga-2.jpg","images/tonga-3.jpg"],
+    m:[{t:8,w:5,v:6,c:6,l:5},{t:8,w:5,v:6,c:6,l:5},{t:8,w:6,v:7,c:7,l:5},{t:7,w:7,v:7,c:7,l:5},{t:7,w:7,v:7,c:7,l:6},{t:6,w:8,v:8,c:8,l:7},{t:6,w:8,v:8,c:8,l:10},{t:6,w:9,v:9,c:8,l:10},{t:6,w:9,v:9,c:8,l:10},{t:7,w:8,v:8,c:8,l:9},{t:7,w:7,v:7,c:7,l:7},{t:8,w:6,v:6,c:6,l:5}]
+  }
+];
+
+const FM = [
+  { k:"t", label:"Temp",       icon:"🌡️" },
+  { k:"w", label:"Weather",    icon:"☀️" },
+  { k:"v", label:"Visibility", icon:"👁️" },
+  { k:"c", label:"Currents",   icon:"🌊" },
+  { k:"l", label:"Wildlife",   icon:"🐢" }
+];
+
+const d1 = document.getElementById("d1");
+const d2 = document.getElementById("d2");
+const btn = document.getElementById("goBtn");
+const res = document.getElementById("results");
+const emp = document.getElementById("empty");
+
+const today = new Date();
+d1.value = fmt(today);
+const plus14 = new Date(today);
+plus14.setDate(plus14.getDate()+14);
+d2.value = fmt(plus14);
+check();
+
+d1.addEventListener("change", check);
+d2.addEventListener("change", check);
+btn.addEventListener("click", search);
+
+function fmt(d){ return d.toISOString().split("T")[0]; }
+function check(){ btn.disabled = !(d1.value && d2.value && new Date(d1.value)<=new Date(d2.value)); }
+
+function months(a,b){
+  const s=new Date(a), e=new Date(b), ms=new Set(), c=new Date(s);
+  while(c<=e){ ms.add(c.getMonth()); c.setDate(c.getDate()+1); }
+  return [...ms];
+}
+
+function score(dest, ms){
+  const f={t:0,w:0,v:0,c:0,l:0};
+  ms.forEach(m=>{ const d=dest.m[m]; f.t+=d.t; f.w+=d.w; f.v+=d.v; f.c+=d.c; f.l+=d.l; });
+  const n=ms.length;
+  for(const k in f) f[k]=Math.round(f[k]/n*10)/10;
+  const ov=Math.round((f.t+f.w+f.v+f.c+f.l)/5*10)/10;
+  return {f,ov};
+}
+
+function search(){
+  const ms = months(d1.value, d2.value);
+  if(emp) emp.remove();
+
+  res.innerHTML='<div class="loading"><div class="ldots"><span></span><span></span><span></span></div><p>Analyzing conditions\u2026</p></div>';
+
+  setTimeout(()=>{
+    const ranked = DESTS.map(d=>{
+      const {f,ov}=score(d,ms);
+      return {...d, sc:f, ov};
+    }).sort((a,b)=>b.ov-a.ov);
+    render(ranked, ms);
+  }, 700);
+}
+
+function mn(i){ return ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][i]; }
+
+function col(v){
+  if(v>=8.5) return "#36d6b5";
+  if(v>=7)   return "#6dd5a0";
+  if(v>=5.5) return "#facc15";
+  if(v>=4)   return "#fb923c";
+  return "#ef4444";
+}
+
+const CIRC = 2*Math.PI*24;
+
+function render(ranked, ms){
+  const ml = ms.map(mn).join(", ");
+  res.innerHTML=`<div class="results-head"><h2>Top Destinations</h2><p class="sub">Ranked for ${ml}</p></div><div class="grid" id="g"></div>`;
+  const g = document.getElementById("g");
+
+  ranked.forEach((d,i)=>{
+    const el = document.createElement("div");
+    el.className="card";
+    el.style.opacity="0";
+    el.style.transform="translateY(16px)";
+
+    const pct = d.ov/10;
+    const dash = CIRC*(1-pct);
+
+    const fHTML = FM.map(f=>{
+      const v=d.sc[f.k];
+      return `<div class="f">
+        <div class="f-icon">${f.icon}</div>
+        <div class="f-val" style="color:${col(v)}">${v}</div>
+        <div class="f-lbl">${f.label}</div>
+        <div class="f-bar"><div class="f-bar-fill" style="width:${v*10}%;background:${col(v)}"></div></div>
+      </div>`;
+    }).join("");
+
+    el.innerHTML=`
+      <div class="photos">
+        <div class="rank">${i+1}</div>
+        <div class="ph" style="background-image:url('${d.imgs[0]}')"></div>
+        <div class="ph" style="background-image:url('${d.imgs[1]}')"></div>
+        <div class="ph" style="background-image:url('${d.imgs[2]}')"></div>
+      </div>
+      <div class="info">
+        <div class="top-row">
+          <div>
+            <div class="dest-name">${d.name}</div>
+            <div class="dest-loc">${d.loc}</div>
+          </div>
+          <div class="score-ring" style="color:${col(d.ov)}">
+            <svg viewBox="0 0 52 52">
+              <circle class="bg"/>
+              <circle class="fg" stroke="${col(d.ov)}" stroke-dasharray="${CIRC}" stroke-dashoffset="${dash}"/>
+            </svg>
+            ${d.ov}
+          </div>
+        </div>
+        <div class="desc">${d.desc}</div>
+        <div class="factors">${fHTML}</div>
+      </div>`;
+
+    g.appendChild(el);
+
+    setTimeout(()=>{
+      el.style.transition="opacity 0.45s ease, transform 0.45s ease";
+      el.style.opacity="1";
+      el.style.transform="translateY(0)";
+    }, i*80);
+  });
+}
+</script>
+</body>
+</html>
