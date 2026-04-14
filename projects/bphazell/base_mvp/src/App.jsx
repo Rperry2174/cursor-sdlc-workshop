@@ -1,4 +1,7 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
+import QuestionTimer from "./components/QuestionTimer";
+
+const SECONDS_PER_QUESTION = 10;
 
 const QUESTIONS = [
   {
@@ -38,6 +41,7 @@ function App() {
   const [score, setScore] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState("");
   const [isFinished, setIsFinished] = useState(false);
+  const isTransitioningRef = useRef(false);
 
   const currentQuestion = QUESTIONS[questionIndex];
   const progressLabel = useMemo(
@@ -45,28 +49,45 @@ function App() {
     [questionIndex],
   );
 
+  const advanceQuestion = useCallback(
+    ({ answer, isTimeout }) => {
+      if (isTransitioningRef.current || isFinished) return;
+      isTransitioningRef.current = true;
+
+      if (!isTimeout && answer === currentQuestion.answer) {
+        setScore((previous) => previous + 1);
+      }
+
+      const isLastQuestion = questionIndex === QUESTIONS.length - 1;
+      if (isLastQuestion) {
+        setIsFinished(true);
+      } else {
+        setQuestionIndex((previous) => previous + 1);
+        setSelectedAnswer("");
+      }
+
+      queueMicrotask(() => {
+        isTransitioningRef.current = false;
+      });
+    },
+    [currentQuestion.answer, isFinished, questionIndex],
+  );
+
   const handleNext = () => {
     if (!selectedAnswer) return;
-
-    if (selectedAnswer === currentQuestion.answer) {
-      setScore((previous) => previous + 1);
-    }
-
-    const isLastQuestion = questionIndex === QUESTIONS.length - 1;
-    if (isLastQuestion) {
-      setIsFinished(true);
-      return;
-    }
-
-    setQuestionIndex((previous) => previous + 1);
-    setSelectedAnswer("");
+    advanceQuestion({ answer: selectedAnswer, isTimeout: false });
   };
+
+  const handleTimeout = useCallback(() => {
+    advanceQuestion({ answer: "", isTimeout: true });
+  }, [advanceQuestion]);
 
   const handlePlayAgain = () => {
     setQuestionIndex(0);
     setScore(0);
     setSelectedAnswer("");
     setIsFinished(false);
+    isTransitioningRef.current = false;
   };
 
   if (isFinished) {
@@ -91,6 +112,12 @@ function App() {
       <section className="card">
         <h1>Quick Quiz Blitz</h1>
         <p className="subtitle">{progressLabel}</p>
+        <QuestionTimer
+          isActive={!isFinished}
+          onTimeout={handleTimeout}
+          questionKey={questionIndex}
+          secondsPerQuestion={SECONDS_PER_QUESTION}
+        />
         <h2>{currentQuestion.prompt}</h2>
 
         <div className="answers">

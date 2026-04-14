@@ -40,6 +40,15 @@ h2 {
   color: #4b5563;
 }
 
+.timer {
+  margin: 10px 0 0;
+  color: #1f2937;
+}
+
+.timer-urgent {
+  color: #b91c1c;
+}
+
 .answers {
   display: grid;
   gap: 10px;
