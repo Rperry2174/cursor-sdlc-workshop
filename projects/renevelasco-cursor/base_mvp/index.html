@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Galaga Arcade</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Courier New', monospace;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  #game-wrapper {
+    position: relative;
+    border: 2px solid #333;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 0 40px rgba(0, 100, 255, 0.15);
+  }
+
+  canvas { display: block; }
+
+  .overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .overlay.visible {
+    pointer-events: auto;
+    opacity: 1;
+  }
+
+  .overlay-bg {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+  }
+
+  .overlay-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    color: #fff;
+  }
+
+  .game-title {
+    font-size: 48px;
+    font-weight: bold;
+    color: #ff0;
+    text-shadow: 0 0 20px rgba(255, 255, 0, 0.5);
+    margin-bottom: 12px;
+    letter-spacing: 6px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 40px;
+    letter-spacing: 2px;
+  }
+
+  .prompt {
+    font-size: 18px;
+    color: #0ff;
+    animation: blink 1.2s ease-in-out infinite;
+    letter-spacing: 1px;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+
+  .win-title {
+    font-size: 42px;
+    font-weight: bold;
+    color: #0f0;
+    text-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+    margin-bottom: 24px;
+    letter-spacing: 4px;
+  }
+
+  .btn {
+    background: transparent;
+    color: #0ff;
+    border: 2px solid #0ff;
+    padding: 12px 36px;
+    font-size: 16px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: background 0.2s, color 0.2s;
+    margin-top: 24px;
+  }
+
+  .btn:hover {
+    background: #0ff;
+    color: #000;
+  }
+
+  .controls {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.35);
+    margin-top: 32px;
+    line-height: 1.8;
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+
+<div id="game-wrapper">
+  <canvas id="game"></canvas>
+
+  <div class="overlay visible" id="startOverlay">
+    <div class="overlay-bg"></div>
+    <div class="overlay-content">
+      <div class="game-title">GALAGA</div>
+      <div class="subtitle">ARCADE</div>
+      <div class="prompt">PRESS SPACE TO START</div>
+      <div class="controls">
+        ARROW KEYS &mdash; MOVE<br>
+        HOLD SPACE &mdash; FIRE
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="gameOverOverlay">
+    <div class="overlay-bg"></div>
+    <div class="overlay-content">
+      <div class="game-over-title" style="font-size:42px;font-weight:bold;color:#f44;text-shadow:0 0 20px rgba(255,68,68,0.5);margin-bottom:24px;letter-spacing:4px;">GAME OVER</div>
+      <div id="goScore" style="font-size:22px;color:#ff0;letter-spacing:2px;"></div>
+      <div id="goBest" style="margin-top:6px;font-size:14px;color:rgba(255,255,255,0.5);letter-spacing:1px;"></div>
+      <button class="btn" id="restartBtn">TRY AGAIN</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="winOverlay">
+    <div class="overlay-bg"></div>
+    <div class="overlay-content">
+      <div class="win-title">YOU WIN!</div>
+      <div class="prompt">ALL ENEMIES DESTROYED</div>
+      <div id="winScore" style="margin-top:16px;font-size:22px;color:#ff0;letter-spacing:2px;"></div>
+      <div id="winBest" style="margin-top:6px;font-size:14px;color:rgba(255,255,255,0.5);letter-spacing:1px;"></div>
+      <button class="btn" id="replayBtn">PLAY AGAIN</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/score.js"></script>
+<script src="js/enemy-movement.js"></script>
+<script src="js/lives.js"></script>
+<script src="js/explosions.js"></script>
+<script>
+(function () {
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+
+  const W = 480;
+  const H = 640;
+  canvas.width = W;
+  canvas.height = H;
+
+  const startOverlay = document.getElementById('startOverlay');
+  const winOverlay = document.getElementById('winOverlay');
+  const gameOverOverlay = document.getElementById('gameOverOverlay');
+  const replayBtn = document.getElementById('replayBtn');
+  const restartBtn = document.getElementById('restartBtn');
+
+  // --- Player ---
+  const PLAYER_W = 32;
+  const PLAYER_H = 24;
+  const PLAYER_SPEED = 5;
+  const BULLET_SPEED = 7;
+  const BULLET_W = 3;
+  const BULLET_H = 12;
+  const MAX_BULLETS = 3;
+
+  // --- Enemy grid ---
+  const ENEMY_ROWS = 5;
+  const ENEMY_COLS = 8;
+  const ENEMY_W = 28;
+  const ENEMY_H = 22;
+  const ENEMY_PAD_X = 12;
+  const ENEMY_PAD_Y = 10;
+  const GRID_TOP = 60;
+
+  const ENEMY_COLORS = ['#f44', '#f84', '#ff0', '#0ff', '#88f'];
+
+  let state = 'start';
+  let player, bullets, enemies, stars, frameCount;
+  const FIRE_COOLDOWN = 8;
+  let fireCooldownTimer = 0;
+  const TOTAL_WAVES = 3;
+  let currentWave = 1;
+  let waveTransitionTimer = 0;
+  const WAVE_TRANSITION_FRAMES = 120;
+
+  const keys = {};
+
+  function makeStars() {
+    const arr = [];
+    for (let i = 0; i < 80; i++) {
+      arr.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        speed: 0.2 + Math.random() * 0.6,
+        brightness: 0.3 + Math.random() * 0.7
+      });
+    }
+    return arr;
+  }
+
+  function makeEnemies() {
+    const arr = [];
+    const gridW = ENEMY_COLS * (ENEMY_W + ENEMY_PAD_X) - ENEMY_PAD_X;
+    const offsetX = (W - gridW) / 2;
+
+    for (let row = 0; row < ENEMY_ROWS; row++) {
+      for (let col = 0; col < ENEMY_COLS; col++) {
+        arr.push({
+          x: offsetX + col * (ENEMY_W + ENEMY_PAD_X),
+          y: GRID_TOP + row * (ENEMY_H + ENEMY_PAD_Y),
+          row,
+          col,
+          alive: true
+        });
+      }
+    }
+    return arr;
+  }
+
+  function resetGame() {
+    player = { x: W / 2 - PLAYER_W / 2, y: H - 50 };
+    bullets = [];
+    enemies = makeEnemies();
+    stars = makeStars();
+    frameCount = 0;
+    currentWave = 1;
+    waveTransitionTimer = 0;
+    Score.reset();
+    EnemyMovement.reset();
+    Lives.reset();
+    Explosions.reset();
+  }
+
+  function startNextWave() {
+    currentWave++;
+    bullets = [];
+    enemies = makeEnemies();
+    EnemyMovement.reset();
+    waveTransitionTimer = WAVE_TRANSITION_FRAMES;
+  }
+
+  resetGame();
+
+  // --- Drawing ---
+  function drawStars() {
+    for (const s of stars) {
+      ctx.fillStyle = `rgba(255, 255, 255, ${s.brightness})`;
+      ctx.fillRect(Math.floor(s.x), Math.floor(s.y), 1, 1);
+    }
+  }
+
+  function updateStars() {
+    for (const s of stars) {
+      s.y += s.speed;
+      if (s.y > H) {
+        s.y = 0;
+        s.x = Math.random() * W;
+      }
+    }
+  }
+
+  function drawPlayer() {
+    const cx = player.x + PLAYER_W / 2;
+    const by = player.y + PLAYER_H;
+
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.moveTo(cx, player.y - 6);
+    ctx.lineTo(cx + PLAYER_W / 2, by);
+    ctx.lineTo(cx + PLAYER_W / 2 - 4, by);
+    ctx.lineTo(cx + 3, player.y + 8);
+    ctx.lineTo(cx, player.y + 2);
+    ctx.lineTo(cx - 3, player.y + 8);
+    ctx.lineTo(cx - PLAYER_W / 2 + 4, by);
+    ctx.lineTo(cx - PLAYER_W / 2, by);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = '#0af';
+    ctx.beginPath();
+    ctx.moveTo(cx, player.y);
+    ctx.lineTo(cx + 4, player.y + 10);
+    ctx.lineTo(cx - 4, player.y + 10);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = '#08f';
+    ctx.fillRect(cx - 1, by, 2, 4 + Math.random() * 3);
+  }
+
+  function drawBullet(b) {
+    ctx.fillStyle = '#ff0';
+    ctx.fillRect(b.x, b.y, BULLET_W, BULLET_H);
+    ctx.fillStyle = 'rgba(255, 255, 0, 0.3)';
+    ctx.fillRect(b.x - 1, b.y + BULLET_H, BULLET_W + 2, 4);
+  }
+
+  function drawEnemy(e) {
+    if (!e.alive) return;
+    const color = ENEMY_COLORS[e.row % ENEMY_COLORS.length];
+    const cx = e.x + ENEMY_W / 2;
+    const cy = e.y + ENEMY_H / 2;
+
+    const wingFlap = Math.sin(frameCount * 0.08 + e.col * 0.5) * 3;
+
+    ctx.fillStyle = color;
+    ctx.fillRect(e.x + 6, e.y + 2, ENEMY_W - 12, ENEMY_H - 4);
+
+    ctx.beginPath();
+    ctx.moveTo(e.x, cy + wingFlap);
+    ctx.lineTo(e.x + 8, e.y + 2);
+    ctx.lineTo(e.x + 8, e.y + ENEMY_H - 2);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(e.x + ENEMY_W, cy - wingFlap);
+    ctx.lineTo(e.x + ENEMY_W - 8, e.y + 2);
+    ctx.lineTo(e.x + ENEMY_W - 8, e.y + ENEMY_H - 2);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = '#000';
+    ctx.fillRect(e.x + 9, cy - 3, 4, 4);
+    ctx.fillRect(e.x + ENEMY_W - 13, cy - 3, 4, 4);
+  }
+
+  function drawHUD() {
+    Score.draw(ctx, W);
+
+    ctx.save();
+    ctx.font = '12px "Courier New", monospace';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.textAlign = 'center';
+    ctx.fillText('WAVE ' + currentWave + ' / ' + TOTAL_WAVES, W / 2, H - 12);
+    ctx.restore();
+  }
+
+  function drawWaveBanner() {
+    if (waveTransitionTimer <= 0) return;
+    const alpha = Math.min(1, waveTransitionTimer / 30);
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.font = 'bold 40px "Courier New", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#0ff';
+    ctx.fillText('WAVE ' + currentWave, W / 2, H / 2 - 10);
+    ctx.font = '16px "Courier New", monospace';
+    ctx.fillStyle = '#fff';
+    ctx.fillText('GET READY', W / 2, H / 2 + 20);
+    ctx.restore();
+  }
+
+  // --- Update ---
+  function update() {
+    if (state !== 'playing') return;
+    frameCount++;
+
+    if (keys['ArrowLeft'] || keys['KeyA']) {
+      player.x -= PLAYER_SPEED;
+    }
+    if (keys['ArrowRight'] || keys['KeyD']) {
+      player.x += PLAYER_SPEED;
+    }
+    player.x = Math.max(0, Math.min(W - PLAYER_W, player.x));
+
+    if (fireCooldownTimer > 0) fireCooldownTimer--;
+    if (keys['Space'] && fireCooldownTimer === 0) {
+      shoot();
+      fireCooldownTimer = FIRE_COOLDOWN;
+    }
+
+    for (let i = bullets.length - 1; i >= 0; i--) {
+      bullets[i].y -= BULLET_SPEED;
+      if (bullets[i].y + BULLET_H < 0) {
+        bullets.splice(i, 1);
+      }
+    }
+
+    for (let i = bullets.length - 1; i >= 0; i--) {
+      const b = bullets[i];
+      for (const e of enemies) {
+        if (!e.alive) continue;
+        if (
+          b.x < e.x + ENEMY_W &&
+          b.x + BULLET_W > e.x &&
+          b.y < e.y + ENEMY_H &&
+          b.y + BULLET_H > e.y
+        ) {
+          e.alive = false;
+          Score.addKill(e.row);
+          Explosions.spawn(e.x + ENEMY_W / 2, e.y + ENEMY_H / 2, ENEMY_COLORS[e.row % ENEMY_COLORS.length]);
+          bullets.splice(i, 1);
+          break;
+        }
+      }
+    }
+
+    EnemyMovement.update(enemies, frameCount, W, H, currentWave);
+
+    Lives.update();
+    const wasHit = Lives.checkPlayerHit(player, PLAYER_W, PLAYER_H, enemies, ENEMY_W, ENEMY_H, EnemyMovement);
+    if (wasHit) {
+      Explosions.spawn(player.x + PLAYER_W / 2, player.y + PLAYER_H / 2, '#fff');
+    }
+
+    if (Lives.getCount() <= 0) {
+      state = 'gameover';
+      document.getElementById('goScore').textContent = 'SCORE: ' + String(Score.getCurrent()).padStart(6, '0');
+      document.getElementById('goBest').textContent = 'HIGH SCORE: ' + String(Score.getBest()).padStart(6, '0');
+      gameOverOverlay.classList.add('visible');
+      return;
+    }
+
+    if (waveTransitionTimer > 0) {
+      waveTransitionTimer--;
+    }
+
+    if (enemies.every(e => !e.alive) && waveTransitionTimer === 0) {
+      if (currentWave >= TOTAL_WAVES) {
+        state = 'win';
+        document.getElementById('winScore').textContent = 'SCORE: ' + String(Score.getCurrent()).padStart(6, '0');
+        document.getElementById('winBest').textContent = 'HIGH SCORE: ' + String(Score.getBest()).padStart(6, '0');
+        winOverlay.classList.add('visible');
+      } else {
+        startNextWave();
+      }
+    }
+
+    Explosions.update();
+    updateStars();
+  }
+
+  function shoot() {
+    if (bullets.length >= MAX_BULLETS) return;
+    bullets.push({
+      x: player.x + PLAYER_W / 2 - BULLET_W / 2,
+      y: player.y - BULLET_H
+    });
+  }
+
+  // --- Render ---
+  function render() {
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, W, H);
+
+    drawStars();
+
+    if (state === 'playing' || state === 'win' || state === 'gameover') {
+      for (const e of enemies) drawEnemy(e);
+      for (const b of bullets) drawBullet(b);
+      EnemyMovement.drawBullets(ctx);
+      Explosions.draw(ctx);
+      const showPlayer = !Lives.isInvincible() || Math.floor(frameCount / 4) % 2 === 0;
+      if (showPlayer) drawPlayer();
+      drawHUD();
+      Lives.draw(ctx, H);
+      drawWaveBanner();
+    }
+  }
+
+  // --- Loop ---
+  function gameLoop() {
+    update();
+    render();
+    requestAnimationFrame(gameLoop);
+  }
+
+  // --- Input ---
+  document.addEventListener('keydown', (e) => {
+    keys[e.code] = true;
+
+    if (e.code === 'Space') {
+      e.preventDefault();
+      if (state === 'start') {
+        state = 'playing';
+        startOverlay.classList.remove('visible');
+        resetGame();
+      }
+    }
+  });
+
+  document.addEventListener('keyup', (e) => {
+    keys[e.code] = false;
+  });
+
+  replayBtn.addEventListener('click', () => {
+    winOverlay.classList.remove('visible');
+    state = 'playing';
+    resetGame();
+  });
+
+  restartBtn.addEventListener('click', () => {
+    gameOverOverlay.classList.remove('visible');
+    state = 'playing';
+    resetGame();
+  });
+
+  gameLoop();
+})();
+</script>
+</body>
+</html>
