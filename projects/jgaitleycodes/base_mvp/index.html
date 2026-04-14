@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TypeRush</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #0f172a;
+    color: #e2e8f0;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 700px;
+    padding: 2.5rem 2rem;
+  }
+
+  h1 {
+    font-size: 2.4rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    background: linear-gradient(135deg, #38bdf8, #818cf8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.25rem;
+  }
+
+  .tagline {
+    color: #94a3b8;
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
+  }
+
+  .passage-box {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 1.5rem;
+    font-size: 1.25rem;
+    line-height: 1.8;
+    letter-spacing: 0.02em;
+    min-height: 120px;
+    margin-bottom: 1.5rem;
+    font-family: 'Menlo', 'Consolas', 'Courier New', monospace;
+    position: relative;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .passage-box .char {
+    transition: color 0.08s;
+  }
+  .passage-box .char.correct { color: #4ade80; }
+  .passage-box .char.incorrect {
+    color: #f87171;
+    border-bottom: 2px solid #f87171;
+  }
+  .passage-box .char.current {
+    background: rgba(56, 189, 248, 0.25);
+    border-radius: 2px;
+  }
+  .passage-box .char.pending { color: #64748b; }
+
+  .input-area {
+    width: 100%;
+    background: #1e293b;
+    border: 2px solid #334155;
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    font-size: 1.15rem;
+    font-family: 'Menlo', 'Consolas', 'Courier New', monospace;
+    color: #e2e8f0;
+    outline: none;
+    transition: border-color 0.2s;
+    margin-bottom: 1.25rem;
+  }
+  .input-area:focus { border-color: #38bdf8; }
+  .input-area:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .stats {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #38bdf8;
+    line-height: 1;
+  }
+  .stat-value.final { color: #4ade80; }
+
+  .stat-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #64748b;
+    margin-top: 0.3rem;
+  }
+
+  .controls {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .btn {
+    padding: 0.75rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.2s;
+  }
+  .btn:active { transform: scale(0.97); }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #38bdf8, #818cf8);
+    color: #0f172a;
+    box-shadow: 0 4px 20px rgba(56, 189, 248, 0.25);
+  }
+  .btn-primary:hover { box-shadow: 0 6px 28px rgba(56, 189, 248, 0.35); }
+  .btn-primary:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: #94a3b8;
+    border: 1px solid #334155;
+  }
+  .btn-ghost:hover { background: #1e293b; }
+
+  .difficulty-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .difficulty-label {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .difficulty-select {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.95rem;
+    color: #e2e8f0;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .difficulty-select:focus { border-color: #38bdf8; }
+  .difficulty-select:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .best-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .best-badge {
+    font-size: 0.9rem;
+    color: #fbbf24;
+    font-weight: 600;
+  }
+
+  .btn-reset-best {
+    background: none;
+    border: none;
+    color: #64748b;
+    font-size: 0.75rem;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 0;
+  }
+  .btn-reset-best:hover { color: #94a3b8; }
+
+  .new-best-tag {
+    display: none;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #fbbf24;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+  }
+  .new-best-tag.visible { display: block; }
+
+  #fireworksCanvas {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  .result-banner {
+    background: linear-gradient(135deg, rgba(74, 222, 128, 0.1), rgba(56, 189, 248, 0.1));
+    border: 1px solid rgba(74, 222, 128, 0.3);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    display: none;
+    text-align: center;
+  }
+  .result-banner.visible { display: block; }
+
+  .result-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #4ade80;
+    margin-bottom: 0.75rem;
+  }
+
+  .result-stats {
+    display: flex;
+    justify-content: center;
+    gap: 2.5rem;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="fireworksCanvas"></canvas>
+
+<div class="container">
+  <h1>TypeRush</h1>
+  <p class="tagline">How fast can you type? Hit Start and find out.</p>
+
+  <div class="difficulty-row">
+    <span class="difficulty-label">Difficulty</span>
+    <select id="difficulty" class="difficulty-select">
+      <option value="easy">Easy</option>
+      <option value="medium" selected>Medium</option>
+      <option value="hard">Hard</option>
+    </select>
+  </div>
+
+  <div class="best-row">
+    <span class="best-badge" id="bestBadge">Best: —</span>
+    <button class="btn-reset-best" id="resetBestBtn">Reset</button>
+  </div>
+
+  <div class="passage-box" id="passage"></div>
+
+  <input
+    type="text"
+    class="input-area"
+    id="typingInput"
+    placeholder="Click Start, then begin typing here..."
+    disabled
+    autocomplete="off"
+    autocorrect="off"
+    autocapitalize="off"
+    spellcheck="false"
+  >
+
+  <div class="stats">
+    <div class="stat">
+      <span class="stat-value" id="timerDisplay">0.0</span>
+      <span class="stat-label">Seconds</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value" id="wpmDisplay">—</span>
+      <span class="stat-label">WPM</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value" id="accuracyDisplay">—</span>
+      <span class="stat-label">Accuracy</span>
+    </div>
+  </div>
+
+  <div class="result-banner" id="resultBanner">
+    <div class="new-best-tag" id="newBestTag">New Best!</div>
+    <div class="result-title">Round Complete!</div>
+    <div class="result-stats">
+      <div class="stat">
+        <span class="stat-value final" id="finalWpm">0</span>
+        <span class="stat-label">WPM</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value final" id="finalTime">0</span>
+        <span class="stat-label">Seconds</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value final" id="finalAccuracy">0</span>
+        <span class="stat-label">Accuracy</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="btn btn-primary" id="startBtn">Start</button>
+    <button class="btn btn-ghost" id="resetBtn" style="display:none">Try Again</button>
+  </div>
+</div>
+
+<script>
+// Fireworks engine — difficulty-themed colors, pure canvas, no dependencies
+var Fireworks = (function () {
+  var canvas = document.getElementById("fireworksCanvas");
+  var ctx = canvas.getContext("2d");
+  var particles = [];
+  var rockets = [];
+  var animId = null;
+  var running = false;
+  var stopTime = 0;
+
+  var PALETTES = {
+    easy:   ["#4ade80", "#22d3ee", "#a3e635", "#34d399", "#2dd4bf"],
+    medium: ["#fbbf24", "#f59e0b", "#fb923c", "#facc15", "#fde68a"],
+    hard:   ["#f87171", "#ec4899", "#a78bfa", "#fb7185", "#c084fc"]
+  };
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+
+  window.addEventListener("resize", resize);
+  resize();
+
+  function Particle(x, y, color) {
+    var angle = Math.random() * Math.PI * 2;
+    var speed = 2 + Math.random() * 5;
+    this.x = x;
+    this.y = y;
+    this.vx = Math.cos(angle) * speed;
+    this.vy = Math.sin(angle) * speed;
+    this.alpha = 1;
+    this.color = color;
+    this.radius = 1.5 + Math.random() * 2;
+    this.decay = 0.012 + Math.random() * 0.018;
+    this.gravity = 0.04;
+  }
+
+  Particle.prototype.update = function () {
+    this.vx *= 0.98;
+    this.vy *= 0.98;
+    this.vy += this.gravity;
+    this.x += this.vx;
+    this.y += this.vy;
+    this.alpha -= this.decay;
+  };
+
+  Particle.prototype.draw = function () {
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, this.alpha);
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    ctx.fillStyle = this.color;
+    ctx.fill();
+    ctx.restore();
+  };
+
+  function Rocket(palette) {
+    this.x = Math.random() * canvas.width;
+    this.y = canvas.height;
+    this.vx = (Math.random() - 0.5) * 2;
+    this.vy = -(8 + Math.random() * 5);
+    this.palette = palette;
+    this.exploded = false;
+    this.alpha = 1;
+  }
+
+  Rocket.prototype.update = function () {
+    this.vy += 0.12;
+    this.x += this.vx;
+    this.y += this.vy;
+    if (this.vy >= -1 && !this.exploded) {
+      this.explode();
+    }
+  };
+
+  Rocket.prototype.explode = function () {
+    this.exploded = true;
+    var count = 60 + Math.floor(Math.random() * 40);
+    for (var i = 0; i < count; i++) {
+      var color = this.palette[Math.floor(Math.random() * this.palette.length)];
+      particles.push(new Particle(this.x, this.y, color));
+    }
+  };
+
+  Rocket.prototype.draw = function () {
+    if (this.exploded) return;
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 2.5, 0, Math.PI * 2);
+    ctx.fillStyle = "#fff";
+    ctx.fill();
+    ctx.restore();
+  };
+
+  function loop() {
+    if (!running) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (var i = rockets.length - 1; i >= 0; i--) {
+      rockets[i].update();
+      rockets[i].draw();
+      if (rockets[i].exploded) rockets.splice(i, 1);
+    }
+
+    for (var j = particles.length - 1; j >= 0; j--) {
+      particles[j].update();
+      particles[j].draw();
+      if (particles[j].alpha <= 0) particles.splice(j, 1);
+    }
+
+    if (Date.now() < stopTime || particles.length > 0 || rockets.length > 0) {
+      animId = requestAnimationFrame(loop);
+    } else {
+      running = false;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  }
+
+  function launch(difficulty, durationMs) {
+    resize();
+    var palette = PALETTES[difficulty] || PALETTES.medium;
+    running = true;
+    stopTime = Date.now() + (durationMs || 3000);
+    var launchCount = 0;
+    var maxLaunches = 12;
+    var interval = setInterval(function () {
+      if (Date.now() >= stopTime || launchCount >= maxLaunches) {
+        clearInterval(interval);
+        return;
+      }
+      rockets.push(new Rocket(palette));
+      if (Math.random() > 0.4) rockets.push(new Rocket(palette));
+      launchCount++;
+    }, 250);
+    if (!animId) animId = requestAnimationFrame(loop);
+  }
+
+  return { launch: launch };
+})();
+</script>
+
+<script src="js/passages.js"></script>
+<script src="js/difficulty.js"></script>
+<script src="js/accuracy.js"></script>
+<script src="js/scoreboard.js"></script>
+<script>
+(function () {
+  var passage = getSelectedPassage();
+  var difficultyEl = document.getElementById("difficulty");
+
+  const passageEl = document.getElementById("passage");
+  const inputEl = document.getElementById("typingInput");
+  const timerEl = document.getElementById("timerDisplay");
+  const wpmEl = document.getElementById("wpmDisplay");
+  const startBtn = document.getElementById("startBtn");
+  const resetBtn = document.getElementById("resetBtn");
+  const resultBanner = document.getElementById("resultBanner");
+  const finalWpmEl = document.getElementById("finalWpm");
+  const finalTimeEl = document.getElementById("finalTime");
+  const accuracyEl = document.getElementById("accuracyDisplay");
+  const finalAccuracyEl = document.getElementById("finalAccuracy");
+
+  var bestBadgeEl = document.getElementById("bestBadge");
+  var resetBestBtn = document.getElementById("resetBestBtn");
+  var newBestTag = document.getElementById("newBestTag");
+
+  var accuracy = createAccuracyTracker();
+  var prevInputLen = 0;
+
+  let startTime = null;
+  let timerInterval = null;
+  let finished = false;
+
+  function refreshBestBadge() {
+    var best = getBest(getSelectedDifficulty());
+    if (best) {
+      bestBadgeEl.textContent = "Best: " + best.wpm + " WPM (" + best.accuracy + "%)";
+    } else {
+      bestBadgeEl.textContent = "Best: \u2014";
+    }
+  }
+
+  function renderPassage(typed) {
+    const chars = passage.split("");
+    const spans = chars.map(function (ch, i) {
+      let cls = "char pending";
+      if (i < typed.length) {
+        cls = typed[i] === ch ? "char correct" : "char incorrect";
+      } else if (i === typed.length) {
+        cls = "char current pending";
+      }
+      const span = document.createElement("span");
+      span.className = cls;
+      span.textContent = ch;
+      return span;
+    });
+    passageEl.replaceChildren.apply(passageEl, spans);
+  }
+
+  function elapsedSeconds() {
+    if (!startTime) return 0;
+    return (Date.now() - startTime) / 1000;
+  }
+
+  function computeWpm(typed, seconds) {
+    if (seconds <= 0) return 0;
+    var correctChars = 0;
+    for (var i = 0; i < typed.length; i++) {
+      if (typed[i] === passage[i]) correctChars++;
+    }
+    return Math.round((correctChars / 5) / (seconds / 60));
+  }
+
+  function tickTimer() {
+    var secs = elapsedSeconds();
+    timerEl.textContent = secs.toFixed(1);
+
+    var typed = inputEl.value;
+    if (typed.length > 0) {
+      var wpm = computeWpm(typed, secs);
+      wpmEl.textContent = wpm;
+    }
+  }
+
+  function finishRound() {
+    finished = true;
+    clearInterval(timerInterval);
+    inputEl.disabled = true;
+
+    var secs = elapsedSeconds();
+    var typed = inputEl.value;
+    var wpm = computeWpm(typed, secs);
+
+    timerEl.textContent = secs.toFixed(1);
+    wpmEl.textContent = wpm;
+    finalWpmEl.textContent = wpm;
+    finalTimeEl.textContent = secs.toFixed(1);
+    var accPct = accuracy.getAccuracy();
+    finalAccuracyEl.textContent = accPct + "%";
+
+    var diff = getSelectedDifficulty();
+    var isNewBest = saveIfBest(diff, wpm, accPct);
+    if (isNewBest) {
+      newBestTag.classList.add("visible");
+      Fireworks.launch(diff, 3500);
+    } else {
+      newBestTag.classList.remove("visible");
+    }
+    refreshBestBadge();
+
+    resultBanner.classList.add("visible");
+    startBtn.style.display = "none";
+    resetBtn.style.display = "inline-block";
+  }
+
+  function resetRound() {
+    finished = false;
+    startTime = null;
+    clearInterval(timerInterval);
+    inputEl.value = "";
+    inputEl.disabled = true;
+    timerEl.textContent = "0.0";
+    wpmEl.textContent = "—";
+    accuracyEl.textContent = "—";
+    accuracy.reset();
+    prevInputLen = 0;
+    resultBanner.classList.remove("visible");
+    startBtn.style.display = "inline-block";
+    startBtn.disabled = false;
+    resetBtn.style.display = "none";
+    difficultyEl.disabled = false;
+    newBestTag.classList.remove("visible");
+    passage = getSelectedPassage();
+    refreshBestBadge();
+    renderPassage("");
+  }
+
+  function startRound() {
+    passage = getSelectedPassage();
+    finished = false;
+    startTime = Date.now();
+    inputEl.disabled = false;
+    inputEl.value = "";
+    inputEl.focus();
+    startBtn.disabled = true;
+    difficultyEl.disabled = true;
+    timerInterval = setInterval(tickTimer, 100);
+    renderPassage("");
+  }
+
+  inputEl.addEventListener("input", function () {
+    if (finished) return;
+    var typed = inputEl.value;
+
+    if (typed.length > prevInputLen) {
+      var idx = typed.length - 1;
+      accuracy.recordKey(passage[idx], typed[idx]);
+    } else if (typed.length < prevInputLen) {
+      accuracy.recordKey(null, "backspace");
+    }
+    prevInputLen = typed.length;
+
+    accuracyEl.textContent = accuracy.getAccuracy() + "%";
+    renderPassage(typed);
+
+    if (typed.length >= passage.length) {
+      finishRound();
+    }
+  });
+
+  // Prevent pasting
+  inputEl.addEventListener("paste", function (e) {
+    e.preventDefault();
+  });
+
+  difficultyEl.addEventListener("change", function () {
+    if (!finished && !startTime) {
+      passage = getSelectedPassage();
+      renderPassage("");
+    }
+    refreshBestBadge();
+  });
+
+  resetBestBtn.addEventListener("click", function () {
+    resetBest(getSelectedDifficulty());
+    refreshBestBadge();
+  });
+
+  startBtn.addEventListener("click", startRound);
+  resetBtn.addEventListener("click", resetRound);
+
+  refreshBestBadge();
+  renderPassage("");
+})();
+</script>
+</body>
+</html>
