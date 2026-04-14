@@ -143,6 +143,16 @@
     </div>
   </div>
 
+  <div class="overlay" id="gameOverOverlay">
+    <div class="overlay-bg"></div>
+    <div class="overlay-content">
+      <div class="game-over-title" style="font-size:42px;font-weight:bold;color:#f44;text-shadow:0 0 20px rgba(255,68,68,0.5);margin-bottom:24px;letter-spacing:4px;">GAME OVER</div>
+      <div id="goScore" style="font-size:22px;color:#ff0;letter-spacing:2px;"></div>
+      <div id="goBest" style="margin-top:6px;font-size:14px;color:rgba(255,255,255,0.5);letter-spacing:1px;"></div>
+      <button class="btn" id="restartBtn">TRY AGAIN</button>
+    </div>
+  </div>
+
   <div class="overlay" id="winOverlay">
     <div class="overlay-bg"></div>
     <div class="overlay-content">
@@ -157,6 +167,7 @@
 
 <script src="js/score.js"></script>
 <script src="js/enemy-movement.js"></script>
+<script src="js/lives.js"></script>
 <script>
 (function () {
   const canvas = document.getElementById('game');
@@ -169,7 +180,9 @@
 
   const startOverlay = document.getElementById('startOverlay');
   const winOverlay = document.getElementById('winOverlay');
+  const gameOverOverlay = document.getElementById('gameOverOverlay');
   const replayBtn = document.getElementById('replayBtn');
+  const restartBtn = document.getElementById('restartBtn');
 
   // --- Player ---
   const PLAYER_W = 32;
@@ -236,6 +249,7 @@
     frameCount = 0;
     Score.reset();
     EnemyMovement.reset();
+    Lives.reset();
   }
 
   resetGame();
@@ -368,6 +382,17 @@
 
     EnemyMovement.update(enemies, frameCount, W, H);
 
+    Lives.update();
+    Lives.checkPlayerHit(player, PLAYER_W, PLAYER_H, enemies, ENEMY_W, ENEMY_H, EnemyMovement);
+
+    if (Lives.getCount() <= 0) {
+      state = 'gameover';
+      document.getElementById('goScore').textContent = 'SCORE: ' + String(Score.getCurrent()).padStart(6, '0');
+      document.getElementById('goBest').textContent = 'HIGH SCORE: ' + String(Score.getBest()).padStart(6, '0');
+      gameOverOverlay.classList.add('visible');
+      return;
+    }
+
     if (enemies.every(e => !e.alive)) {
       state = 'win';
       document.getElementById('winScore').textContent = 'SCORE: ' + String(Score.getCurrent()).padStart(6, '0');
@@ -393,12 +418,14 @@
 
     drawStars();
 
-    if (state === 'playing' || state === 'win') {
+    if (state === 'playing' || state === 'win' || state === 'gameover') {
       for (const e of enemies) drawEnemy(e);
       for (const b of bullets) drawBullet(b);
       EnemyMovement.drawBullets(ctx);
-      drawPlayer();
+      const showPlayer = !Lives.isInvincible() || Math.floor(frameCount / 4) % 2 === 0;
+      if (showPlayer) drawPlayer();
       drawHUD();
+      Lives.draw(ctx, H);
     }
   }
 
@@ -431,6 +458,12 @@
 
   replayBtn.addEventListener('click', () => {
     winOverlay.classList.remove('visible');
+    state = 'playing';
+    resetGame();
+  });
+
+  restartBtn.addEventListener('click', () => {
+    gameOverOverlay.classList.remove('visible');
     state = 'playing';
     resetGame();
   });
