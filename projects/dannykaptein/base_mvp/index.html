@@ -269,9 +269,19 @@
   const scoreDisplay = document.getElementById('scoreDisplay');
   const dotsDisplay = document.getElementById('dotsDisplay');
 
-  let grid, dots, totalDots, score, state;
+  let grid, dots, pellets, totalDots, score, state;
   let player, ghosts;
   let animFrame = 0;
+  let frightenedTimer = 0;
+  const FRIGHTENED_DURATION = 50;
+  let ghostEatCombo = 0;
+
+  const PELLET_POSITIONS = [
+    { r: 3, c: 1 },
+    { r: 3, c: 26 },
+    { r: 18, c: 1 },
+    { r: 18, c: 26 },
+  ];
 
   const DIRS = ['up', 'down', 'left', 'right'];
   const OPPOSITE = { up: 'down', down: 'up', left: 'right', right: 'left' };
@@ -310,16 +320,29 @@
   function initGame() {
     grid = [];
     dots = [];
+    pellets = [];
     totalDots = 0;
     score = 0;
+    frightenedTimer = 0;
+    ghostEatCombo = 0;
 
     for (let r = 0; r < ROWS; r++) {
       grid[r] = [];
       dots[r] = [];
+      pellets[r] = [];
       for (let c = 0; c < COLS; c++) {
         grid[r][c] = MAZE[r][c];
         dots[r][c] = MAZE[r][c] === '.';
+        pellets[r][c] = false;
         if (dots[r][c]) totalDots++;
+      }
+    }
+
+    for (const pp of PELLET_POSITIONS) {
+      pellets[pp.r][pp.c] = true;
+      if (!dots[pp.r][pp.c]) {
+        dots[pp.r][pp.c] = true;
+        totalDots++;
       }
     }
 
@@ -332,6 +355,7 @@
       color: def.color,
       name: def.name,
       ai: def.ai,
+      eaten: false,
     }));
 
     updateHUD();
@@ -367,11 +391,27 @@
     }
 
     if (dots[player.r] && dots[player.r][player.c]) {
+      const isPellet = pellets[player.r][player.c];
       dots[player.r][player.c] = false;
-      score += 10;
+      pellets[player.r][player.c] = false;
+
+      if (isPellet) {
+        score += 50;
+        frightenedTimer = FRIGHTENED_DURATION;
+        ghostEatCombo = 0;
+        for (const g of ghosts) {
+          if (!g.eaten) g.dir = OPPOSITE[g.dir];
+        }
+        sfxPowerUp();
+      } else {
+        score += 10;
+        sfxChomp();
+      }
+
       updateHUD();
       if (countDots() === 0) {
         state = 'win';
+        sfxWin();
         winOverlay.classList.add('visible');
       }
     }
@@ -410,11 +450,50 @@
     return options[Math.floor(Math.random() * options.length)];
   }
 
+  function pickDirAwayFromTarget(g, targetR, targetC) {
+    const options = getValidDirs(g);
+    if (options.length === 0) return g.dir;
+    let best = null;
+    let bestDist = -1;
+    for (const d of options) {
+      const p = getNextPos(g.r, g.c, d);
+      p.c = wrapCol(p.c);
+      const dd = dist(p.r, p.c, targetR, targetC);
+      if (dd > bestDist) { bestDist = dd; best = d; }
+    }
+    return best || options[0];
+  }
+
   function moveGhostAI(g) {
+    if (g.eaten) {
+      const homeR = 11, homeC = 14;
+      if (g.r === homeR && Math.abs(g.c - homeC) <= 1) {
+        g.eaten = false;
+        g.r = homeR;
+        g.c = homeC;
+        return;
+      }
+      g.dir = pickDirTowardTarget(g, homeR, homeC);
+      const np = getNextPos(g.r, g.c, g.dir);
+      g.r = np.r;
+      g.c = wrapCol(np.c);
+      return;
+    }
+
     const options = getValidDirs(g);
     if (options.length === 0) return;
 
     let chosenDir;
+
+    if (frightenedTimer > 0) {
+      chosenDir = pickDirAwayFromTarget(g, player.r, player.c);
+      if (Math.random() < 0.3) chosenDir = pickRandomDir(g);
+      g.dir = chosenDir;
+      const np = getNextPos(g.r, g.c, chosenDir);
+      g.r = np.r;
+      g.c = wrapCol(np.c);
+      return;
+    }
 
     switch (g.ai) {
       case 'chase':
@@ -470,7 +549,19 @@
 
   function checkCollision() {
     for (const g of ghosts) {
-      if (player.r === g.r && player.c === g.c) return true;
+      if (g.eaten) continue;
+      if (player.r === g.r && player.c === g.c) {
+        if (frightenedTimer > 0) {
+          g.eaten = true;
+          ghostEatCombo++;
+          const bonus = 200 * ghostEatCombo;
+          score += bonus;
+          updateHUD();
+          sfxEatGhost();
+        } else {
+          return true;
+        }
+      }
     }
     return false;
   }
@@ -571,6 +662,60 @@
     }
   });
 
+  // --- Sound Effects ---
+
+  function ensureAudio() {
+    if (!audioCtx) audioCtx = new AudioCtx();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+  }
+
+  function playTone(freq, duration, type, vol) {
+    ensureAudio();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type || 'square';
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol || 0.1, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration);
+  }
+
+  let chompToggle = false;
+  function sfxChomp() {
+    chompToggle = !chompToggle;
+    playTone(chompToggle ? 200 : 260, 0.06, 'sine', 0.08);
+  }
+
+  function sfxPowerUp() {
+    playTone(220, 0.08, 'square', 0.1);
+    setTimeout(() => playTone(330, 0.08, 'square', 0.1), 60);
+    setTimeout(() => playTone(440, 0.08, 'square', 0.1), 120);
+    setTimeout(() => playTone(660, 0.15, 'square', 0.12), 180);
+  }
+
+  function sfxEatGhost() {
+    playTone(500, 0.06, 'sine', 0.12);
+    setTimeout(() => playTone(700, 0.06, 'sine', 0.12), 50);
+    setTimeout(() => playTone(900, 0.1, 'sine', 0.1), 100);
+  }
+
+  function sfxDie() {
+    playTone(400, 0.12, 'sawtooth', 0.12);
+    setTimeout(() => playTone(300, 0.12, 'sawtooth', 0.1), 100);
+    setTimeout(() => playTone(200, 0.15, 'sawtooth', 0.08), 200);
+    setTimeout(() => playTone(100, 0.3, 'sawtooth', 0.06), 320);
+  }
+
+  function sfxWin() {
+    playTone(523, 0.1, 'square', 0.1);
+    setTimeout(() => playTone(659, 0.1, 'square', 0.1), 100);
+    setTimeout(() => playTone(784, 0.1, 'square', 0.1), 200);
+    setTimeout(() => playTone(1047, 0.25, 'square', 0.12), 300);
+  }
+
   // --- Drawing ---
 
   function drawTree(x, y, seed) {
@@ -626,9 +771,26 @@
   function drawDots() {
     for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
-        if (dots[r][c]) {
-          const dx = c * TILE + TILE / 2;
-          const dy = r * TILE + TILE / 2;
+        if (!dots[r][c]) continue;
+        const dx = c * TILE + TILE / 2;
+        const dy = r * TILE + TILE / 2;
+
+        if (pellets[r][c]) {
+          const pulse = 0.6 + Math.sin(animFrame * 0.15) * 0.4;
+          const radius = 6 + Math.sin(animFrame * 0.15) * 1.5;
+          ctx.fillStyle = `rgba(180, 255, 100, ${pulse * 0.25})`;
+          ctx.beginPath();
+          ctx.arc(dx, dy, radius + 4, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = `rgba(200, 255, 120, ${pulse})`;
+          ctx.beginPath();
+          ctx.arc(dx, dy, radius, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#fff';
+          ctx.beginPath();
+          ctx.arc(dx - 1.5, dy - 1.5, 2, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
           const glow = 0.15 + Math.sin(animFrame * 0.06 + r + c) * 0.1;
           ctx.fillStyle = `rgba(255, 238, 100, ${glow})`;
           ctx.beginPath();
@@ -690,8 +852,32 @@
 
     const s = TILE * 0.42;
     const bob = Math.sin(animFrame * 0.2 + g.c) * 1.5;
+    const px = g.dir === 'left' ? -1.5 : g.dir === 'right' ? 1.5 : 0;
+    const py = g.dir === 'up' ? -1.5 : g.dir === 'down' ? 1.5 : 0;
 
-    ctx.fillStyle = g.color;
+    if (g.eaten) {
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(-s * 0.3, -s * 0.3, s * 0.28, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(s * 0.3, -s * 0.3, s * 0.28, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#4444ff';
+      ctx.beginPath();
+      ctx.arc(-s * 0.3 + px, -s * 0.3 + py, s * 0.14, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(s * 0.3 + px, -s * 0.3 + py, s * 0.14, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+      return;
+    }
+
+    const isFrightened = frightenedTimer > 0;
+    const flashing = isFrightened && frightenedTimer < 15 && Math.floor(animFrame * 0.3) % 2 === 0;
+
+    ctx.fillStyle = isFrightened ? (flashing ? '#fff' : '#2222dd') : g.color;
     ctx.beginPath();
     ctx.arc(0, -s * 0.2 + bob, s, Math.PI, 0, false);
     ctx.lineTo(s, s * 0.8 + bob);
@@ -707,23 +893,40 @@
     ctx.closePath();
     ctx.fill();
 
-    ctx.fillStyle = '#fff';
-    ctx.beginPath();
-    ctx.arc(-s * 0.3, -s * 0.3 + bob, s * 0.28, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(s * 0.3, -s * 0.3 + bob, s * 0.28, 0, Math.PI * 2);
-    ctx.fill();
+    if (isFrightened) {
+      ctx.fillStyle = flashing ? '#f00' : '#fff';
+      ctx.beginPath();
+      ctx.arc(-s * 0.25, -s * 0.2 + bob, s * 0.12, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(s * 0.25, -s * 0.2 + bob, s * 0.12, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = flashing ? '#f00' : '#fff';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      const mouthY = s * 0.15 + bob;
+      for (let i = 0; i < 4; i++) {
+        const mx = -s * 0.5 + i * (s / 2);
+        ctx.lineTo(mx, mouthY + (i % 2 === 0 ? 0 : -3));
+      }
+      ctx.stroke();
+    } else {
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(-s * 0.3, -s * 0.3 + bob, s * 0.28, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(s * 0.3, -s * 0.3 + bob, s * 0.28, 0, Math.PI * 2);
+      ctx.fill();
 
-    const px = g.dir === 'left' ? -1.5 : g.dir === 'right' ? 1.5 : 0;
-    const py = g.dir === 'up' ? -1.5 : g.dir === 'down' ? 1.5 : 0;
-    ctx.fillStyle = '#222';
-    ctx.beginPath();
-    ctx.arc(-s * 0.3 + px, -s * 0.3 + bob + py, s * 0.14, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(s * 0.3 + px, -s * 0.3 + bob + py, s * 0.14, 0, Math.PI * 2);
-    ctx.fill();
+      ctx.fillStyle = '#222';
+      ctx.beginPath();
+      ctx.arc(-s * 0.3 + px, -s * 0.3 + bob + py, s * 0.14, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(s * 0.3 + px, -s * 0.3 + bob + py, s * 0.14, 0, Math.PI * 2);
+      ctx.fill();
+    }
 
     ctx.restore();
   }
@@ -766,11 +969,13 @@
       tickAccum += dt;
       while (tickAccum >= TICK_RATE) {
         tickAccum -= TICK_RATE;
+        if (frightenedTimer > 0) frightenedTimer--;
         movePlayer();
         if (state !== 'playing') break;
         for (const g of ghosts) moveGhostAI(g);
         if (checkCollision()) {
           state = 'lose';
+          sfxDie();
           loseOverlay.classList.add('visible');
         }
       }
