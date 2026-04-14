@@ -206,6 +206,10 @@
       <span class="stat-value" id="wpmDisplay">—</span>
       <span class="stat-label">WPM</span>
     </div>
+    <div class="stat">
+      <span class="stat-value" id="accuracyDisplay">—</span>
+      <span class="stat-label">Accuracy</span>
+    </div>
   </div>
 
   <div class="result-banner" id="resultBanner">
@@ -219,6 +223,10 @@
         <span class="stat-value final" id="finalTime">0</span>
         <span class="stat-label">Seconds</span>
       </div>
+      <div class="stat">
+        <span class="stat-value final" id="finalAccuracy">0</span>
+        <span class="stat-label">Accuracy</span>
+      </div>
     </div>
   </div>
 
@@ -228,6 +236,7 @@
   </div>
 </div>
 
+<script src="js/accuracy.js"></script>
 <script>
 (function () {
   const PASSAGE =
@@ -244,6 +253,11 @@
   const resultBanner = document.getElementById("resultBanner");
   const finalWpmEl = document.getElementById("finalWpm");
   const finalTimeEl = document.getElementById("finalTime");
+  const accuracyEl = document.getElementById("accuracyDisplay");
+  const finalAccuracyEl = document.getElementById("finalAccuracy");
+
+  var accuracy = createAccuracyTracker();
+  var prevInputLen = 0;
 
   let startTime = null;
   let timerInterval = null;
@@ -304,6 +318,7 @@
     wpmEl.textContent = wpm;
     finalWpmEl.textContent = wpm;
     finalTimeEl.textContent = secs.toFixed(1);
+    finalAccuracyEl.textContent = accuracy.getAccuracy() + "%";
 
     resultBanner.classList.add("visible");
     startBtn.style.display = "none";
@@ -318,6 +333,9 @@
     inputEl.disabled = true;
     timerEl.textContent = "0.0";
     wpmEl.textContent = "—";
+    accuracyEl.textContent = "—";
+    accuracy.reset();
+    prevInputLen = 0;
     resultBanner.classList.remove("visible");
     startBtn.style.display = "inline-block";
     startBtn.disabled = false;
@@ -339,6 +357,16 @@
   inputEl.addEventListener("input", function () {
     if (finished) return;
     var typed = inputEl.value;
+
+    if (typed.length > prevInputLen) {
+      var idx = typed.length - 1;
+      accuracy.recordKey(PASSAGE[idx], typed[idx]);
+    } else if (typed.length < prevInputLen) {
+      accuracy.recordKey(null, "backspace");
+    }
+    prevInputLen = typed.length;
+
+    accuracyEl.textContent = accuracy.getAccuracy() + "%";
     renderPassage(typed);
 
     if (typed.length >= PASSAGE.length) {
