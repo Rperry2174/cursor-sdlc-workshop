@@ -1,64 +1,38 @@
 import { useCallback, useMemo, useRef, useState } from "react";
+import CategorySelector from "./components/CategorySelector";
 import QuestionTimer from "./components/QuestionTimer";
+import questionsByCategory from "./data/questionsByCategory";
 
 const SECONDS_PER_QUESTION = 10;
 
-const QUESTIONS = [
-  {
-    prompt: "Which planet is known as the Red Planet?",
-    choices: ["Earth", "Mars", "Venus", "Jupiter"],
-    answer: "Mars",
-  },
-  {
-    prompt: "What does CSS stand for?",
-    choices: [
-      "Computer Style Sheets",
-      "Cascading Style Sheets",
-      "Creative Style System",
-      "Colorful Style Syntax",
-    ],
-    answer: "Cascading Style Sheets",
-  },
-  {
-    prompt: "How many minutes are in one hour?",
-    choices: ["30", "45", "60", "90"],
-    answer: "60",
-  },
-  {
-    prompt: "Which language runs in the browser?",
-    choices: ["Java", "C#", "JavaScript", "Python"],
-    answer: "JavaScript",
-  },
-  {
-    prompt: "What is 9 x 7?",
-    choices: ["56", "63", "72", "81"],
-    answer: "63",
-  },
-];
-
 function App() {
+  const categoryNames = useMemo(() => Object.keys(questionsByCategory), []);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState("");
   const [isFinished, setIsFinished] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [hasStartedQuiz, setHasStartedQuiz] = useState(false);
   const isTransitioningRef = useRef(false);
 
-  const currentQuestion = QUESTIONS[questionIndex];
+  const questions = selectedCategory ? questionsByCategory[selectedCategory] : [];
+  const totalQuestions = questions.length;
+  const currentQuestion = questions[questionIndex];
   const progressLabel = useMemo(
-    () => `Question ${questionIndex + 1} of ${QUESTIONS.length}`,
-    [questionIndex],
+    () => `Question ${questionIndex + 1} of ${totalQuestions}`,
+    [questionIndex, totalQuestions],
   );
 
   const advanceQuestion = useCallback(
     ({ answer, isTimeout }) => {
-      if (isTransitioningRef.current || isFinished) return;
+      if (isTransitioningRef.current || isFinished || !currentQuestion) return;
       isTransitioningRef.current = true;
 
       if (!isTimeout && answer === currentQuestion.answer) {
         setScore((previous) => previous + 1);
       }
 
-      const isLastQuestion = questionIndex === QUESTIONS.length - 1;
+      const isLastQuestion = questionIndex === totalQuestions - 1;
       if (isLastQuestion) {
         setIsFinished(true);
       } else {
@@ -70,7 +44,7 @@ function App() {
         isTransitioningRef.current = false;
       });
     },
-    [currentQuestion.answer, isFinished, questionIndex],
+    [currentQuestion, isFinished, questionIndex, totalQuestions],
   );
 
   const handleNext = () => {
@@ -82,7 +56,27 @@ function App() {
     advanceQuestion({ answer: "", isTimeout: true });
   }, [advanceQuestion]);
 
+  const handleStartQuiz = () => {
+    if (!selectedCategory) return;
+    setQuestionIndex(0);
+    setScore(0);
+    setSelectedAnswer("");
+    setIsFinished(false);
+    setHasStartedQuiz(true);
+    isTransitioningRef.current = false;
+  };
+
   const handlePlayAgain = () => {
+    setQuestionIndex(0);
+    setScore(0);
+    setSelectedAnswer("");
+    setIsFinished(false);
+    setHasStartedQuiz(true);
+    isTransitioningRef.current = false;
+  };
+
+  const handleChangeCategory = () => {
+    setHasStartedQuiz(false);
     setQuestionIndex(0);
     setScore(0);
     setSelectedAnswer("");
@@ -90,17 +84,40 @@ function App() {
     isTransitioningRef.current = false;
   };
 
+  if (!hasStartedQuiz) {
+    return (
+      <main className="app">
+        <section className="card">
+          <h1>Quick Quiz Blitz</h1>
+          <p className="subtitle">Choose a category before you start.</p>
+          <CategorySelector
+            categories={categoryNames}
+            onSelect={setSelectedCategory}
+            selectedCategory={selectedCategory}
+          />
+          <button className="button" disabled={!selectedCategory} onClick={handleStartQuiz}>
+            Start Quiz
+          </button>
+        </section>
+      </main>
+    );
+  }
+
   if (isFinished) {
     return (
       <main className="app">
         <section className="card">
           <h1>Quick Quiz Blitz</h1>
+          <p className="subtitle">Category: {selectedCategory}</p>
           <p className="subtitle">Nice run. Here is your final score.</p>
           <p className="score">
-            {score} / {QUESTIONS.length}
+            {score} / {totalQuestions}
           </p>
-          <button className="button" onClick={handlePlayAgain}>
+          <button className="button button-spacing" onClick={handlePlayAgain}>
             Play Again
+          </button>
+          <button className="button button-secondary" onClick={handleChangeCategory}>
+            Change Category
           </button>
         </section>
       </main>
@@ -115,7 +132,7 @@ function App() {
         <QuestionTimer
           isActive={!isFinished}
           onTimeout={handleTimeout}
-          questionKey={questionIndex}
+          questionKey={`${selectedCategory}-${questionIndex}`}
           secondsPerQuestion={SECONDS_PER_QUESTION}
         />
         <h2>{currentQuestion.prompt}</h2>
@@ -133,7 +150,7 @@ function App() {
         </div>
 
         <button className="button" disabled={!selectedAnswer} onClick={handleNext}>
-          {questionIndex === QUESTIONS.length - 1 ? "Finish Quiz" : "Next Question"}
+          {questionIndex === totalQuestions - 1 ? "Finish Quiz" : "Next Question"}
         </button>
       </section>
     </main>

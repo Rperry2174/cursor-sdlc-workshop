@@ -49,6 +49,31 @@ h2 {
   color: #b91c1c;
 }
 
+.category-list {
+  display: grid;
+  gap: 10px;
+  margin: 14px 0 16px;
+}
+
+.category {
+  text-align: left;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 10px 12px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.category:hover {
+  background: #f9fafb;
+}
+
+.category.selected {
+  border-color: #2563eb;
+  background: #dbeafe;
+}
+
 .answers {
   display: grid;
   gap: 10px;
@@ -88,6 +113,14 @@ h2 {
 .button:disabled {
   opacity: 0.55;
   cursor: not-allowed;
+}
+
+.button-spacing {
+  margin-bottom: 10px;
+}
+
+.button-secondary {
+  background: #374151;
 }
 
 .score {
