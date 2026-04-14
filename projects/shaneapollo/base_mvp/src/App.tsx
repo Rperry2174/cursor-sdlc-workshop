@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Text, useApp, useInput } from 'ink';
 import { Board, type BoardCard } from './components/Board.js';
+import { MoveCounter } from './components/MoveCounter.js';
 
 const COLS = 4;
 const ROWS = 3;
@@ -33,6 +34,7 @@ export function App() {
   const [firstPick, setFirstPick] = useState<number | null>(null);
   const [secondPick, setSecondPick] = useState<number | null>(null);
   const [locked, setLocked] = useState(false);
+  const [moves, setMoves] = useState(0);
 
   const won = cards.every((c) => c.matched);
 
@@ -103,6 +105,7 @@ export function App() {
         );
       } else if (secondPick === null && cursor !== firstPick) {
         setSecondPick(cursor);
+        setMoves((m) => m + 1);
         setCards((prev) =>
           prev.map((card, i) =>
             i === cursor ? { ...card, faceUp: true } : card,
@@ -121,11 +124,15 @@ export function App() {
       {won ? (
         <Box flexDirection="column" marginTop={1}>
           <Text color="green" bold>
-            You win! Press any key to exit.
+            You win in {moves} move{moves === 1 ? '' : 's'}! Press any key to
+            exit.
           </Text>
         </Box>
       ) : (
         <>
+          <Box marginTop={1}>
+            <MoveCounter moves={moves} />
+          </Box>
           <Board cards={cards} cursor={cursor} cols={COLS} rows={ROWS} />
           <Box marginTop={1}>
             <Text dimColor>
