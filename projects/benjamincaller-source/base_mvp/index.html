@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rush Hour Puzzle</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0f172a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    color: #e2e8f0;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* ---- Level Select Screen ---- */
+  .screen { display: none; }
+  .screen.active { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+
+  .level-grid-title {
+    font-size: 32px; font-weight: 800;
+    background: linear-gradient(135deg, #ef4444, #f97316);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+
+  .difficulty-section { width: 100%; max-width: 440px; }
+  .difficulty-label {
+    font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px;
+    margin-bottom: 10px; padding-left: 4px;
+  }
+  .difficulty-label.beginner { color: #22c55e; }
+  .difficulty-label.intermediate { color: #f59e0b; }
+  .difficulty-label.advanced { color: #ef4444; }
+
+  .level-grid {
+    display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px;
+    margin-bottom: 20px;
+  }
+
+  .level-cell {
+    aspect-ratio: 1; border-radius: 8px; border: none;
+    font-size: 13px; font-weight: 700; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,0.06); color: #64748b;
+    transition: transform 0.1s ease, background 0.15s ease;
+    position: relative;
+  }
+  .level-cell:hover { transform: scale(1.1); background: rgba(255,255,255,0.12); }
+  .level-cell.completed { background: rgba(34,197,94,0.15); color: #22c55e; }
+  .level-cell.completed::after {
+    content: '✓'; position: absolute; top: 1px; right: 3px;
+    font-size: 8px; color: #22c55e;
+  }
+  .level-cell.current { background: rgba(59,130,246,0.25); color: #3b82f6; box-shadow: 0 0 0 2px #3b82f6; }
+  .level-cell.locked { opacity: 0.35; cursor: default; }
+
+  /* ---- Game Screen ---- */
+  .game-container { gap: 18px; }
+
+  header { text-align: center; }
+  header h1 {
+    font-size: 28px; font-weight: 800;
+    background: linear-gradient(135deg, #ef4444, #f97316);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+
+  .level-info { display: flex; align-items: center; gap: 10px; margin-top: 6px; justify-content: center; }
+  .level-badge {
+    padding: 3px 12px; background: rgba(255,255,255,0.08); border-radius: 20px;
+    font-size: 13px; font-weight: 600; color: #94a3b8;
+  }
+  .diff-badge {
+    padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .diff-badge.beginner { background: rgba(34,197,94,0.15); color: #22c55e; }
+  .diff-badge.intermediate { background: rgba(245,158,11,0.15); color: #f59e0b; }
+  .diff-badge.advanced { background: rgba(239,68,68,0.15); color: #ef4444; }
+
+  .board-frame {
+    position: relative; background: #1e293b; border-radius: 16px;
+    padding: 12px 56px 12px 12px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+
+  .board {
+    position: relative; width: 360px; height: 360px;
+    background: #334155; border-radius: 8px; overflow: hidden;
+  }
+
+  .grid-line-h, .grid-line-v { position: absolute; background: rgba(255,255,255,0.04); }
+  .grid-line-h { width: 100%; height: 1px; }
+  .grid-line-v { height: 100%; width: 1px; }
+
+  .exit-marker {
+    position: absolute; right: 0; top: calc(12px + 2 * 60px);
+    width: 44px; height: 60px; display: flex; align-items: center; justify-content: center; gap: 2px;
+  }
+  .exit-arrow { width: 16px; height: 60px; background: linear-gradient(90deg, transparent, #ef4444); border-radius: 0 4px 4px 0; }
+  .exit-label { font-size: 11px; font-weight: 800; color: #ef4444; text-transform: uppercase; letter-spacing: 1px; writing-mode: vertical-lr; text-orientation: mixed; }
+
+  .vehicle {
+    position: absolute; cursor: grab;
+    transition: box-shadow 0.15s ease, transform 0.1s ease, filter 0.15s ease;
+  }
+  .vehicle .car-body {
+    position: absolute; inset: 0; border-radius: 12px; overflow: hidden;
+    pointer-events: none;
+  }
+  /* Top gloss */
+  .vehicle .car-body::before {
+    content: ''; position: absolute; z-index: 2;
+    border-radius: 8px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.08) 40%, transparent 60%);
+    pointer-events: none;
+  }
+  .vehicle.h-vehicle .car-body::before { top: 3px; left: 10px; right: 10px; height: 45%; }
+  .vehicle.v-vehicle .car-body::before { top: 10px; left: 3px; right: 3px; height: 35%; }
+  /* Inset border for depth */
+  .vehicle .car-body::after {
+    content: ''; position: absolute; inset: 0; border-radius: 12px;
+    border: 1.5px solid rgba(255,255,255,0.12);
+    border-bottom-color: rgba(0,0,0,0.35);
+    border-right-color: rgba(0,0,0,0.2);
+    pointer-events: none; z-index: 3;
+  }
+
+  /* Roof panel — the darker center strip */
+  .vehicle .roof {
+    position: absolute; z-index: 1; pointer-events: none;
+    background: rgba(0,0,0,0.12); border-radius: 6px;
+  }
+  .vehicle.h-vehicle .roof { top: 10px; bottom: 10px; left: 18px; right: 18px; }
+  .vehicle.v-vehicle .roof { left: 10px; right: 10px; top: 18px; bottom: 18px; }
+  .vehicle.truck.h-vehicle .roof { left: 22px; right: 22px; }
+  .vehicle.truck.v-vehicle .roof { top: 22px; bottom: 22px; }
+
+  /* Windshield */
+  .vehicle .windshield {
+    position: absolute; z-index: 4; pointer-events: none;
+    border-radius: 5px;
+    background: linear-gradient(135deg, rgba(180,225,255,0.45), rgba(140,200,255,0.2));
+    border: 1px solid rgba(180,225,255,0.2);
+    box-shadow: inset 0 1px 2px rgba(255,255,255,0.15);
+  }
+  .vehicle.h-vehicle .windshield { right: 14px; top: 10px; bottom: 10px; width: 10px; }
+  .vehicle.v-vehicle .windshield { bottom: 14px; left: 10px; right: 10px; height: 10px; }
+  .vehicle.truck.h-vehicle .windshield { right: 18px; width: 8px; }
+  .vehicle.truck.v-vehicle .windshield { bottom: 18px; height: 8px; }
+
+  /* Rear window */
+  .vehicle .rear-window {
+    position: absolute; z-index: 4; pointer-events: none;
+    border-radius: 4px;
+    background: rgba(140,180,220,0.2);
+    border: 1px solid rgba(140,180,220,0.1);
+  }
+  .vehicle.h-vehicle .rear-window { left: 14px; top: 12px; bottom: 12px; width: 8px; }
+  .vehicle.v-vehicle .rear-window { top: 14px; left: 12px; right: 12px; height: 8px; }
+  .vehicle.truck .rear-window { display: none; }
+
+  /* Headlights (front) */
+  .vehicle .headlights {
+    position: absolute; z-index: 5; display: flex; gap: 6px; pointer-events: none;
+  }
+  .vehicle.h-vehicle .headlights { right: 4px; top: 50%; transform: translateY(-50%); flex-direction: column; }
+  .vehicle.v-vehicle .headlights { bottom: 4px; left: 50%; transform: translateX(-50%); flex-direction: row; }
+  .headlight {
+    width: 7px; height: 5px; border-radius: 3px;
+    background: rgba(255,255,220,0.9);
+    box-shadow: 0 0 6px 2px rgba(255,255,200,0.35);
+  }
+  .vehicle.v-vehicle .headlight { width: 5px; height: 7px; }
+
+  /* Taillights (back) */
+  .vehicle .taillights {
+    position: absolute; z-index: 5; display: flex; gap: 6px; pointer-events: none;
+  }
+  .vehicle.h-vehicle .taillights { left: 4px; top: 50%; transform: translateY(-50%); flex-direction: column; }
+  .vehicle.v-vehicle .taillights { top: 4px; left: 50%; transform: translateX(-50%); flex-direction: row; }
+  .taillight {
+    width: 6px; height: 4px; border-radius: 2px;
+    background: rgba(255,80,80,0.7);
+    box-shadow: 0 0 4px 1px rgba(255,60,60,0.3);
+  }
+  .vehicle.v-vehicle .taillight { width: 4px; height: 6px; }
+
+  /* Bumpers */
+  .vehicle .bumper {
+    position: absolute; z-index: 4; pointer-events: none;
+    background: rgba(0,0,0,0.2); border-radius: 3px;
+  }
+  .vehicle.h-vehicle .bumper-front { right: 2px; top: 6px; bottom: 6px; width: 3px; border-radius: 0 4px 4px 0; }
+  .vehicle.h-vehicle .bumper-back { left: 2px; top: 6px; bottom: 6px; width: 3px; border-radius: 4px 0 0 4px; }
+  .vehicle.v-vehicle .bumper-front { bottom: 2px; left: 6px; right: 6px; height: 3px; border-radius: 0 0 4px 4px; }
+  .vehicle.v-vehicle .bumper-back { top: 2px; left: 6px; right: 6px; height: 3px; border-radius: 4px 4px 0 0; }
+
+  /* Truck stripe */
+  .vehicle.truck .truck-stripe {
+    position: absolute; z-index: 2; pointer-events: none;
+    background: rgba(255,255,255,0.08); border-radius: 2px;
+  }
+  .vehicle.h-vehicle.truck .truck-stripe { top: 50%; left: 20px; right: 20px; height: 2px; transform: translateY(-50%); }
+  .vehicle.v-vehicle.truck .truck-stripe { left: 50%; top: 20px; bottom: 20px; width: 2px; transform: translateX(-50%); }
+
+  /* Hover & drag */
+  .vehicle:hover {
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.2), 0 8px 24px rgba(0,0,0,0.4);
+    z-index: 5; transform: scale(1.03); filter: brightness(1.08);
+  }
+  .vehicle.dragging {
+    cursor: grabbing;
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.3), 0 14px 36px rgba(0,0,0,0.5);
+    z-index: 10; transform: scale(1.05); filter: brightness(1.12);
+  }
+
+  /* Target car (red) */
+  .vehicle.target .car-body { background: linear-gradient(135deg, #ef4444, #dc2626) !important; }
+  .vehicle.target { box-shadow: 0 0 24px rgba(239,68,68,0.25); }
+  .vehicle.target .headlights .headlight {
+    background: rgba(255,255,220,1);
+    box-shadow: 0 0 10px 3px rgba(255,255,200,0.5);
+  }
+  .vehicle.target .taillights .taillight {
+    background: rgba(255,200,50,0.8);
+    box-shadow: 0 0 4px 1px rgba(255,200,50,0.4);
+  }
+
+  .controls { display: flex; gap: 10px; }
+  .btn {
+    padding: 9px 22px; border: none; border-radius: 10px;
+    font-size: 14px; font-weight: 600; cursor: pointer;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn:active { transform: translateY(0); }
+  .btn-secondary { background: rgba(255,255,255,0.08); color: #e2e8f0; }
+  .btn-secondary:hover { background: rgba(255,255,255,0.12); }
+
+  .overlay {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; border-radius: 8px;
+    opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 20;
+  }
+  .overlay.visible { opacity: 1; pointer-events: auto; }
+  .overlay-bg { position: absolute; inset: 0; background: rgba(15,23,42,0.85); backdrop-filter: blur(6px); border-radius: 8px; }
+  .overlay-content { position: relative; z-index: 1; text-align: center; }
+  .win-title { font-size: 36px; font-weight: 800; color: #fbbf24; text-shadow: 0 0 30px rgba(251,191,36,0.3); margin-bottom: 8px; }
+  .win-subtitle { font-size: 16px; color: #94a3b8; margin-bottom: 24px; }
+  .win-btns { display: flex; gap: 10px; justify-content: center; }
+  .win-btn {
+    padding: 11px 28px; border: none; border-radius: 12px;
+    font-size: 15px; font-weight: 700; cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: transform 0.1s ease;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .win-btn:hover { transform: translateY(-2px); }
+  .win-btn:active { transform: translateY(0); }
+  .win-btn-primary { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #0f172a; }
+  .win-btn-secondary { background: rgba(255,255,255,0.1); color: #e2e8f0; }
+
+  .instructions { text-align: center; font-size: 13px; color: #64748b; max-width: 360px; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<!-- Level Select Screen -->
+<div class="screen active" id="selectScreen">
+  <div class="level-grid-title">Rush Hour</div>
+  <p style="color:#64748b; font-size:14px; margin-top:-8px;">Select a level</p>
+  <div id="levelSections"></div>
+</div>
+
+<!-- Game Screen -->
+<div class="screen game-container" id="gameScreen">
+  <header>
+    <h1>Rush Hour</h1>
+    <div class="level-info">
+      <div class="level-badge" id="levelBadge">Level 1 / 50</div>
+      <div class="diff-badge" id="diffBadge">Beginner</div>
+    </div>
+  </header>
+  <div class="board-frame">
+    <div class="exit-marker"><div class="exit-arrow"></div><div class="exit-label">EXIT</div></div>
+    <div class="board" id="board">
+      <div class="overlay" id="winOverlay">
+        <div class="overlay-bg"></div>
+        <div class="overlay-content">
+          <div class="win-title">Solved!</div>
+          <div class="win-subtitle" id="winSubtitle">Level 1 complete</div>
+          <div class="win-btns">
+            <button class="win-btn win-btn-secondary" id="menuBtn">Levels</button>
+            <button class="win-btn win-btn-primary" id="nextBtn">Next Level</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="controls">
+    <button class="btn btn-secondary" id="backBtn">← Levels</button>
+    <button class="btn btn-secondary" id="resetBtn">Reset</button>
+  </div>
+  <p class="instructions">Drag vehicles along their lane to clear a path.<br>Get the <strong style="color:#ef4444">red car</strong> to the exit →</p>
+</div>
+
+<script>
+(function () {
+  const GRID = 6, CELL = 60;
+  const board = document.getElementById('board');
+  const winOverlay = document.getElementById('winOverlay');
+  const winSubtitle = document.getElementById('winSubtitle');
+  const nextBtn = document.getElementById('nextBtn');
+  const menuBtn = document.getElementById('menuBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const backBtn = document.getElementById('backBtn');
+  const levelBadge = document.getElementById('levelBadge');
+  const diffBadge = document.getElementById('diffBadge');
+  const selectScreen = document.getElementById('selectScreen');
+  const gameScreen = document.getElementById('gameScreen');
+  const levelSections = document.getElementById('levelSections');
+
+  const COLORS = [
+    '#3b82f6','#22c55e','#a855f7','#f97316','#06b6d4',
+    '#ec4899','#84cc16','#6366f1','#14b8a6','#f43f5e',
+    '#eab308','#8b5cf6','#10b981','#f472b6','#0ea5e9',
+  ];
+
+  const LEVELS = [
+    {v:[[2,0,2,"h",true],[0,5,3,"v",false],[4,3,2,"h",false],[2,4,2,"v",false]],par:3,d:"Beginner"},
+    {v:[[2,1,2,"h",true],[1,3,2,"v",false],[2,5,2,"v",false],[0,2,2,"h",false],[3,2,3,"v",false]],par:3,d:"Beginner"},
+    {v:[[2,1,2,"h",true],[0,4,3,"v",false],[5,1,2,"h",false],[3,0,3,"h",false],[1,3,3,"v",false],[0,0,2,"v",false]],par:3,d:"Beginner"},
+    {v:[[2,1,2,"h",true],[1,4,3,"v",false],[2,5,2,"v",false],[4,3,2,"v",false],[5,1,2,"h",false]],par:3,d:"Beginner"},
+    {v:[[2,0,2,"h",true],[2,2,3,"v",false],[0,0,2,"h",false],[0,4,2,"v",false],[5,2,2,"h",false],[3,0,3,"v",false]],par:3,d:"Beginner"},
+    {v:[[2,0,2,"h",true],[2,2,3,"v",false],[0,4,2,"h",false],[4,0,2,"h",false],[2,5,3,"v",false],[4,4,2,"v",false],[5,0,2,"h",false]],par:3,d:"Beginner"},
+    {v:[[2,1,2,"h",true],[2,4,3,"v",false],[0,3,2,"v",false],[0,0,3,"v",false],[3,1,3,"h",false],[2,5,3,"v",false],[4,1,2,"h",false]],par:3,d:"Beginner"},
+    {v:[[2,0,2,"h",true],[1,2,3,"v",false],[4,3,2,"h",false],[2,3,2,"v",false],[1,3,2,"h",false],[4,0,2,"v",false]],par:4,d:"Beginner"},
+    {v:[[2,1,2,"h",true],[2,4,2,"v",false],[4,1,3,"h",false],[0,3,3,"v",false]],par:4,d:"Beginner"},
+    {v:[[2,1,2,"h",true],[1,4,3,"v",false],[1,0,2,"h",false],[2,5,2,"v",false],[0,3,3,"h",false],[1,3,3,"v",false]],par:4,d:"Beginner"},
+    {v:[[2,1,2,"h",true],[0,3,3,"v",false],[5,2,2,"h",false],[3,2,3,"h",false],[1,1,2,"h",false],[4,0,2,"v",false]],par:4,d:"Beginner"},
+    {v:[[2,0,2,"h",true],[2,4,2,"v",false],[5,1,3,"h",false],[0,3,3,"v",false],[0,5,2,"v",false]],par:4,d:"Beginner"},
+    {v:[[2,1,2,"h",true],[1,4,3,"v",false],[2,5,3,"v",false],[5,4,2,"h",false],[4,2,3,"h",false],[0,0,3,"v",false]],par:5,d:"Beginner"},
+    {v:[[2,1,2,"h",true],[2,4,2,"v",false],[4,4,2,"h",false],[0,5,3,"v",false],[3,1,3,"v",false],[2,3,2,"v",false]],par:5,d:"Beginner"},
+    {v:[[2,1,2,"h",true],[2,4,2,"v",false],[1,5,3,"v",false],[4,2,2,"h",false],[4,4,2,"h",false]],par:5,d:"Beginner"},
+    {v:[[2,0,2,"h",true],[1,3,3,"v",false],[3,0,2,"v",false],[2,2,2,"v",false],[1,5,3,"v",false],[1,1,2,"h",false],[4,1,2,"h",false]],par:5,d:"Beginner"},
+    {v:[[2,0,2,"h",true],[0,4,3,"v",false],[4,2,2,"v",false],[4,3,3,"h",false],[2,5,2,"v",false],[0,5,2,"v",false]],par:5,d:"Beginner"},
+    {v:[[2,1,2,"h",true],[1,3,3,"v",false],[2,0,2,"v",false],[0,0,2,"v",false],[5,0,2,"h",false],[0,5,3,"v",false],[4,2,2,"v",false],[4,3,2,"h",false]],par:7,d:"Intermediate"},
+    {v:[[2,2,2,"h",true],[2,5,2,"v",false],[4,3,2,"h",false],[5,0,2,"h",false],[1,4,3,"v",false],[3,0,2,"v",false],[1,0,2,"h",false],[4,5,2,"v",false],[3,2,2,"v",false],[0,2,2,"h",false]],par:7,d:"Intermediate"},
+    {v:[[2,1,2,"h",true],[1,5,2,"v",false],[3,2,2,"v",false],[0,3,2,"v",false],[4,4,2,"h",false],[4,0,2,"h",false],[5,2,3,"h",false],[1,4,3,"v",false]],par:7,d:"Intermediate"},
+    {v:[[2,0,2,"h",true],[0,3,3,"v",false],[2,4,2,"v",false],[4,2,3,"h",false],[5,1,2,"h",false],[2,2,2,"v",false],[4,0,2,"v",false]],par:7,d:"Intermediate"},
+    {v:[[2,0,2,"h",true],[2,5,2,"v",false],[0,4,2,"v",false],[4,1,2,"h",false],[3,3,2,"v",false],[1,2,3,"v",false],[0,1,3,"h",false],[5,1,2,"h",false],[1,3,2,"v",false]],par:7,d:"Intermediate"},
+    {v:[[2,1,2,"h",true],[0,4,3,"v",false],[1,5,2,"v",false],[4,2,2,"v",false],[4,3,2,"v",false],[4,4,2,"h",false],[3,0,2,"h",false]],par:7,d:"Intermediate"},
+    {v:[[2,2,2,"h",true],[1,4,3,"v",false],[4,0,2,"v",false],[4,4,2,"h",false],[2,1,2,"v",false],[5,4,2,"h",false],[0,2,2,"v",false],[3,2,2,"h",false],[0,5,3,"v",false],[4,1,2,"h",false]],par:7,d:"Intermediate"},
+    {v:[[2,1,2,"h",true],[1,3,2,"v",false],[4,1,2,"h",false],[0,5,2,"v",false],[5,4,2,"h",false],[4,3,2,"v",false],[2,4,3,"v",false],[3,1,3,"h",false],[2,0,2,"v",false]],par:7,d:"Intermediate"},
+    {v:[[2,0,2,"h",true],[0,2,3,"v",false],[4,2,3,"h",false],[1,3,3,"h",false],[2,3,2,"v",false],[2,5,2,"v",false],[5,2,2,"h",false],[0,4,2,"h",false]],par:8,d:"Intermediate"},
+    {v:[[2,1,2,"h",true],[0,4,3,"v",false],[3,2,3,"h",false],[3,0,3,"v",false],[4,2,2,"v",false],[1,2,2,"h",false],[4,3,2,"h",false],[0,0,2,"h",false]],par:8,d:"Intermediate"},
+    {v:[[2,2,2,"h",true],[0,5,3,"v",false],[4,4,2,"h",false],[3,2,2,"v",false],[3,3,2,"v",false],[0,1,2,"h",false],[0,0,2,"v",false],[1,1,2,"h",false],[0,4,3,"v",false]],par:8,d:"Intermediate"},
+    {v:[[2,2,2,"h",true],[0,4,3,"v",false],[3,4,2,"h",false],[4,3,2,"h",false],[3,2,2,"v",false],[5,1,2,"h",false],[1,1,3,"h",false]],par:8,d:"Intermediate"},
+    {v:[[2,0,2,"h",true],[2,5,3,"v",false],[0,2,3,"v",false],[4,0,2,"h",false],[3,2,3,"h",false],[0,0,2,"h",false]],par:8,d:"Intermediate"},
+    {v:[[2,2,2,"h",true],[1,5,2,"v",false],[1,4,3,"v",false],[5,4,2,"h",false],[1,0,2,"v",false],[3,2,2,"v",false],[4,3,2,"h",false]],par:8,d:"Intermediate"},
+    {v:[[2,2,2,"h",true],[0,5,3,"v",false],[0,1,3,"h",false],[4,3,2,"v",false],[3,1,3,"h",false],[2,4,3,"v",false],[1,0,3,"h",false],[5,4,2,"h",false],[2,0,3,"v",false],[5,1,2,"h",false]],par:9,d:"Intermediate"},
+    {v:[[2,1,2,"h",true],[1,4,3,"v",false],[5,2,2,"h",false],[3,1,3,"h",false],[4,1,2,"v",false],[0,2,3,"h",false],[4,4,2,"h",false],[4,2,2,"h",false]],par:10,d:"Intermediate"},
+    {v:[[2,1,2,"h",true],[1,3,3,"v",false],[2,4,3,"v",false],[0,0,2,"v",false],[3,0,2,"v",false],[0,3,3,"h",false],[4,2,2,"h",false],[4,1,2,"v",false],[2,5,2,"v",false]],par:12,d:"Intermediate"},
+    {v:[[2,1,2,"h",true],[2,3,3,"v",false],[3,1,2,"v",false],[1,4,2,"v",false],[4,4,2,"h",false],[2,0,2,"v",false],[1,2,2,"h",false],[0,0,2,"v",false],[2,5,2,"v",false],[0,3,2,"h",false],[5,2,2,"h",false],[0,1,2,"h",false],[4,0,2,"v",false]],par:15,d:"Advanced"},
+    {v:[[2,0,2,"h",true],[0,3,3,"v",false],[0,5,2,"v",false],[2,2,2,"v",false],[4,0,2,"v",false],[2,5,3,"v",false],[4,1,3,"h",false],[5,2,3,"h",false],[0,0,3,"h",false]],par:15,d:"Advanced"},
+    {v:[[2,1,2,"h",true],[2,3,2,"v",false],[4,2,2,"h",false],[0,3,2,"v",false],[4,5,2,"v",false],[2,4,2,"v",false],[5,2,2,"h",false],[0,0,3,"v",false],[1,4,2,"h",false],[3,0,2,"h",false],[4,1,2,"v",false],[0,2,2,"v",false]],par:15,d:"Advanced"},
+    {v:[[2,0,2,"h",true],[1,3,3,"v",false],[0,3,3,"h",false],[1,5,2,"v",false],[2,2,2,"v",false],[5,4,2,"h",false],[4,1,2,"h",false],[4,3,2,"h",false],[1,4,2,"v",false],[1,0,2,"h",false],[3,0,2,"v",false]],par:15,d:"Advanced"},
+    {v:[[2,1,2,"h",true],[0,3,3,"v",false],[4,0,2,"v",false],[2,4,2,"v",false],[3,1,2,"v",false],[1,5,3,"v",false],[4,4,2,"v",false],[5,2,2,"h",false],[0,0,2,"h",false],[4,2,2,"h",false]],par:15,d:"Advanced"},
+    {v:[[2,2,2,"h",true],[1,4,3,"v",false],[3,0,3,"v",false],[0,3,2,"v",false],[4,4,2,"h",false],[3,2,2,"v",false],[4,1,2,"v",false],[1,1,2,"h",false],[0,0,3,"h",false]],par:15,d:"Advanced"},
+    {v:[[2,0,2,"h",true],[0,4,3,"v",false],[3,1,2,"v",false],[5,4,2,"h",false],[0,0,2,"v",false],[3,3,2,"v",false],[3,0,3,"v",false],[4,4,2,"h",false],[5,1,2,"h",false],[0,5,2,"v",false],[1,3,2,"v",false],[0,2,2,"h",false]],par:16,d:"Advanced"},
+    {v:[[2,1,2,"h",true],[1,4,3,"v",false],[2,5,2,"v",false],[3,0,3,"h",false],[4,3,2,"v",false],[0,3,2,"h",false],[0,2,2,"v",false],[5,4,2,"h",false],[4,2,2,"v",false],[4,1,2,"v",false]],par:16,d:"Advanced"},
+    {v:[[2,1,2,"h",true],[1,3,3,"v",false],[0,0,2,"v",false],[0,1,2,"h",false],[2,5,2,"v",false],[4,3,2,"h",false],[4,1,2,"v",false],[3,0,3,"v",false],[5,3,2,"h",false],[1,4,3,"v",false],[4,5,2,"v",false],[3,2,2,"v",false]],par:17,d:"Advanced"},
+    {v:[[2,2,2,"h",true],[1,5,3,"v",false],[4,3,2,"v",false],[1,0,2,"h",false],[4,4,2,"h",false],[2,1,3,"v",false],[3,2,2,"v",false],[5,0,2,"h",false],[0,2,2,"h",false],[3,0,2,"v",false],[1,4,2,"v",false],[3,3,2,"h",false],[0,4,2,"h",false]],par:17,d:"Advanced"},
+    {v:[[2,2,2,"h",true],[1,4,2,"v",false],[5,2,2,"h",false],[0,5,3,"v",false],[4,1,2,"v",false],[1,1,2,"v",false],[0,0,2,"h",false],[4,0,2,"v",false],[3,3,2,"v",false],[3,4,2,"h",false],[5,4,2,"h",false],[0,2,2,"v",false]],par:17,d:"Advanced"},
+    {v:[[2,0,2,"h",true],[1,5,3,"v",false],[4,2,2,"v",false],[3,0,2,"v",false],[5,3,2,"h",false],[3,1,2,"h",false],[1,1,3,"h",false],[0,1,2,"h",false],[2,3,2,"v",false],[0,4,2,"v",false],[4,3,2,"h",false],[5,0,2,"h",false],[0,0,2,"v",false]],par:17,d:"Advanced"},
+    {v:[[2,0,2,"h",true],[0,2,3,"v",false],[1,3,2,"h",false],[5,2,3,"h",false],[3,4,2,"v",false],[4,1,2,"h",false],[3,2,2,"h",false],[0,3,2,"h",false],[3,5,3,"v",false],[3,0,2,"h",false]],par:19,d:"Advanced"},
+    {v:[[2,1,2,"h",true],[2,4,2,"v",false],[3,1,2,"h",false],[5,4,2,"h",false],[5,0,2,"h",false],[0,2,2,"h",false],[3,0,2,"v",false],[4,2,2,"v",false],[0,4,2,"v",false],[4,3,2,"v",false],[0,1,2,"v",false],[2,5,3,"v",false],[2,3,2,"v",false]],par:19,d:"Advanced"},
+    {v:[[2,0,2,"h",true],[1,2,2,"v",false],[1,4,2,"v",false],[0,1,2,"h",false],[3,2,3,"h",false],[4,0,3,"h",false],[5,3,3,"h",false],[0,5,2,"v",false],[4,3,2,"h",false],[3,5,2,"v",false],[0,0,2,"v",false],[5,0,3,"h",false],[0,3,2,"v",false]],par:20,d:"Advanced"},
+    {v:[[2,0,2,"h",true],[1,3,3,"v",false],[1,2,2,"v",false],[3,5,2,"v",false],[3,0,2,"h",false],[4,2,2,"v",false],[3,4,2,"v",false],[4,0,2,"v",false],[1,5,2,"v",false],[1,4,2,"v",false],[5,3,2,"h",false],[0,3,2,"h",false],[0,1,2,"v",false]],par:24,d:"Advanced"},
+  ];
+
+  // --- Progress (localStorage) ---
+  const STORAGE_KEY = 'rush_hour_progress';
+  function loadProgress() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; }
+  }
+  function saveCompleted(idx) {
+    const p = loadProgress();
+    p[idx] = true;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
+  }
+  function isCompleted(idx) { return !!loadProgress()[idx]; }
+
+  // --- Level Select ---
+  function buildLevelSelect() {
+    levelSections.textContent = '';
+    const groups = [
+      { label: 'Beginner', cls: 'beginner' },
+      { label: 'Intermediate', cls: 'intermediate' },
+      { label: 'Advanced', cls: 'advanced' },
+    ];
+    for (const group of groups) {
+      const indices = LEVELS.map((l, i) => l.d === group.label ? i : -1).filter(i => i >= 0);
+      if (!indices.length) continue;
+
+      const section = document.createElement('div');
+      section.className = 'difficulty-section';
+
+      const label = document.createElement('div');
+      label.className = 'difficulty-label ' + group.cls;
+      label.textContent = group.label;
+      section.appendChild(label);
+
+      const grid = document.createElement('div');
+      grid.className = 'level-grid';
+
+      for (const idx of indices) {
+        const cell = document.createElement('button');
+        cell.className = 'level-cell';
+        cell.textContent = idx + 1;
+        if (isCompleted(idx)) cell.classList.add('completed');
+
+        cell.addEventListener('click', () => { showGame(idx); });
+        grid.appendChild(cell);
+      }
+
+      section.appendChild(grid);
+      levelSections.appendChild(section);
+    }
+  }
+
+  function showSelect() {
+    buildLevelSelect();
+    gameScreen.classList.remove('active');
+    selectScreen.classList.add('active');
+  }
+
+  function showGame(idx) {
+    selectScreen.classList.remove('active');
+    gameScreen.classList.add('active');
+    loadLevel(idx);
+  }
+
+  // --- Game ---
+  let currentLevel = 0;
+  let vehicles = [];
+  let dragState = null;
+
+  function buildGrid() {
+    board.querySelectorAll('.grid-line-h, .grid-line-v').forEach(el => el.remove());
+    for (let i = 1; i < GRID; i++) {
+      const h = document.createElement('div');
+      h.className = 'grid-line-h';
+      h.style.top = (i * CELL) + 'px';
+      board.appendChild(h);
+      const v = document.createElement('div');
+      v.className = 'grid-line-v';
+      v.style.left = (i * CELL) + 'px';
+      board.appendChild(v);
+    }
+  }
+
+  function loadLevel(index) {
+    currentLevel = index;
+    winOverlay.classList.remove('visible');
+    const level = LEVELS[index];
+    levelBadge.textContent = `Level ${index + 1} / ${LEVELS.length}`;
+    diffBadge.textContent = level.d;
+    diffBadge.className = 'diff-badge ' + level.d.toLowerCase();
+
+    board.querySelectorAll('.vehicle').forEach(el => el.remove());
+    vehicles = [];
+
+    let colorIdx = 0;
+    level.v.forEach((vData, i) => {
+      const [row, col, size, orient, isTarget] = vData;
+      const el = document.createElement('div');
+      const isTruck = size === 3;
+      const orientClass = orient === 'h' ? 'h-vehicle' : 'v-vehicle';
+      el.className = 'vehicle ' + orientClass + (isTarget ? ' target' : '') + (isTruck ? ' truck' : '');
+
+      const body = document.createElement('div');
+      body.className = 'car-body';
+      if (!isTarget) {
+        const c = COLORS[colorIdx % COLORS.length];
+        body.style.background = `linear-gradient(145deg, ${c}, ${c}bb)`;
+        colorIdx++;
+      }
+      el.appendChild(body);
+
+      el.appendChild(Object.assign(document.createElement('div'), { className: 'roof' }));
+      el.appendChild(Object.assign(document.createElement('div'), { className: 'windshield' }));
+      el.appendChild(Object.assign(document.createElement('div'), { className: 'rear-window' }));
+
+      const hl = document.createElement('div'); hl.className = 'headlights';
+      hl.appendChild(Object.assign(document.createElement('div'), { className: 'headlight' }));
+      hl.appendChild(Object.assign(document.createElement('div'), { className: 'headlight' }));
+      el.appendChild(hl);
+
+      const tl = document.createElement('div'); tl.className = 'taillights';
+      tl.appendChild(Object.assign(document.createElement('div'), { className: 'taillight' }));
+      tl.appendChild(Object.assign(document.createElement('div'), { className: 'taillight' }));
+      el.appendChild(tl);
+
+      el.appendChild(Object.assign(document.createElement('div'), { className: 'bumper bumper-front' }));
+      el.appendChild(Object.assign(document.createElement('div'), { className: 'bumper bumper-back' }));
+
+      if (isTruck) {
+        el.appendChild(Object.assign(document.createElement('div'), { className: 'truck-stripe' }));
+      }
+
+      const veh = { row, col, size, orient, isTarget, el, id: i };
+      vehicles.push(veh);
+      positionVehicle(veh);
+      board.appendChild(el);
+      el.addEventListener('pointerdown', (e) => startDrag(e, veh));
+    });
+  }
+
+  function positionVehicle(v) {
+    v.el.style.width = (v.orient === 'h' ? v.size * CELL : CELL) - 4 + 'px';
+    v.el.style.height = (v.orient === 'v' ? v.size * CELL : CELL) - 4 + 'px';
+    v.el.style.left = v.col * CELL + 2 + 'px';
+    v.el.style.top = v.row * CELL + 2 + 'px';
+  }
+
+  function getOccupied(exclude) {
+    const grid = Array.from({ length: GRID }, () => Array(GRID).fill(false));
+    for (const v of vehicles) {
+      if (v === exclude) continue;
+      for (let i = 0; i < v.size; i++) {
+        const r = v.orient === 'v' ? v.row + i : v.row;
+        const c = v.orient === 'h' ? v.col + i : v.col;
+        if (r >= 0 && r < GRID && c >= 0 && c < GRID) grid[r][c] = true;
+      }
+    }
+    return grid;
+  }
+
+  function startDrag(e, veh) {
+    e.preventDefault();
+    const grid = getOccupied(veh);
+    let min, max;
+    if (veh.orient === 'h') {
+      let lo = veh.col; while (lo > 0 && !grid[veh.row][lo - 1]) lo--;
+      let hi = veh.col; while (hi + veh.size < GRID && !grid[veh.row][hi + veh.size]) hi++;
+      min = lo * CELL; max = hi * CELL;
+    } else {
+      let lo = veh.row; while (lo > 0 && !grid[lo - 1][veh.col]) lo--;
+      let hi = veh.row; while (hi + veh.size < GRID && !grid[hi + veh.size][veh.col]) hi++;
+      min = lo * CELL; max = hi * CELL;
+    }
+    const startMouse = veh.orient === 'h' ? e.clientX : e.clientY;
+    const startPos = veh.orient === 'h' ? veh.col * CELL : veh.row * CELL;
+    veh.el.classList.add('dragging');
+    veh.el.setPointerCapture(e.pointerId);
+    dragState = { veh, startMouse, startPos, min, max };
+    veh.el.addEventListener('pointermove', onDrag);
+    veh.el.addEventListener('pointerup', onDragEnd);
+    veh.el.addEventListener('pointercancel', onDragEnd);
+  }
+
+  function onDrag(e) {
+    if (!dragState) return;
+    const { veh, startMouse, startPos, min, max } = dragState;
+    const cur = veh.orient === 'h' ? e.clientX : e.clientY;
+    const pos = Math.max(min, Math.min(max, startPos + cur - startMouse));
+    if (veh.orient === 'h') veh.el.style.left = pos + 2 + 'px';
+    else veh.el.style.top = pos + 2 + 'px';
+  }
+
+  function onDragEnd(e) {
+    if (!dragState) return;
+    const { veh, startMouse, startPos, min, max } = dragState;
+    const cur = veh.orient === 'h' ? e.clientX : e.clientY;
+    const pos = Math.max(min, Math.min(max, startPos + cur - startMouse));
+    const snapped = Math.round(pos / CELL) * CELL;
+    if (veh.orient === 'h') veh.col = snapped / CELL;
+    else veh.row = snapped / CELL;
+    positionVehicle(veh);
+    veh.el.classList.remove('dragging');
+    veh.el.removeEventListener('pointermove', onDrag);
+    veh.el.removeEventListener('pointerup', onDragEnd);
+    veh.el.removeEventListener('pointercancel', onDragEnd);
+    dragState = null;
+    checkWin();
+  }
+
+  function checkWin() {
+    const target = vehicles.find(v => v.isTarget);
+    if (!target || target.col + target.size < GRID) return;
+    saveCompleted(currentLevel);
+    const isLast = currentLevel + 1 >= LEVELS.length;
+    winSubtitle.textContent = isLast ? 'You beat all 50 levels!' : `Level ${currentLevel + 1} complete`;
+    nextBtn.textContent = isLast ? 'Play Again' : 'Next Level';
+    setTimeout(() => winOverlay.classList.add('visible'), 200);
+  }
+
+  nextBtn.addEventListener('click', () => {
+    const next = (currentLevel + 1) % LEVELS.length;
+    loadLevel(next);
+  });
+
+  menuBtn.addEventListener('click', showSelect);
+  backBtn.addEventListener('click', showSelect);
+  resetBtn.addEventListener('click', () => loadLevel(currentLevel));
+
+  buildGrid();
+  buildLevelSelect();
+})();
+</script>
+</body>
+</html>
