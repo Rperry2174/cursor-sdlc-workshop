@@ -123,6 +123,45 @@
     line-height: 1.8;
     letter-spacing: 1px;
   }
+
+  .name-input {
+    background: transparent;
+    border: 2px solid #ff0;
+    color: #ff0;
+    font-family: 'Courier New', monospace;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    text-transform: uppercase;
+    width: 160px;
+    padding: 8px;
+    letter-spacing: 4px;
+    outline: none;
+    margin-top: 16px;
+  }
+
+  .name-input::placeholder {
+    color: rgba(255, 255, 0, 0.3);
+  }
+
+  .leaderboard-title {
+    font-size: 14px;
+    font-weight: bold;
+    color: #ff0;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+
+  .leaderboard-list {
+    font-size: 12px;
+    line-height: 1.8;
+    color: #ccc;
+    letter-spacing: 1px;
+  }
+
+  .lb-rank-1 { color: #ff0; }
+  .lb-rank-2 { color: #ccc; }
+  .lb-rank-3 { color: #c84; }
 </style>
 </head>
 <body>
@@ -135,11 +174,25 @@
     <div class="overlay-content">
       <div class="game-title">GALAGA</div>
       <div class="subtitle">ARCADE</div>
+      <div id="titleLeaderboard" style="margin-bottom:24px;"></div>
       <div class="prompt">PRESS SPACE TO START</div>
       <div class="controls">
         ARROW KEYS &mdash; MOVE<br>
         HOLD SPACE &mdash; FIRE
       </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="nameEntryOverlay">
+    <div class="overlay-bg"></div>
+    <div class="overlay-content">
+      <div id="nameEntryTitle" style="font-size:32px;font-weight:bold;letter-spacing:4px;margin-bottom:8px;"></div>
+      <div id="nameEntryScore" style="font-size:22px;color:#ff0;letter-spacing:2px;"></div>
+      <div style="margin-top:4px;font-size:14px;color:#0f0;letter-spacing:1px;">NEW HIGH SCORE!</div>
+      <div style="margin-top:16px;font-size:14px;color:rgba(255,255,255,0.6);">ENTER YOUR NAME</div>
+      <input type="text" id="nameInput" class="name-input" maxlength="10" placeholder="AAA" autocomplete="off">
+      <br>
+      <button class="btn" id="nameSubmitBtn">SUBMIT</button>
     </div>
   </div>
 
@@ -169,6 +222,7 @@
 <script src="js/enemy-movement.js"></script>
 <script src="js/lives.js"></script>
 <script src="js/explosions.js"></script>
+<script src="js/leaderboard.js"></script>
 <script>
 (function () {
   const canvas = document.getElementById('game');
@@ -182,8 +236,68 @@
   const startOverlay = document.getElementById('startOverlay');
   const winOverlay = document.getElementById('winOverlay');
   const gameOverOverlay = document.getElementById('gameOverOverlay');
+  const nameEntryOverlay = document.getElementById('nameEntryOverlay');
   const replayBtn = document.getElementById('replayBtn');
   const restartBtn = document.getElementById('restartBtn');
+  const nameInput = document.getElementById('nameInput');
+  const nameSubmitBtn = document.getElementById('nameSubmitBtn');
+  const nameEntryTitle = document.getElementById('nameEntryTitle');
+  const nameEntryScore = document.getElementById('nameEntryScore');
+
+  let pendingEndState = null;
+
+  function refreshTitleLeaderboard() {
+    const entries = Leaderboard.getEntries();
+    const el = document.getElementById('titleLeaderboard');
+    if (entries.length === 0) {
+      el.textContent = '';
+      return;
+    }
+    const rankColors = ['lb-rank-1', 'lb-rank-2', 'lb-rank-3', '', ''];
+    let html = '<div class="leaderboard-title">TOP SCORES</div><div class="leaderboard-list">';
+    for (let i = 0; i < entries.length; i++) {
+      const e = entries[i];
+      const cls = rankColors[i] || '';
+      const name = e.name.padEnd(10, '\u00A0');
+      const score = String(e.score).padStart(7, '0');
+      html += '<div class="' + cls + '">' + (i + 1) + '. ' + name + ' ' + score + '</div>';
+    }
+    html += '</div>';
+    el.innerHTML = html;
+  }
+
+  refreshTitleLeaderboard();
+
+  function showEndScreen(endState) {
+    const finalScore = Score.getCurrent();
+    if (Leaderboard.qualifies(finalScore)) {
+      pendingEndState = endState;
+      nameEntryTitle.textContent = endState === 'win' ? 'YOU WIN!' : 'GAME OVER';
+      nameEntryTitle.style.color = endState === 'win' ? '#0f0' : '#f44';
+      nameEntryScore.textContent = 'SCORE: ' + String(finalScore).padStart(6, '0');
+      nameInput.value = '';
+      nameEntryOverlay.classList.add('visible');
+      setTimeout(() => nameInput.focus(), 100);
+    } else if (endState === 'win') {
+      document.getElementById('winScore').textContent = 'SCORE: ' + String(finalScore).padStart(6, '0');
+      document.getElementById('winBest').textContent = 'HIGH SCORE: ' + String(Score.getBest()).padStart(6, '0');
+      winOverlay.classList.add('visible');
+    } else {
+      document.getElementById('goScore').textContent = 'SCORE: ' + String(finalScore).padStart(6, '0');
+      document.getElementById('goBest').textContent = 'HIGH SCORE: ' + String(Score.getBest()).padStart(6, '0');
+      gameOverOverlay.classList.add('visible');
+    }
+  }
+
+  function submitName() {
+    const name = nameInput.value.trim() || 'AAA';
+    Leaderboard.addEntry(name, Score.getCurrent());
+    nameEntryOverlay.classList.remove('visible');
+    refreshTitleLeaderboard();
+    state = 'start';
+    startOverlay.classList.add('visible');
+    pendingEndState = null;
+  }
 
   // --- Player ---
   const PLAYER_W = 32;
@@ -437,9 +551,7 @@
 
     if (Lives.getCount() <= 0) {
       state = 'gameover';
-      document.getElementById('goScore').textContent = 'SCORE: ' + String(Score.getCurrent()).padStart(6, '0');
-      document.getElementById('goBest').textContent = 'HIGH SCORE: ' + String(Score.getBest()).padStart(6, '0');
-      gameOverOverlay.classList.add('visible');
+      showEndScreen('gameover');
       return;
     }
 
@@ -450,9 +562,7 @@
     if (enemies.every(e => !e.alive) && waveTransitionTimer === 0) {
       if (currentWave >= TOTAL_WAVES) {
         state = 'win';
-        document.getElementById('winScore').textContent = 'SCORE: ' + String(Score.getCurrent()).padStart(6, '0');
-        document.getElementById('winBest').textContent = 'HIGH SCORE: ' + String(Score.getBest()).padStart(6, '0');
-        winOverlay.classList.add('visible');
+        showEndScreen('win');
       } else {
         startNextWave();
       }
@@ -503,6 +613,7 @@
 
     if (e.code === 'Space') {
       e.preventDefault();
+      if (nameEntryOverlay.classList.contains('visible')) return;
       if (state === 'start') {
         state = 'playing';
         startOverlay.classList.remove('visible');
@@ -525,6 +636,13 @@
     gameOverOverlay.classList.remove('visible');
     state = 'playing';
     resetGame();
+  });
+
+  nameSubmitBtn.addEventListener('click', submitName);
+
+  nameInput.addEventListener('keydown', (e) => {
+    e.stopPropagation();
+    if (e.code === 'Enter') submitName();
   });
 
   gameLoop();
