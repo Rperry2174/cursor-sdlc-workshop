@@ -1,0 +1,19 @@
+{
+  "$schema": "https://www.cursor.com/schemas/environment.schema.json",
+  "name": "quick-quiz-blitz-base-mvp",
+  "install": "npm install --prefix projects/bphazell/base_mvp",
+  "start": "npm run dev --prefix projects/bphazell/base_mvp -- --host 0.0.0.0 --port 5173",
+  "ports": [
+    {
+      "name": "quick-quiz-blitz",
+      "port": 5173
+    }
+  ],
+  "terminals": [
+    {
+      "name": "quiz-dev-server",
+      "command": "npm run dev --prefix projects/bphazell/base_mvp -- --host 0.0.0.0 --port 5173",
+      "description": "Runs the Quick Quiz Blitz Vite dev server."
+    }
+  ]
+}
