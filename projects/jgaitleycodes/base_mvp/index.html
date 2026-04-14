@@ -215,6 +215,15 @@
   }
   .new-best-tag.visible { display: block; }
 
+  #fireworksCanvas {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
   .result-banner {
     background: linear-gradient(135deg, rgba(74, 222, 128, 0.1), rgba(56, 189, 248, 0.1));
     border: 1px solid rgba(74, 222, 128, 0.3);
@@ -241,6 +250,8 @@
 </style>
 </head>
 <body>
+
+<canvas id="fireworksCanvas"></canvas>
 
 <div class="container">
   <h1>TypeRush</h1>
@@ -313,6 +324,149 @@
     <button class="btn btn-ghost" id="resetBtn" style="display:none">Try Again</button>
   </div>
 </div>
+
+<script>
+// Fireworks engine — difficulty-themed colors, pure canvas, no dependencies
+var Fireworks = (function () {
+  var canvas = document.getElementById("fireworksCanvas");
+  var ctx = canvas.getContext("2d");
+  var particles = [];
+  var rockets = [];
+  var animId = null;
+  var running = false;
+  var stopTime = 0;
+
+  var PALETTES = {
+    easy:   ["#4ade80", "#22d3ee", "#a3e635", "#34d399", "#2dd4bf"],
+    medium: ["#fbbf24", "#f59e0b", "#fb923c", "#facc15", "#fde68a"],
+    hard:   ["#f87171", "#ec4899", "#a78bfa", "#fb7185", "#c084fc"]
+  };
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+
+  window.addEventListener("resize", resize);
+  resize();
+
+  function Particle(x, y, color) {
+    var angle = Math.random() * Math.PI * 2;
+    var speed = 2 + Math.random() * 5;
+    this.x = x;
+    this.y = y;
+    this.vx = Math.cos(angle) * speed;
+    this.vy = Math.sin(angle) * speed;
+    this.alpha = 1;
+    this.color = color;
+    this.radius = 1.5 + Math.random() * 2;
+    this.decay = 0.012 + Math.random() * 0.018;
+    this.gravity = 0.04;
+  }
+
+  Particle.prototype.update = function () {
+    this.vx *= 0.98;
+    this.vy *= 0.98;
+    this.vy += this.gravity;
+    this.x += this.vx;
+    this.y += this.vy;
+    this.alpha -= this.decay;
+  };
+
+  Particle.prototype.draw = function () {
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, this.alpha);
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    ctx.fillStyle = this.color;
+    ctx.fill();
+    ctx.restore();
+  };
+
+  function Rocket(palette) {
+    this.x = Math.random() * canvas.width;
+    this.y = canvas.height;
+    this.vx = (Math.random() - 0.5) * 2;
+    this.vy = -(8 + Math.random() * 5);
+    this.palette = palette;
+    this.exploded = false;
+    this.alpha = 1;
+  }
+
+  Rocket.prototype.update = function () {
+    this.vy += 0.12;
+    this.x += this.vx;
+    this.y += this.vy;
+    if (this.vy >= -1 && !this.exploded) {
+      this.explode();
+    }
+  };
+
+  Rocket.prototype.explode = function () {
+    this.exploded = true;
+    var count = 60 + Math.floor(Math.random() * 40);
+    for (var i = 0; i < count; i++) {
+      var color = this.palette[Math.floor(Math.random() * this.palette.length)];
+      particles.push(new Particle(this.x, this.y, color));
+    }
+  };
+
+  Rocket.prototype.draw = function () {
+    if (this.exploded) return;
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 2.5, 0, Math.PI * 2);
+    ctx.fillStyle = "#fff";
+    ctx.fill();
+    ctx.restore();
+  };
+
+  function loop() {
+    if (!running) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (var i = rockets.length - 1; i >= 0; i--) {
+      rockets[i].update();
+      rockets[i].draw();
+      if (rockets[i].exploded) rockets.splice(i, 1);
+    }
+
+    for (var j = particles.length - 1; j >= 0; j--) {
+      particles[j].update();
+      particles[j].draw();
+      if (particles[j].alpha <= 0) particles.splice(j, 1);
+    }
+
+    if (Date.now() < stopTime || particles.length > 0 || rockets.length > 0) {
+      animId = requestAnimationFrame(loop);
+    } else {
+      running = false;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  }
+
+  function launch(difficulty, durationMs) {
+    resize();
+    var palette = PALETTES[difficulty] || PALETTES.medium;
+    running = true;
+    stopTime = Date.now() + (durationMs || 3000);
+    var launchCount = 0;
+    var maxLaunches = 12;
+    var interval = setInterval(function () {
+      if (Date.now() >= stopTime || launchCount >= maxLaunches) {
+        clearInterval(interval);
+        return;
+      }
+      rockets.push(new Rocket(palette));
+      if (Math.random() > 0.4) rockets.push(new Rocket(palette));
+      launchCount++;
+    }, 250);
+    if (!animId) animId = requestAnimationFrame(loop);
+  }
+
+  return { launch: launch };
+})();
+</script>
 
 <script src="js/passages.js"></script>
 <script src="js/difficulty.js"></script>
@@ -413,9 +567,11 @@
     var accPct = accuracy.getAccuracy();
     finalAccuracyEl.textContent = accPct + "%";
 
-    var isNewBest = saveIfBest(getSelectedDifficulty(), wpm, accPct);
+    var diff = getSelectedDifficulty();
+    var isNewBest = saveIfBest(diff, wpm, accPct);
     if (isNewBest) {
       newBestTag.classList.add("visible");
+      Fireworks.launch(diff, 3500);
     } else {
       newBestTag.classList.remove("visible");
     }
