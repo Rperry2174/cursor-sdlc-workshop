@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Football Trivia — Who Wants to Be a Legend?</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0d3b0d;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    color: #fff;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  /* --- Football pitch background --- */
+  .pitch-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    background:
+      repeating-linear-gradient(
+        0deg,
+        rgba(255,255,255,0.025) 0px,
+        rgba(255,255,255,0.025) 1px,
+        transparent 1px,
+        transparent 60px
+      ),
+      linear-gradient(180deg, #145a14 0%, #0d3b0d 40%, #092e09 100%);
+  }
+
+  .pitch-bg::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 500px;
+    height: 500px;
+    transform: translate(-50%, -50%);
+    border: 2px solid rgba(255,255,255,0.07);
+    border-radius: 50%;
+  }
+
+  .pitch-bg::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: rgba(255,255,255,0.06);
+  }
+
+  .pitch-corner-tl,
+  .pitch-corner-tr,
+  .pitch-corner-bl,
+  .pitch-corner-br {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    border: 2px solid rgba(255,255,255,0.06);
+    border-radius: 50%;
+  }
+  .pitch-corner-tl { top: -30px; left: -30px; }
+  .pitch-corner-tr { top: -30px; right: -30px; }
+  .pitch-corner-bl { bottom: -30px; left: -30px; }
+  .pitch-corner-br { bottom: -30px; right: -30px; }
+
+  .pitch-box-top {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 360px;
+    height: 120px;
+    border: 2px solid rgba(255,255,255,0.06);
+    border-top: none;
+  }
+
+  .pitch-box-bottom {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 360px;
+    height: 120px;
+    border: 2px solid rgba(255,255,255,0.06);
+    border-bottom: none;
+  }
+
+  .pitch-spot {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .pitch-sideline-l,
+  .pitch-sideline-r {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: rgba(255,255,255,0.05);
+  }
+  .pitch-sideline-l { left: 40px; }
+  .pitch-sideline-r { right: 40px; }
+
+  .pitch-vignette {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 50% 50%, transparent 30%, rgba(0,0,0,0.45) 100%);
+    pointer-events: none;
+  }
+
+  .pitch-floodlight {
+    position: absolute;
+    top: -10%;
+    width: 100%;
+    height: 50%;
+    background: radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.04) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .game-layout {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    gap: 32px;
+    align-items: flex-start;
+    max-width: 1100px;
+    width: 100%;
+    padding: 32px 24px;
+  }
+
+  /* --- LEFT: Question area --- */
+  .main-area {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .header h1 {
+    font-size: 28px;
+    font-weight: 800;
+    color: #fff;
+    text-shadow: 0 2px 16px rgba(0, 0, 0, 0.5);
+    letter-spacing: -0.5px;
+  }
+
+  .header h1 .ball { font-size: 26px; margin-right: 4px; }
+
+  .header .subtitle {
+    font-size: 12px;
+    color: rgba(255,255,255,0.35);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-top: 4px;
+  }
+
+  .question-card {
+    background: linear-gradient(135deg, rgba(0, 40, 0, 0.7), rgba(0, 20, 0, 0.85));
+    border: 1px solid rgba(74, 222, 128, 0.2);
+    border-radius: 16px;
+    padding: 32px 28px;
+    margin-bottom: 20px;
+    backdrop-filter: blur(12px);
+    box-shadow:
+      0 0 40px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+
+  .question-number {
+    font-size: 13px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.35);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+  }
+
+  .question-text {
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1.5;
+  }
+
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .option-btn {
+    position: relative;
+    background: linear-gradient(135deg, rgba(0, 40, 0, 0.6), rgba(0, 20, 0, 0.75));
+    border: 2px solid rgba(74, 222, 128, 0.15);
+    border-radius: 12px;
+    padding: 16px 20px;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s ease;
+    overflow: hidden;
+    backdrop-filter: blur(8px);
+  }
+
+  .option-btn .option-letter {
+    color: #fbbf24;
+    font-weight: 800;
+    margin-right: 8px;
+  }
+
+  .option-btn:hover:not(.disabled) {
+    background: linear-gradient(135deg, rgba(20, 80, 20, 0.6), rgba(10, 50, 10, 0.7));
+    border-color: rgba(74, 222, 128, 0.45);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px rgba(74, 222, 128, 0.12);
+  }
+
+  .option-btn.correct {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.3), rgba(22, 163, 74, 0.4));
+    border-color: #22c55e;
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.2);
+  }
+
+  .option-btn.wrong {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.3), rgba(185, 28, 28, 0.4));
+    border-color: #ef4444;
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
+  }
+
+  .option-btn.disabled { cursor: default; opacity: 0.45; }
+  .option-btn.disabled.correct,
+  .option-btn.disabled.wrong { opacity: 1; }
+
+  .next-btn {
+    display: none;
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #16a34a, #15803d);
+    border: 1px solid rgba(74, 222, 128, 0.35);
+    border-radius: 12px;
+    color: #fff;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    box-shadow: 0 4px 20px rgba(22, 163, 74, 0.3);
+  }
+
+  .next-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(22, 163, 74, 0.45);
+  }
+
+  /* --- RIGHT: Prize ladder --- */
+  .ladder {
+    width: 240px;
+    flex-shrink: 0;
+    background: linear-gradient(180deg, rgba(0, 30, 0, 0.85), rgba(0, 15, 0, 0.92));
+    border: 1px solid rgba(74, 222, 128, 0.12);
+    border-radius: 16px;
+    padding: 16px 0;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 0 40px rgba(0,0,0,0.4);
+    position: sticky;
+    top: 32px;
+  }
+
+  .ladder-title {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.35);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    margin-bottom: 4px;
+  }
+
+  .ladder-row {
+    display: flex;
+    align-items: center;
+    padding: 9px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.3);
+    transition: all 0.3s ease;
+    position: relative;
+  }
+
+  .ladder-row .ladder-num {
+    width: 24px;
+    text-align: right;
+    margin-right: 12px;
+    font-weight: 800;
+    font-size: 13px;
+  }
+
+  .ladder-row .ladder-prize {
+    flex: 1;
+  }
+
+  .ladder-row.milestone {
+    color: rgba(245, 158, 11, 0.5);
+  }
+
+  .ladder-row.active {
+    color: #fff;
+    background: linear-gradient(90deg, rgba(74, 222, 128, 0.15), transparent);
+  }
+
+  .ladder-row.active .ladder-num {
+    color: #fbbf24;
+  }
+
+  .ladder-row.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: #4ade80;
+    border-radius: 0 2px 2px 0;
+  }
+
+  .ladder-row.cleared {
+    color: rgba(34, 197, 94, 0.5);
+  }
+
+  .ladder-row.milestone.cleared {
+    color: rgba(245, 158, 11, 0.6);
+  }
+
+  /* --- Results overlay --- */
+  .results-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: rgba(10, 14, 26, 0.92);
+    backdrop-filter: blur(16px);
+    justify-content: center;
+    align-items: center;
+  }
+
+  .results-overlay.visible {
+    display: flex;
+  }
+
+  .results-card {
+    text-align: center;
+    max-width: 480px;
+    padding: 48px 40px;
+    background: linear-gradient(135deg, rgba(0, 40, 0, 0.8), rgba(0, 20, 0, 0.9));
+    border: 1px solid rgba(74, 222, 128, 0.2);
+    border-radius: 20px;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 0 80px rgba(0, 0, 0, 0.4);
+  }
+
+  .results-card .emoji { font-size: 48px; margin-bottom: 16px; }
+
+  .results-card h2 {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+
+  .results-card .won-prize {
+    font-size: 48px;
+    font-weight: 800;
+    color: #f59e0b;
+    text-shadow: 0 0 30px rgba(245, 158, 11, 0.4);
+    margin-bottom: 4px;
+  }
+
+  .results-card .won-label {
+    font-size: 14px;
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+
+  .results-card .results-detail {
+    font-size: 16px;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 32px;
+    line-height: 1.5;
+  }
+
+  .results-card .play-again-btn {
+    padding: 16px 48px;
+    background: linear-gradient(135deg, #16a34a, #15803d);
+    border: 1px solid rgba(74, 222, 128, 0.35);
+    border-radius: 12px;
+    color: #fff;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    box-shadow: 0 4px 20px rgba(22, 163, 74, 0.3);
+  }
+
+  .results-card .play-again-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(22, 163, 74, 0.45);
+  }
+
+  /* --- Game Over flash --- */
+  .game-over-flash {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(239, 68, 68, 0.15);
+    z-index: 99;
+    animation: flash-out 0.6s ease forwards;
+    pointer-events: none;
+  }
+
+  @keyframes flash-out {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  /* --- Responsive --- */
+  @media (max-width: 800px) {
+    .game-layout {
+      flex-direction: column-reverse;
+      align-items: stretch;
+    }
+    .ladder {
+      width: 100%;
+      position: static;
+      display: flex;
+      flex-wrap: wrap;
+      padding: 12px;
+      gap: 0;
+    }
+    .ladder-title {
+      width: 100%;
+      border-bottom: none;
+      padding-bottom: 8px;
+      margin-bottom: 0;
+    }
+    .ladder-row {
+      width: 50%;
+      padding: 6px 12px;
+      font-size: 13px;
+    }
+    .options-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="pitch-bg">
+  <div class="pitch-corner-tl"></div>
+  <div class="pitch-corner-tr"></div>
+  <div class="pitch-corner-bl"></div>
+  <div class="pitch-corner-br"></div>
+  <div class="pitch-box-top"></div>
+  <div class="pitch-box-bottom"></div>
+  <div class="pitch-spot"></div>
+  <div class="pitch-sideline-l"></div>
+  <div class="pitch-sideline-r"></div>
+  <div class="pitch-floodlight"></div>
+  <div class="pitch-vignette"></div>
+</div>
+
+<div class="game-over-flash" id="gameOverFlash"></div>
+
+<div class="game-layout">
+  <div class="main-area">
+    <div class="header">
+      <h1><span class="ball">&#9917;</span> Who Wants to Be a Football Legend?</h1>
+      <div class="subtitle">Answer wrong and you lose it all</div>
+    </div>
+
+    <div id="quiz">
+      <div class="question-card">
+        <div class="question-number" id="questionNumber">Question 1</div>
+        <div class="question-text" id="questionText"></div>
+      </div>
+      <div class="options-grid" id="options"></div>
+      <button class="next-btn" id="nextBtn">Next Question</button>
+    </div>
+  </div>
+
+  <div class="ladder" id="ladder"></div>
+</div>
+
+<div class="results-overlay" id="resultsOverlay">
+  <div class="results-card">
+    <div class="emoji" id="resultsEmoji">&#9917;</div>
+    <h2 id="resultsTitle">Full Time!</h2>
+    <div class="won-label">You Won</div>
+    <div class="won-prize" id="wonPrize">$0</div>
+    <div class="results-detail" id="resultsDetail"></div>
+    <button class="play-again-btn" id="playAgainBtn">Play Again</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  var LEVELS = [
+    { num: 1,  prize: "$100",        milestone: false },
+    { num: 2,  prize: "$200",        milestone: false },
+    { num: 3,  prize: "$500",        milestone: false },
+    { num: 4,  prize: "$1,000",      milestone: false },
+    { num: 5,  prize: "$5,000",      milestone: true  },
+    { num: 6,  prize: "$10,000",     milestone: false },
+    { num: 7,  prize: "$25,000",     milestone: false },
+    { num: 8,  prize: "$50,000",     milestone: false },
+    { num: 9,  prize: "$100,000",    milestone: false },
+    { num: 10, prize: "$1,000,000",  milestone: true  }
+  ];
+
+  var allQuestions = [
+    { q: "Which country has won the most FIFA World Cup titles?", options: ["Germany", "Argentina", "Brazil", "Italy"], answer: 2 },
+    { q: "Who holds the record for most goals in a single calendar year (91 in 2012)?", options: ["Cristiano Ronaldo", "Lionel Messi", "Gerd Müller", "Pelé"], answer: 1 },
+    { q: "Which club has won the most Champions League / European Cup titles?", options: ["AC Milan", "Real Madrid", "Liverpool", "Bayern Munich"], answer: 1 },
+    { q: "In which year was the first FIFA World Cup held?", options: ["1928", "1930", "1934", "1926"], answer: 1 },
+    { q: "Which player is known as 'The Egyptian King'?", options: ["Sadio Mané", "Mohamed Salah", "Riyad Mahrez", "Hakim Ziyech"], answer: 1 },
+    { q: "How many substitutions are allowed in a standard FIFA match (since 2022)?", options: ["3", "4", "5", "6"], answer: 2 },
+    { q: "Which country hosted the 2006 FIFA World Cup?", options: ["France", "South Africa", "Japan", "Germany"], answer: 3 },
+    { q: "Who scored the 'Hand of God' goal at the 1986 World Cup?", options: ["Pelé", "Diego Maradona", "Zinedine Zidane", "Ronaldo"], answer: 1 },
+    { q: "Which Premier League club is nicknamed 'The Red Devils'?", options: ["Liverpool", "Arsenal", "Manchester United", "Nottingham Forest"], answer: 2 },
+    { q: "How long is a standard match excluding stoppage time?", options: ["80 minutes", "90 minutes", "100 minutes", "120 minutes"], answer: 1 },
+    { q: "Which country won the 2022 FIFA World Cup in Qatar?", options: ["France", "Brazil", "Argentina", "Croatia"], answer: 2 },
+    { q: "Who is the all-time top scorer in World Cup history?", options: ["Ronaldo (R9)", "Miroslav Klose", "Pelé", "Just Fontaine"], answer: 1 },
+    { q: "What is FC Barcelona's home stadium called?", options: ["Santiago Bernabéu", "Camp Nou", "Wanda Metropolitano", "San Siro"], answer: 1 },
+    { q: "Which player has won the most Ballon d'Or awards?", options: ["Cristiano Ronaldo", "Lionel Messi", "Michel Platini", "Johan Cruyff"], answer: 1 },
+    { q: "Which nation won the first European Championship in 1960?", options: ["Spain", "West Germany", "Soviet Union", "Italy"], answer: 2 },
+    { q: "What does 'FIFA' stand for?", options: ["Fédération Internationale de Football Association", "Federation of International Football Associations", "Football International Fair Association", "Fédération Intercontinentale de Football Amateur"], answer: 0 },
+    { q: "Which goalkeeper holds the most Premier League clean sheets?", options: ["David Seaman", "Petr Čech", "Edwin van der Sar", "Peter Schmeichel"], answer: 1 },
+    { q: "In which city is the Maracanã stadium?", options: ["Buenos Aires", "São Paulo", "Rio de Janeiro", "Montevideo"], answer: 2 },
+    { q: "Who managed Manchester United from 1986 to 2013?", options: ["Arsène Wenger", "José Mourinho", "Sir Alex Ferguson", "Sir Matt Busby"], answer: 2 },
+    { q: "Which country's team is nicknamed 'Die Mannschaft'?", options: ["Austria", "Germany", "Netherlands", "Switzerland"], answer: 1 },
+    { q: "How many players per team are on the field in a standard match?", options: ["10", "11", "12", "9"], answer: 1 },
+    { q: "Which African nation first reached a World Cup quarter-final (1990)?", options: ["Nigeria", "Ghana", "Cameroon", "Senegal"], answer: 2 },
+    { q: "What colour card does a referee show for a sending off?", options: ["Yellow", "Red", "Orange", "Black"], answer: 1 },
+    { q: "Which English club won the 2005 Champions League from 3-0 down at half-time?", options: ["Chelsea", "Manchester United", "Liverpool", "Arsenal"], answer: 2 },
+    { q: "Who is the all-time top scorer in the Champions League?", options: ["Lionel Messi", "Raúl", "Cristiano Ronaldo", "Robert Lewandowski"], answer: 2 },
+    { q: "Which World Cup is remembered for the Vuvuzela horns?", options: ["2006 Germany", "2010 South Africa", "2014 Brazil", "2002 Korea/Japan"], answer: 1 },
+    { q: "What is the diameter of a regulation size 5 football?", options: ["18–20 cm", "22–23 cm", "25–27 cm", "30–32 cm"], answer: 1 },
+    { q: "Who is the Premier League's all-time top scorer?", options: ["Wayne Rooney", "Andrew Cole", "Alan Shearer", "Thierry Henry"], answer: 2 },
+    { q: "In which years did Pelé win his three World Cups?", options: ["1954, 1962, 1970", "1958, 1962, 1970", "1958, 1966, 1970", "1962, 1970, 1974"], answer: 1 },
+    { q: "Which country does Kylian Mbappé represent?", options: ["Belgium", "Cameroon", "France", "Senegal"], answer: 2 }
+  ];
+
+  var LETTERS = ["A", "B", "C", "D"];
+
+  function shuffle(arr) {
+    for (var i = arr.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+    }
+    return arr;
+  }
+
+  var questions, current, answered, gameOver;
+
+  var questionNumber = document.getElementById("questionNumber");
+  var questionText = document.getElementById("questionText");
+  var optionsEl = document.getElementById("options");
+  var nextBtn = document.getElementById("nextBtn");
+  var ladderEl = document.getElementById("ladder");
+  var resultsOverlay = document.getElementById("resultsOverlay");
+  var resultsEmoji = document.getElementById("resultsEmoji");
+  var resultsTitle = document.getElementById("resultsTitle");
+  var wonPrize = document.getElementById("wonPrize");
+  var resultsDetail = document.getElementById("resultsDetail");
+  var playAgainBtn = document.getElementById("playAgainBtn");
+  var gameOverFlash = document.getElementById("gameOverFlash");
+
+  function buildLadder() {
+    ladderEl.textContent = "";
+    var title = document.createElement("div");
+    title.className = "ladder-title";
+    title.textContent = "Prize Ladder";
+    ladderEl.appendChild(title);
+
+    for (var i = LEVELS.length - 1; i >= 0; i--) {
+      var row = document.createElement("div");
+      row.className = "ladder-row";
+      row.id = "ladder-" + i;
+      if (LEVELS[i].milestone) row.classList.add("milestone");
+
+      var num = document.createElement("span");
+      num.className = "ladder-num";
+      num.textContent = LEVELS[i].num;
+
+      var prize = document.createElement("span");
+      prize.className = "ladder-prize";
+      prize.textContent = LEVELS[i].prize;
+
+      row.appendChild(num);
+      row.appendChild(prize);
+      ladderEl.appendChild(row);
+    }
+  }
+
+  function updateLadder() {
+    for (var i = 0; i < LEVELS.length; i++) {
+      var row = document.getElementById("ladder-" + i);
+      row.classList.remove("active", "cleared");
+      if (i < current) {
+        row.classList.add("cleared");
+      } else if (i === current && !gameOver) {
+        row.classList.add("active");
+      }
+    }
+  }
+
+  function startGame() {
+    questions = shuffle(allQuestions.slice()).slice(0, LEVELS.length);
+    current = 0;
+    answered = false;
+    gameOver = false;
+    resultsOverlay.classList.remove("visible");
+    buildLadder();
+    loadQuestion();
+  }
+
+  function loadQuestion() {
+    answered = false;
+    nextBtn.style.display = "none";
+    updateLadder();
+
+    var q = questions[current];
+    questionNumber.textContent = "Question " + (current + 1) + " — For " + LEVELS[current].prize;
+    questionText.textContent = q.q;
+    optionsEl.textContent = "";
+
+    q.options.forEach(function (opt, i) {
+      var btn = document.createElement("button");
+      btn.className = "option-btn";
+
+      var letter = document.createElement("span");
+      letter.className = "option-letter";
+      letter.textContent = LETTERS[i] + ":";
+
+      btn.appendChild(letter);
+      btn.appendChild(document.createTextNode(" " + opt));
+      btn.addEventListener("click", function () { selectAnswer(i); });
+      optionsEl.appendChild(btn);
+    });
+  }
+
+  function selectAnswer(index) {
+    if (answered) return;
+    answered = true;
+
+    var q = questions[current];
+    var buttons = optionsEl.querySelectorAll(".option-btn");
+
+    buttons.forEach(function (btn, i) {
+      btn.classList.add("disabled");
+      if (i === q.answer) btn.classList.add("correct");
+      else if (i === index) btn.classList.add("wrong");
+    });
+
+    if (index === q.answer) {
+      if (current === LEVELS.length - 1) {
+        setTimeout(function () { showResults(true); }, 1200);
+      } else {
+        nextBtn.textContent = "Next — Play for " + LEVELS[current + 1].prize;
+        nextBtn.style.display = "block";
+      }
+    } else {
+      gameOver = true;
+      updateLadder();
+      gameOverFlash.style.display = "block";
+      gameOverFlash.style.animation = "none";
+      void gameOverFlash.offsetHeight;
+      gameOverFlash.style.animation = "flash-out 0.6s ease forwards";
+      setTimeout(function () {
+        gameOverFlash.style.display = "none";
+        showResults(false);
+      }, 1200);
+    }
+  }
+
+  function getSafeHaven() {
+    for (var i = current - 1; i >= 0; i--) {
+      if (LEVELS[i].milestone) return LEVELS[i].prize;
+    }
+    return "$0";
+  }
+
+  function showResults(won) {
+    if (won) {
+      resultsEmoji.textContent = "\u{1F3C6}";
+      resultsTitle.textContent = "You're a Football Legend!";
+      wonPrize.textContent = LEVELS[LEVELS.length - 1].prize;
+      resultsDetail.textContent = "You answered all " + LEVELS.length + " questions correctly. Absolute world class!";
+    } else {
+      var safe = getSafeHaven();
+      resultsEmoji.textContent = "\u26BD";
+      resultsTitle.textContent = "Game Over!";
+      wonPrize.textContent = safe;
+      if (safe === "$0") {
+        resultsDetail.textContent =
+          "Wrong answer on question " + (current + 1) + ". You didn't reach a milestone — you walk away with nothing. Red card performance!";
+      } else {
+        resultsDetail.textContent =
+          "Wrong answer on question " + (current + 1) + ". You drop back to your last milestone of " + safe + ".";
+      }
+    }
+    resultsOverlay.classList.add("visible");
+  }
+
+  nextBtn.addEventListener("click", function () {
+    current++;
+    loadQuestion();
+  });
+
+  playAgainBtn.addEventListener("click", startGame);
+
+  startGame();
+})();
+</script>
+</body>
+</html>
