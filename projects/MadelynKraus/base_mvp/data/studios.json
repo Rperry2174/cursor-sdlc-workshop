@@ -1,0 +1,164 @@
+[
+  {
+    "id": "new-york-pilates-soho",
+    "name": "New York Pilates – SoHo",
+    "neighborhood": "SoHo",
+    "borough": "Manhattan"
+  },
+  {
+    "id": "new-york-pilates-bowery",
+    "name": "New York Pilates – Bowery",
+    "neighborhood": "Bowery",
+    "borough": "Manhattan"
+  },
+  {
+    "id": "new-york-pilates-west-village",
+    "name": "New York Pilates – West Village",
+    "neighborhood": "West Village",
+    "borough": "Manhattan"
+  },
+  {
+    "id": "new-york-pilates-flatiron",
+    "name": "New York Pilates – Flatiron",
+    "neighborhood": "Flatiron",
+    "borough": "Manhattan"
+  },
+  {
+    "id": "real-pilates-nyc-tribeca",
+    "name": "Real Pilates NYC – Tribeca",
+    "neighborhood": "Tribeca",
+    "borough": "Manhattan"
+  },
+  {
+    "id": "nice-and-tall-midtown",
+    "name": "Nice & Tall – Midtown",
+    "neighborhood": "Midtown (original studio, est. 1928)",
+    "borough": "Manhattan"
+  },
+  {
+    "id": "the-pilates-circuit-chelsea",
+    "name": "The Pilates Circuit – Chelsea",
+    "neighborhood": "Chelsea",
+    "borough": "Manhattan"
+  },
+  {
+    "id": "the-pilates-circuit-nomad",
+    "name": "The Pilates Circuit – NoMad",
+    "neighborhood": "NoMad",
+    "borough": "Manhattan"
+  },
+  {
+    "id": "studio-pilates-harlem",
+    "name": "Studio Pilates Harlem",
+    "neighborhood": "Harlem",
+    "borough": "Manhattan"
+  },
+  {
+    "id": "riverview-pilates-upper-west-side",
+    "name": "Riverview Pilates – Upper West Side",
+    "neighborhood": "Upper West Side",
+    "borough": "Manhattan"
+  },
+  {
+    "id": "club-pilates-manhattan-multi",
+    "name": "Club Pilates",
+    "neighborhood": "Multiple Manhattan locations (9 across NYC)",
+    "borough": "Manhattan"
+  },
+  {
+    "id": "solidcore-manhattan-multi",
+    "name": "[solidcore]",
+    "neighborhood": "10+ Manhattan locations",
+    "borough": "Manhattan"
+  },
+  {
+    "id": "dynamic-body-pilates-manhattan",
+    "name": "Dynamic Body Pilates",
+    "neighborhood": "Manhattan",
+    "borough": "Manhattan"
+  },
+  {
+    "id": "east-river-pilates-williamsburg",
+    "name": "East River Pilates – Williamsburg",
+    "neighborhood": "Williamsburg (3 locations)",
+    "borough": "Brooklyn"
+  },
+  {
+    "id": "flow-pilates-clinton-hill",
+    "name": "Flow Pilates – Clinton Hill",
+    "neighborhood": "Clinton Hill",
+    "borough": "Brooklyn"
+  },
+  {
+    "id": "craft-pilates-park-slope",
+    "name": "Craft Pilates – Park Slope",
+    "neighborhood": "Park Slope",
+    "borough": "Brooklyn"
+  },
+  {
+    "id": "club-pilates-park-slope",
+    "name": "Club Pilates – Park Slope",
+    "neighborhood": "Park Slope",
+    "borough": "Brooklyn"
+  },
+  {
+    "id": "good-day-pilates-brooklyn-heights",
+    "name": "Good Day Pilates – Brooklyn Heights",
+    "neighborhood": "Brooklyn Heights",
+    "borough": "Brooklyn"
+  },
+  {
+    "id": "pilates-heights-brooklyn-heights",
+    "name": "Pilates Heights – Brooklyn Heights",
+    "neighborhood": "Brooklyn Heights",
+    "borough": "Brooklyn"
+  },
+  {
+    "id": "streamline-pilates-brooklyn-heights",
+    "name": "Streamline Pilates – Brooklyn Heights",
+    "neighborhood": "Brooklyn Heights",
+    "borough": "Brooklyn"
+  },
+  {
+    "id": "fort-pilates-fort-greene",
+    "name": "Fort Pilates – Fort Greene",
+    "neighborhood": "Fort Greene",
+    "borough": "Brooklyn"
+  },
+  {
+    "id": "pilates-garage-gowanus",
+    "name": "Pilates Garage – Gowanus",
+    "neighborhood": "Gowanus",
+    "borough": "Brooklyn"
+  },
+  {
+    "id": "aline-pilates-carroll-gardens",
+    "name": "ALine Pilates – Carroll Gardens",
+    "neighborhood": "Carroll Gardens",
+    "borough": "Brooklyn"
+  },
+  {
+    "id": "pilates-by-simona-park-slope",
+    "name": "Pilates by Simona – Park Slope",
+    "neighborhood": "Park Slope",
+    "borough": "Brooklyn"
+  },
+  {
+    "id": "violet-hour-pilates-prospect-heights",
+    "name": "Violet Hour Pilates – Prospect Heights",
+    "neighborhood": "Prospect Heights",
+    "borough": "Brooklyn"
+  },
+  {
+    "id": "pilates-bklyn-greenpoint",
+    "name": "Pilates BKLYN – Greenpoint",
+    "neighborhood": "Greenpoint",
+    "borough": "Brooklyn"
+  },
+  {
+    "id": "zarhcos-pilates-vinegar-hill",
+    "name": "Zarhcos Pilates – Vinegar Hill",
+    "neighborhood": "Vinegar Hill",
+    "borough": "Brooklyn"
+  }
+]
