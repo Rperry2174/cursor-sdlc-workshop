@@ -4,9 +4,9 @@
 
 ## Project Overview
 
-**Project Name:** Claudesweeper
+**Project Name:** CC Sweeper
 
-**One-line Description:** Classic Minesweeper, but the mines are Anthropic logos.
+**One-line Description:** Classic Minesweeper, but the mines are Anthropic.
 
 **Type:** Web App (single-page React app)
 
