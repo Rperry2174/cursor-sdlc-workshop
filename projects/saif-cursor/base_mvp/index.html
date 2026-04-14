@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leaf Arena Brawl</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      background: #0d1117;
+      color: #e6edf3;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: 0.02em;
+    }
+    .sub {
+      font-size: 0.85rem;
+      color: #8b949e;
+      margin-bottom: 12px;
+      text-align: center;
+      max-width: 520px;
+      line-height: 1.45;
+    }
+    #wrap {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+    }
+    canvas {
+      display: block;
+      background: #1a1f2e;
+    }
+    .legend {
+      margin-top: 14px;
+      font-size: 0.78rem;
+      color: #8b949e;
+      max-width: 900px;
+      line-height: 1.6;
+      text-align: center;
+    }
+    .legend strong { color: #58a6ff; }
+    .legend em { color: #f0883e; font-style: normal; }
+  </style>
+</head>
+<body>
+  <h1>Leaf Arena Brawl</h1>
+  <p class="sub">Two-player same-keyboard fighter — pick a character each, then battle until one health bar is empty. Fighters are <strong>original chibi-style drawings</strong> (not official game/anime art).</p>
+  <div id="wrap">
+    <canvas id="game" width="900" height="480" aria-label="Fighting game canvas"></canvas>
+  </div>
+  <p class="legend">
+    <strong>P1</strong> — move <em>A D</em> · punch <em>Q</em> · kick <em>W</em> · defend <em>E</em> (hold)
+    &nbsp;|&nbsp;
+    <strong>P2</strong> — move <em>← →</em> · punch <em>U</em> · kick <em>I</em> · defend <em>O</em> (hold)
+    &nbsp;|&nbsp;
+    Select: <em>1–4</em> &nbsp; Rematch: <em>R</em>
+  </p>
+
+  <script>
+(function () {
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+
+  const W = canvas.width;
+  const H = canvas.height;
+  const GROUND_Y = 400;
+  const FIGHTER_W = 52;
+  const FIGHTER_H = 108;
+  const MOVE_SPEED = 4.2;
+
+  const ROSTER = [
+    { name: 'Naruto', key: 'naruto', body: '#ff7a33', accent: '#1a237e' },
+    { name: 'Sasuke', key: 'sasuke', body: '#3949ab', accent: '#0d1421' },
+    { name: 'Sakura', key: 'sakura', body: '#f06292', accent: '#fff' },
+    { name: 'Kakashi', key: 'kakashi', body: '#90a4ae', accent: '#37474f' },
+  ];
+
+  const PUNCH = {
+    duration: 16,
+    damage: 9,
+    range: 62,
+    height: 38,
+    yOff: 36,
+    activeStart: 4,
+    activeEnd: 11,
+    cooldown: 18,
+  };
+  const KICK = {
+    duration: 24,
+    damage: 14,
+    range: 88,
+    height: 36,
+    yOff: 52,
+    activeStart: 6,
+    activeEnd: 17,
+    cooldown: 26,
+  };
+  const BLOCK_MULT = 0.22;
+
+  const keys = {};
+  window.addEventListener('keydown', function (e) {
+    keys[e.code] = true;
+    if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].indexOf(e.code) >= 0) {
+      e.preventDefault();
+    }
+  });
+  window.addEventListener('keyup', function (e) {
+    keys[e.code] = false;
+    if (e.code === 'KeyR' && phase === 'over') {
+      startFight();
+    }
+  });
+
+  let phase = 'select_p1';
+  let p1Pick = -1;
+  let p2Pick = -1;
+  let fighters = [];
+  let winner = null;
+  let hitParticles = [];
+  let screenShake = 0;
+
+  function makeFighter(rosterIndex, side) {
+    const r = ROSTER[rosterIndex];
+    const startX = side === 'left' ? 160 : W - 160 - FIGHTER_W;
+    return {
+      rosterIndex,
+      name: r.name,
+      body: r.body,
+      accent: r.accent,
+      side,
+      x: startX,
+      y: GROUND_Y - FIGHTER_H,
+      hp: 100,
+      maxHp: 100,
+      state: 'idle',
+      stateT: 0,
+      hitThisSwing: false,
+      punchCd: 0,
+      kickCd: 0,
+      hitFlash: 0,
+      hitWasBlock: false,
+    };
+  }
+
+  function other(f) {
+    return fighters[0] === f ? fighters[1] : fighters[0];
+  }
+
+  function faceToward(f, targetX) {
+    const cx = f.x + FIGHTER_W / 2;
+    return targetX < cx ? -1 : 1;
+  }
+
+  function bodyBox(f) {
+    return { x: f.x, y: f.y, w: FIGHTER_W, h: FIGHTER_H };
+  }
+
+  function attackHurtbox(f) {
+    const atk = f.state === 'punch' ? PUNCH : KICK;
+    const face = faceToward(f, other(f).x + FIGHTER_W / 2);
+    const top = f.y + atk.yOff;
+    let hx;
+    if (face === 1) {
+      hx = f.x + FIGHTER_W;
+    } else {
+      hx = f.x - atk.range;
+    }
+    return { x: hx, y: top, w: atk.range, h: atk.height, face };
+  }
+
+  function rectsOverlap(a, b) {
+    return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+  }
+
+  function startFight() {
+    fighters = [makeFighter(p1Pick, 'left'), makeFighter(p2Pick, 'right')];
+    winner = null;
+    phase = 'fight';
+    hitParticles = [];
+    screenShake = 0;
+  }
+
+  function spawnHitFX(ix, iy, blocked, isKick) {
+    const n = blocked ? 6 : (isKick ? 14 : 9);
+    for (let i = 0; i < n; i++) {
+      const ang = (Math.PI * 2 * i) / n + (Math.random() - 0.5) * 0.4;
+      const spd = blocked ? 1.8 + Math.random() * 2.2 : 3.5 + Math.random() * 5;
+      hitParticles.push({
+        x: ix,
+        y: iy,
+        vx: Math.cos(ang) * spd,
+        vy: Math.sin(ang) * spd - 2,
+        life: blocked ? 10 : 16,
+        maxLife: blocked ? 10 : 16,
+        blocked,
+      });
+    }
+  }
+
+  function overlapCenter(a, b) {
+    const L = Math.max(a.x, b.x);
+    const R = Math.min(a.x + a.w, b.x + b.w);
+    const T = Math.max(a.y, b.y);
+    const B = Math.min(a.y + a.h, b.y + b.h);
+    if (L >= R || T >= B) return { x: (a.x + a.w / 2), y: (a.y + a.h / 2) };
+    return { x: (L + R) / 2, y: (T + B) / 2 };
+  }
+
+  function updateHitFX() {
+    hitParticles = hitParticles.filter(function (p) {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.22;
+      p.vx *= 0.96;
+      p.life--;
+      return p.life > 0;
+    });
+    if (screenShake > 0) screenShake--;
+    for (let i = 0; i < fighters.length; i++) {
+      if (fighters[i].hitFlash > 0) fighters[i].hitFlash--;
+    }
+  }
+
+  function tryDamage(attacker, defender) {
+    if (defender.hp <= 0 || attacker.hp <= 0) return;
+    const atk = attacker.state === 'punch' ? PUNCH : KICK;
+    if (attacker.state !== 'punch' && attacker.state !== 'kick') return;
+    if (attacker.hitThisSwing) return;
+    if (attacker.stateT < atk.activeStart || attacker.stateT > atk.activeEnd) return;
+
+    const hurt = attackHurtbox(attacker);
+    const body = bodyBox(defender);
+    if (!rectsOverlap(hurt, body)) return;
+
+    const blocked = defender.state === 'defend';
+    let dmg = atk.damage;
+    if (blocked) {
+      dmg *= BLOCK_MULT;
+    }
+    const pt = overlapCenter(hurt, body);
+    const isKick = attacker.state === 'kick';
+    spawnHitFX(pt.x, pt.y, blocked, isKick);
+    defender.hitFlash = blocked ? 7 : 12;
+    defender.hitWasBlock = blocked;
+    screenShake = blocked ? 4 : 9;
+
+    defender.hp = Math.max(0, Math.round((defender.hp - dmg) * 10) / 10);
+    attacker.hitThisSwing = true;
+
+    if (fighters[0].hp <= 0 || fighters[1].hp <= 0) {
+      winner = fighters[0].hp > 0 ? fighters[0] : fighters[1].hp > 0 ? fighters[1] : null;
+      phase = 'over';
+    }
+  }
+
+  function updateFighter(f, inputs) {
+    const opp = other(f);
+
+    if (f.punchCd > 0) f.punchCd--;
+    if (f.kickCd > 0) f.kickCd--;
+
+    if (phase !== 'fight' || f.hp <= 0) return;
+
+    if (f.state === 'idle' || f.state === 'defend') {
+      if (inputs.defend) {
+        f.state = 'defend';
+        f.stateT = 0;
+      } else {
+        f.state = 'idle';
+        f.stateT = 0;
+      }
+
+      if (f.state === 'idle') {
+        let dx = 0;
+        if (inputs.left) dx -= MOVE_SPEED;
+        if (inputs.right) dx += MOVE_SPEED;
+        f.x += dx;
+        f.x = Math.max(40, Math.min(W - FIGHTER_W - 40, f.x));
+
+        if (inputs.punch && f.punchCd === 0) {
+          f.state = 'punch';
+          f.stateT = 0;
+          f.hitThisSwing = false;
+        } else if (inputs.kick && f.kickCd === 0) {
+          f.state = 'kick';
+          f.stateT = 0;
+          f.hitThisSwing = false;
+        }
+      }
+    } else if (f.state === 'punch') {
+      f.stateT++;
+      tryDamage(f, opp);
+      if (f.stateT >= PUNCH.duration) {
+        f.state = 'idle';
+        f.punchCd = PUNCH.cooldown;
+      }
+    } else if (f.state === 'kick') {
+      f.stateT++;
+      tryDamage(f, opp);
+      if (f.stateT >= KICK.duration) {
+        f.state = 'idle';
+        f.kickCd = KICK.cooldown;
+      }
+    }
+  }
+
+  function separateFighters() {
+    if (fighters.length !== 2) return;
+    const b0 = bodyBox(fighters[0]);
+    const b1 = bodyBox(fighters[1]);
+    if (!rectsOverlap(b0, b1)) return;
+    const push = 6;
+    if (fighters[0].x < fighters[1].x) {
+      fighters[0].x -= push;
+      fighters[1].x += push;
+    } else {
+      fighters[0].x += push;
+      fighters[1].x -= push;
+    }
+    fighters[0].x = Math.max(40, Math.min(W - FIGHTER_W - 40, fighters[0].x));
+    fighters[1].x = Math.max(40, Math.min(W - FIGHTER_W - 40, fighters[1].x));
+  }
+
+  function tick() {
+    if (phase === 'fight' && fighters.length === 2) {
+      const p1 = fighters[0];
+      const p2 = fighters[1];
+      updateFighter(p1, {
+        left: keys['KeyA'],
+        right: keys['KeyD'],
+        punch: keys['KeyQ'],
+        kick: keys['KeyW'],
+        defend: keys['KeyE'],
+      });
+      updateFighter(p2, {
+        left: keys['ArrowLeft'],
+        right: keys['ArrowRight'],
+        punch: keys['KeyU'],
+        kick: keys['KeyI'],
+        defend: keys['KeyO'],
+      });
+      separateFighters();
+    }
+
+    updateHitFX();
+
+    if (phase === 'select_p1' || phase === 'select_p2') {
+      for (let i = 0; i < 4; i++) {
+        const code = 'Digit' + (i + 1);
+        if (keys[code]) {
+          keys[code] = false;
+          if (phase === 'select_p1') {
+            p1Pick = i;
+            phase = 'select_p2';
+          } else {
+            p2Pick = i;
+            startFight();
+          }
+          break;
+        }
+      }
+    }
+  }
+
+  function fighterPose(f) {
+    if (f.state === 'punch') return 'punch';
+    if (f.state === 'kick') return 'kick';
+    if (f.state === 'defend') return 'defend';
+    return 'idle';
+  }
+
+  /**
+   * Stylized chibi figures (original vector art — not official sprites).
+   * Local coords: origin at ground between feet; x = character's forward; y increases DOWNWARD.
+   */
+  function drawChibiStylized(ctx, key, pose) {
+    const p = pose;
+
+    function legPair(lOff, rOff) {
+      ctx.fillStyle = '#1a1a1a';
+      ctx.fillRect(-13 + lOff, -8, 9, 26);
+      ctx.fillRect(4 + rOff, -8, 9, 26);
+    }
+
+    function boot() {
+      ctx.fillStyle = '#263238';
+      ctx.fillRect(-15, -4, 12, 5);
+      ctx.fillRect(3, -4, 12, 5);
+    }
+
+    if (key === 'naruto') {
+      if (p === 'kick') legPair(0, 10);
+      else if (p === 'idle' || p === 'punch' || p === 'defend') legPair(0, 0);
+      boot();
+      ctx.fillStyle = '#ff6f00';
+      ctx.fillRect(-15, -38, 30, 32);
+      ctx.strokeStyle = '#1a1a1a';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, -38);
+      ctx.lineTo(-6, -46);
+      ctx.moveTo(0, -38);
+      ctx.lineTo(6, -46);
+      ctx.stroke();
+      ctx.fillStyle = '#1a1a1a';
+      ctx.fillRect(-2, -34, 4, 14);
+      ctx.fillStyle = '#fdbf93';
+      ctx.beginPath();
+      ctx.arc(0, -58, 13, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#cfd8dc';
+      ctx.fillRect(-14, -66, 28, 7);
+      ctx.fillStyle = '#eceff1';
+      ctx.fillRect(-5, -65, 10, 5);
+      ctx.fillStyle = '#1565c0';
+      ctx.beginPath();
+      ctx.arc(-5, -59, 2.2, 0, Math.PI * 2);
+      ctx.arc(5, -59, 2.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#d84315';
+      ctx.lineWidth = 1.2;
+      for (let s = -1; s <= 1; s += 2) {
+        for (let i = 0; i < 3; i++) {
+          ctx.beginPath();
+          ctx.moveTo(s * 11, -58 + i * 2);
+          ctx.lineTo(s * 16, -57 + i * 2);
+          ctx.stroke();
+        }
+      }
+      ctx.fillStyle = '#fdd835';
+      for (let i = 0; i < 9; i++) {
+        const ang = -Math.PI / 2 + (i - 4) * 0.28;
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(ang) * 6, -62 + Math.sin(ang) * 6);
+        ctx.lineTo(Math.cos(ang) * 6 + Math.cos(ang - 0.35) * 16, -62 + Math.sin(ang) * 6 + Math.sin(ang - 0.35) * 16);
+        ctx.lineTo(Math.cos(ang) * 10, -58 + Math.sin(ang) * 4);
+        ctx.fill();
+      }
+      ctx.fillStyle = '#ff6f00';
+      if (p === 'punch') {
+        ctx.fillRect(10, -52, 18, 8);
+        ctx.fillStyle = '#fdbf93';
+        ctx.beginPath();
+        ctx.arc(27, -48, 4, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (p === 'kick') {
+        ctx.fillRect(8, -30, 20, 9);
+        ctx.fillStyle = '#ff6f00';
+        ctx.fillRect(22, -32, 14, 7);
+      } else if (p === 'defend') {
+        ctx.fillStyle = '#fdbf93';
+        ctx.fillRect(-12, -52, 8, 16);
+        ctx.fillRect(4, -52, 8, 16);
+      } else {
+        ctx.fillRect(-16, -50, 8, 14);
+        ctx.fillRect(8, -50, 8, 14);
+      }
+      return;
+    }
+
+    if (key === 'sasuke') {
+      if (p === 'kick') legPair(0, 12);
+      else legPair(0, 0);
+      boot();
+      ctx.fillStyle = '#1565c0';
+      ctx.fillRect(-14, -40, 28, 34);
+      ctx.fillStyle = '#eceff1';
+      ctx.beginPath();
+      ctx.moveTo(0, -40);
+      ctx.lineTo(-8, -48);
+      ctx.lineTo(8, -48);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = '#e8baa8';
+      ctx.beginPath();
+      ctx.arc(0, -58, 12, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#0d1421';
+      ctx.beginPath();
+      ctx.moveTo(-14, -58);
+      ctx.quadraticCurveTo(-18, -78, -6, -82);
+      ctx.lineTo(4, -80);
+      ctx.quadraticCurveTo(16, -76, 14, -58);
+      ctx.lineTo(10, -54);
+      ctx.lineTo(-10, -54);
+      ctx.closePath();
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(-12, -60);
+      ctx.lineTo(-22, -56);
+      ctx.lineTo(-26, -48);
+      ctx.lineTo(-14, -52);
+      ctx.fill();
+      ctx.fillStyle = '#b71c1c';
+      ctx.beginPath();
+      ctx.moveTo(-3, -60);
+      ctx.lineTo(0, -56);
+      ctx.lineTo(3, -60);
+      ctx.fill();
+      ctx.fillStyle = '#263238';
+      ctx.beginPath();
+      ctx.arc(-4, -59, 1.8, 0, Math.PI * 2);
+      ctx.arc(4, -59, 1.8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#1565c0';
+      if (p === 'punch') {
+        ctx.fillRect(9, -52, 20, 7);
+        ctx.fillStyle = '#e8baa8';
+        ctx.beginPath();
+        ctx.arc(28, -49, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (p === 'kick') {
+        ctx.fillRect(6, -28, 22, 8);
+        ctx.fillStyle = '#0d47a1';
+        ctx.fillRect(24, -30, 14, 7);
+      } else if (p === 'defend') {
+        ctx.fillStyle = '#1565c0';
+        ctx.fillRect(-11, -54, 7, 18);
+        ctx.fillRect(4, -54, 7, 18);
+      } else {
+        ctx.fillRect(-15, -50, 7, 14);
+        ctx.fillRect(8, -50, 7, 14);
+      }
+      return;
+    }
+
+    if (key === 'sakura') {
+      if (p === 'kick') legPair(0, 10);
+      else legPair(0, 0);
+      boot();
+      ctx.fillStyle = '#ad1457';
+      ctx.fillRect(-13, -24, 26, 18);
+      ctx.fillStyle = '#c62828';
+      ctx.fillRect(-14, -40, 28, 18);
+      ctx.fillStyle = '#eceff1';
+      ctx.fillRect(-3, -22, 6, 8);
+      ctx.fillStyle = '#e8baa8';
+      ctx.beginPath();
+      ctx.arc(0, -58, 12, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#2e7d32';
+      ctx.fillRect(-12, -66, 24, 6);
+      ctx.fillStyle = '#f48fb1';
+      ctx.beginPath();
+      ctx.moveTo(-12, -58);
+      ctx.quadraticCurveTo(-20, -52, -22, -38);
+      ctx.lineTo(-18, -36);
+      ctx.lineTo(-14, -50);
+      ctx.lineTo(-12, -58);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(12, -58);
+      ctx.quadraticCurveTo(20, -52, 22, -38);
+      ctx.lineTo(18, -36);
+      ctx.lineTo(14, -50);
+      ctx.lineTo(12, -58);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(-10, -64);
+      ctx.quadraticCurveTo(0, -72, 10, -64);
+      ctx.lineTo(8, -58);
+      ctx.lineTo(-8, -58);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = '#4a148c';
+      ctx.beginPath();
+      ctx.arc(-4, -59, 1.6, 0, Math.PI * 2);
+      ctx.arc(4, -59, 1.6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#c62828';
+      if (p === 'punch') {
+        ctx.fillRect(8, -50, 18, 7);
+        ctx.fillStyle = '#fce4ec';
+        ctx.beginPath();
+        ctx.arc(25, -47, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (p === 'kick') {
+        ctx.fillRect(6, -28, 20, 8);
+        ctx.fillStyle = '#880e4f';
+        ctx.fillRect(22, -30, 12, 6);
+      } else if (p === 'defend') {
+        ctx.fillRect(-10, -54, 6, 16);
+        ctx.fillRect(4, -54, 6, 16);
+      } else {
+        ctx.fillRect(-14, -50, 6, 13);
+        ctx.fillRect(8, -50, 6, 13);
+      }
+      return;
+    }
+
+    if (key === 'kakashi') {
+      if (p === 'kick') legPair(0, 9);
+      else legPair(0, 0);
+      boot();
+      ctx.fillStyle = '#37474f';
+      ctx.fillRect(-15, -42, 30, 36);
+      ctx.fillStyle = '#263238';
+      ctx.fillRect(-14, -38, 28, 8);
+      ctx.fillRect(-6, -34, 12, 6);
+      ctx.fillStyle = '#eceff1';
+      ctx.beginPath();
+      ctx.arc(0, -58, 11, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#b0bec5';
+      ctx.beginPath();
+      ctx.moveTo(-12, -62);
+      ctx.lineTo(-4, -68);
+      ctx.lineTo(8, -70);
+      ctx.lineTo(14, -64);
+      ctx.lineTo(12, -58);
+      ctx.lineTo(-10, -56);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = '#90a4ae';
+      ctx.fillRect(-14, -62, 28, 14);
+      ctx.fillStyle = '#eceff1';
+      ctx.fillRect(-12, -60, 24, 4);
+      ctx.fillStyle = '#37474f';
+      ctx.beginPath();
+      ctx.moveTo(-10, -54);
+      ctx.lineTo(10, -54);
+      ctx.lineTo(10, -48);
+      ctx.lineTo(-10, -48);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = '#1a237e';
+      ctx.beginPath();
+      ctx.arc(4, -58, 2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#263238';
+      ctx.fillRect(-8, -60, 6, 5);
+      ctx.fillStyle = '#37474f';
+      if (p === 'punch') {
+        ctx.fillRect(9, -50, 20, 8);
+        ctx.fillStyle = '#eceff1';
+        ctx.beginPath();
+        ctx.arc(28, -46, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (p === 'kick') {
+        ctx.fillRect(5, -28, 22, 8);
+        ctx.fillStyle = '#263238';
+        ctx.fillRect(24, -30, 14, 7);
+      } else if (p === 'defend') {
+        ctx.fillRect(-11, -54, 7, 17);
+        ctx.fillRect(4, -54, 7, 17);
+      } else {
+        ctx.fillRect(-15, -50, 7, 14);
+        ctx.fillRect(8, -50, 7, 14);
+      }
+    }
+  }
+
+  function drawFighter(f) {
+    const face = faceToward(f, other(f).x + FIGHTER_W / 2);
+    const x = f.x;
+    const y = f.y;
+    const footY = y + FIGHTER_H - 2;
+    const midX = x + FIGHTER_W / 2;
+    const key = ROSTER[f.rosterIndex].key;
+    const pose = fighterPose(f);
+
+    ctx.save();
+    ctx.fillStyle = 'rgba(0,0,0,0.22)';
+    ctx.beginPath();
+    ctx.ellipse(midX, footY + 3, 24, 7, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.save();
+    ctx.translate(midX, footY);
+    ctx.scale(face, 1);
+    drawChibiStylized(ctx, key, pose);
+    ctx.restore();
+
+    if (f.hitFlash > 0) {
+      const maxF = f.hitWasBlock ? 7 : 12;
+      const k = f.hitFlash / maxF;
+      ctx.save();
+      ctx.globalCompositeOperation = 'screen';
+      ctx.fillStyle = f.hitWasBlock
+        ? 'rgba(130, 220, 255, ' + (0.42 * k) + ')'
+        : 'rgba(255, 255, 255, ' + (0.55 * k) + ')';
+      ctx.fillRect(x - 10, y - 24, FIGHTER_W + 20, FIGHTER_H + 32);
+      ctx.restore();
+      ctx.strokeStyle = f.hitWasBlock ? 'rgba(150, 235, 255, 0.95)' : 'rgba(255, 200, 90, 0.95)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x - 6, y - 14, FIGHTER_W + 12, FIGHTER_H + 24);
+    }
+
+    if (f.state === 'defend') {
+      ctx.strokeStyle = 'rgba(100, 200, 255, 0.85)';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(x - 4, y - 8, FIGHTER_W + 8, FIGHTER_H + 8);
+    }
+
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 11px system-ui,sans-serif';
+    ctx.textAlign = 'center';
+    ctx.shadowColor = 'rgba(0,0,0,0.85)';
+    ctx.shadowBlur = 4;
+    ctx.fillText(f.name, midX, y + FIGHTER_H + 14);
+    ctx.shadowBlur = 0;
+  }
+
+  function drawHitParticles() {
+    for (let i = 0; i < hitParticles.length; i++) {
+      const p = hitParticles[i];
+      const a = p.life / p.maxLife;
+      if (p.blocked) {
+        ctx.strokeStyle = 'rgba(170, 230, 255,' + (0.35 + a * 0.65) + ')';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(p.x - p.vx * 2.2, p.y - p.vy * 2.2);
+        ctx.stroke();
+      } else {
+        ctx.fillStyle = 'rgba(255, 200, 80,' + a + ')';
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y - 4);
+        ctx.lineTo(p.x + 3, p.y);
+        ctx.lineTo(p.x, p.y + 4);
+        ctx.lineTo(p.x - 3, p.y);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = 'rgba(255, 255, 255,' + (a * 0.85) + ')';
+        ctx.fillRect(p.x - 1.5, p.y - 1.5, 3, 3);
+      }
+    }
+  }
+
+  function drawHealthBars() {
+    if (fighters.length !== 2) return;
+    const barW = 280;
+    const h = 14;
+    const y = 16;
+    function bar(x, label, pct, color) {
+      ctx.fillStyle = '#21262d';
+      ctx.fillRect(x, y, barW, h);
+      ctx.fillStyle = color;
+      ctx.fillRect(x, y, barW * pct, h);
+      ctx.strokeStyle = '#30363d';
+      ctx.strokeRect(x, y, barW, h);
+      ctx.fillStyle = '#e6edf3';
+      ctx.font = '600 12px system-ui,sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText(label, x, y - 4);
+    }
+    bar(32, 'P1 ' + fighters[0].name, fighters[0].hp / fighters[0].maxHp, '#3fb950');
+    bar(W - 32 - barW, 'P2 ' + fighters[1].name, fighters[1].hp / fighters[1].maxHp, '#58a6ff');
+  }
+
+  function drawSelect() {
+    ctx.fillStyle = 'rgba(13, 17, 23, 0.92)';
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.fillStyle = '#e6edf3';
+    ctx.font = '700 22px system-ui,sans-serif';
+    ctx.textAlign = 'center';
+    const title = phase === 'select_p1' ? 'Player 1 — pick fighter (keys 1–4)' : 'Player 2 — pick fighter (keys 1–4)';
+    ctx.fillText(title, W / 2, 80);
+
+    for (let i = 0; i < ROSTER.length; i++) {
+      const r = ROSTER[i];
+      const cx = 150 + i * 200;
+      const cy = 228;
+      ctx.fillStyle = 'rgba(22, 27, 34, 0.92)';
+      ctx.fillRect(cx - 72, cy - 108, 144, 208);
+      ctx.strokeStyle = '#30363d';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(cx - 72, cy - 108, 144, 208);
+      ctx.save();
+      ctx.translate(cx, cy + 42);
+      ctx.scale(1.35, 1.35);
+      drawChibiStylized(ctx, r.key, 'idle');
+      ctx.restore();
+      ctx.fillStyle = '#e6edf3';
+      ctx.font = '600 14px system-ui,sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(r.name, cx, cy + 72);
+      ctx.font = '13px system-ui,sans-serif';
+      ctx.fillStyle = '#8b949e';
+      ctx.fillText('[' + (i + 1) + ']', cx, cy + 92);
+    }
+  }
+
+  function drawFightBg() {
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, '#1e2a4a');
+    g.addColorStop(1, '#0f1419');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.fillStyle = '#3d4f6f';
+    ctx.fillRect(0, GROUND_Y, W, H - GROUND_Y);
+    ctx.strokeStyle = '#58a6ff';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0, GROUND_Y);
+    ctx.lineTo(W, GROUND_Y);
+    ctx.stroke();
+  }
+
+  function drawOverlay() {
+    if (phase !== 'over') return;
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = '#f0f6fc';
+    ctx.font = '700 28px system-ui,sans-serif';
+    ctx.textAlign = 'center';
+    if (winner) {
+      ctx.fillText(winner.name + ' wins!', W / 2, H / 2 - 12);
+    } else {
+      ctx.fillText('Double KO!', W / 2, H / 2 - 12);
+    }
+    ctx.font = '16px system-ui,sans-serif';
+    ctx.fillStyle = '#8b949e';
+    ctx.fillText('Press R to rematch', W / 2, H / 2 + 24);
+  }
+
+  function loop() {
+    tick();
+
+    if (phase === 'select_p1' || phase === 'select_p2') {
+      drawFightBg();
+      drawSelect();
+    } else {
+      ctx.save();
+      if (screenShake > 0) {
+        ctx.translate((Math.random() - 0.5) * 14, (Math.random() - 0.5) * 10);
+      }
+      drawFightBg();
+      if (fighters.length === 2) {
+        drawHealthBars();
+        drawFighter(fighters[0]);
+        drawFighter(fighters[1]);
+        drawHitParticles();
+      }
+      ctx.restore();
+      drawOverlay();
+    }
+
+    requestAnimationFrame(loop);
+  }
+
+  requestAnimationFrame(loop);
+})();
+  </script>
+</body>
+</html>
