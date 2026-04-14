@@ -1,0 +1,24 @@
+{
+  "name": "ink-memory-match",
+  "version": "0.1.0",
+  "description": "Terminal Memory Card Match game built with Ink (React for CLIs).",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "ink-memory-match": "./src/cli.tsx"
+  },
+  "scripts": {
+    "start": "tsx src/cli.tsx",
+    "dev": "tsx watch src/cli.tsx",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "ink": "^7.0.0",
+    "react": "^19.2.5"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.14",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.2"
+  }
+}
