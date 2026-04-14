@@ -1,23 +1,20 @@
-# Base MVP
+# Base MVP — Marvis Bacon Judges Typing
 
-This folder is where your project code lives.
+React + Vite single-page app: retype a hardcoded passage with per-character feedback until it matches exactly.
 
-## What to Build
-- A minimal, working version of your project
-- Should run locally and do *something* visible
-- Keep it simple — 10 minutes max!
+## Run locally
 
-### Good Examples
-- A Chrome extension with one button that does one thing
-- A web page with basic HTML/CSS/JS
-- A simple CLI script
+```bash
+cd projects/jdfriedma/base_mvp
+npm install
+npm run dev
+```
 
-### Instructions
+Open the URL Vite prints (default here: `http://localhost:5174/`).
 
-1. Tell Cursor to read the `prd.md` in your project folder
-2. Tell Cursor to generate the base MVP here
-3. Tell Cursor to run it locally and verify it works
+## Build
 
-### After You're Done
-
-> **Ask Cursor:** "Commit all my changes with the message 'Base MVP scaffold', push to my fork, and open a PR to the original repo"
+```bash
+npm run build
+npm run preview
+```
