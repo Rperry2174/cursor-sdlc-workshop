@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Flappy Bird</title>
+<title>Sky Hop — Version 2</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -143,7 +143,7 @@
     position: absolute;
     top: 12px;
     right: 12px;
-    z-index: 10;
+    z-index: 30;
     background: rgba(0, 0, 0, 0.4);
     border: none;
     color: #fff;
@@ -161,6 +161,75 @@
 
   .sound-toggle:hover { background: rgba(0, 0, 0, 0.6); }
 
+  .pause-toggle {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 30;
+    background: rgba(0, 0, 0, 0.4);
+    border: none;
+    color: #fff;
+    font-size: 18px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+    transition: background 0.2s;
+  }
+
+  .pause-toggle.visible { display: flex; }
+
+  .pause-toggle:hover { background: rgba(0, 0, 0, 0.6); }
+
+  .difficulty-row {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+
+  .difficulty-row .label {
+    width: 100%;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: rgba(255, 255, 255, 0.55);
+    margin-bottom: 4px;
+  }
+
+  .diff-btn {
+    background: rgba(255, 255, 255, 0.12);
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    color: #fff;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, transform 0.1s;
+  }
+
+  .diff-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .diff-btn.selected {
+    background: rgba(255, 215, 0, 0.25);
+    border-color: #ffd700;
+    color: #ffd700;
+  }
+
+  .pause-hint {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.55);
+    margin-top: 16px;
+  }
+
   .new-best {
     color: #ffd700;
     font-size: 14px;
@@ -177,14 +246,32 @@
 <div id="game-wrapper">
   <canvas id="game"></canvas>
 
-  <button class="sound-toggle" id="soundBtn" title="Toggle sound">🔊</button>
+  <button type="button" class="pause-toggle" id="pauseBtn" title="Pause (P)" aria-label="Pause">⏸</button>
+  <button type="button" class="sound-toggle" id="soundBtn" title="Toggle sound">🔊</button>
 
   <div class="overlay visible" id="readyOverlay">
     <div class="overlay-bg"></div>
     <div class="overlay-content">
-      <div class="game-title">Flappy Bird</div>
-      <div class="subtitle">A simple tap-to-fly game</div>
+      <div class="game-title">Sky Hop</div>
+      <div class="subtitle">Version 2 — tap to fly, beat your best</div>
+      <div class="difficulty-row">
+        <span class="label">Difficulty</span>
+        <button type="button" class="diff-btn" data-diff="easy">Easy</button>
+        <button type="button" class="diff-btn selected" data-diff="medium">Medium</button>
+        <button type="button" class="diff-btn" data-diff="hard">Hard</button>
+      </div>
       <div class="tap-prompt">Tap or Press Space to Start</div>
+      <div class="pause-hint">Press P anytime to pause</div>
+    </div>
+  </div>
+
+  <div class="overlay" id="pauseOverlay">
+    <div class="overlay-bg"></div>
+    <div class="overlay-content">
+      <div class="game-title" style="font-size: 36px">Paused</div>
+      <div class="subtitle">Take a breath — nothing is lost.</div>
+      <button type="button" class="btn" id="resumeBtn">Resume</button>
+      <div class="pause-hint">Press P or click Resume</div>
     </div>
   </div>
 
@@ -215,11 +302,15 @@
 
   const readyOverlay = document.getElementById('readyOverlay');
   const gameOverOverlay = document.getElementById('gameOverOverlay');
+  const pauseOverlay = document.getElementById('pauseOverlay');
   const finalScoreEl = document.getElementById('finalScore');
   const bestScoreEl = document.getElementById('bestScoreDisplay');
   const newBestLabel = document.getElementById('newBestLabel');
   const retryBtn = document.getElementById('retryBtn');
+  const resumeBtn = document.getElementById('resumeBtn');
+  const pauseBtn = document.getElementById('pauseBtn');
   const soundBtn = document.getElementById('soundBtn');
+  const diffButtons = document.querySelectorAll('.diff-btn');
 
   // --- Audio (Web Audio API, no external files) ---
   let soundEnabled = true;
@@ -270,12 +361,30 @@
   const BIRD_X = 80;
   const BIRD_RADIUS = 14;
   const PIPE_WIDTH = 56;
-  const PIPE_GAP = 160;
-  const PIPE_SPEED = 2.2;
-  const PIPE_SPAWN_INTERVAL = 110;
   const GROUND_H = 60;
   const GAP_MARGIN_TOP = 80;
   const GAP_MARGIN_BOTTOM = 80 + GROUND_H;
+
+  /** Base tuning per difficulty; progressive scaling applied in getEffectiveParams */
+  const DIFFICULTY = {
+    easy:   { gap: 188, speed: 1.82, interval: 128 },
+    medium: { gap: 160, speed: 2.2,  interval: 110 },
+    hard:   { gap: 126, speed: 2.88, interval: 90 },
+  };
+
+  let selectedDifficulty = 'medium';
+
+  function getEffectiveParams() {
+    const profile = DIFFICULTY[selectedDifficulty];
+    const s = score;
+    const speedBoost = 1 + Math.min(s, 50) * 0.011;
+    const gapTighten = Math.min(s * 1.05, 44);
+    return {
+      gap: Math.max(92, profile.gap - gapTighten),
+      speed: profile.speed * speedBoost,
+      interval: profile.interval,
+    };
+  }
 
   // --- Colors ---
   const SKY_TOP = '#70c5ce';
@@ -292,8 +401,8 @@
   const BIRD_BEAK = '#e87040';
 
   // --- State ---
-  let state = 'ready'; // ready | playing | gameover
-  let bird, pipes, score, bestScore, frameCount, shakeTimer, flashAlpha;
+  let state = 'ready'; // ready | playing | paused | gameover
+  let bird, pipes, score, bestScore, frameCount, shakeTimer, flashAlpha, spawnAccumulator;
 
   bestScore = parseInt(localStorage.getItem('flappy_best') || '0', 10);
 
@@ -302,6 +411,7 @@
     pipes = [];
     score = 0;
     frameCount = 0;
+    spawnAccumulator = 0;
     shakeTimer = 0;
     flashAlpha = 0;
   }
@@ -326,7 +436,8 @@
 
     ctx.strokeStyle = GROUND_DARK;
     ctx.lineWidth = 1;
-    const offset = (frameCount * PIPE_SPEED) % 24;
+    const scroll = state === 'playing' || state === 'paused' ? getEffectiveParams().speed : DIFFICULTY[selectedDifficulty].speed;
+    const offset = (frameCount * scroll) % 24;
     for (let x = -offset; x < CANVAS_W; x += 24) {
       ctx.beginPath();
       ctx.moveTo(x, groundY + 12);
@@ -355,8 +466,9 @@
   }
 
   function drawPipe(pipe) {
-    const topH = pipe.gapY - PIPE_GAP / 2;
-    const bottomY = pipe.gapY + PIPE_GAP / 2;
+    const g = pipe.gap;
+    const topH = pipe.gapY - g / 2;
+    const bottomY = pipe.gapY + g / 2;
     const bottomH = CANVAS_H - GROUND_H - bottomY;
 
     // Top pipe body
@@ -431,7 +543,7 @@
   }
 
   function drawScore() {
-    if (state !== 'playing') return;
+    if (state !== 'playing' && state !== 'paused') return;
     ctx.save();
     ctx.font = 'bold 48px "Segoe UI", system-ui, sans-serif';
     ctx.textAlign = 'center';
@@ -451,8 +563,9 @@
     if (bird.y + BIRD_RADIUS > groundY || bird.y - BIRD_RADIUS < 0) return true;
 
     for (const pipe of pipes) {
-      const topH = pipe.gapY - PIPE_GAP / 2;
-      const bottomY = pipe.gapY + PIPE_GAP / 2;
+      const g = pipe.gap;
+      const topH = pipe.gapY - g / 2;
+      const bottomY = pipe.gapY + g / 2;
 
       if (BIRD_X + BIRD_RADIUS > pipe.x && BIRD_X - BIRD_RADIUS < pipe.x + PIPE_WIDTH) {
         if (bird.y - BIRD_RADIUS < topH || bird.y + BIRD_RADIUS > bottomY) {
@@ -463,9 +576,29 @@
     return false;
   }
 
+  function syncPauseUi() {
+    const on = state === 'playing' || state === 'paused';
+    pauseBtn.classList.toggle('visible', on);
+    pauseBtn.textContent = state === 'paused' ? '▶' : '⏸';
+    pauseBtn.setAttribute('title', state === 'paused' ? 'Resume (P)' : 'Pause (P)');
+  }
+
+  function togglePause() {
+    if (state === 'playing') {
+      state = 'paused';
+      pauseOverlay.classList.add('visible');
+      syncPauseUi();
+    } else if (state === 'paused') {
+      state = 'playing';
+      pauseOverlay.classList.remove('visible');
+      syncPauseUi();
+    }
+  }
+
   // --- Flap ---
   function flap() {
     ensureAudio();
+    if (state === 'paused') return;
     if (state === 'ready') {
       state = 'playing';
       readyOverlay.classList.remove('visible');
@@ -473,10 +606,10 @@
       bird.vel = Math.min(bird.vel, 2);
       bird.vel = Math.min(bird.vel + FLAP_IMPULSE, FLAP_IMPULSE);
       sfxFlap();
+      syncPauseUi();
       return;
     }
     if (state === 'playing') {
-      // Cap downward momentum before applying flap so dives recover smoothly.
       bird.vel = Math.min(bird.vel, 2);
       bird.vel = Math.min(bird.vel + FLAP_IMPULSE, FLAP_IMPULSE);
       sfxFlap();
@@ -486,6 +619,8 @@
   // --- Game Over ---
   function triggerGameOver() {
     state = 'gameover';
+    pauseOverlay.classList.remove('visible');
+    pauseBtn.classList.remove('visible');
     sfxHit();
     setTimeout(sfxDie, 150);
     shakeTimer = 12;
@@ -511,6 +646,7 @@
     state = 'playing';
     resetGame();
     bird.vel = FLAP_IMPULSE;
+    syncPauseUi();
   }
 
   // --- Update ---
@@ -519,28 +655,30 @@
 
     frameCount++;
 
+    const p = getEffectiveParams();
+
     // Bird physics
     bird.vel += GRAVITY;
     if (bird.vel > TERMINAL_VEL) bird.vel = TERMINAL_VEL;
     bird.y += bird.vel;
 
-    // Ease into the target angle so the bird doesn't snap between frames.
     const targetRotation = bird.vel < 0
       ? Math.max(-0.4, bird.vel * 0.05)
       : Math.min(1.0, bird.vel * 0.07);
     bird.rotation += (targetRotation - bird.rotation) * 0.15;
 
-    // Spawn pipes
-    if (frameCount % PIPE_SPAWN_INTERVAL === 0) {
-      const minGapY = GAP_MARGIN_TOP + PIPE_GAP / 2;
-      const maxGapY = CANVAS_H - GAP_MARGIN_BOTTOM - PIPE_GAP / 2;
+    spawnAccumulator += 1;
+    if (spawnAccumulator >= p.interval) {
+      spawnAccumulator = 0;
+      const gap = p.gap;
+      const minGapY = GAP_MARGIN_TOP + gap / 2;
+      const maxGapY = CANVAS_H - GAP_MARGIN_BOTTOM - gap / 2;
       const gapY = minGapY + Math.random() * (maxGapY - minGapY);
-      pipes.push({ x: CANVAS_W, gapY, scored: false });
+      pipes.push({ x: CANVAS_W, gapY, scored: false, gap });
     }
 
-    // Move and score pipes
     for (let i = pipes.length - 1; i >= 0; i--) {
-      pipes[i].x -= PIPE_SPEED;
+      pipes[i].x -= p.speed;
 
       if (!pipes[i].scored && pipes[i].x + PIPE_WIDTH < BIRD_X) {
         pipes[i].scored = true;
@@ -553,7 +691,6 @@
       }
     }
 
-    // Collision
     if (checkCollision()) {
       triggerGameOver();
     }
@@ -606,12 +743,10 @@
       bird.y = CANVAS_H / 2 - 30 + Math.sin(frameCount * 0.05) * 12;
     }
   }
-  const originalUpdate = update;
-
   function wrappedLoop() {
     if (state === 'ready') {
       idleUpdate();
-    } else {
+    } else if (state === 'playing') {
       update();
     }
     render();
@@ -625,10 +760,41 @@
   });
 
   document.addEventListener('keydown', (e) => {
+    if (e.code === 'KeyP' && !e.repeat) {
+      e.preventDefault();
+      if (state === 'playing' || state === 'paused') togglePause();
+      return;
+    }
+    if (e.code === 'Escape' && !e.repeat) {
+      e.preventDefault();
+      if (state === 'playing' || state === 'paused') togglePause();
+      return;
+    }
     if (e.code === 'Space' || e.code === 'ArrowUp') {
       e.preventDefault();
       flap();
     }
+  });
+
+  pauseBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    togglePause();
+  });
+
+  resumeBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (state === 'paused') togglePause();
+  });
+
+  diffButtons.forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (state !== 'ready') return;
+      const d = btn.getAttribute('data-diff');
+      if (!d || !DIFFICULTY[d]) return;
+      selectedDifficulty = d;
+      diffButtons.forEach((b) => b.classList.toggle('selected', b === btn));
+    });
   });
 
   retryBtn.addEventListener('click', (e) => {
