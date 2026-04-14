@@ -180,6 +180,41 @@
   .difficulty-select:focus { border-color: #38bdf8; }
   .difficulty-select:disabled { opacity: 0.4; cursor: not-allowed; }
 
+  .best-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .best-badge {
+    font-size: 0.9rem;
+    color: #fbbf24;
+    font-weight: 600;
+  }
+
+  .btn-reset-best {
+    background: none;
+    border: none;
+    color: #64748b;
+    font-size: 0.75rem;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 0;
+  }
+  .btn-reset-best:hover { color: #94a3b8; }
+
+  .new-best-tag {
+    display: none;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #fbbf24;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+  }
+  .new-best-tag.visible { display: block; }
+
   .result-banner {
     background: linear-gradient(135deg, rgba(74, 222, 128, 0.1), rgba(56, 189, 248, 0.1));
     border: 1px solid rgba(74, 222, 128, 0.3);
@@ -220,6 +255,11 @@
     </select>
   </div>
 
+  <div class="best-row">
+    <span class="best-badge" id="bestBadge">Best: —</span>
+    <button class="btn-reset-best" id="resetBestBtn">Reset</button>
+  </div>
+
   <div class="passage-box" id="passage"></div>
 
   <input
@@ -250,6 +290,7 @@
   </div>
 
   <div class="result-banner" id="resultBanner">
+    <div class="new-best-tag" id="newBestTag">New Best!</div>
     <div class="result-title">Round Complete!</div>
     <div class="result-stats">
       <div class="stat">
@@ -276,6 +317,7 @@
 <script src="js/passages.js"></script>
 <script src="js/difficulty.js"></script>
 <script src="js/accuracy.js"></script>
+<script src="js/scoreboard.js"></script>
 <script>
 (function () {
   var passage = getSelectedPassage();
@@ -293,12 +335,25 @@
   const accuracyEl = document.getElementById("accuracyDisplay");
   const finalAccuracyEl = document.getElementById("finalAccuracy");
 
+  var bestBadgeEl = document.getElementById("bestBadge");
+  var resetBestBtn = document.getElementById("resetBestBtn");
+  var newBestTag = document.getElementById("newBestTag");
+
   var accuracy = createAccuracyTracker();
   var prevInputLen = 0;
 
   let startTime = null;
   let timerInterval = null;
   let finished = false;
+
+  function refreshBestBadge() {
+    var best = getBest(getSelectedDifficulty());
+    if (best) {
+      bestBadgeEl.textContent = "Best: " + best.wpm + " WPM (" + best.accuracy + "%)";
+    } else {
+      bestBadgeEl.textContent = "Best: \u2014";
+    }
+  }
 
   function renderPassage(typed) {
     const chars = passage.split("");
@@ -355,7 +410,16 @@
     wpmEl.textContent = wpm;
     finalWpmEl.textContent = wpm;
     finalTimeEl.textContent = secs.toFixed(1);
-    finalAccuracyEl.textContent = accuracy.getAccuracy() + "%";
+    var accPct = accuracy.getAccuracy();
+    finalAccuracyEl.textContent = accPct + "%";
+
+    var isNewBest = saveIfBest(getSelectedDifficulty(), wpm, accPct);
+    if (isNewBest) {
+      newBestTag.classList.add("visible");
+    } else {
+      newBestTag.classList.remove("visible");
+    }
+    refreshBestBadge();
 
     resultBanner.classList.add("visible");
     startBtn.style.display = "none";
@@ -378,7 +442,9 @@
     startBtn.disabled = false;
     resetBtn.style.display = "none";
     difficultyEl.disabled = false;
+    newBestTag.classList.remove("visible");
     passage = getSelectedPassage();
+    refreshBestBadge();
     renderPassage("");
   }
 
@@ -425,11 +491,18 @@
       passage = getSelectedPassage();
       renderPassage("");
     }
+    refreshBestBadge();
+  });
+
+  resetBestBtn.addEventListener("click", function () {
+    resetBest(getSelectedDifficulty());
+    refreshBestBadge();
   });
 
   startBtn.addEventListener("click", startRound);
   resetBtn.addEventListener("click", resetRound);
 
+  refreshBestBadge();
   renderPassage("");
 })();
 </script>
