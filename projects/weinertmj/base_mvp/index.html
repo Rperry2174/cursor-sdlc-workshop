@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Commanders Jeopardy</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --burgundy:#773141;
+    --burgundy-dark:#5a2532;
+    --gold:#FFB612;
+    --gold-dim:#c89200;
+    --board-blue:#060CE9;
+    --board-blue-light:#1a1fd4;
+    --tile-blue:#1414a0;
+    --bg:#0a0a1a;
+    --white:#fff;
+    --green:#2ecc40;
+    --red:#e74c3c;
+  }
+  body{
+    background:var(--bg);
+    color:var(--white);
+    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+
+  /* ── Setup Screen ── */
+  #setup{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    min-height:100vh;width:100%;max-width:600px;padding:24px;gap:24px;
+  }
+  .logo-header{text-align:center;margin-bottom:8px}
+  .commanders-w{width:100px;height:100px;margin:0 auto 12px}
+  .commanders-w svg{width:100%;height:100%}
+  .logo-header h1{
+    font-size:32px;font-weight:800;color:var(--gold);
+    text-shadow:2px 2px 0 var(--burgundy-dark);letter-spacing:1px;
+  }
+  .logo-header p{color:rgba(255,255,255,.6);font-size:14px;margin-top:4px}
+  .setup-card{
+    background:var(--burgundy);border-radius:16px;padding:28px;width:100%;
+    box-shadow:0 8px 32px rgba(0,0,0,.4);
+  }
+  .setup-card h2{font-size:20px;margin-bottom:16px;color:var(--gold)}
+  .setup-card label{display:block;font-size:14px;color:rgba(255,255,255,.8);margin-bottom:4px;margin-top:12px}
+  .setup-card input{
+    width:100%;padding:10px 14px;border-radius:8px;border:2px solid transparent;
+    background:rgba(255,255,255,.12);color:var(--white);font-size:16px;
+    outline:none;transition:border .2s;
+  }
+  .setup-card input:focus{border-color:var(--gold)}
+  .setup-card input::placeholder{color:rgba(255,255,255,.35)}
+  .player-row{display:flex;align-items:center;gap:8px}
+  .player-row input{flex:1}
+  .btn-remove{
+    background:none;border:none;color:rgba(255,255,255,.4);font-size:22px;
+    cursor:pointer;padding:4px 8px;border-radius:6px;transition:color .2s;
+  }
+  .btn-remove:hover{color:var(--red)}
+  .setup-actions{display:flex;flex-direction:column;gap:10px;margin-top:20px}
+  .btn{
+    padding:14px 28px;border:none;border-radius:50px;font-size:16px;font-weight:700;
+    cursor:pointer;transition:transform .15s,box-shadow .15s;text-transform:uppercase;
+    letter-spacing:1px;
+  }
+  .btn:hover{transform:translateY(-2px)}
+  .btn:active{transform:translateY(0)}
+  .btn-gold{background:var(--gold);color:var(--burgundy-dark);box-shadow:0 4px 15px rgba(255,182,18,.3)}
+  .btn-outline{
+    background:transparent;color:var(--gold);border:2px solid var(--gold);
+    padding:10px 20px;font-size:14px;border-radius:50px;
+  }
+  .btn-outline:hover{background:rgba(255,182,18,.1)}
+
+  /* ── Game Screen ── */
+  #game{display:none;width:100%;max-width:960px;padding:16px 12px}
+
+  .game-header{
+    display:flex;align-items:center;justify-content:center;gap:12px;
+    margin-bottom:6px;flex-wrap:wrap;
+  }
+  .game-header .commanders-w{width:48px;height:48px;margin:0}
+  .game-header h1{font-size:24px;font-weight:800;color:var(--gold);text-shadow:1px 1px 0 var(--burgundy-dark)}
+  .round-indicator{
+    text-align:center;font-size:14px;color:rgba(255,255,255,.5);margin-bottom:12px;
+  }
+  .round-indicator span{color:var(--gold);font-weight:700}
+
+  /* Scoreboard */
+  .scoreboard{
+    display:flex;justify-content:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;
+  }
+  .player-score{
+    background:var(--burgundy);border-radius:12px;padding:10px 20px;min-width:130px;
+    text-align:center;transition:box-shadow .3s,transform .3s;position:relative;
+  }
+  .player-score.active{
+    box-shadow:0 0 0 3px var(--gold),0 0 20px rgba(255,182,18,.3);
+    transform:scale(1.05);
+  }
+  .player-score .name{font-size:13px;color:rgba(255,255,255,.7);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px}
+  .player-score .score{font-size:26px;font-weight:800;color:var(--gold)}
+  .player-score .turn-arrow{
+    position:absolute;top:-10px;left:50%;transform:translateX(-50%);
+    font-size:14px;color:var(--gold);opacity:0;transition:opacity .3s;
+  }
+  .player-score.active .turn-arrow{opacity:1}
+  .player-score .cpu-badge{
+    font-size:10px;background:rgba(255,255,255,.15);border-radius:4px;
+    padding:1px 6px;margin-left:4px;vertical-align:middle;
+  }
+
+  /* Board */
+  .board{
+    display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:16px;
+  }
+  .category-header{
+    background:var(--board-blue);border-radius:8px 8px 4px 4px;padding:12px 6px;
+    text-align:center;font-weight:800;font-size:13px;color:var(--white);
+    text-transform:uppercase;letter-spacing:.5px;line-height:1.2;
+    min-height:56px;display:flex;align-items:center;justify-content:center;
+    text-shadow:1px 1px 2px rgba(0,0,0,.5);
+  }
+  .tile{
+    background:var(--tile-blue);border-radius:6px;padding:14px 6px;text-align:center;
+    font-size:22px;font-weight:800;color:var(--gold);cursor:pointer;
+    transition:transform .15s,background .15s,box-shadow .15s;
+    min-height:56px;display:flex;align-items:center;justify-content:center;
+    text-shadow:1px 1px 2px rgba(0,0,0,.4);user-select:none;
+  }
+  .tile:hover:not(.used){
+    transform:scale(1.06);background:var(--board-blue-light);
+    box-shadow:0 4px 16px rgba(6,12,233,.4);
+  }
+  .tile.used{
+    background:rgba(20,20,60,.3);color:rgba(255,255,255,.15);
+    cursor:default;transform:none;
+  }
+
+  .finish-row{text-align:center;margin-top:8px}
+
+  /* ── Modal ── */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);
+    display:none;align-items:center;justify-content:center;z-index:100;padding:16px;
+  }
+  .modal-overlay.open{display:flex}
+  .modal{
+    background:var(--board-blue);border-radius:20px;padding:32px 28px;
+    max-width:540px;width:100%;box-shadow:0 12px 60px rgba(0,0,0,.6);
+    position:relative;text-align:center;
+  }
+  .modal-category{font-size:12px;text-transform:uppercase;letter-spacing:2px;color:var(--gold);margin-bottom:4px}
+  .modal-value{font-size:28px;font-weight:800;color:var(--gold);margin-bottom:16px}
+  .modal-question{font-size:20px;font-weight:600;line-height:1.4;margin-bottom:24px}
+  .modal-turn{font-size:13px;color:rgba(255,255,255,.6);margin-bottom:12px}
+  .answers{display:flex;flex-direction:column;gap:10px}
+  .answer-btn{
+    background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.2);
+    color:var(--white);padding:14px 18px;border-radius:12px;font-size:16px;
+    cursor:pointer;transition:background .15s,border-color .15s,transform .1s;
+    text-align:left;
+  }
+  .answer-btn:hover:not(.locked){background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.4);transform:scale(1.01)}
+  .answer-btn.correct{background:rgba(46,204,64,.25);border-color:var(--green);color:var(--green)}
+  .answer-btn.wrong{background:rgba(231,76,60,.2);border-color:var(--red);color:var(--red)}
+  .answer-btn.reveal{border-color:var(--green);color:var(--green)}
+  .answer-btn.locked{cursor:default;opacity:.85}
+  .modal-feedback{margin-top:16px;font-size:18px;font-weight:700;min-height:28px}
+
+  /* ── Round Transition ── */
+  .round-splash{
+    position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(6px);
+    display:none;align-items:center;justify-content:center;z-index:200;
+    flex-direction:column;gap:12px;text-align:center;
+  }
+  .round-splash.open{display:flex}
+  .round-splash h2{font-size:48px;font-weight:900;color:var(--gold);text-shadow:2px 3px 0 var(--burgundy-dark)}
+  .round-splash p{font-size:18px;color:rgba(255,255,255,.6)}
+
+  /* ── Results ── */
+  #results{
+    display:none;flex-direction:column;align-items:center;justify-content:center;
+    min-height:100vh;width:100%;max-width:600px;padding:24px;gap:20px;text-align:center;
+  }
+  .results-card{
+    background:var(--burgundy);border-radius:20px;padding:32px;width:100%;
+    box-shadow:0 8px 32px rgba(0,0,0,.4);
+  }
+  .results-card h2{font-size:28px;color:var(--gold);margin-bottom:20px}
+  .final-scores{display:flex;flex-direction:column;gap:12px;margin-bottom:20px}
+  .final-score-row{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:12px 16px;background:rgba(255,255,255,.08);border-radius:10px;
+  }
+  .final-score-row.winner{background:rgba(255,182,18,.15);border:2px solid var(--gold)}
+  .final-score-row .rank{font-size:20px;margin-right:10px}
+  .final-score-row .fname{font-size:18px;font-weight:600;flex:1;text-align:left}
+  .final-score-row .fscore{font-size:24px;font-weight:800;color:var(--gold)}
+  .winner-banner{font-size:22px;font-weight:800;color:var(--gold);margin-bottom:8px}
+
+  .cpu-thinking{
+    font-size:15px;color:rgba(255,255,255,.6);margin-top:12px;
+    animation:pulse 1s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+
+  @media(max-width:600px){
+    .board{gap:4px}
+    .category-header{font-size:11px;padding:8px 4px;min-height:44px}
+    .tile{font-size:16px;padding:10px 4px;min-height:44px}
+    .modal{padding:24px 18px}
+    .modal-question{font-size:17px}
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════ SETUP SCREEN ════════ -->
+<div id="setup">
+  <div class="logo-header">
+    <div class="commanders-w">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="48" fill="#773141" stroke="#FFB612" stroke-width="4"/>
+        <text x="50" y="68" text-anchor="middle" font-size="60" font-weight="900" fill="#FFB612" font-family="'Segoe UI',system-ui,sans-serif">W</text>
+      </svg>
+    </div>
+    <h1>Commanders Jeopardy</h1>
+    <p>Test your Washington Commanders knowledge!</p>
+  </div>
+  <div class="setup-card">
+    <h2>Players</h2>
+    <p style="font-size:13px;color:rgba(255,255,255,.5);margin-bottom:8px">1 player = you vs. Coach (CPU). Up to 4 players.</p>
+    <div id="playerInputs"></div>
+    <div class="setup-actions">
+      <button class="btn btn-outline" id="addPlayerBtn">+ Add Player</button>
+      <button class="btn btn-gold" id="startBtn">Start Game</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ GAME SCREEN ════════ -->
+<div id="game">
+  <div class="game-header">
+    <div class="commanders-w">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="48" fill="#773141" stroke="#FFB612" stroke-width="4"/>
+        <text x="50" y="68" text-anchor="middle" font-size="60" font-weight="900" fill="#FFB612" font-family="'Segoe UI',system-ui,sans-serif">W</text>
+      </svg>
+    </div>
+    <h1>Commanders Jeopardy</h1>
+  </div>
+  <div class="round-indicator">Round <span id="roundNum">1</span> of <span id="roundTotal">10</span></div>
+  <div class="scoreboard" id="scoreboard"></div>
+  <div class="board" id="board"></div>
+  <div class="finish-row">
+    <button class="btn btn-outline" id="finishBtn" style="display:none">Finish Game</button>
+  </div>
+</div>
+
+<!-- ════════ QUESTION MODAL ════════ -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-category" id="modalCategory"></div>
+    <div class="modal-value" id="modalValue"></div>
+    <div class="modal-turn" id="modalTurn"></div>
+    <div class="modal-question" id="modalQuestion"></div>
+    <div class="answers" id="modalAnswers"></div>
+    <div class="modal-feedback" id="modalFeedback"></div>
+    <div class="cpu-thinking" id="cpuThinking" style="display:none">Coach is thinking...</div>
+  </div>
+</div>
+
+<!-- ════════ ROUND SPLASH ════════ -->
+<div class="round-splash" id="roundSplash">
+  <h2 id="splashTitle">Round 2</h2>
+  <p id="splashSub">New board incoming...</p>
+</div>
+
+<!-- ════════ RESULTS SCREEN ════════ -->
+<div id="results">
+  <div class="logo-header">
+    <div class="commanders-w">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="48" fill="#773141" stroke="#FFB612" stroke-width="4"/>
+        <text x="50" y="68" text-anchor="middle" font-size="60" font-weight="900" fill="#FFB612" font-family="'Segoe UI',system-ui,sans-serif">W</text>
+      </svg>
+    </div>
+    <h1>Game Over!</h1>
+  </div>
+  <div class="results-card">
+    <div class="winner-banner" id="winnerBanner"></div>
+    <h2>Final Scores</h2>
+    <div class="final-scores" id="finalScores"></div>
+    <button class="btn btn-gold" id="playAgainBtn" style="margin-top:16px">Play Again</button>
+  </div>
+</div>
+
+<script>
+(function(){
+
+const CATEGORIES = [
+  "Franchise History",
+  "Legendary Players",
+  "Super Bowl Era",
+  "Modern Commanders",
+  "By the Numbers"
+];
+const VALUES = [100,200,300,400,500];
+const MAX_ROUNDS = 10;
+
+/*
+  QUESTION_POOL[category][valueIndex] = array of {q, a, c} objects
+  Each slot has 10+ questions so we can play 10 unique rounds.
+*/
+const QUESTION_POOL = {
+"Franchise History": [
+  [
+    {q:"In what year was the Washington franchise founded?",a:["1932","1940","1925","1950"],c:0},
+    {q:"The franchise played its first NFL season in which year?",a:["1932","1933","1930","1936"],c:0},
+    {q:"What league did the franchise originally join?",a:["NFL","AFL","AAFC","USFL"],c:0},
+    {q:"In what decade did the team move from Boston to Washington?",a:["1930s","1940s","1920s","1950s"],c:0},
+    {q:"The franchise is one of the oldest in the NFL. It was the ___th team to join the league.",a:["5th","3rd","8th","10th"],c:0},
+    {q:"Which U.S. president attended Washington home games and was a well-known fan in the 1960s?",a:["John F. Kennedy","Richard Nixon","Lyndon Johnson","Dwight Eisenhower"],c:0},
+    {q:"Washington's first home field in D.C. was which stadium?",a:["Griffith Stadium","RFK Stadium","FedEx Field","Fenway Park"],c:0},
+    {q:"The team's famous marching band was founded in what decade?",a:["1930s","1940s","1950s","1960s"],c:0},
+    {q:"Which division does Washington currently play in?",a:["NFC East","NFC South","AFC East","NFC North"],c:0},
+    {q:"Before the NFC East, Washington was part of which early NFL division?",a:["Eastern Division","Western Division","Coastal Division","Capitol Division"],c:0},
+  ],
+  [
+    {q:"What city did the team play in before moving to Washington, D.C.?",a:["Boston","New York","Philadelphia","Baltimore"],c:0},
+    {q:"Who was the franchise's founding owner?",a:["George Preston Marshall","Art Rooney","Tim Mara","Curly Lambeau"],c:0},
+    {q:"Washington moved from Boston to D.C. in which year?",a:["1937","1940","1935","1942"],c:0},
+    {q:"RFK Stadium opened for Washington in what year?",a:["1961","1957","1965","1970"],c:0},
+    {q:"Which owner moved the team from RFK Stadium to a new facility in Maryland?",a:["Jack Kent Cooke","Daniel Snyder","George Preston Marshall","Edward Bennett Williams"],c:0},
+    {q:"What was the team's original fight song called?",a:["Hail to the Redskins","Fight for Old DC","March of the Burgundy","Victory March"],c:0},
+    {q:"Washington was the last NFL team to integrate, finally doing so in which year?",a:["1962","1958","1965","1970"],c:0},
+    {q:"Which rival team shares a famous Thanksgiving Day rivalry with Washington?",a:["Dallas Cowboys","New York Giants","Philadelphia Eagles","Pittsburgh Steelers"],c:0},
+    {q:"The team temporarily used which name from 2020 to 2021?",a:["Washington Football Team","Washington Warriors","Washington Sentinels","Washington FC"],c:0},
+    {q:"Washington's all-time series record is most dominant against which NFC East rival?",a:["Arizona Cardinals","Dallas Cowboys","Philadelphia Eagles","New York Giants"],c:0},
+  ],
+  [
+    {q:"What was the original name of the franchise when it was founded in Boston?",a:["Boston Braves","Boston Patriots","Boston Red Legs","Boston Bulldogs"],c:0},
+    {q:"The team was renamed from the Boston Braves to what in 1933?",a:["Boston Redskins","Boston Indians","Boston Warriors","Boston Senators"],c:0},
+    {q:"George Preston Marshall was known for promoting what innovation in the NFL?",a:["The halftime show","The forward pass","Monday Night Football","The salary cap"],c:0},
+    {q:"The franchise won its first NFL Championship in which year?",a:["1937","1940","1942","1936"],c:0},
+    {q:"In the 1940 NFL Championship, Washington suffered a historic loss by what score?",a:["73-0","56-0","63-7","45-0"],c:0},
+    {q:"Who beat Washington 73-0 in the 1940 NFL Championship?",a:["Chicago Bears","Green Bay Packers","New York Giants","Detroit Lions"],c:0},
+    {q:"What color are Washington's traditional home jerseys?",a:["Burgundy","Red","Maroon","Crimson"],c:0},
+    {q:"Washington's rivalry with the Dallas Cowboys is often called what?",a:["The biggest rivalry in the NFC East","The Border War","The Capital Clash","The Beltway Battle"],c:0},
+    {q:"How many NFL Championship titles (pre-Super Bowl era) did Washington win?",a:["2","3","1","4"],c:0},
+    {q:"Which Washington owner was inducted into the Pro Football Hall of Fame?",a:["George Preston Marshall","Jack Kent Cooke","Daniel Snyder","Edward Bennett Williams"],c:0},
+  ],
+  [
+    {q:"Who was the longtime owner who purchased the team in 1969 and helped build the dynasty era?",a:["Jack Kent Cooke","George Preston Marshall","Daniel Snyder","Edward Bennett Williams"],c:0},
+    {q:"Edward Bennett Williams owned the team during which decade?",a:["1960s-1970s","1950s-1960s","1970s-1980s","1980s-1990s"],c:0},
+    {q:"Daniel Snyder purchased Washington in what year?",a:["1999","1995","2001","2003"],c:0},
+    {q:"In 2023, which group purchased the Commanders from Daniel Snyder?",a:["Josh Harris group","Jeff Bezos group","Magic Johnson group","Robert Kraft group"],c:0},
+    {q:"FedEx Field (now Northwest Stadium) is located in which Maryland city?",a:["Landover","Bethesda","College Park","Annapolis"],c:0},
+    {q:"Washington's proposed new stadium site is planned for which Virginia location?",a:["Woodbridge","Arlington","Tysons","Alexandria"],c:0},
+    {q:"Which coach led Washington to a 'perfect' replacement-player record during the 1987 strike?",a:["Joe Gibbs","George Allen","Richie Petitbon","Jack Pardee"],c:0},
+    {q:"George Allen's famous motto for his Washington teams was what?",a:["The future is now","Win or go home","Defense wins championships","Play like champions"],c:0},
+    {q:"Jack Kent Cooke Stadium was renamed to FedEx Field in what year?",a:["1999","1997","2000","2001"],c:0},
+    {q:"What was the seating capacity of RFK Stadium for Washington football games?",a:["~55,000","~45,000","~65,000","~75,000"],c:0},
+  ],
+  [
+    {q:"In what year did the franchise officially rebrand to the Washington Commanders?",a:["2022","2020","2021","2023"],c:0},
+    {q:"The Commanders' new logo features which letter?",a:["W","C","DC","WC"],c:0},
+    {q:"What are the official colors of the Washington Commanders?",a:["Burgundy and gold","Red and white","Navy and gold","Burgundy and black"],c:0},
+    {q:"During the 2020 rebrand transition, what placeholder name was used?",a:["Washington Football Team","Washington FC","Washington Gridiron","Washington Burgundy"],c:0},
+    {q:"How many name changes has the franchise undergone in its history?",a:["4","3","2","5"],c:0},
+    {q:"The Commanders' mascot is a character named what?",a:["Major Tuddy","Commander Carl","Captain DC","General Hog"],c:0},
+    {q:"Which conference does Washington compete in?",a:["NFC","AFC","Both","Neither"],c:0},
+    {q:"Washington has appeared in how many Super Bowls total?",a:["5","3","4","6"],c:0},
+    {q:"The team's current fight song was updated in which year?",a:["2022","2020","2021","2023"],c:0},
+    {q:"Which media market does Washington represent, ranked among the largest in the U.S.?",a:["Top 10","Top 5","Top 20","Top 15"],c:0},
+  ],
+],
+"Legendary Players": [
+  [
+    {q:"Which Hall of Fame quarterback led Washington to multiple Super Bowl victories?",a:["Joe Theismann","Sonny Jurgensen","Billy Kilmer","Mark Rypien"],c:0},
+    {q:"Sonny Jurgensen is in the Hall of Fame primarily for playing which position?",a:["Quarterback","Wide Receiver","Running Back","Linebacker"],c:0},
+    {q:"Which Washington legend held the NFL's all-time reception record when he retired?",a:["Art Monk","Charlie Taylor","Gary Clark","Bobby Mitchell"],c:0},
+    {q:"Bobby Mitchell was Washington's first African American player in what year?",a:["1962","1960","1965","1958"],c:0},
+    {q:"Charley Taylor was a Hall of Fame player at which position?",a:["Wide Receiver","Tight End","Running Back","Quarterback"],c:0},
+    {q:"Which Hall of Fame coach never had a losing season with Washington?",a:["Joe Gibbs","George Allen","Vince Lombardi","Otto Graham"],c:0},
+    {q:"Larry Brown won NFL MVP in 1972 playing which position for Washington?",a:["Running Back","Linebacker","Quarterback","Safety"],c:0},
+    {q:"Chris Hanburger was a 9-time Pro Bowl player at which position?",a:["Linebacker","Defensive End","Safety","Cornerback"],c:0},
+    {q:"Which Washington kicker holds the franchise record for career points scored?",a:["Mark Moseley","Chip Lohmiller","Dustin Hopkins","John Hall"],c:0},
+    {q:"Mark Moseley won NFL MVP in 1982 — the only kicker to ever win it. True or false?",a:["True","False","He was co-MVP","He won Offensive Player of the Year, not MVP"],c:0},
+  ],
+  [
+    {q:"Which receiver was known as 'The Possum' and played 14 seasons for Washington?",a:["Art Monk","Gary Clark","Charlie Taylor","Ricky Sanders"],c:0},
+    {q:"Gary Clark was part of which famous Washington receiving trio?",a:["The Posse","The Three Amigos","The Fun Bunch","Air Washington"],c:0},
+    {q:"Ricky Sanders set a Super Bowl record with how many receiving yards in Super Bowl XXII?",a:["193","180","210","165"],c:0},
+    {q:"Which Washington running back was called 'The Diesel'?",a:["John Riggins","Larry Brown","George Rogers","Stephen Davis"],c:0},
+    {q:"Clinton Portis played for Washington after being traded from which team?",a:["Denver Broncos","Miami Dolphins","Jacksonville Jaguars","Carolina Panthers"],c:0},
+    {q:"Santana Moss wore which jersey number for Washington?",a:["89","81","84","80"],c:0},
+    {q:"Chris Cooley played which position for Washington from 2004-2012?",a:["Tight End","Wide Receiver","Fullback","Linebacker"],c:0},
+    {q:"London Fletcher played how many seasons for Washington?",a:["6","8","4","10"],c:0},
+    {q:"LaVar Arrington was drafted by Washington in which round of the 2000 NFL Draft?",a:["1st round","2nd round","3rd round","4th round"],c:0},
+    {q:"Champ Bailey was traded from Washington to the Broncos for which running back?",a:["Clinton Portis","Mike Anderson","Terrell Davis","Tatum Bell"],c:0},
+  ],
+  [
+    {q:"Which dominant left tackle was nicknamed 'Hog' and anchored the offensive line in the 1980s?",a:["Joe Jacoby","Russ Grimm","Mark May","Jeff Bostic"],c:0},
+    {q:"The 'Hogs' was the nickname for which Washington position group?",a:["Offensive line","Defensive line","Linebackers","Secondary"],c:0},
+    {q:"Russ Grimm was inducted into the Pro Football Hall of Fame in what year?",a:["2010","2008","2012","2006"],c:0},
+    {q:"Jeff Bostic played center for Washington in how many Super Bowls?",a:["3","2","4","1"],c:0},
+    {q:"Dexter Manley was a dominant pass rusher who played which position?",a:["Defensive End","Linebacker","Defensive Tackle","Safety"],c:0},
+    {q:"Charles Mann recorded how many sacks in his Washington career?",a:["82","64","75","91"],c:0},
+    {q:"Dave Butz was one of the largest players of his era at which position?",a:["Defensive Tackle","Offensive Tackle","Defensive End","Guard"],c:0},
+    {q:"Which Washington linebacker was known for the 'Fun Bunch' end zone celebrations?",a:["Rich Milot","Neal Olkewicz","Monte Coleman","Brad Dusek"],c:0},
+    {q:"Monte Coleman holds the Washington record for most seasons played with how many?",a:["16","14","18","12"],c:0},
+    {q:"Ken Harvey was a Pro Bowl player at which position for Washington in the 1990s?",a:["Linebacker","Defensive End","Safety","Cornerback"],c:0},
+  ],
+  [
+    {q:"Sammy Baugh, one of the franchise's earliest stars, was known by what nickname?",a:["Slingin' Sammy","Slippery Sam","The Rifle","Bullet Baugh"],c:0},
+    {q:"Sammy Baugh led the NFL in passing, punting, and interceptions in the same season. What year?",a:["1943","1940","1945","1947"],c:0},
+    {q:"Which Washington great was the NFL's first 1,000-yard receiver?",a:["Charley Taylor","Bobby Mitchell","Art Monk","Gary Clark"],c:0},
+    {q:"Pat Fischer was a standout at which position during the 1970s?",a:["Cornerback","Safety","Linebacker","Wide Receiver"],c:0},
+    {q:"Len Hauss played which position for Washington for 14 seasons?",a:["Center","Guard","Tackle","Tight End"],c:0},
+    {q:"Which Washington quarterback threw for 3,000+ yards in 1967, a huge total for that era?",a:["Sonny Jurgensen","Billy Kilmer","Joe Theismann","Sammy Baugh"],c:0},
+    {q:"Billy Kilmer was known for his unorthodox throwing style and which nickname?",a:["Whiskey","Scrambler","The Lefty","Old Bones"],c:0},
+    {q:"Brig Owens set a franchise record with how many interceptions in one season?",a:["8","10","6","12"],c:0},
+    {q:"Which Washington running back rushed for 1,347 yards in 1970?",a:["Larry Brown","Charley Harraway","Henry Dyer","Bob Brunet"],c:0},
+    {q:"Vince Lombardi coached Washington for how many seasons before his passing?",a:["1","2","3","He never coached Washington"],c:0},
+  ],
+  [
+    {q:"Darrell Green played his entire 20-year career with Washington and was known for his elite what?",a:["Speed","Tackling","Ball-hawking","Run stuffing"],c:0},
+    {q:"Which Washington safety's number 21 was retired after his tragic death in 2007?",a:["Sean Taylor","Darrell Green","Todd Bowles","Matt Bowen"],c:0},
+    {q:"Sean Taylor was drafted by Washington in which year?",a:["2004","2003","2005","2006"],c:0},
+    {q:"Ken Houston was acquired by Washington in a trade with which team?",a:["Houston Oilers","Pittsburgh Steelers","Dallas Cowboys","Miami Dolphins"],c:0},
+    {q:"Paul Krause began his career with Washington before starring for which team?",a:["Minnesota Vikings","Green Bay Packers","Chicago Bears","Detroit Lions"],c:0},
+    {q:"Darrell Green won the NFL's Fastest Man competition how many times?",a:["4","2","6","3"],c:0},
+    {q:"Which Washington cornerback had 54 career interceptions?",a:["Darrell Green","Brig Owens","Pat Fischer","Champ Bailey"],c:0},
+    {q:"Ryan Kerrigan holds the franchise sack record. How many career sacks did he record?",a:["95.5","90","88","101"],c:0},
+    {q:"Trent Williams was a dominant left tackle for Washington and made how many Pro Bowls there?",a:["7","5","8","6"],c:0},
+    {q:"Which kicker hit the longest field goal in franchise history at 59 yards?",a:["Dustin Hopkins","Mark Moseley","Chip Lohmiller","Graham Gano"],c:0},
+  ],
+],
+"Super Bowl Era": [
+  [
+    {q:"How many Super Bowls has Washington won?",a:["3","2","4","1"],c:0},
+    {q:"Washington won its first Super Bowl after the ____ season.",a:["1982","1983","1981","1984"],c:0},
+    {q:"Which Super Bowl was Washington's first victory?",a:["Super Bowl XVII","Super Bowl XVIII","Super Bowl XXII","Super Bowl XVI"],c:0},
+    {q:"Washington's Super Bowl era dynasty spanned which decade?",a:["1980s","1970s","1990s","2000s"],c:0},
+    {q:"In how many of their 5 Super Bowl appearances did Washington win?",a:["3","2","4","5"],c:0},
+    {q:"Washington lost Super Bowl VII to which undefeated team?",a:["Miami Dolphins","Pittsburgh Steelers","Dallas Cowboys","Oakland Raiders"],c:0},
+    {q:"Washington lost Super Bowl XVIII to which team?",a:["Los Angeles Raiders","San Francisco 49ers","Denver Broncos","Dallas Cowboys"],c:0},
+    {q:"The 1982 Washington team went on a playoff run despite a season shortened by what?",a:["Player strike","Lockout","Weather","Stadium issues"],c:0},
+    {q:"Washington won Super Bowls after the 1982, 1987, and ____ seasons.",a:["1991","1990","1992","1989"],c:0},
+    {q:"Which NFC Championship game did Washington win before Super Bowl XXVI?",a:["vs. Detroit Lions","vs. Dallas Cowboys","vs. San Francisco 49ers","vs. Chicago Bears"],c:0},
+  ],
+  [
+    {q:"Who coached Washington to all three Super Bowl victories?",a:["Joe Gibbs","George Allen","Norv Turner","Jack Pardee"],c:0},
+    {q:"Joe Gibbs used a different starting QB for each Super Bowl win. True or false?",a:["True","False","He used the same QB twice","He only coached two Super Bowls"],c:0},
+    {q:"Which three QBs started Washington's three Super Bowl wins?",a:["Theismann, Williams, Rypien","Theismann, Kilmer, Williams","Jurgensen, Theismann, Williams","Kilmer, Theismann, Rypien"],c:0},
+    {q:"George Allen coached Washington to which Super Bowl?",a:["Super Bowl VII","Super Bowl XVII","Super Bowl XXII","Super Bowl XII"],c:0},
+    {q:"Joe Gibbs retired from coaching the first time in which year?",a:["1993","1992","1994","1991"],c:0},
+    {q:"Joe Gibbs returned to coach Washington for a second stint starting in which year?",a:["2004","2003","2005","2002"],c:0},
+    {q:"During his second stint, Gibbs' best season record was what?",a:["10-6","9-7","8-8","11-5"],c:0},
+    {q:"Joe Gibbs is also famous for owning a team in which racing series?",a:["NASCAR","IndyCar","Formula 1","NHRA"],c:0},
+    {q:"Gibbs was inducted into the Pro Football Hall of Fame in which year?",a:["1996","1998","2000","1994"],c:0},
+    {q:"How many career wins did Joe Gibbs accumulate as Washington's head coach?",a:["171","154","140","185"],c:0},
+  ],
+  [
+    {q:"In Super Bowl XXII, Doug Williams threw how many TDs?",a:["4","3","5","2"],c:0},
+    {q:"Doug Williams threw for how many yards in Super Bowl XXII?",a:["340","292","280","310"],c:0},
+    {q:"Washington scored how many points in the 2nd quarter of Super Bowl XXII?",a:["35","28","42","21"],c:0},
+    {q:"Who did Washington defeat in Super Bowl XXII?",a:["Denver Broncos","Miami Dolphins","Buffalo Bills","Cleveland Browns"],c:0},
+    {q:"Timmy Smith rushed for a Super Bowl record in XXII. How many yards?",a:["204","180","195","165"],c:0},
+    {q:"Doug Williams became the first Black QB to start and win a Super Bowl in what year?",a:["1988","1987","1986","1989"],c:0},
+    {q:"Who was the Denver Broncos QB that Washington defeated in Super Bowl XXII?",a:["John Elway","Craig Morton","Gary Kubiak","Steve DeBerg"],c:0},
+    {q:"The halftime score of Super Bowl XXII was tied at what?",a:["10-10","7-7","14-10","10-7"],c:0},
+    {q:"Ricky Sanders caught how many passes in Super Bowl XXII?",a:["9","7","11","5"],c:0},
+    {q:"Super Bowl XXII was played in which city?",a:["San Diego","Miami","New Orleans","Pasadena"],c:0},
+  ],
+  [
+    {q:"Which team did Washington defeat in Super Bowl XVII?",a:["Miami Dolphins","Denver Broncos","Buffalo Bills","Dallas Cowboys"],c:0},
+    {q:"John Riggins' iconic 43-yard TD run in Super Bowl XVII came on which play?",a:["4th and 1","3rd and 2","2nd and goal","4th and inches"],c:0},
+    {q:"The final score of Super Bowl XVII was what?",a:["27-17","24-17","27-21","31-17"],c:0},
+    {q:"Super Bowl XVII was played in which stadium?",a:["Rose Bowl","Orange Bowl","Superdome","Tampa Stadium"],c:0},
+    {q:"Washington trailed Miami at halftime in Super Bowl XVII by what score?",a:["17-10","14-7","17-13","14-10"],c:0},
+    {q:"Which Washington kicker made key field goals in Super Bowl XVII?",a:["Mark Moseley","Chip Lohmiller","Jeff Hayes","Danny Knight"],c:0},
+    {q:"The 1982 Washington team's regular season record was what in the strike-shortened season?",a:["8-1","7-2","9-0","6-3"],c:0},
+    {q:"Which Miami Dolphins QB did Washington face in Super Bowl XVII?",a:["David Woodley","Dan Marino","Bob Griese","Don Strock"],c:0},
+    {q:"Riggins was named Super Bowl XVII MVP after rushing for how many yards?",a:["166","140","181","124"],c:0},
+    {q:"Washington's dominant running game in Super Bowl XVII was aided by which blocking formation?",a:["Counter Trey","Power I","Sweep Right","Iso Lead"],c:0},
+  ],
+  [
+    {q:"Who was named MVP of Super Bowl XXVI?",a:["Mark Rypien","Doug Williams","Joe Theismann","John Riggins"],c:0},
+    {q:"Washington defeated which team in Super Bowl XXVI?",a:["Buffalo Bills","Dallas Cowboys","Denver Broncos","Miami Dolphins"],c:0},
+    {q:"The final score of Super Bowl XXVI was what?",a:["37-24","34-24","37-21","31-24"],c:0},
+    {q:"Mark Rypien threw how many touchdowns in Super Bowl XXVI?",a:["2","3","4","1"],c:0},
+    {q:"Super Bowl XXVI was played in which venue?",a:["Metrodome","Rose Bowl","Superdome","Tampa Stadium"],c:0},
+    {q:"Which Washington receiver caught a 30-yard TD in Super Bowl XXVI?",a:["Gary Clark","Art Monk","Ricky Sanders","Earnest Byner"],c:0},
+    {q:"The 1991 Washington team's regular season record was what?",a:["14-2","12-4","15-1","13-3"],c:0},
+    {q:"Which defensive player had 2 interceptions in Super Bowl XXVI?",a:["Kurt Gouveia","Brad Edwards","Darrell Green","Danny Copeland"],c:0},
+    {q:"The Bills' QB in Super Bowl XXVI was who?",a:["Jim Kelly","Frank Reich","Doug Flutie","Drew Bledsoe"],c:0},
+    {q:"The 1991 Commanders scored how many points in the regular season?",a:["485","465","500","450"],c:0},
+  ],
+],
+"Modern Commanders": [
+  [
+    {q:"What is the name of Washington's home stadium as of 2024?",a:["Northwest Stadium","FedEx Field","RFK Stadium","Commanders Field"],c:0},
+    {q:"The stadium was renamed from FedEx Field to Northwest Stadium in which year?",a:["2025","2024","2023","2026"],c:0},
+    {q:"Washington's current home stadium is in which state?",a:["Maryland","Virginia","Washington D.C.","Pennsylvania"],c:0},
+    {q:"Who is the current majority owner of the Washington Commanders?",a:["Josh Harris","Daniel Snyder","Magic Johnson","Jeff Bezos"],c:0},
+    {q:"The Commanders' practice facility is located in which Virginia city?",a:["Ashburn","Leesburg","Fairfax","Reston"],c:0},
+    {q:"What is the name of Washington's training facility?",a:["Commanders Park","Redskins Park","Inova Sports Performance Center","FedEx Practice Fields"],c:0},
+    {q:"Washington's NFC East division rivals include all EXCEPT which team?",a:["Carolina Panthers","Dallas Cowboys","New York Giants","Philadelphia Eagles"],c:0},
+    {q:"The Commanders' 2024 regular season home opener was played against which team?",a:["New York Giants","Dallas Cowboys","Philadelphia Eagles","Tampa Bay Buccaneers"],c:0},
+    {q:"Which radio station is the flagship for Commanders game broadcasts?",a:["WJFK","WTOP","WMAL","ESPN Radio"],c:0},
+    {q:"The Commanders' cheerleading squad is called what?",a:["Command Force","First Ladies of Football","Commanderettes","Burgundy & Gold Dancers"],c:0},
+  ],
+  [
+    {q:"Which defensive end wore #99 and was drafted 2nd overall by Washington in 2020?",a:["Chase Young","Montez Sweat","Jonathan Allen","Daron Payne"],c:0},
+    {q:"Jonathan Allen plays which position for the Commanders?",a:["Defensive Tackle","Defensive End","Linebacker","Safety"],c:0},
+    {q:"Daron Payne was drafted by Washington out of which college?",a:["Alabama","Clemson","Ohio State","Georgia"],c:0},
+    {q:"Montez Sweat was acquired by Washington via trade from which team?",a:["Chicago Bears","Detroit Lions","Green Bay Packers","Minnesota Vikings"],c:0},
+    {q:"Which Washington linebacker wore #56 and was a team captain from 2020-2023?",a:["Cole Holcomb","Jon Bostic","Thomas Davis","Shaun Dion Hamilton"],c:0},
+    {q:"Bobby Wagner signed with Washington as a free agent in which year?",a:["2024","2023","2025","2022"],c:0},
+    {q:"Kam Curl plays which position for the Commanders?",a:["Safety","Cornerback","Linebacker","Defensive End"],c:0},
+    {q:"Emmanuel Forbes was drafted by Washington in 2023 from which school?",a:["Mississippi State","Alabama","LSU","Auburn"],c:0},
+    {q:"Washington's defensive coordinator in 2024 was who?",a:["Joe Whitt Jr.","Jack Del Rio","Ron Rivera","Jeff Hafley"],c:0},
+    {q:"Which Commanders pass rusher recorded double-digit sacks in the 2024 season?",a:["Dorance Armstrong","Chase Young","Montez Sweat","Clelin Ferrell"],c:0},
+  ],
+  [
+    {q:"Which quarterback did Washington select 2nd overall in the 2024 NFL Draft?",a:["Jayden Daniels","Drake Maye","Caleb Williams","Bo Nix"],c:0},
+    {q:"Jayden Daniels won the Heisman Trophy at which university?",a:["LSU","Arizona State","Alabama","Oregon"],c:0},
+    {q:"Before the 2024 draft, who was Washington's starting QB in 2023?",a:["Sam Howell","Taylor Heinicke","Carson Wentz","Jacoby Brissett"],c:0},
+    {q:"Sam Howell was drafted by Washington in which round?",a:["5th round","3rd round","4th round","6th round"],c:0},
+    {q:"Taylor Heinicke became a fan favorite after a gutsy playoff performance against which team?",a:["Tampa Bay Buccaneers","Dallas Cowboys","Green Bay Packers","San Francisco 49ers"],c:0},
+    {q:"Carson Wentz started for Washington during which season?",a:["2022","2021","2023","2020"],c:0},
+    {q:"Alex Smith made a remarkable comeback with Washington after a devastating injury to which body part?",a:["Leg","Knee","Shoulder","Ankle"],c:0},
+    {q:"Kirk Cousins played for Washington and was known for which famous catchphrase?",a:["You like that!","Let's ride!","Omaha!","Can't stop us!"],c:0},
+    {q:"Robert Griffin III (RG3) won Offensive Rookie of the Year with Washington in which season?",a:["2012","2013","2011","2014"],c:0},
+    {q:"RG3 was drafted with the 2nd overall pick in 2012 from which university?",a:["Baylor","Texas A&M","Oklahoma","TCU"],c:0},
+  ],
+  [
+    {q:"Who became the head coach of the Commanders in 2024?",a:["Dan Quinn","Ron Rivera","Jack Del Rio","Eric Bieniemy"],c:0},
+    {q:"Ron Rivera was the Commanders' head coach from 2020 to which year?",a:["2023","2022","2024","2021"],c:0},
+    {q:"Dan Quinn previously served as head coach of which NFL team?",a:["Atlanta Falcons","Dallas Cowboys","Seattle Seahawks","New York Jets"],c:0},
+    {q:"Ron Rivera coached Washington to a division title in which season?",a:["2020","2021","2022","2019"],c:0},
+    {q:"Washington's 2020 division-winning record was what?",a:["7-9","8-8","9-7","6-10"],c:0},
+    {q:"Which offensive coordinator did Dan Quinn bring to Washington?",a:["Kliff Kingsbury","Shane Steichen","Brian Johnson","Todd Monken"],c:0},
+    {q:"Jay Gruden coached Washington from 2014 to which year?",a:["2019","2018","2020","2017"],c:0},
+    {q:"Mike Shanahan coached Washington from 2010 to what year?",a:["2013","2012","2014","2011"],c:0},
+    {q:"Which interim head coach led Washington after Jay Gruden's firing in 2019?",a:["Bill Callahan","Kevin O'Connell","Chris Richard","Rob Ryan"],c:0},
+    {q:"Dan Quinn's defensive background is primarily in which scheme?",a:["4-3","3-4","Nickel","46 Defense"],c:0},
+  ],
+  [
+    {q:"Terry McLaurin was drafted by Washington from which university?",a:["Ohio State","Michigan","Penn State","Alabama"],c:0},
+    {q:"Terry McLaurin's nickname is what?",a:["Scary Terry","Flash","The Ghost","T-Mac"],c:0},
+    {q:"Jahan Dotson was drafted by Washington in which round of the 2022 draft?",a:["1st round","2nd round","3rd round","4th round"],c:0},
+    {q:"Which Washington tight end caught 4 TDs as a rookie in 2024?",a:["Ben Sinnott","Cole Turner","John Bates","Armani Rogers"],c:0},
+    {q:"Brian Robinson Jr. plays which position for the Commanders?",a:["Running Back","Wide Receiver","Tight End","Fullback"],c:0},
+    {q:"Brian Robinson Jr. was drafted out of which college?",a:["Alabama","Georgia","Ohio State","Clemson"],c:0},
+    {q:"Which Washington rookie WR from Texas made an impact in 2024?",a:["Luke McCaffrey","Dyami Brown","Dax Milne","Jahan Dotson"],c:0},
+    {q:"Austin Ekeler signed with Washington as a free agent from which team?",a:["Los Angeles Chargers","Denver Broncos","New England Patriots","Las Vegas Raiders"],c:0},
+    {q:"Zach Ertz joined Washington in 2023 having previously starred for which team?",a:["Philadelphia Eagles","Arizona Cardinals","Detroit Lions","Minnesota Vikings"],c:0},
+    {q:"Which offensive lineman was Washington's 2023 first-round draft pick?",a:["Jaxon Smith-Njigba was not — it was no OL in round 1","Andrew Wylie","Sam Cosmi","Charles Leno Jr."],c:0},
+  ],
+],
+"By the Numbers": [
+  [
+    {q:"What jersey number did Sean Taylor wear?",a:["21","24","36","20"],c:0},
+    {q:"What number did Art Monk wear?",a:["81","80","84","89"],c:0},
+    {q:"Darrell Green wore which jersey number?",a:["28","24","21","20"],c:0},
+    {q:"John Riggins' famous jersey number was what?",a:["44","34","32","42"],c:0},
+    {q:"Joe Theismann wore which number?",a:["7","12","14","9"],c:0},
+    {q:"Sonny Jurgensen's jersey number was what?",a:["9","7","12","14"],c:0},
+    {q:"Doug Williams wore which number in Super Bowl XXII?",a:["17","12","7","9"],c:0},
+    {q:"Sammy Baugh's retired number is what?",a:["33","7","44","21"],c:0},
+    {q:"How many jersey numbers has Washington officially retired?",a:["1","3","5","0"],c:0},
+    {q:"Terry McLaurin wears which jersey number?",a:["17","1","11","7"],c:0},
+  ],
+  [
+    {q:"How many consecutive seasons did Darrell Green play for Washington?",a:["20","18","16","15"],c:0},
+    {q:"Art Monk played how many seasons for Washington?",a:["14","12","16","10"],c:0},
+    {q:"Joe Gibbs coached Washington for how many total seasons across both stints?",a:["16","12","14","10"],c:0},
+    {q:"John Riggins rushed for how many career yards with Washington?",a:["7,472","6,800","8,100","5,900"],c:0},
+    {q:"The franchise has played in how many decades of NFL football?",a:["10","9","8","7"],c:0},
+    {q:"Washington's all-time win total entering 2024 was approximately how many?",a:["~620","~580","~650","~500"],c:0},
+    {q:"How many Hall of Famers have primarily played for Washington?",a:["12","8","15","6"],c:0},
+    {q:"George Allen's career record with Washington was above .500. True or false?",a:["True","False","Exactly .500","He had a losing record"],c:0},
+    {q:"The Hogs offensive line blocked for how many different Super Bowl-winning running backs?",a:["3","2","4","1"],c:0},
+    {q:"Washington has won the NFC East division title how many times (through 2024)?",a:["15","12","18","10"],c:0},
+  ],
+  [
+    {q:"What was the team's win total in their 2024 regular season?",a:["12","10","11","9"],c:0},
+    {q:"Washington made the playoffs in 2024 as which seed?",a:["6th","5th","7th","4th"],c:0},
+    {q:"Jayden Daniels threw how many passing TDs in his 2024 rookie season?",a:["25","22","30","18"],c:0},
+    {q:"How many wins did Washington have in the 2023 season under Ron Rivera?",a:["4","5","6","3"],c:0},
+    {q:"Washington's 2020 playoff appearance ended with a loss to which team?",a:["Tampa Bay Buccaneers","Green Bay Packers","Seattle Seahawks","Los Angeles Rams"],c:0},
+    {q:"In 2012, RG3's rookie year, Washington finished with how many wins?",a:["10","9","11","8"],c:0},
+    {q:"Washington's last playoff win before 2024 came in which year?",a:["2005","2007","2015","2012"],c:0},
+    {q:"How many consecutive losing seasons did Washington have from 2017-2019?",a:["3","2","4","1"],c:0},
+    {q:"Washington's point differential in their 12-5 2024 season was approximately what?",a:["+82","+55","+110","+40"],c:0},
+    {q:"Jayden Daniels' 2024 passer rating was approximately what?",a:["100.4","95.2","108.6","92.1"],c:0},
+  ],
+  [
+    {q:"John Riggins rushed for how many yards in Super Bowl XVII?",a:["166","140","181","124"],c:0},
+    {q:"Timmy Smith set the Super Bowl rushing record in XXII with how many yards?",a:["204","180","195","165"],c:0},
+    {q:"Mark Rypien threw for how many yards in Super Bowl XXVI?",a:["292","280","310","265"],c:0},
+    {q:"Doug Williams threw for how many yards in the 2nd quarter alone of Super Bowl XXII?",a:["228","195","180","250"],c:0},
+    {q:"Washington's largest margin of victory in a Super Bowl was how many points?",a:["32 (Super Bowl XXII)","13 (Super Bowl XXVI)","10 (Super Bowl XVII)","24 (Super Bowl XXII)"],c:0},
+    {q:"How many total points did Washington score across their 3 Super Bowl wins?",a:["101","92","106","88"],c:0},
+    {q:"The 1991 team's point differential (regular season) was approximately what?",a:["+230","+185","+200","+155"],c:0},
+    {q:"Art Monk held the NFL career reception record with how many catches when he retired?",a:["940","888","900","820"],c:0},
+    {q:"Darrell Green ran the 40-yard dash at the NFL Combine in approximately what time?",a:["4.43 seconds","4.33 seconds","4.50 seconds","4.28 seconds"],c:0},
+    {q:"Mark Moseley's 1982 MVP season saw him convert what percentage of field goals?",a:["95.2%","89.5%","100%","92.3%"],c:0},
+  ],
+  [
+    {q:"In the 1983 season, Washington scored how many points?",a:["541","500","520","480"],c:0},
+    {q:"Washington's largest comeback in franchise history was how many points?",a:["28","24","21","31"],c:0},
+    {q:"FedEx Field's seating capacity was approximately what?",a:["82,000","90,000","75,000","68,000"],c:0},
+    {q:"The longest field goal in Commanders history is how many yards?",a:["59","56","62","54"],c:0},
+    {q:"Washington's single-game rushing record is how many yards?",a:["296","280","310","265"],c:0},
+    {q:"How many 4,000-yard passing seasons have Washington QBs had?",a:["3","5","1","7"],c:0},
+    {q:"Clinton Portis rushed for how many career yards with Washington?",a:["6,824","7,100","5,900","6,200"],c:0},
+    {q:"The longest play in franchise history is a rush/reception of how many yards?",a:["99","97","95","90"],c:0},
+    {q:"Washington's franchise record for sacks in a season is how many?",a:["66","58","52","61"],c:0},
+    {q:"How many 1,000-yard rushers has Washington had in franchise history?",a:["12","8","15","6"],c:0},
+  ],
+],
+};
+
+/* ══════════════════════
+   GAME STATE
+   ══════════════════════ */
+let players = [];
+let currentPlayerIdx = 0;
+let usedTiles = new Set();
+const TOTAL_TILES = 25;
+let activeQ = null;
+let currentRound = 1;
+let roundBoard = {};
+
+function shuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+
+function buildRoundBoard(){
+  roundBoard={};
+  CATEGORIES.forEach((cat,ci)=>{
+    roundBoard[cat]=[];
+    VALUES.forEach((v,vi)=>{
+      const pool=QUESTION_POOL[cat][vi];
+      const pick=pool[Math.floor(Math.random()*pool.length)];
+      roundBoard[cat].push({v,...pick});
+    });
+  });
+}
+
+/* ══════════════════════
+   SETUP
+   ══════════════════════ */
+const setupEl = document.getElementById('setup');
+const gameEl = document.getElementById('game');
+const resultsEl = document.getElementById('results');
+const playerInputsEl = document.getElementById('playerInputs');
+
+function getInputNames(){
+  return Array.from(playerInputsEl.querySelectorAll('.player-input')).map(i=>i.value.trim());
+}
+
+function rebuildInputs(names){
+  playerInputsEl.textContent='';
+  const count=Math.max(names.length,1);
+  for(let i=0;i<count;i++){
+    const label=document.createElement('label');
+    label.textContent='Player '+(i+1);
+    const row=document.createElement('div');
+    row.className='player-row';
+    const input=document.createElement('input');
+    input.type='text';input.placeholder='Enter name...';input.value=names[i]||'';
+    input.className='player-input';
+    row.appendChild(input);
+    if(count>1){
+      const rm=document.createElement('button');rm.className='btn-remove';rm.textContent='×';
+      const idx=i;rm.addEventListener('click',()=>{const n=getInputNames();n.splice(idx,1);rebuildInputs(n);});
+      row.appendChild(rm);
+    }
+    const w=document.createElement('div');w.style.marginBottom='4px';
+    w.appendChild(label);w.appendChild(row);
+    playerInputsEl.appendChild(w);
+  }
+}
+
+document.getElementById('addPlayerBtn').addEventListener('click',()=>{
+  const n=getInputNames();if(n.length>=4)return;n.push('');rebuildInputs(n);
+});
+
+document.getElementById('startBtn').addEventListener('click',()=>{
+  let names=getInputNames().filter(n=>n.length>0);
+  if(!names.length) names=['Player 1'];
+  players=names.map(n=>({name:n,score:0,isCPU:false}));
+  if(players.length===1) players.push({name:'Coach',score:0,isCPU:true});
+  currentPlayerIdx=0;
+  currentRound=1;
+  startRound();
+});
+
+rebuildInputs(['']);
+
+/* ══════════════════════
+   ROUND / GAME
+   ══════════════════════ */
+function startRound(){
+  usedTiles=new Set();
+  buildRoundBoard();
+  setupEl.style.display='none';
+  resultsEl.style.display='none';
+  gameEl.style.display='block';
+  document.getElementById('roundNum').textContent=currentRound;
+  document.getElementById('roundTotal').textContent=MAX_ROUNDS;
+  renderScoreboard();
+  renderBoard();
+  updateFinishBtn();
+  if(players[currentPlayerIdx].isCPU) scheduleCPUTurn();
+}
+
+function showRoundSplash(cb){
+  const splash=document.getElementById('roundSplash');
+  document.getElementById('splashTitle').textContent='Round '+currentRound;
+  document.getElementById('splashSub').textContent='New board — let\'s go!';
+  splash.classList.add('open');
+  setTimeout(()=>{splash.classList.remove('open');cb();},1800);
+}
+
+function renderScoreboard(){
+  const sb=document.getElementById('scoreboard');
+  sb.textContent='';
+  players.forEach((p,i)=>{
+    const div=document.createElement('div');
+    div.className='player-score'+(i===currentPlayerIdx?' active':'');
+    div.id='pscore-'+i;
+    const arrow=document.createElement('div');arrow.className='turn-arrow';arrow.textContent='▼';
+    const nameEl=document.createElement('div');nameEl.className='name';nameEl.textContent=p.name;
+    if(p.isCPU){const b=document.createElement('span');b.className='cpu-badge';b.textContent='CPU';nameEl.appendChild(b);}
+    const scoreEl=document.createElement('div');scoreEl.className='score';scoreEl.textContent='$'+p.score;
+    div.appendChild(arrow);div.appendChild(nameEl);div.appendChild(scoreEl);
+    sb.appendChild(div);
+  });
+}
+
+function updateScoreboard(){
+  players.forEach((p,i)=>{
+    const el=document.getElementById('pscore-'+i);if(!el)return;
+    el.className='player-score'+(i===currentPlayerIdx?' active':'');
+    el.querySelector('.score').textContent='$'+p.score;
+  });
+}
+
+function renderBoard(){
+  const board=document.getElementById('board');
+  board.textContent='';
+  CATEGORIES.forEach(cat=>{
+    const hdr=document.createElement('div');hdr.className='category-header';hdr.textContent=cat;
+    board.appendChild(hdr);
+  });
+  for(let vi=0;vi<5;vi++){
+    CATEGORIES.forEach(cat=>{
+      const q=roundBoard[cat][vi];
+      const key=cat+'|'+q.v;
+      const tile=document.createElement('div');
+      tile.className='tile'+(usedTiles.has(key)?' used':'');
+      tile.textContent=usedTiles.has(key)?'':'$'+q.v;
+      if(!usedTiles.has(key)) tile.addEventListener('click',()=>openQuestion(cat,vi));
+      board.appendChild(tile);
+    });
+  }
+}
+
+function updateFinishBtn(){
+  document.getElementById('finishBtn').style.display=usedTiles.size>0?'inline-block':'none';
+}
+
+document.getElementById('finishBtn').addEventListener('click',endRoundOrGame);
+
+/* ══════════════════════
+   QUESTION MODAL
+   ══════════════════════ */
+function openQuestion(cat,vi){
+  if(players[currentPlayerIdx].isCPU && !activeCPUTurn) return;
+  const q=roundBoard[cat][vi];
+  const key=cat+'|'+q.v;
+  if(usedTiles.has(key)) return;
+  activeQ={cat,vi,q,key};
+
+  document.getElementById('modalCategory').textContent=cat;
+  document.getElementById('modalValue').textContent='$'+q.v;
+  document.getElementById('modalTurn').textContent=players[currentPlayerIdx].name+"'s turn";
+  document.getElementById('modalQuestion').textContent=q.q;
+  document.getElementById('modalFeedback').textContent='';
+  document.getElementById('cpuThinking').style.display='none';
+
+  const answersEl=document.getElementById('modalAnswers');
+  answersEl.textContent='';
+  q.a.forEach((ans,ai)=>{
+    const btn=document.createElement('button');btn.className='answer-btn';btn.textContent=ans;
+    btn.addEventListener('click',()=>handleAnswer(ai,btn));
+    answersEl.appendChild(btn);
+  });
+
+  document.getElementById('modalOverlay').classList.add('open');
+  if(players[currentPlayerIdx].isCPU) cpuAnswer();
+}
+
+function handleAnswer(chosenIdx,btnEl){
+  if(!activeQ)return;
+  const allBtns=document.querySelectorAll('#modalAnswers .answer-btn');
+  if(btnEl.classList.contains('locked'))return;
+  allBtns.forEach(b=>b.classList.add('locked'));
+
+  const correct=chosenIdx===activeQ.q.c;
+  const feedback=document.getElementById('modalFeedback');
+
+  if(correct){
+    btnEl.classList.add('correct');
+    feedback.textContent='Correct! +$'+activeQ.q.v;
+    feedback.style.color='var(--green)';
+    players[currentPlayerIdx].score+=activeQ.q.v;
+  } else {
+    btnEl.classList.add('wrong');
+    allBtns[activeQ.q.c].classList.add('reveal');
+    feedback.textContent='Wrong! The answer was: '+activeQ.q.a[activeQ.q.c];
+    feedback.style.color='var(--red)';
+  }
+
+  usedTiles.add(activeQ.key);
+
+  setTimeout(()=>{
+    document.getElementById('modalOverlay').classList.remove('open');
+    activeQ=null;activeCPUTurn=false;
+    renderBoard();updateScoreboard();updateFinishBtn();
+    if(usedTiles.size>=TOTAL_TILES){
+      setTimeout(endRoundOrGame,400);
+      return;
+    }
+    nextTurn();
+  },1600);
+}
+
+/* ══════════════════════
+   TURNS
+   ══════════════════════ */
+function nextTurn(){
+  currentPlayerIdx=(currentPlayerIdx+1)%players.length;
+  updateScoreboard();
+  if(players[currentPlayerIdx].isCPU) scheduleCPUTurn();
+}
+
+/* ══════════════════════
+   CPU LOGIC
+   ══════════════════════ */
+let activeCPUTurn=false;
+
+function scheduleCPUTurn(){
+  setTimeout(()=>{activeCPUTurn=true;cpuPickTile();},800);
+}
+
+function cpuPickTile(){
+  const avail=[];
+  CATEGORIES.forEach(cat=>{
+    roundBoard[cat].forEach((q,vi)=>{
+      const key=cat+'|'+q.v;
+      if(!usedTiles.has(key)) avail.push({cat,vi});
+    });
+  });
+  if(!avail.length){endRoundOrGame();return;}
+  const pick=avail[Math.floor(Math.random()*avail.length)];
+  openQuestion(pick.cat,pick.vi);
+}
+
+function cpuAnswer(){
+  const thinkEl=document.getElementById('cpuThinking');
+  thinkEl.style.display='block';
+  const allBtns=document.querySelectorAll('#modalAnswers .answer-btn');
+  setTimeout(()=>{
+    thinkEl.style.display='none';
+    const correct=Math.random()<0.6;
+    let idx;
+    if(correct){idx=activeQ.q.c;}
+    else{const w=activeQ.q.a.map((_,i)=>i).filter(i=>i!==activeQ.q.c);idx=w[Math.floor(Math.random()*w.length)];}
+    handleAnswer(idx,allBtns[idx]);
+  },1000+Math.random()*1000);
+}
+
+/* ══════════════════════
+   END OF ROUND / GAME
+   ══════════════════════ */
+function endRoundOrGame(){
+  if(currentRound>=MAX_ROUNDS){
+    showResults();
+  } else {
+    currentRound++;
+    showRoundSplash(()=>startRound());
+  }
+}
+
+/* ══════════════════════
+   RESULTS
+   ══════════════════════ */
+function showResults(){
+  gameEl.style.display='none';
+  resultsEl.style.display='flex';
+  const sorted=[...players].sort((a,b)=>b.score-a.score);
+  const topScore=sorted[0].score;
+
+  const banner=document.getElementById('winnerBanner');
+  const winners=sorted.filter(p=>p.score===topScore);
+  banner.textContent=winners.length>1?"It's a tie!":winners[0].name+' wins!';
+
+  const container=document.getElementById('finalScores');
+  container.textContent='';
+  const medals=['🥇','🥈','🥉',''];
+  sorted.forEach((p,i)=>{
+    const row=document.createElement('div');
+    row.className='final-score-row'+(p.score===topScore?' winner':'');
+    const rank=document.createElement('span');rank.className='rank';rank.textContent=medals[i]||'';
+    const name=document.createElement('span');name.className='fname';name.textContent=p.name+(p.isCPU?' (CPU)':'');
+    const sc=document.createElement('span');sc.className='fscore';sc.textContent='$'+p.score;
+    row.appendChild(rank);row.appendChild(name);row.appendChild(sc);
+    container.appendChild(row);
+  });
+}
+
+document.getElementById('playAgainBtn').addEventListener('click',()=>{
+  players.forEach(p=>p.score=0);
+  currentPlayerIdx=0;currentRound=1;
+  resultsEl.style.display='none';
+  startRound();
+});
+
+})();
+</script>
+</body>
+</html>
