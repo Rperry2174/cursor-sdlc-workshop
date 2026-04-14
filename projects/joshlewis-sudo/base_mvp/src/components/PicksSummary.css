@@ -1,0 +1,44 @@
+.picks-summary {
+  margin-top: 2rem;
+  padding: 1.25rem 1.5rem;
+  background: #16213e;
+  border: 1px solid #2a2a4a;
+  border-radius: 16px;
+}
+
+.picks-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  color: #8888aa;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.picks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.picks-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.4rem 0;
+}
+
+.picks-date {
+  font-size: 0.85rem;
+  color: #6a6a8a;
+}
+
+.picks-team {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #f0f0f0;
+}
+
+.picks-team--angels {
+  color: #ff4d6a;
+}

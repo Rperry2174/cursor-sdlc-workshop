@@ -1,0 +1,23 @@
+.section-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #6a6a8a;
+  margin-bottom: 0.75rem;
+}
+
+.cards-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.app-footer {
+  text-align: center;
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #2a2a4a;
+  color: #4a4a6a;
+  font-size: 0.75rem;
+}

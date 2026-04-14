@@ -1,0 +1,52 @@
+.pitcher-side {
+  flex: 1;
+  min-width: 0;
+}
+
+.pitcher-side--right {
+  text-align: right;
+}
+
+.pitcher-team-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.2rem;
+}
+
+.pitcher-side--right .pitcher-team-row {
+  justify-content: flex-end;
+}
+
+.pitcher-abbr {
+  font-weight: 900;
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+  color: #8888aa;
+}
+
+.pitcher-abbr--angels {
+  color: #ba0021;
+}
+
+.pitcher-hand {
+  font-size: 0.65rem;
+  color: #6a6a8a;
+  background: #2a2a4a;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.pitcher-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pitcher-record {
+  font-size: 0.8rem;
+  color: #8888aa;
+  margin-top: 2px;
+}

@@ -1,0 +1,77 @@
+.stat-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.stat-val {
+  width: 42px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #6a6a8a;
+  flex-shrink: 0;
+}
+
+.stat-val--left {
+  text-align: right;
+}
+
+.stat-val--right {
+  text-align: left;
+}
+
+.stat-val--winner {
+  color: #4ade80;
+}
+
+.stat-bar-track {
+  flex: 1;
+  position: relative;
+}
+
+.stat-bar-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.stat-bar-halves {
+  display: flex;
+  gap: 2px;
+  height: 18px;
+}
+
+.stat-bar-half {
+  flex: 1;
+  background: #1a1a2e;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.stat-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+  background: #2a2a4a;
+}
+
+.stat-bar-fill--left {
+  margin-left: auto;
+}
+
+.stat-bar-fill--winner {
+  background: #ba0021;
+}
+
+.stat-bar-fill--right.stat-bar-fill--winner {
+  background: #334;
+}

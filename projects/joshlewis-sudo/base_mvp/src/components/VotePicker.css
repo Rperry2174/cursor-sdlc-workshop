@@ -1,0 +1,49 @@
+.vote-picker {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #2a2a4a;
+}
+
+.vote-label {
+  font-size: 0.75rem;
+  color: #6a6a8a;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.vote-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.vote-btn {
+  padding: 0.35rem 1rem;
+  border: 1px solid #2a2a4a;
+  border-radius: 8px;
+  background: transparent;
+  color: #8888aa;
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+
+.vote-btn:hover {
+  border-color: #555;
+  color: #ccc;
+}
+
+.vote-btn--selected {
+  border-color: #4a4a6a;
+  background: #2a2a4a;
+  color: #f0f0f0;
+}
+
+.vote-btn--selected.vote-btn--angels {
+  border-color: #ba0021;
+  background: rgba(186, 0, 33, 0.2);
+  color: #ff4d6a;
+}

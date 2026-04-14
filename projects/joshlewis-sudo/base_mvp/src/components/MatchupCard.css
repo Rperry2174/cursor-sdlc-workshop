@@ -1,0 +1,68 @@
+.matchup-card {
+  background: #16213e;
+  border: 1px solid #2a2a4a;
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
+  transition: border-color 0.2s;
+}
+
+.matchup-card:hover {
+  border-color: #ba0021;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+
+.card-date {
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.card-subtitle {
+  font-size: 0.75rem;
+  color: #f5c518;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 0.15rem;
+}
+
+.card-venue {
+  color: #6a6a8a;
+  font-size: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.pitchers-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.vs-badge {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #2a2a4a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 0.75rem;
+  color: #8888aa;
+}
+
+.stat-bars-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #2a2a4a;
+}

@@ -1,0 +1,74 @@
+.batting-leaders {
+  margin-bottom: 1.5rem;
+}
+
+.leaders-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #6a6a8a;
+  margin-bottom: 0.75rem;
+}
+
+.leaders-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.5rem;
+}
+
+.leader-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #16213e;
+  border: 1px solid #2a2a4a;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  transition: border-color 0.2s;
+}
+
+.leader-card:hover {
+  border-color: #ba0021;
+}
+
+.leader-emoji {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.leader-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.leader-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #f0f0f0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.leader-stat-line {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  margin-top: 2px;
+}
+
+.leader-value {
+  font-size: 1rem;
+  font-weight: 900;
+  color: #ba0021;
+}
+
+.leader-stat-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #6a6a8a;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
