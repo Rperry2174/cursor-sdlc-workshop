@@ -1,23 +1,16 @@
-# Base MVP
+# React + Vite
 
-This folder is where your project code lives.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## What to Build
-- A minimal, working version of your project
-- Should run locally and do *something* visible
-- Keep it simple — 10 minutes max!
+Currently, two official plugins are available:
 
-### Good Examples
-- A Chrome extension with one button that does one thing
-- A web page with basic HTML/CSS/JS
-- A simple CLI script
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
-### Instructions
+## React Compiler
 
-1. Tell Cursor to read the `prd.md` in your project folder
-2. Tell Cursor to generate the base MVP here
-3. Tell Cursor to run it locally and verify it works
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-### After You're Done
+## Expanding the ESLint configuration
 
-> **Ask Cursor:** "Commit all my changes with the message 'Base MVP scaffold', push to my fork, and open a PR to the original repo"
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
