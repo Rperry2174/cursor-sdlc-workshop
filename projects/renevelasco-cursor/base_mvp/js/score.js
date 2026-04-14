@@ -8,8 +8,11 @@ const Score = (function () {
     current = 0;
   }
 
+  const DOUBLE_POINTS_ROW = 1; // orange (#f84)
+
   function addKill(enemyRow) {
-    const points = ROW_POINTS[enemyRow] || 20;
+    let points = ROW_POINTS[enemyRow] || 20;
+    if (enemyRow === DOUBLE_POINTS_ROW) points *= 2;
     current += points;
     if (current > best) {
       best = current;
