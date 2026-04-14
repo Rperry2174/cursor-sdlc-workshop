@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from "react";
+import AnswerReview from "./components/AnswerReview";
 import CategorySelector from "./components/CategorySelector";
 import QuestionTimer from "./components/QuestionTimer";
 import questionsByCategory from "./data/questionsByCategory";
@@ -13,6 +14,7 @@ function App() {
   const [isFinished, setIsFinished] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [hasStartedQuiz, setHasStartedQuiz] = useState(false);
+  const [answerHistory, setAnswerHistory] = useState([]);
   const isTransitioningRef = useRef(false);
 
   const questions = selectedCategory ? questionsByCategory[selectedCategory] : [];
@@ -27,8 +29,21 @@ function App() {
     ({ answer, isTimeout }) => {
       if (isTransitioningRef.current || isFinished || !currentQuestion) return;
       isTransitioningRef.current = true;
+      const isCorrect = !isTimeout && answer === currentQuestion.answer;
 
-      if (!isTimeout && answer === currentQuestion.answer) {
+      setAnswerHistory((previous) => [
+        ...previous,
+        {
+          questionIndex,
+          prompt: currentQuestion.prompt,
+          selectedAnswer: answer,
+          correctAnswer: currentQuestion.answer,
+          isCorrect,
+          isTimeout,
+        },
+      ]);
+
+      if (isCorrect) {
         setScore((previous) => previous + 1);
       }
 
@@ -63,6 +78,7 @@ function App() {
     setSelectedAnswer("");
     setIsFinished(false);
     setHasStartedQuiz(true);
+    setAnswerHistory([]);
     isTransitioningRef.current = false;
   };
 
@@ -72,6 +88,7 @@ function App() {
     setSelectedAnswer("");
     setIsFinished(false);
     setHasStartedQuiz(true);
+    setAnswerHistory([]);
     isTransitioningRef.current = false;
   };
 
@@ -81,6 +98,7 @@ function App() {
     setScore(0);
     setSelectedAnswer("");
     setIsFinished(false);
+    setAnswerHistory([]);
     isTransitioningRef.current = false;
   };
 
@@ -113,6 +131,7 @@ function App() {
           <p className="score">
             {score} / {totalQuestions}
           </p>
+          <AnswerReview entries={answerHistory} />
           <button className="button button-spacing" onClick={handlePlayAgain}>
             Play Again
           </button>

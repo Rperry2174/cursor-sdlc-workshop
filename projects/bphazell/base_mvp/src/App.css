@@ -128,3 +128,50 @@ h2 {
   font-weight: 700;
   margin: 8px 0 20px;
 }
+
+.answer-review {
+  margin: 4px 0 20px;
+}
+
+.answer-review h2 {
+  margin: 0 0 10px;
+  font-size: 1.15rem;
+}
+
+.answer-review-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.answer-review-item {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 12px;
+  background: #f9fafb;
+}
+
+.answer-review-question {
+  margin: 0 0 8px;
+  font-weight: 600;
+}
+
+.answer-review-row {
+  margin: 0 0 4px;
+  color: #374151;
+}
+
+.answer-review-status {
+  margin: 6px 0 0;
+  font-weight: 700;
+}
+
+.answer-review-status.is-correct {
+  color: #166534;
+}
+
+.answer-review-status.is-incorrect {
+  color: #b91c1c;
+}
