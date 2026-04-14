@@ -20,8 +20,13 @@ const EnemyMovement = (function () {
     enemyBullets = [];
   }
 
-  function update(enemies, frameCount, canvasW, canvasH) {
-    swayAngle += SWAY_SPEED;
+  function update(enemies, frameCount, canvasW, canvasH, wave) {
+    const waveNum = wave || 1;
+    const swayMult = 1 + (waveNum - 1) * 0.3;
+    const diveMult = 1 + (waveNum - 1) * 0.6;
+    const maxDivers = MAX_DIVERS + (waveNum - 1);
+
+    swayAngle += SWAY_SPEED * swayMult;
     const newOffset = Math.sin(swayAngle) * SWAY_RANGE;
     const delta = newOffset - swayOffset;
     swayOffset = newOffset;
@@ -35,8 +40,8 @@ const EnemyMovement = (function () {
     const aliveInFormation = enemies.filter(
       e => e.alive && !divers.some(d => d.enemy === e)
     );
-    if (aliveInFormation.length > 0 && divers.length < MAX_DIVERS) {
-      if (Math.random() < DIVE_CHANCE) {
+    if (aliveInFormation.length > 0 && divers.length < maxDivers) {
+      if (Math.random() < DIVE_CHANCE * diveMult) {
         const pick = aliveInFormation[Math.floor(Math.random() * aliveInFormation.length)];
         divers.push({
           enemy: pick,

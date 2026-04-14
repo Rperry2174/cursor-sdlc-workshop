@@ -209,6 +209,10 @@
   let player, bullets, enemies, stars, frameCount;
   const FIRE_COOLDOWN = 8;
   let fireCooldownTimer = 0;
+  const TOTAL_WAVES = 3;
+  let currentWave = 1;
+  let waveTransitionTimer = 0;
+  const WAVE_TRANSITION_FRAMES = 120;
 
   const keys = {};
 
@@ -250,10 +254,20 @@
     enemies = makeEnemies();
     stars = makeStars();
     frameCount = 0;
+    currentWave = 1;
+    waveTransitionTimer = 0;
     Score.reset();
     EnemyMovement.reset();
     Lives.reset();
     Explosions.reset();
+  }
+
+  function startNextWave() {
+    currentWave++;
+    bullets = [];
+    enemies = makeEnemies();
+    EnemyMovement.reset();
+    waveTransitionTimer = WAVE_TRANSITION_FRAMES;
   }
 
   resetGame();
@@ -344,6 +358,28 @@
 
   function drawHUD() {
     Score.draw(ctx, W);
+
+    ctx.save();
+    ctx.font = '12px "Courier New", monospace';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.textAlign = 'center';
+    ctx.fillText('WAVE ' + currentWave + ' / ' + TOTAL_WAVES, W / 2, H - 12);
+    ctx.restore();
+  }
+
+  function drawWaveBanner() {
+    if (waveTransitionTimer <= 0) return;
+    const alpha = Math.min(1, waveTransitionTimer / 30);
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.font = 'bold 40px "Courier New", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#0ff';
+    ctx.fillText('WAVE ' + currentWave, W / 2, H / 2 - 10);
+    ctx.font = '16px "Courier New", monospace';
+    ctx.fillStyle = '#fff';
+    ctx.fillText('GET READY', W / 2, H / 2 + 20);
+    ctx.restore();
   }
 
   // --- Update ---
@@ -391,7 +427,7 @@
       }
     }
 
-    EnemyMovement.update(enemies, frameCount, W, H);
+    EnemyMovement.update(enemies, frameCount, W, H, currentWave);
 
     Lives.update();
     const wasHit = Lives.checkPlayerHit(player, PLAYER_W, PLAYER_H, enemies, ENEMY_W, ENEMY_H, EnemyMovement);
@@ -407,11 +443,19 @@
       return;
     }
 
-    if (enemies.every(e => !e.alive)) {
-      state = 'win';
-      document.getElementById('winScore').textContent = 'SCORE: ' + String(Score.getCurrent()).padStart(6, '0');
-      document.getElementById('winBest').textContent = 'HIGH SCORE: ' + String(Score.getBest()).padStart(6, '0');
-      winOverlay.classList.add('visible');
+    if (waveTransitionTimer > 0) {
+      waveTransitionTimer--;
+    }
+
+    if (enemies.every(e => !e.alive) && waveTransitionTimer === 0) {
+      if (currentWave >= TOTAL_WAVES) {
+        state = 'win';
+        document.getElementById('winScore').textContent = 'SCORE: ' + String(Score.getCurrent()).padStart(6, '0');
+        document.getElementById('winBest').textContent = 'HIGH SCORE: ' + String(Score.getBest()).padStart(6, '0');
+        winOverlay.classList.add('visible');
+      } else {
+        startNextWave();
+      }
     }
 
     Explosions.update();
@@ -442,6 +486,7 @@
       if (showPlayer) drawPlayer();
       drawHUD();
       Lives.draw(ctx, H);
+      drawWaveBanner();
     }
   }
 
