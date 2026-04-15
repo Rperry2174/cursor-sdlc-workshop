@@ -8,6 +8,11 @@ import DifficultyPicker from './components/DifficultyPicker.jsx'
 import WpmDisplay from './components/WpmDisplay.jsx'
 import AccuracyTracker from './components/AccuracyTracker.jsx'
 import MarvisMascot from './components/MarvisMascot.jsx'
+import ResultsModal from './components/ResultsModal.jsx'
+import {
+  accuracyPercent,
+  isPass,
+} from './constants/results.js'
 import './App.css'
 
 /**
@@ -46,6 +51,8 @@ export default function App() {
   const [nowMs, setNowMs] = useState(() => Date.now())
   const [sessionEndMs, setSessionEndMs] = useState(null)
   const [startTimeMs, setStartTimeMs] = useState(null)
+  const [successCount, setSuccessCount] = useState(0)
+  const [failureCount, setFailureCount] = useState(0)
 
   const inputRef = useRef(null)
 
@@ -103,8 +110,14 @@ export default function App() {
     const next = e.target.value
     if (next.length > passage.length) return
 
+    let nextCorrect = correctForward
+    let nextTotal = totalForward
     if (next.length > typed.length) {
       for (let i = typed.length; i < next.length; i++) {
+        nextTotal += 1
+        if (next[i] === passage[i]) {
+          nextCorrect += 1
+        }
         setTotalForward((t) => t + 1)
         if (next[i] === passage[i]) {
           setCorrectForward((c) => c + 1)
@@ -125,7 +138,15 @@ export default function App() {
     setTyped(next)
 
     if (next === passage && passage.length > 0 && runStartMs != null) {
-      setSessionEndMs((prev) => prev ?? Date.now())
+      const endMs = Date.now()
+      setSessionEndMs((prev) => prev ?? endMs)
+      const wpmFinal =
+        (passage.length / CHARS_PER_WORD) / ((endMs - runStartMs) / 60_000)
+      if (isPass(wpmFinal, nextCorrect, nextTotal)) {
+        setSuccessCount((c) => c + 1)
+      } else {
+        setFailureCount((c) => c + 1)
+      }
     } else if (next !== passage) {
       setSessionEndMs(null)
     }
@@ -146,6 +167,17 @@ export default function App() {
       ? (passage.length / CHARS_PER_WORD) /
         ((sessionEndMs - startTimeMs) / 60_000)
       : null
+
+  const finalAccuracyPct =
+    finished && totalForward > 0
+      ? accuracyPercent(correctForward, totalForward)
+      : null
+
+  const passed = Boolean(
+    finished &&
+      finalWpm != null &&
+      isPass(finalWpm, correctForward, totalForward),
+  )
 
   const passageSegments = useMemo(() => segmentPassage(passage), [passage])
 
@@ -169,10 +201,12 @@ export default function App() {
 
       <main className="main">
         <section className="board" aria-label="Typing feedback">
-          <DifficultyPicker
-            value={difficulty}
-            onChange={handleDifficultyChange}
-          />
+          {!finished && (
+            <DifficultyPicker
+              value={difficulty}
+              onChange={handleDifficultyChange}
+            />
+          )}
 
           <div className="stats-row">
             <WpmDisplay
@@ -188,7 +222,13 @@ export default function App() {
             />
           </div>
 
-          <div className="typing-workspace">
+          <div
+            className={
+              finished
+                ? 'typing-workspace typing-workspace--finished'
+                : 'typing-workspace'
+            }
+          >
             <div className="document-zone" aria-label="Reference passage">
               <p className="document-zone__eyebrow" aria-hidden="true">
                 Reference file — read only
@@ -247,40 +287,52 @@ export default function App() {
               </div>
             </div>
 
-            {finished && (
-              <p className="finished-banner" role="status">
-                Finished!
-              </p>
-            )}
+            {!finished && (
+              <div className="desk-zone">
+                <label className="desk-zone__label" htmlFor="typing-input">
+                  Entry field
+                </label>
+                <textarea
+                  id="typing-input"
+                  ref={inputRef}
+                  className="typing-input"
+                  value={typed}
+                  onChange={handleChange}
+                  onPaste={(e) => e.preventDefault()}
+                  spellCheck={false}
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  rows={difficulty === 'hard' ? 8 : 3}
+                  readOnly={finished}
+                />
 
-            <div className="desk-zone">
-              <label className="desk-zone__label" htmlFor="typing-input">
-                Entry field
-              </label>
-              <textarea
-                id="typing-input"
-                ref={inputRef}
-                className="typing-input"
-                value={typed}
-                onChange={handleChange}
-                onPaste={(e) => e.preventDefault()}
-                spellCheck={false}
-                autoComplete="off"
-                autoCorrect="off"
-                autoCapitalize="off"
-                rows={difficulty === 'hard' ? 8 : 3}
-                readOnly={finished}
-              />
-
-              <div className="actions">
-                <button type="button" className="btn-reset" onClick={handleReset}>
-                  Start over
-                </button>
+                <div className="actions">
+                  <button
+                    type="button"
+                    className="btn-reset"
+                    onClick={handleReset}
+                  >
+                    Start over
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </section>
       </main>
+
+      <ResultsModal
+        open={finished}
+        passed={passed}
+        finalWpm={finalWpm}
+        accuracyPct={finalAccuracyPct}
+        successCount={successCount}
+        failureCount={failureCount}
+        difficulty={difficulty}
+        onDifficultyChange={handleDifficultyChange}
+        onStartOver={handleReset}
+      />
     </div>
   )
 }

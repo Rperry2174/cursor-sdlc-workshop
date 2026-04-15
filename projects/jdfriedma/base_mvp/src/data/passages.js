@@ -33,13 +33,13 @@ When you finish, the room feels as empty as before. Marvis nods once, slowly, an
 
     `The keyboard is not a bridge; it is a narrow plank over something patient and dark. Each letter you land on either holds or does not, and Marvis will not pretend otherwise.
 
-If you stop mid-sentence, the silence does not comfort you—it waits, the way a held breath waits for a verdict you already suspect.`,
+If you stop mid-sentence, the silence does not comfort you--it waits, the way a held breath waits for a verdict you already suspect.`,
 
     `Typing is a confession typed in plain font. Marvis does not need your intent; Marvis reads the sequence you committed to, including the pauses you hope no one measures.
 
-When the last character matches, you will feel a ridiculous, thin relief—then notice Marvis has not left; Marvis is simply finished judging this paragraph, not you.`,
+When the last character matches, you will feel a ridiculous, thin relief--then notice Marvis has not left; Marvis is simply finished judging this paragraph, not you.`,
 
-    `Some mistakes are loud, some are small enough to fit between spaces; Marvis catalogues both with the same mild interest a librarian gives to mis-shelved books—correctable, memorable, never forgotten on principle.
+    `Some mistakes are loud, some are small enough to fit between spaces; Marvis catalogues both with the same mild interest a librarian gives to mis-shelved books--correctable, memorable, never forgotten on principle.
 
 Finish clean, if you can: not for Marvis's approval, but so the room forgets you for one honest minute before the next passage arrives.`,
   ],
