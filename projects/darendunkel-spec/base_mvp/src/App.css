@@ -1,0 +1,136 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  background: #0f0f1a;
+  color: #f0f0f0;
+  min-height: 100vh;
+}
+
+.app {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.card {
+  background: #1c1c2e;
+  border-radius: 16px;
+  padding: 40px;
+  max-width: 560px;
+  width: 100%;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+}
+
+.progress {
+  font-size: 14px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 16px;
+}
+
+.question {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-bottom: 32px;
+}
+
+.choices {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.btn {
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 16px;
+  border-radius: 10px;
+  transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.choice {
+  background: #2a2a40;
+  color: #f0f0f0;
+  padding: 16px 20px;
+  text-align: left;
+  border: 2px solid transparent;
+}
+
+.choice:hover:not(:disabled) {
+  background: #35355a;
+  border-color: #6c63ff;
+}
+
+.choice:disabled {
+  cursor: default;
+}
+
+.choice.correct {
+  background: #1b5e20;
+  border-color: #4caf50;
+}
+
+.choice.wrong {
+  background: #7f1d1d;
+  border-color: #ef4444;
+}
+
+.score {
+  font-size: 16px;
+  color: #aaa;
+  text-align: right;
+}
+
+/* --- End screen --- */
+
+.end-screen {
+  text-align: center;
+}
+
+.end-screen h1 {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.final-score {
+  font-size: 64px;
+  font-weight: 800;
+  color: #6c63ff;
+  margin-bottom: 8px;
+}
+
+.final-message {
+  font-size: 18px;
+  color: #aaa;
+  margin-bottom: 32px;
+}
+
+.play-again {
+  background: #6c63ff;
+  color: #fff;
+  padding: 14px 40px;
+  font-size: 18px;
+  font-weight: 600;
+  box-shadow: 0 4px 16px rgba(108, 99, 255, 0.35);
+}
+
+.play-again:hover {
+  background: #5a52d5;
+  box-shadow: 0 6px 20px rgba(108, 99, 255, 0.5);
+}
