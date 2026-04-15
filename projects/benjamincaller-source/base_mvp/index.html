@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rush Hour Puzzle</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0f172a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    color: #e2e8f0;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* ---- Level Select Screen ---- */
+  .screen { display: none; }
+  .screen.active { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+
+  .level-grid-title {
+    font-size: 32px; font-weight: 800;
+    background: linear-gradient(135deg, #ef4444, #f97316);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+
+  .difficulty-section { width: 100%; max-width: 440px; }
+  .difficulty-label {
+    font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px;
+    margin-bottom: 10px; padding-left: 4px;
+  }
+  .difficulty-label.beginner { color: #22c55e; }
+  .difficulty-label.intermediate { color: #f59e0b; }
+  .difficulty-label.advanced { color: #ef4444; }
+  .difficulty-label.expert { color: #a855f7; }
+
+  .level-grid {
+    display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px;
+    margin-bottom: 20px;
+  }
+
+  .level-cell {
+    aspect-ratio: 1; border-radius: 8px; border: none;
+    font-size: 13px; font-weight: 700; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,0.06); color: #64748b;
+    transition: transform 0.1s ease, background 0.15s ease;
+    position: relative;
+  }
+  .level-cell:hover { transform: scale(1.1); background: rgba(255,255,255,0.12); }
+  .level-cell.completed { background: rgba(34,197,94,0.15); color: #22c55e; }
+  .level-cell.completed::after {
+    content: '✓'; position: absolute; top: 1px; right: 3px;
+    font-size: 8px; color: #22c55e;
+  }
+  .level-cell.current { background: rgba(59,130,246,0.25); color: #3b82f6; box-shadow: 0 0 0 2px #3b82f6; }
+  .level-cell.locked { opacity: 0.35; cursor: default; }
+
+  /* ---- Game Screen ---- */
+  .game-container { gap: 18px; }
+
+  header { text-align: center; }
+  header h1 {
+    font-size: 28px; font-weight: 800;
+    background: linear-gradient(135deg, #ef4444, #f97316);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+
+  .level-info { display: flex; align-items: center; gap: 10px; margin-top: 6px; justify-content: center; }
+  .level-badge {
+    padding: 3px 12px; background: rgba(255,255,255,0.08); border-radius: 20px;
+    font-size: 13px; font-weight: 600; color: #94a3b8;
+  }
+  .diff-badge {
+    padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .diff-badge.beginner { background: rgba(34,197,94,0.15); color: #22c55e; }
+  .diff-badge.intermediate { background: rgba(245,158,11,0.15); color: #f59e0b; }
+  .diff-badge.advanced { background: rgba(239,68,68,0.15); color: #ef4444; }
+  .diff-badge.expert { background: rgba(168,85,247,0.15); color: #a855f7; }
+
+  .board-frame {
+    position: relative; background: #1e293b; border-radius: 16px;
+    padding: 12px 56px 12px 12px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+
+  .board {
+    position: relative; width: 360px; height: 360px;
+    background: #334155; border-radius: 8px; overflow: hidden;
+  }
+
+  .grid-line-h, .grid-line-v { position: absolute; background: rgba(255,255,255,0.04); }
+  .grid-line-h { width: 100%; height: 1px; }
+  .grid-line-v { height: 100%; width: 1px; }
+
+  .exit-marker {
+    position: absolute; right: 0; top: calc(12px + 2 * 60px);
+    width: 44px; height: 60px; display: flex; align-items: center; justify-content: center; gap: 2px;
+  }
+  .exit-arrow { width: 16px; height: 60px; background: linear-gradient(90deg, transparent, #ef4444); border-radius: 0 4px 4px 0; }
+  .exit-label { font-size: 11px; font-weight: 800; color: #ef4444; text-transform: uppercase; letter-spacing: 1px; writing-mode: vertical-lr; text-orientation: mixed; }
+
+  /* ---- Vehicle base ---- */
+  .vehicle {
+    position: absolute; border-radius: 12px; cursor: grab;
+    transition: box-shadow 0.15s ease, transform 0.1s ease;
+    overflow: hidden;
+  }
+
+  /* Body shine — glossy highlight across the top */
+  .vehicle::before {
+    content: ''; position: absolute; pointer-events: none; z-index: 2;
+    border-radius: 8px;
+  }
+  .vehicle.h-vehicle::before {
+    top: 4px; left: 8px; right: 8px; height: 40%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.30) 0%, rgba(255,255,255,0.05) 60%, transparent 100%);
+  }
+  .vehicle.v-vehicle::before {
+    top: 8px; left: 4px; bottom: 60%; right: 4px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.30) 0%, rgba(255,255,255,0.05) 60%, transparent 100%);
+  }
+
+  /* Outer border for depth */
+  .vehicle::after {
+    content: ''; position: absolute; inset: 0; border-radius: 12px;
+    border: 1.5px solid rgba(255,255,255,0.12);
+    border-bottom-color: rgba(0,0,0,0.35);
+    border-right-color: rgba(0,0,0,0.2);
+    pointer-events: none; z-index: 3;
+  }
+
+  /* ---- Roof / cabin ---- */
+  .vehicle .roof {
+    position: absolute; pointer-events: none; z-index: 1;
+    background: rgba(0,0,0,0.12);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .vehicle.h-vehicle .roof {
+    top: 6px; bottom: 6px; border-radius: 6px;
+    left: 28%; right: 22%; /* offset towards rear */
+  }
+  .vehicle.v-vehicle .roof {
+    left: 6px; right: 6px; border-radius: 6px;
+    top: 22%; bottom: 28%;
+  }
+  .vehicle.truck .roof {
+    background: rgba(0,0,0,0.10);
+  }
+  .vehicle.h-vehicle.truck .roof { left: 45%; right: 12%; }
+  .vehicle.v-vehicle.truck .roof { top: 12%; bottom: 45%; }
+
+  /* ---- Windshield ---- */
+  .vehicle .windshield {
+    position: absolute; pointer-events: none; z-index: 4;
+    background: linear-gradient(135deg, rgba(170,215,255,0.45), rgba(130,190,240,0.2));
+    border: 1px solid rgba(170,215,255,0.25);
+    border-radius: 3px;
+  }
+  .vehicle.h-vehicle .windshield {
+    right: 14px; top: 10px; bottom: 10px; width: 10px;
+  }
+  .vehicle.v-vehicle .windshield {
+    bottom: 14px; left: 10px; right: 10px; height: 10px;
+  }
+  .vehicle.h-vehicle.truck .windshield { right: 18px; width: 8px; }
+  .vehicle.v-vehicle.truck .windshield { bottom: 18px; height: 8px; }
+
+  /* ---- Headlights (front) ---- */
+  .vehicle .headlights {
+    position: absolute; z-index: 4; display: flex; pointer-events: none;
+  }
+  .vehicle.h-vehicle .headlights {
+    right: 4px; top: 50%; transform: translateY(-50%);
+    flex-direction: column; gap: 8px;
+  }
+  .vehicle.v-vehicle .headlights {
+    bottom: 4px; left: 50%; transform: translateX(-50%);
+    flex-direction: row; gap: 8px;
+  }
+  .headlight {
+    width: 7px; height: 5px; border-radius: 2px;
+    background: rgba(255,255,220,0.9);
+    box-shadow: 0 0 6px 2px rgba(255,255,200,0.35);
+  }
+  .vehicle.v-vehicle .headlight { width: 5px; height: 7px; }
+
+  /* ---- Taillights (rear) ---- */
+  .vehicle .taillights {
+    position: absolute; z-index: 4; display: flex; pointer-events: none;
+  }
+  .vehicle.h-vehicle .taillights {
+    left: 4px; top: 50%; transform: translateY(-50%);
+    flex-direction: column; gap: 10px;
+  }
+  .vehicle.v-vehicle .taillights {
+    top: 4px; left: 50%; transform: translateX(-50%);
+    flex-direction: row; gap: 10px;
+  }
+  .taillight {
+    width: 5px; height: 4px; border-radius: 1px;
+    background: rgba(255,60,60,0.7);
+    box-shadow: 0 0 4px 1px rgba(255,60,60,0.3);
+  }
+  .vehicle.v-vehicle .taillight { width: 4px; height: 5px; }
+
+  /* ---- Wheels ---- */
+  .vehicle .wheels {
+    position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  }
+  .wheel {
+    position: absolute; border-radius: 3px;
+    background: #1a1a2e;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  /* Horizontal cars: wheels on top and bottom edges */
+  .vehicle.h-vehicle .wheel { width: 10px; height: 6px; }
+  .vehicle.h-vehicle .wheel.fl { left: 8px; top: -2px; }
+  .vehicle.h-vehicle .wheel.fr { right: 8px; top: -2px; }
+  .vehicle.h-vehicle .wheel.rl { left: 8px; bottom: -2px; }
+  .vehicle.h-vehicle .wheel.rr { right: 8px; bottom: -2px; }
+  /* Vertical cars: wheels on left and right edges */
+  .vehicle.v-vehicle .wheel { width: 6px; height: 10px; }
+  .vehicle.v-vehicle .wheel.fl { top: 8px; left: -2px; }
+  .vehicle.v-vehicle .wheel.fr { top: 8px; right: -2px; }
+  .vehicle.v-vehicle .wheel.rl { bottom: 8px; left: -2px; }
+  .vehicle.v-vehicle .wheel.rr { bottom: 8px; right: -2px; }
+
+  /* ---- Bumper stripe ---- */
+  .vehicle .bumper {
+    position: absolute; pointer-events: none; z-index: 1;
+    background: rgba(0,0,0,0.15); border-radius: 2px;
+  }
+  .vehicle.h-vehicle .bumper { width: 3px; top: 12px; bottom: 12px; }
+  .vehicle.h-vehicle .bumper.front { right: 2px; }
+  .vehicle.h-vehicle .bumper.rear { left: 2px; }
+  .vehicle.v-vehicle .bumper { height: 3px; left: 12px; right: 12px; }
+  .vehicle.v-vehicle .bumper.front { bottom: 2px; }
+  .vehicle.v-vehicle .bumper.rear { top: 2px; }
+
+  /* ---- Interaction states ---- */
+  .vehicle:hover {
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.2), 0 8px 20px rgba(0,0,0,0.4);
+    z-index: 5; transform: scale(1.03);
+  }
+  .vehicle.dragging {
+    cursor: grabbing;
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.3), 0 14px 36px rgba(0,0,0,0.5);
+    z-index: 10; transform: scale(1.05);
+  }
+
+  /* ---- Target (red car) ---- */
+  .vehicle.target {
+    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+    box-shadow: 0 0 24px rgba(239,68,68,0.25);
+  }
+  .vehicle.target .headlights .headlight {
+    background: rgba(255,255,210,1);
+    box-shadow: 0 0 10px 3px rgba(255,255,200,0.5);
+  }
+  .vehicle.target .taillights .taillight {
+    background: rgba(255,200,50,0.8);
+    box-shadow: 0 0 4px 1px rgba(255,200,50,0.4);
+  }
+
+  .vehicle.hint-highlight {
+    animation: hintPulse 0.6s ease-in-out 3;
+    z-index: 8 !important;
+  }
+  @keyframes hintPulse {
+    0%, 100% { box-shadow: 0 0 0 3px rgba(251,191,36,0.0); }
+    50% { box-shadow: 0 0 0 4px rgba(251,191,36,0.8), 0 0 20px rgba(251,191,36,0.3); }
+  }
+  .hint-arrow {
+    position: absolute; z-index: 15; pointer-events: none;
+    font-size: 24px; color: #fbbf24;
+    text-shadow: 0 0 10px rgba(251,191,36,0.6);
+    animation: hintArrowBounce 0.5s ease-in-out infinite alternate;
+  }
+  @keyframes hintArrowBounce {
+    0% { transform: translate(-50%,-50%) scale(1); }
+    100% { transform: translate(-50%,-50%) scale(1.2); }
+  }
+
+  .controls { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .btn {
+    padding: 9px 22px; border: none; border-radius: 10px;
+    font-size: 14px; font-weight: 600; cursor: pointer;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn:active { transform: translateY(0); }
+  .btn-secondary { background: rgba(255,255,255,0.08); color: #e2e8f0; }
+  .btn-secondary:hover { background: rgba(255,255,255,0.12); }
+  .btn-hint { background: rgba(251,191,36,0.15); color: #fbbf24; }
+  .btn-hint:hover { background: rgba(251,191,36,0.25); }
+  .btn-solve { background: rgba(34,197,94,0.15); color: #22c55e; }
+  .btn-solve:hover { background: rgba(34,197,94,0.25); }
+
+  .overlay {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; border-radius: 8px;
+    opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 20;
+  }
+  .overlay.visible { opacity: 1; pointer-events: auto; }
+  .overlay-bg { position: absolute; inset: 0; background: rgba(15,23,42,0.85); backdrop-filter: blur(6px); border-radius: 8px; }
+  .overlay-content { position: relative; z-index: 1; text-align: center; }
+  .win-title { font-size: 36px; font-weight: 800; color: #fbbf24; text-shadow: 0 0 30px rgba(251,191,36,0.3); margin-bottom: 8px; }
+  .win-subtitle { font-size: 16px; color: #94a3b8; margin-bottom: 24px; }
+  .win-btns { display: flex; gap: 10px; justify-content: center; }
+  .win-btn {
+    padding: 11px 28px; border: none; border-radius: 12px;
+    font-size: 15px; font-weight: 700; cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: transform 0.1s ease;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .win-btn:hover { transform: translateY(-2px); }
+  .win-btn:active { transform: translateY(0); }
+  .win-btn-primary { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #0f172a; }
+  .win-btn-secondary { background: rgba(255,255,255,0.1); color: #e2e8f0; }
+
+  .instructions { text-align: center; font-size: 13px; color: #64748b; max-width: 360px; line-height: 1.5; }
+
+  /* ---- Welcome Screen ---- */
+  .welcome-screen { gap: 0; position: relative; overflow: hidden; }
+
+  .welcome-bg {
+    position: absolute; inset: 0; z-index: 0; overflow: hidden;
+    background: radial-gradient(ellipse at 50% 40%, #1e293b 0%, #0f172a 70%);
+  }
+  .welcome-bg .bg-vehicle {
+    position: absolute; border-radius: 6px; opacity: 0.08;
+  }
+
+  .welcome-content {
+    position: relative; z-index: 1;
+    display: flex; flex-direction: column; align-items: center; gap: 32px;
+    animation: welcomeFadeIn 0.8s ease-out;
+  }
+  @keyframes welcomeFadeIn {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .welcome-title {
+    font-size: 56px; font-weight: 900; letter-spacing: -2px;
+    background: linear-gradient(135deg, #ef4444, #f97316, #fbbf24, #ef4444);
+    background-size: 300% 300%;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    animation: titleShimmer 4s ease-in-out infinite;
+  }
+  @keyframes titleShimmer {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  .welcome-subtitle {
+    font-size: 16px; color: #94a3b8; margin-top: -20px; letter-spacing: 4px;
+    text-transform: uppercase; font-weight: 600;
+  }
+
+  .welcome-board {
+    width: 240px; height: 240px; position: relative;
+    background: #334155; border-radius: 12px; overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+  .welcome-board .demo-car {
+    position: absolute; border-radius: 5px;
+    transition: left 0.6s cubic-bezier(0.4,0,0.2,1), top 0.6s cubic-bezier(0.4,0,0.2,1);
+  }
+  .welcome-board .demo-exit {
+    position: absolute; right: 0; top: calc(2 * 40px);
+    width: 6px; height: 40px; background: linear-gradient(90deg, transparent, #ef4444);
+    border-radius: 0 3px 3px 0;
+  }
+  .welcome-board .demo-gridline-h, .welcome-board .demo-gridline-v {
+    position: absolute; background: rgba(255,255,255,0.04);
+  }
+  .welcome-board .demo-gridline-h { width: 100%; height: 1px; }
+  .welcome-board .demo-gridline-v { height: 100%; width: 1px; }
+
+  .welcome-stats {
+    display: flex; gap: 32px; color: #64748b; font-size: 14px;
+  }
+  .welcome-stats .stat {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+  .welcome-stats .stat-num {
+    font-size: 28px; font-weight: 800; color: #e2e8f0;
+  }
+
+  .play-btn {
+    padding: 16px 64px; border: none; border-radius: 16px;
+    font-size: 20px; font-weight: 800; cursor: pointer;
+    background: linear-gradient(135deg, #ef4444, #f97316);
+    color: white; letter-spacing: 1px;
+    box-shadow: 0 8px 30px rgba(239,68,68,0.3);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .play-btn:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 12px 40px rgba(239,68,68,0.4);
+  }
+  .play-btn:active { transform: translateY(0) scale(0.98); }
+
+  .welcome-footer {
+    font-size: 12px; color: #475569; margin-top: 8px;
+  }
+</style>
+</head>
+<body>
+
+<!-- Welcome Screen -->
+<div class="screen welcome-screen active" id="welcomeScreen">
+  <div class="welcome-bg" id="welcomeBg"></div>
+  <div class="welcome-content">
+    <div class="welcome-title">Rush Hour</div>
+    <div class="welcome-subtitle">Sliding Puzzle</div>
+    <div class="welcome-board" id="demoBoard"></div>
+    <div class="welcome-stats">
+      <div class="stat"><div class="stat-num">140</div>Levels</div>
+      <div class="stat"><div class="stat-num">4</div>Difficulties</div>
+      <div class="stat"><div class="stat-num">&infin;</div>Fun</div>
+    </div>
+    <button class="play-btn" id="playBtn">PLAY</button>
+    <div class="welcome-footer">Drag vehicles to free the red car</div>
+  </div>
+</div>
+
+<!-- Level Select Screen -->
+<div class="screen" id="selectScreen">
+  <div class="level-grid-title">Rush Hour</div>
+  <p style="color:#64748b; font-size:14px; margin-top:-8px;">Select a level</p>
+  <div id="levelSections"></div>
+</div>
+
+<!-- Game Screen -->
+<div class="screen game-container" id="gameScreen">
+  <header>
+    <h1>Rush Hour</h1>
+    <div class="level-info">
+      <div class="level-badge" id="levelBadge">Level 1 / 50</div>
+      <div class="diff-badge" id="diffBadge">Beginner</div>
+    </div>
+  </header>
+  <div class="board-frame">
+    <div class="exit-marker"><div class="exit-arrow"></div><div class="exit-label">EXIT</div></div>
+    <div class="board" id="board">
+      <div class="overlay" id="winOverlay">
+        <div class="overlay-bg"></div>
+        <div class="overlay-content">
+          <div class="win-title">Solved!</div>
+          <div class="win-subtitle" id="winSubtitle">Level 1 complete</div>
+          <div class="win-btns">
+            <button class="win-btn win-btn-secondary" id="menuBtn">Levels</button>
+            <button class="win-btn win-btn-primary" id="nextBtn">Next Level</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="controls">
+    <button class="btn btn-secondary" id="backBtn">← Levels</button>
+    <button class="btn btn-secondary" id="resetBtn">Reset</button>
+    <button class="btn btn-hint" id="hintBtn">💡 Hint</button>
+    <button class="btn btn-solve" id="solveBtn">▶ Solve</button>
+  </div>
+  <p class="instructions">Drag vehicles along their lane to clear a path.<br>Get the <strong style="color:#ef4444">red car</strong> to the exit →</p>
+</div>
+
+<script>
+(function () {
+  const GRID = 6, CELL = 60;
+  const board = document.getElementById('board');
+  const winOverlay = document.getElementById('winOverlay');
+  const winSubtitle = document.getElementById('winSubtitle');
+  const nextBtn = document.getElementById('nextBtn');
+  const menuBtn = document.getElementById('menuBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const backBtn = document.getElementById('backBtn');
+  const levelBadge = document.getElementById('levelBadge');
+  const diffBadge = document.getElementById('diffBadge');
+  const welcomeScreen = document.getElementById('welcomeScreen');
+  const selectScreen = document.getElementById('selectScreen');
+  const gameScreen = document.getElementById('gameScreen');
+  const levelSections = document.getElementById('levelSections');
+
+  const COLORS = [
+    '#3b82f6','#22c55e','#a855f7','#f97316','#06b6d4',
+    '#ec4899','#84cc16','#6366f1','#14b8a6','#f43f5e',
+    '#eab308','#8b5cf6','#10b981','#f472b6','#0ea5e9',
+  ];
+
+  const LEVELS = [
+    {v:[[2,0,2,"h",true],[1,4,2,"v",false],[3,4,2,"h",false],[0,3,2,"h",false],[5,0,3,"h",false],[0,5,2,"v",false],[1,2,3,"v",false]],par:5,d:"Beginner"},
+    {v:[[2,0,2,"h",true],[2,4,2,"v",false],[1,5,3,"v",false],[3,1,3,"v",false],[5,4,2,"h",false],[1,3,2,"v",false]],par:5,d:"Beginner"},
+    {v:[[2,0,2,"h",true],[2,2,2,"v",false],[1,3,3,"v",false],[5,3,2,"h",false],[4,3,2,"h",false],[1,4,2,"h",false]],par:5,d:"Beginner"},
+    {v:[[2,2,2,"h",true],[0,4,3,"v",false],[4,2,3,"h",false],[1,5,2,"v",false],[3,3,3,"h",false],[0,1,2,"v",false]],par:5,d:"Beginner"},
+    {v:[[2,1,2,"h",true],[0,4,3,"v",false],[3,0,2,"v",false],[3,1,3,"h",false],[4,2,2,"h",false],[1,2,2,"h",false],[4,4,2,"h",false]],par:5,d:"Beginner"},
+    {v:[[2,2,2,"h",true],[2,5,2,"v",false],[3,0,2,"h",false],[4,2,2,"v",false],[1,4,3,"v",false],[0,0,2,"h",false],[5,0,2,"h",false],[5,3,2,"h",false],[1,1,2,"v",false]],par:5,d:"Beginner"},
+    {v:[[2,1,2,"h",true],[2,4,3,"v",false],[3,2,2,"h",false],[4,0,2,"v",false],[2,0,2,"v",false],[3,1,3,"v",false],[1,0,3,"h",false],[5,3,3,"h",false]],par:5,d:"Beginner"},
+    {v:[[2,2,2,"h",true],[1,5,3,"v",false],[1,4,2,"v",false],[3,2,2,"v",false],[3,0,2,"v",false],[5,4,2,"h",false],[1,0,3,"h",false],[4,3,2,"v",false],[0,4,2,"h",false]],par:5,d:"Beginner"},
+    {v:[[2,0,2,"h",true],[1,3,2,"v",false],[4,1,2,"v",false],[1,5,2,"v",false],[2,4,3,"v",false],[3,0,2,"h",false],[1,2,2,"v",false],[4,2,2,"h",false],[3,5,2,"v",false]],par:5,d:"Beginner"},
+    {v:[[2,1,2,"h",true],[0,4,3,"v",false],[5,4,2,"h",false],[0,0,3,"v",false],[3,0,3,"v",false],[2,3,3,"v",false],[0,1,3,"h",false],[4,1,2,"v",false]],par:5,d:"Beginner"},
+    {v:[[2,1,2,"h",true],[1,4,2,"v",false],[4,2,2,"h",false],[3,1,2,"v",false],[3,4,2,"h",false],[1,0,2,"v",false],[0,3,2,"h",false],[1,3,3,"v",false]],par:5,d:"Beginner"},
+    {v:[[2,0,2,"h",true],[2,5,2,"v",false],[3,1,3,"h",false],[0,2,3,"v",false],[4,5,2,"v",false],[0,0,2,"h",false],[1,3,2,"h",false],[2,4,2,"v",false]],par:5,d:"Beginner"},
+    {v:[[2,1,2,"h",true],[0,5,3,"v",false],[3,0,3,"v",false],[4,2,2,"h",false],[2,4,3,"v",false],[5,1,2,"h",false],[1,0,2,"h",false],[0,3,3,"v",false]],par:5,d:"Beginner"},
+    {v:[[2,0,2,"h",true],[2,3,3,"v",false],[5,3,2,"h",false],[0,4,2,"v",false],[2,2,3,"v",false],[0,2,2,"h",false],[0,0,2,"h",false],[5,0,2,"h",false],[2,5,2,"v",false]],par:5,d:"Beginner"},
+    {v:[[2,1,2,"h",true],[2,5,2,"v",false],[0,0,2,"h",false],[4,4,2,"h",false],[4,1,2,"v",false],[4,3,2,"v",false],[2,0,2,"v",false],[1,4,3,"v",false],[1,0,2,"h",false]],par:5,d:"Beginner"},
+    {v:[[2,0,2,"h",true],[2,3,2,"v",false],[3,5,3,"v",false],[5,3,2,"h",false],[3,2,2,"v",false],[1,4,3,"v",false],[0,4,2,"h",false],[4,0,2,"h",false],[1,2,2,"v",false]],par:5,d:"Beginner"},
+    {v:[[2,0,2,"h",true],[0,2,3,"v",false],[1,3,2,"v",false],[0,4,2,"h",false],[1,4,2,"v",false],[2,5,2,"v",false],[3,3,2,"v",false],[5,3,2,"h",false],[0,0,2,"v",false]],par:5,d:"Beginner"},
+    {v:[[2,1,2,"h",true],[0,4,3,"v",false],[3,0,2,"h",false],[5,4,2,"h",false],[0,2,2,"v",false],[1,0,2,"h",false],[1,3,2,"v",false],[5,1,2,"h",false],[3,2,2,"v",false]],par:5,d:"Beginner"},
+    {v:[[2,2,2,"h",true],[1,5,3,"v",false],[5,3,3,"h",false],[0,2,2,"h",false],[3,0,3,"v",false],[3,2,2,"h",false],[4,2,2,"v",false],[1,1,2,"v",false]],par:5,d:"Beginner"},
+    {v:[[2,0,2,"h",true],[2,2,3,"v",false],[0,2,2,"v",false],[1,3,3,"v",false],[5,3,2,"h",false],[2,4,2,"v",false],[4,0,2,"v",false],[1,4,2,"h",false]],par:5,d:"Beginner"},
+    {v:[[2,0,2,"h",true],[1,4,3,"v",false],[0,3,3,"v",false],[4,1,2,"v",false],[5,3,2,"h",false]],par:5,d:"Beginner"},
+    {v:[[2,0,2,"h",true],[2,2,2,"v",false],[5,2,3,"h",false],[2,3,3,"v",false],[1,4,2,"v",false]],par:5,d:"Beginner"},
+    {v:[[2,1,2,"h",true],[2,5,2,"v",false],[0,3,3,"v",false],[5,0,2,"h",false],[4,3,2,"h",false],[3,3,2,"h",false],[4,0,3,"h",false],[0,0,2,"h",false]],par:5,d:"Beginner"},
+    {v:[[2,0,2,"h",true],[2,5,2,"v",false],[4,0,3,"h",false],[2,4,3,"v",false],[3,0,3,"h",false],[5,1,2,"h",false],[1,2,3,"h",false],[5,3,2,"h",false]],par:5,d:"Beginner"},
+    {v:[[2,1,2,"h",true],[1,4,2,"v",false],[0,0,2,"v",false],[0,3,3,"v",false],[4,4,2,"h",false],[4,2,2,"h",false],[5,0,2,"h",false],[1,5,2,"v",false]],par:5,d:"Beginner"},
+    {v:[[2,0,2,"h",true],[2,2,2,"v",false],[0,1,2,"v",false],[3,0,2,"h",false],[0,3,2,"v",false],[2,5,3,"v",false],[5,2,3,"h",false],[2,4,3,"v",false]],par:5,d:"Beginner"},
+    {v:[[2,0,2,"h",true],[2,2,3,"v",false],[0,0,2,"h",false],[1,0,3,"h",false],[2,3,2,"v",false],[4,5,2,"v",false],[1,5,2,"v",false],[4,0,2,"v",false],[2,4,3,"v",false]],par:5,d:"Beginner"},
+    {v:[[2,1,2,"h",true],[2,5,3,"v",false],[1,1,2,"h",false],[3,2,2,"h",false],[1,3,2,"h",false],[4,2,2,"v",false],[4,3,2,"h",false],[3,0,2,"v",false],[2,4,2,"v",false]],par:5,d:"Beginner"},
+    {v:[[2,0,2,"h",true],[1,3,2,"v",false],[5,0,3,"h",false],[4,1,2,"h",false],[3,1,3,"h",false],[2,5,2,"v",false],[0,4,3,"v",false],[0,1,3,"h",false]],par:5,d:"Beginner"},
+    {v:[[2,1,2,"h",true],[1,4,2,"v",false],[1,3,3,"v",false],[3,0,2,"h",false],[0,1,2,"v",false],[2,5,2,"v",false],[4,2,3,"h",false],[5,3,3,"h",false]],par:6,d:"Beginner"},
+    {v:[[2,0,2,"h",true],[1,3,2,"v",false],[3,0,3,"h",false],[0,3,2,"h",false],[0,0,2,"v",false],[5,1,2,"h",false],[0,2,3,"v",false],[5,3,3,"h",false],[1,4,2,"h",false]],par:6,d:"Beginner"},
+    {v:[[2,0,2,"h",true],[2,3,2,"v",false],[0,2,3,"h",false],[0,1,2,"v",false],[4,5,2,"v",false],[1,2,2,"v",false],[5,2,3,"h",false],[1,4,2,"v",false],[4,1,3,"h",false]],par:6,d:"Beginner"},
+    {v:[[2,1,2,"h",true],[1,4,3,"v",false],[3,1,3,"v",false],[4,4,2,"h",false],[4,2,2,"h",false]],par:6,d:"Beginner"},
+    {v:[[2,1,2,"h",true],[1,3,3,"v",false],[0,1,2,"v",false],[4,3,2,"h",false],[0,4,3,"v",false],[2,0,2,"v",false],[4,2,2,"v",false]],par:7,d:"Beginner"},
+    {v:[[2,0,2,"h",true],[0,4,3,"v",false],[0,3,2,"v",false],[3,0,2,"v",false],[3,1,2,"h",false],[4,2,2,"v",false],[1,1,2,"h",false],[4,1,2,"v",false],[4,4,2,"h",false]],par:7,d:"Beginner"},
+    {v:[[2,0,2,"h",true],[0,3,3,"v",false],[3,5,2,"v",false],[1,4,2,"h",false],[2,2,3,"v",false],[3,0,2,"v",false],[4,3,2,"h",false],[1,1,2,"h",false],[5,2,2,"h",false]],par:8,d:"Beginner"},
+    {v:[[2,1,2,"h",true],[0,4,3,"v",false],[3,3,2,"v",false],[3,4,2,"h",false],[1,1,3,"h",false],[3,1,2,"h",false],[2,0,2,"v",false],[4,4,2,"h",false]],par:8,d:"Beginner"},
+    {v:[[2,2,2,"h",true],[0,5,3,"v",false],[5,4,2,"h",false],[1,4,3,"v",false],[3,2,3,"v",false],[2,1,2,"v",false],[0,1,3,"h",false]],par:8,d:"Beginner"},
+    {v:[[2,0,2,"h",true],[2,5,3,"v",false],[4,3,2,"h",false],[3,2,3,"h",false],[0,4,3,"v",false],[4,1,2,"v",false],[0,2,2,"v",false],[5,2,3,"h",false],[0,3,2,"v",false]],par:8,d:"Beginner"},
+    {v:[[2,2,2,"h",true],[0,4,3,"v",false],[2,1,3,"v",false],[5,3,2,"h",false],[4,3,2,"h",false],[0,1,3,"h",false],[4,2,2,"v",false],[3,0,3,"v",false]],par:9,d:"Beginner"},
+    {v:[[2,1,2,"h",true],[1,4,2,"v",false],[0,0,3,"h",false],[3,4,2,"h",false],[4,2,3,"h",false],[1,1,3,"h",false],[1,0,3,"v",false],[0,3,2,"h",false],[5,2,2,"h",false],[3,1,2,"v",false],[2,3,2,"v",false]],par:10,d:"Intermediate"},
+    {v:[[2,0,2,"h",true],[1,3,2,"v",false],[0,0,2,"h",false],[1,2,2,"v",false],[3,4,2,"h",false],[5,2,2,"h",false],[5,4,2,"h",false],[3,2,2,"v",false],[0,4,2,"v",false],[3,3,2,"v",false],[0,5,3,"v",false]],par:10,d:"Intermediate"},
+    {v:[[2,0,2,"h",true],[2,3,2,"v",false],[3,4,2,"v",false],[0,2,3,"v",false],[3,0,3,"h",false],[5,3,2,"h",false],[3,5,3,"v",false]],par:10,d:"Intermediate"},
+    {v:[[2,2,2,"h",true],[2,5,2,"v",false],[3,3,2,"h",false],[0,3,2,"v",false],[1,4,2,"v",false],[0,1,3,"v",false],[0,2,2,"v",false],[0,4,2,"h",false],[4,5,2,"v",false],[5,0,2,"h",false]],par:10,d:"Intermediate"},
+    {v:[[2,0,2,"h",true],[1,4,3,"v",false],[5,3,2,"h",false],[3,5,3,"v",false],[4,1,2,"v",false],[1,2,3,"v",false],[4,3,2,"h",false]],par:10,d:"Intermediate"},
+    {v:[[2,0,2,"h",true],[1,3,2,"v",false],[0,2,3,"h",false],[0,5,2,"v",false],[2,2,2,"v",false],[0,0,2,"h",false],[4,2,2,"v",false],[2,4,2,"v",false],[3,0,2,"h",false],[3,5,2,"v",false]],par:10,d:"Intermediate"},
+    {v:[[2,0,2,"h",true],[2,2,2,"v",false],[3,5,3,"v",false],[2,3,2,"v",false],[4,1,2,"v",false],[0,2,2,"v",false],[4,2,2,"h",false],[1,3,2,"h",false],[4,4,2,"v",false],[1,5,2,"v",false],[4,0,2,"v",false]],par:10,d:"Intermediate"},
+    {v:[[2,0,2,"h",true],[0,5,3,"v",false],[1,2,2,"v",false],[5,2,2,"h",false],[3,2,2,"h",false],[4,1,2,"v",false],[1,3,2,"h",false],[5,4,2,"h",false],[0,2,2,"h",false],[3,4,2,"h",false]],par:10,d:"Intermediate"},
+    {v:[[2,0,2,"h",true],[1,5,3,"v",false],[4,0,2,"v",false],[1,2,3,"v",false],[5,3,3,"h",false],[4,2,2,"h",false],[3,4,2,"v",false],[1,3,2,"v",false],[3,0,2,"h",false],[0,2,2,"h",false],[1,0,2,"h",false]],par:10,d:"Intermediate"},
+    {v:[[2,0,2,"h",true],[1,2,3,"v",false],[0,4,2,"v",false],[5,2,3,"h",false],[2,5,3,"v",false],[4,2,3,"h",false],[3,0,2,"v",false]],par:10,d:"Intermediate"},
+    {v:[[2,2,2,"h",true],[0,5,3,"v",false],[1,0,3,"v",false],[3,2,2,"v",false],[2,1,3,"v",false],[4,3,2,"h",false],[0,4,3,"v",false],[5,3,2,"h",false],[1,2,2,"h",false]],par:10,d:"Intermediate"},
+    {v:[[2,0,2,"h",true],[1,5,3,"v",false],[3,1,2,"v",false],[4,4,2,"v",false],[1,0,2,"h",false],[2,2,2,"v",false],[0,4,2,"h",false],[0,2,2,"v",false],[0,3,2,"v",false],[2,3,3,"v",false],[2,4,2,"v",false]],par:10,d:"Intermediate"},
+    {v:[[2,2,2,"h",true],[1,4,3,"v",false],[1,1,3,"h",false],[4,3,3,"h",false],[3,2,2,"v",false],[0,2,3,"h",false],[0,5,3,"v",false],[4,0,2,"v",false],[2,0,2,"v",false]],par:10,d:"Intermediate"},
+    {v:[[2,0,2,"h",true],[0,5,3,"v",false],[5,1,2,"h",false],[4,4,2,"h",false],[1,2,2,"v",false],[1,3,3,"v",false],[3,0,3,"v",false],[3,1,2,"v",false],[0,3,2,"h",false]],par:10,d:"Intermediate"},
+    {v:[[2,2,2,"h",true],[1,4,3,"v",false],[2,1,3,"v",false],[5,2,2,"h",false],[0,3,2,"h",false],[1,1,3,"h",false],[2,0,2,"v",false],[0,0,2,"v",false],[2,5,3,"v",false],[4,3,2,"h",false],[3,2,2,"v",false]],par:10,d:"Intermediate"},
+    {v:[[2,1,2,"h",true],[1,4,2,"v",false],[0,1,2,"h",false],[5,1,3,"h",false],[1,5,2,"v",false],[0,3,3,"v",false],[3,3,2,"h",false],[3,2,2,"v",false],[3,5,2,"v",false],[5,4,2,"h",false],[4,3,2,"h",false]],par:10,d:"Intermediate"},
+    {v:[[2,2,2,"h",true],[1,5,2,"v",false],[4,2,2,"v",false],[1,1,2,"v",false],[4,3,2,"h",false],[3,0,3,"h",false],[1,4,3,"v",false]],par:10,d:"Intermediate"},
+    {v:[[2,1,2,"h",true],[0,4,3,"v",false],[5,1,2,"h",false],[3,5,2,"v",false],[3,3,2,"h",false],[3,1,2,"v",false],[1,0,2,"v",false],[1,3,2,"v",false],[3,2,2,"v",false],[5,3,2,"h",false],[0,2,2,"v",false]],par:10,d:"Intermediate"},
+    {v:[[2,0,2,"h",true],[1,5,2,"v",false],[1,2,3,"v",false],[4,0,3,"h",false],[3,5,2,"v",false],[0,0,2,"v",false],[0,2,2,"h",false],[3,3,2,"v",false],[5,3,2,"h",false],[0,4,2,"v",false]],par:11,d:"Intermediate"},
+    {v:[[2,0,2,"h",true],[2,2,2,"v",false],[1,4,3,"v",false],[0,0,2,"h",false],[4,3,3,"h",false],[0,5,2,"v",false],[5,1,2,"h",false],[1,1,3,"h",false],[3,0,3,"v",false],[5,4,2,"h",false]],par:11,d:"Intermediate"},
+    {v:[[2,1,2,"h",true],[2,3,2,"v",false],[1,4,3,"v",false],[4,2,2,"v",false],[3,1,3,"v",false],[1,2,2,"h",false],[0,2,2,"h",false],[4,3,2,"v",false],[0,5,3,"v",false],[5,4,2,"h",false],[1,0,2,"h",false]],par:11,d:"Intermediate"},
+    {v:[[2,2,2,"h",true],[0,5,3,"v",false],[3,4,2,"h",false],[2,1,3,"v",false],[1,1,2,"h",false],[4,2,3,"h",false],[0,0,3,"h",false],[0,4,2,"v",false],[1,0,3,"v",false],[5,1,3,"h",false],[3,2,2,"h",false]],par:11,d:"Intermediate"},
+    {v:[[2,2,2,"h",true],[1,4,3,"v",false],[0,3,2,"h",false],[5,0,3,"h",false],[0,5,2,"v",false],[3,3,2,"v",false],[4,4,2,"h",false],[0,1,3,"v",false],[1,0,3,"v",false]],par:11,d:"Intermediate"},
+    {v:[[2,0,2,"h",true],[1,3,2,"v",false],[4,3,2,"v",false],[2,5,2,"v",false],[3,2,2,"h",false],[0,2,3,"v",false],[4,1,2,"h",false],[4,0,2,"v",false],[0,4,2,"h",false],[4,4,2,"v",false]],par:11,d:"Intermediate"},
+    {v:[[2,1,2,"h",true],[1,3,2,"v",false],[0,5,3,"v",false],[5,2,3,"h",false],[4,3,3,"h",false],[3,1,3,"v",false],[1,0,3,"v",false],[0,2,2,"h",false],[1,1,2,"h",false],[2,4,2,"v",false],[0,0,2,"h",false]],par:11,d:"Intermediate"},
+    {v:[[2,0,2,"h",true],[1,3,2,"v",false],[4,3,2,"h",false],[3,1,3,"v",false],[4,0,2,"v",false],[1,2,2,"v",false],[0,4,3,"v",false],[5,3,3,"h",false],[3,3,2,"h",false],[0,1,2,"h",false],[0,0,2,"v",false]],par:11,d:"Intermediate"},
+    {v:[[2,1,2,"h",true],[1,3,3,"v",false],[3,2,3,"v",false],[1,5,3,"v",false],[1,0,3,"h",false],[3,4,2,"v",false],[0,3,2,"h",false],[4,0,2,"h",false],[5,3,2,"h",false],[0,0,3,"h",false],[2,0,2,"v",false]],par:12,d:"Intermediate"},
+    {v:[[2,0,2,"h",true],[2,2,2,"v",false],[5,1,3,"h",false],[0,0,2,"v",false],[1,4,3,"v",false],[4,2,2,"h",false],[3,5,2,"v",false],[0,2,3,"h",false],[3,0,3,"v",false],[1,1,3,"h",false],[0,5,2,"v",false]],par:12,d:"Intermediate"},
+    {v:[[2,0,2,"h",true],[1,3,3,"v",false],[0,5,3,"v",false],[3,0,3,"v",false],[4,4,2,"v",false],[4,2,2,"h",false],[3,1,2,"v",false],[1,2,2,"v",false]],par:12,d:"Intermediate"},
+    {v:[[2,0,2,"h",true],[0,2,3,"v",false],[4,0,2,"v",false],[5,2,3,"h",false],[4,2,2,"h",false],[0,3,2,"h",false],[3,3,3,"h",false],[3,1,2,"h",false],[0,5,3,"v",false],[4,1,2,"v",false],[1,4,2,"v",false]],par:12,d:"Intermediate"},
+    {v:[[2,0,2,"h",true],[1,3,3,"v",false],[4,2,2,"h",false],[5,3,3,"h",false],[3,0,2,"v",false],[0,3,2,"h",false],[0,5,2,"v",false],[2,4,3,"v",false],[4,1,2,"v",false]],par:13,d:"Intermediate"},
+    {v:[[2,1,2,"h",true],[1,5,2,"v",false],[4,2,2,"h",false],[5,2,2,"h",false],[1,3,3,"v",false],[3,1,2,"v",false],[3,0,2,"v",false],[2,4,2,"v",false],[4,4,2,"v",false]],par:14,d:"Intermediate"},
+    {v:[[2,1,2,"h",true],[2,5,2,"v",false],[0,0,3,"v",false],[5,2,2,"h",false],[1,4,3,"v",false],[5,4,2,"h",false],[3,2,2,"v",false],[1,1,3,"h",false],[4,3,3,"h",false]],par:14,d:"Intermediate"},
+    {v:[[2,0,2,"h",true],[1,4,3,"v",false],[3,3,2,"v",false],[0,4,2,"h",false],[4,1,2,"v",false],[2,2,2,"v",false],[4,2,2,"v",false],[5,4,2,"h",false],[4,4,2,"h",false],[4,0,2,"v",false],[3,0,2,"h",false]],par:14,d:"Intermediate"},
+    {v:[[2,1,2,"h",true],[2,5,3,"v",false],[4,1,2,"v",false],[4,3,2,"h",false],[0,3,3,"v",false],[3,2,3,"v",false],[1,4,3,"v",false],[0,0,2,"h",false]],par:15,d:"Intermediate"},
+    {v:[[2,2,2,"h",true],[0,4,3,"v",false],[4,3,2,"h",false],[5,1,3,"h",false],[0,0,2,"h",false],[3,4,2,"h",false],[3,2,2,"v",false],[4,5,2,"v",false],[3,0,2,"v",false],[1,0,3,"h",false],[0,2,2,"h",false]],par:15,d:"Intermediate"},
+    {v:[[2,0,2,"h",true],[0,2,3,"v",false],[2,5,2,"v",false],[2,3,3,"v",false],[0,3,2,"h",false],[5,2,2,"h",false],[3,0,2,"v",false],[3,4,3,"v",false],[4,1,2,"h",false],[4,5,2,"v",false]],par:15,d:"Intermediate"},
+    {v:[[2,0,2,"h",true],[1,3,3,"v",false],[4,5,2,"v",false],[1,4,3,"v",false],[3,0,3,"h",false],[4,2,2,"v",false],[0,2,3,"h",false],[4,3,2,"h",false],[0,0,2,"v",false]],par:16,d:"Intermediate"},
+    {v:[[2,1,2,"h",true],[0,3,3,"v",false],[3,2,2,"h",false],[1,0,2,"v",false],[4,5,2,"v",false],[0,2,2,"v",false],[4,2,2,"v",false],[0,0,2,"h",false],[1,5,2,"v",false],[4,3,2,"h",false],[5,0,2,"h",false]],par:16,d:"Intermediate"},
+    {v:[[2,0,2,"h",true],[1,4,2,"v",false],[3,1,2,"v",false],[0,3,3,"v",false],[4,3,2,"h",false],[3,5,2,"v",false],[2,2,2,"v",false],[0,4,2,"h",false],[1,5,2,"v",false]],par:16,d:"Intermediate"},
+    {v:[[2,2,2,"h",true],[1,4,3,"v",false],[5,3,2,"h",false],[4,3,2,"h",false],[3,1,2,"v",false],[1,0,3,"v",false],[0,0,3,"h",false],[1,1,2,"h",false],[0,3,2,"v",false],[1,5,3,"v",false],[3,2,2,"v",false]],par:19,d:"Advanced"},
+    {v:[[2,0,2,"h",true],[1,4,2,"v",false],[3,1,2,"h",false],[0,3,3,"h",false],[3,5,3,"v",false],[1,2,2,"v",false],[5,1,3,"h",false],[1,0,2,"h",false],[4,2,2,"h",false],[1,5,2,"v",false],[3,0,2,"v",false],[3,4,2,"v",false]],par:19,d:"Advanced"},
+    {v:[[2,0,2,"h",true],[1,3,3,"v",false],[0,4,2,"v",false],[4,0,2,"v",false],[4,2,2,"v",false],[5,3,3,"h",false],[0,2,2,"v",false],[3,5,2,"v",false],[0,5,2,"v",false],[4,1,2,"v",false],[2,4,2,"v",false],[4,3,2,"h",false]],par:19,d:"Advanced"},
+    {v:[[2,0,2,"h",true],[2,4,3,"v",false],[0,3,2,"v",false],[1,2,3,"v",false],[4,2,2,"h",false],[4,1,2,"v",false],[5,2,2,"h",false],[3,5,2,"v",false],[4,0,2,"v",false],[0,4,2,"h",false],[2,3,2,"v",false]],par:19,d:"Advanced"},
+    {v:[[2,1,2,"h",true],[2,5,3,"v",false],[3,2,3,"h",false],[4,0,3,"h",false],[1,0,3,"v",false],[5,2,3,"h",false],[4,3,2,"h",false],[1,4,2,"v",false],[0,3,2,"h",false],[5,0,2,"h",false],[0,2,2,"v",false]],par:19,d:"Advanced"},
+    {v:[[2,1,2,"h",true],[2,5,2,"v",false],[2,3,2,"v",false],[4,5,2,"v",false],[4,1,2,"v",false],[0,4,2,"h",false],[4,2,2,"h",false],[0,0,2,"v",false],[3,1,2,"h",false],[1,3,3,"h",false],[2,0,3,"v",false],[3,4,2,"v",false],[5,3,2,"h",false]],par:19,d:"Advanced"},
+    {v:[[2,0,2,"h",true],[1,2,2,"v",false],[3,3,2,"h",false],[0,1,3,"h",false],[2,5,2,"v",false],[0,4,3,"v",false],[3,0,2,"v",false],[1,3,2,"v",false],[3,1,2,"h",false],[4,2,3,"h",false]],par:19,d:"Advanced"},
+    {v:[[2,2,2,"h",true],[2,4,3,"v",false],[2,1,2,"v",false],[5,4,2,"h",false],[0,2,2,"h",false],[3,2,3,"v",false],[1,2,2,"h",false],[4,0,2,"h",false],[1,0,2,"v",false],[0,5,2,"v",false],[0,0,2,"h",false],[4,3,2,"v",false],[2,5,3,"v",false]],par:19,d:"Advanced"},
+    {v:[[2,1,2,"h",true],[1,3,2,"v",false],[3,2,2,"v",false],[5,1,3,"h",false],[1,4,3,"v",false],[1,0,2,"v",false],[4,4,2,"h",false],[0,2,3,"h",false],[0,5,2,"v",false],[4,0,2,"v",false],[3,1,2,"v",false],[2,5,2,"v",false]],par:19,d:"Advanced"},
+    {v:[[2,0,2,"h",true],[1,5,2,"v",false],[0,0,2,"h",false],[3,0,2,"v",false],[2,4,3,"v",false],[5,1,2,"h",false],[2,2,2,"v",false],[3,1,2,"v",false],[0,2,2,"v",false],[4,5,2,"v",false],[2,3,2,"v",false],[4,2,2,"h",false]],par:19,d:"Advanced"},
+    {v:[[2,2,2,"h",true],[1,5,3,"v",false],[2,1,3,"v",false],[5,0,2,"h",false],[0,2,2,"v",false],[4,2,2,"h",false],[1,4,2,"v",false],[5,3,2,"h",false],[2,0,3,"v",false],[4,4,2,"h",false],[0,3,2,"h",false],[0,0,2,"h",false],[1,0,2,"h",false]],par:19,d:"Advanced"},
+    {v:[[2,0,2,"h",true],[1,4,3,"v",false],[0,0,2,"h",false],[0,3,2,"v",false],[4,2,2,"h",false],[4,1,2,"v",false],[3,5,3,"v",false],[1,2,3,"v",false],[5,3,2,"h",false],[0,5,2,"v",false],[3,0,2,"v",false]],par:19,d:"Advanced"},
+    {v:[[2,0,2,"h",true],[0,4,3,"v",false],[1,0,3,"h",false],[3,2,2,"v",false],[2,3,2,"v",false],[3,0,2,"h",false],[4,0,2,"v",false],[4,3,3,"h",false],[0,5,2,"v",false],[5,4,2,"h",false],[2,5,2,"v",false]],par:19,d:"Advanced"},
+    {v:[[2,0,2,"h",true],[1,2,3,"v",false],[4,2,2,"h",false],[4,5,2,"v",false],[5,2,2,"h",false],[4,4,2,"v",false],[1,4,2,"v",false],[0,1,2,"h",false],[4,1,2,"v",false],[2,3,2,"v",false],[0,5,2,"v",false]],par:19,d:"Advanced"},
+    {v:[[2,1,2,"h",true],[2,5,2,"v",false],[3,0,3,"v",false],[5,3,3,"h",false],[4,2,2,"v",false],[0,1,2,"h",false],[0,4,3,"v",false],[0,5,2,"v",false],[1,1,3,"h",false],[3,1,3,"v",false],[4,4,2,"h",false],[0,0,2,"v",false]],par:19,d:"Advanced"},
+    {v:[[2,0,2,"h",true],[2,5,2,"v",false],[0,4,2,"h",false],[1,2,3,"v",false],[3,1,2,"v",false],[0,3,3,"v",false],[4,5,2,"v",false],[4,3,2,"h",false],[5,1,2,"h",false],[2,4,2,"v",false]],par:19,d:"Advanced"},
+    {v:[[2,0,2,"h",true],[1,2,2,"v",false],[0,0,3,"h",false],[1,3,2,"h",false],[4,1,2,"h",false],[4,5,2,"v",false],[0,4,2,"h",false],[5,2,2,"h",false],[2,5,2,"v",false],[2,4,3,"v",false],[4,0,2,"v",false]],par:19,d:"Advanced"},
+    {v:[[2,2,2,"h",true],[2,4,3,"v",false],[5,3,2,"h",false],[0,2,3,"h",false],[4,2,2,"v",false],[1,2,2,"h",false],[1,5,2,"v",false],[5,0,2,"h",false],[0,0,3,"v",false],[3,0,3,"h",false]],par:20,d:"Advanced"},
+    {v:[[2,0,2,"h",true],[1,5,2,"v",false],[0,0,2,"h",false],[0,4,2,"h",false],[3,4,2,"h",false],[5,2,3,"h",false],[2,2,3,"v",false],[3,3,2,"v",false],[4,5,2,"v",false],[1,2,3,"h",false],[4,0,2,"v",false]],par:20,d:"Advanced"},
+    {v:[[2,0,2,"h",true],[1,5,2,"v",false],[4,3,2,"v",false],[1,3,2,"v",false],[2,4,2,"v",false],[4,0,3,"h",false],[3,5,2,"v",false],[1,1,2,"h",false],[2,2,2,"v",false],[0,4,2,"h",false],[0,0,2,"v",false],[5,0,3,"h",false]],par:20,d:"Advanced"},
+    {v:[[2,1,2,"h",true],[2,5,3,"v",false],[5,4,2,"h",false],[3,3,2,"h",false],[0,2,2,"v",false],[4,0,2,"h",false],[0,3,3,"h",false],[5,2,2,"h",false],[1,3,2,"v",false],[2,0,2,"v",false],[1,0,2,"h",false],[1,4,2,"h",false],[4,2,2,"h",false]],par:20,d:"Advanced"},
+    {v:[[2,0,2,"h",true],[1,5,2,"v",false],[4,2,3,"h",false],[5,2,2,"h",false],[1,1,3,"h",false],[3,3,2,"h",false],[0,0,2,"h",false],[0,4,3,"v",false],[3,5,2,"v",false],[2,2,2,"v",false],[3,0,2,"v",false]],par:20,d:"Advanced"},
+    {v:[[2,0,2,"h",true],[1,2,2,"v",false],[2,4,2,"v",false],[0,4,2,"v",false],[5,1,2,"h",false],[1,3,3,"v",false],[0,1,2,"h",false],[4,2,3,"h",false],[0,0,2,"v",false],[1,5,2,"v",false],[5,3,2,"h",false],[4,5,2,"v",false],[3,1,2,"h",false]],par:20,d:"Advanced"},
+    {v:[[2,0,2,"h",true],[2,4,3,"v",false],[0,5,2,"v",false],[3,2,2,"h",false],[1,2,2,"h",false],[3,1,3,"v",false],[0,2,2,"h",false],[0,0,2,"h",false],[5,4,2,"h",false],[4,2,2,"v",false],[4,3,2,"v",false],[4,0,2,"v",false],[2,5,2,"v",false]],par:20,d:"Advanced"},
+    {v:[[2,1,2,"h",true],[1,4,3,"v",false],[5,1,3,"h",false],[3,0,3,"v",false],[3,3,2,"v",false],[0,1,3,"h",false],[3,1,2,"v",false],[0,5,2,"v",false],[2,5,2,"v",false],[1,0,2,"v",false],[1,2,2,"h",false],[4,4,2,"h",false],[3,2,2,"v",false]],par:20,d:"Advanced"},
+    {v:[[2,2,2,"h",true],[0,4,3,"v",false],[4,4,2,"h",false],[2,5,2,"v",false],[0,0,3,"h",false],[4,2,2,"v",false],[5,3,2,"h",false],[5,0,2,"h",false],[3,1,2,"h",false],[1,0,3,"h",false],[4,0,2,"h",false],[0,5,2,"v",false],[2,0,2,"v",false]],par:20,d:"Advanced"},
+    {v:[[2,0,2,"h",true],[1,3,3,"v",false],[1,4,3,"v",false],[4,3,2,"h",false],[3,0,3,"v",false],[2,5,2,"v",false],[0,5,2,"v",false],[3,1,2,"v",false],[0,1,3,"h",false],[1,2,2,"v",false]],par:21,d:"Advanced"},
+    {v:[[2,0,2,"h",true],[2,2,2,"v",false],[0,2,3,"h",false],[2,5,3,"v",false],[1,4,2,"v",false],[1,2,2,"h",false],[3,3,2,"h",false],[3,0,2,"v",false],[4,4,2,"v",false],[4,1,2,"h",false]],par:21,d:"Advanced"},
+    {v:[[2,1,2,"h",true],[0,4,3,"v",false],[3,0,2,"v",false],[4,4,2,"h",false],[1,3,2,"v",false],[3,4,2,"h",false],[0,2,2,"h",false],[5,3,3,"h",false],[0,0,2,"v",false],[4,1,2,"v",false],[3,3,2,"v",false],[4,2,2,"v",false],[0,5,3,"v",false]],par:21,d:"Advanced"},
+    {v:[[2,1,2,"h",true],[1,4,2,"v",false],[0,3,3,"h",false],[3,1,2,"h",false],[4,2,3,"h",false],[2,5,3,"v",false],[0,0,3,"v",false],[5,2,2,"h",false],[5,4,2,"h",false],[1,2,2,"h",false],[3,3,2,"h",false],[4,1,2,"v",false],[0,1,2,"h",false]],par:21,d:"Advanced"},
+    {v:[[2,0,2,"h",true],[2,5,3,"v",false],[5,1,3,"h",false],[3,1,3,"h",false],[4,0,3,"h",false],[0,3,3,"v",false],[1,4,2,"v",false],[3,4,3,"v",false],[1,2,2,"v",false],[0,0,2,"v",false],[0,4,2,"h",false]],par:21,d:"Advanced"},
+    {v:[[2,0,2,"h",true],[0,2,3,"v",false],[0,5,3,"v",false],[1,0,2,"h",false],[5,2,2,"h",false],[3,0,2,"v",false],[1,3,3,"v",false],[0,4,2,"v",false],[3,1,2,"h",false]],par:21,d:"Advanced"},
+    {v:[[2,0,2,"h",true],[0,2,3,"v",false],[5,1,2,"h",false],[3,2,3,"h",false],[4,1,2,"h",false],[3,5,3,"v",false],[4,0,2,"v",false],[0,4,2,"h",false],[1,3,2,"v",false],[0,1,2,"v",false]],par:21,d:"Advanced"},
+    {v:[[2,1,2,"h",true],[1,4,3,"v",false],[5,2,2,"h",false],[0,2,3,"h",false],[3,0,2,"h",false],[2,5,2,"v",false],[4,3,3,"h",false],[3,2,2,"v",false],[0,5,2,"v",false],[0,0,3,"v",false]],par:21,d:"Advanced"},
+    {v:[[2,0,2,"h",true],[1,5,3,"v",false],[4,3,2,"v",false],[0,2,3,"h",false],[4,4,2,"h",false],[1,2,2,"h",false],[2,3,2,"v",false],[2,2,2,"v",false],[4,0,2,"v",false],[5,4,2,"h",false]],par:22,d:"Advanced"},
+    {v:[[2,1,2,"h",true],[2,4,3,"v",false],[3,3,2,"v",false],[1,4,2,"h",false],[0,1,2,"h",false],[5,0,2,"h",false],[4,5,2,"v",false],[5,3,2,"h",false],[0,3,2,"v",false],[3,0,3,"h",false],[0,4,2,"h",false],[4,2,2,"v",false],[4,0,2,"h",false]],par:22,d:"Advanced"},
+    {v:[[2,1,2,"h",true],[1,5,2,"v",false],[0,4,3,"v",false],[0,2,2,"v",false],[0,0,2,"h",false],[3,3,2,"h",false],[5,4,2,"h",false],[5,2,2,"h",false],[3,1,2,"v",false],[1,0,2,"v",false],[0,3,2,"v",false],[3,2,2,"v",false],[4,4,2,"h",false]],par:23,d:"Advanced"},
+    {v:[[2,1,2,"h",true],[1,3,2,"v",false],[5,2,2,"h",false],[3,0,2,"h",false],[3,2,2,"v",false],[0,1,2,"h",false],[1,5,2,"v",false],[4,3,3,"h",false],[0,3,3,"h",false],[1,4,2,"v",false],[0,0,3,"v",false],[1,1,2,"h",false]],par:23,d:"Advanced"},
+    {v:[[2,0,2,"h",true],[1,2,3,"v",false],[3,3,2,"h",false],[0,0,2,"h",false],[0,4,2,"h",false],[4,1,2,"h",false],[3,0,2,"v",false],[3,5,3,"v",false],[0,3,3,"v",false]],par:23,d:"Advanced"},
+    {v:[[2,0,2,"h",true],[2,2,2,"v",false],[3,3,2,"v",false],[4,1,2,"h",false],[4,4,2,"v",false],[3,0,2,"v",false],[0,0,3,"h",false],[2,5,2,"v",false],[0,3,2,"h",false],[1,0,3,"h",false],[1,3,2,"h",false],[5,1,3,"h",false],[4,5,2,"v",false]],par:24,d:"Advanced"},
+    {v:[[2,0,2,"h",true],[2,3,3,"v",false],[2,4,2,"v",false],[1,5,2,"v",false],[4,5,2,"v",false],[1,1,2,"h",false],[4,0,3,"h",false],[0,4,2,"v",false],[0,0,2,"v",false],[5,2,3,"h",false],[3,0,2,"h",false],[2,2,2,"v",false],[0,2,2,"h",false]],par:23,d:"Expert"},
+    {v:[[2,2,2,"h",true],[1,5,2,"v",false],[4,3,2,"v",false],[1,2,2,"h",false],[2,0,3,"v",false],[5,0,2,"h",false],[0,4,3,"v",false],[3,1,3,"h",false],[5,4,2,"h",false],[0,0,2,"h",false],[4,2,2,"v",false],[4,4,2,"h",false]],par:23,d:"Expert"},
+    {v:[[2,2,2,"h",true],[2,4,2,"v",false],[3,2,2,"h",false],[1,1,2,"h",false],[5,3,3,"h",false],[0,0,3,"v",false],[0,3,3,"h",false],[2,5,3,"v",false],[3,0,2,"h",false],[0,1,2,"h",false],[4,2,3,"h",false],[4,1,2,"v",false]],par:23,d:"Expert"},
+    {v:[[2,0,2,"h",true],[0,2,3,"v",false],[2,3,2,"v",false],[2,4,2,"v",false],[1,5,2,"v",false],[5,2,3,"h",false],[3,0,2,"v",false],[0,1,2,"v",false],[0,3,2,"v",false],[4,1,2,"h",false],[4,5,2,"v",false],[3,1,2,"h",false]],par:23,d:"Expert"},
+    {v:[[2,1,2,"h",true],[1,5,2,"v",false],[3,5,2,"v",false],[1,4,3,"v",false],[5,3,3,"h",false],[4,2,2,"v",false],[3,2,2,"h",false],[4,3,2,"h",false],[4,1,2,"v",false],[3,0,2,"v",false],[1,1,3,"h",false],[0,4,2,"h",false],[0,0,2,"v",false]],par:23,d:"Expert"},
+    {v:[[2,0,2,"h",true],[2,2,2,"v",false],[1,3,2,"v",false],[2,4,2,"v",false],[4,3,3,"h",false],[1,0,2,"h",false],[3,0,2,"v",false],[4,1,2,"h",false],[0,2,3,"h",false],[5,1,3,"h",false],[0,5,3,"v",false],[5,4,2,"h",false]],par:23,d:"Expert"},
+    {v:[[2,0,2,"h",true],[1,2,2,"v",false],[2,3,2,"v",false],[2,4,2,"v",false],[4,3,2,"h",false],[1,4,2,"h",false],[5,3,3,"h",false],[4,0,2,"v",false],[0,3,2,"h",false],[3,0,2,"h",false],[2,5,3,"v",false],[5,1,2,"h",false],[0,0,3,"h",false]],par:24,d:"Expert"},
+    {v:[[2,0,2,"h",true],[2,2,2,"v",false],[0,3,3,"v",false],[2,4,2,"v",false],[2,5,2,"v",false],[5,3,2,"h",false],[0,0,3,"h",false],[4,3,2,"h",false],[4,5,2,"v",false],[3,1,2,"v",false],[3,0,3,"v",false]],par:24,d:"Expert"},
+    {v:[[2,0,2,"h",true],[2,3,2,"v",false],[2,5,2,"v",false],[3,0,2,"h",false],[4,0,3,"h",false],[1,2,3,"h",false],[0,3,2,"h",false],[5,0,2,"h",false],[3,4,3,"v",false],[2,2,2,"v",false],[0,1,2,"h",false],[0,0,2,"v",false]],par:24,d:"Expert"},
+    {v:[[2,2,2,"h",true],[1,4,2,"v",false],[2,5,2,"v",false],[4,4,2,"v",false],[0,3,2,"h",false],[4,0,3,"h",false],[1,0,2,"v",false],[3,3,3,"v",false],[3,0,3,"h",false],[0,5,2,"v",false],[0,2,2,"v",false]],par:24,d:"Expert"},
+    {v:[[2,0,2,"h",true],[2,2,2,"v",false],[1,3,2,"v",false],[1,4,2,"v",false],[1,5,2,"v",false],[4,1,2,"h",false],[4,0,2,"v",false],[3,3,2,"v",false],[1,0,3,"h",false],[3,0,2,"h",false],[0,1,2,"h",false],[4,4,2,"v",false],[3,5,2,"v",false]],par:24,d:"Expert"},
+    {v:[[2,0,2,"h",true],[2,2,2,"v",false],[2,4,2,"v",false],[2,5,2,"v",false],[4,3,2,"v",false],[1,1,3,"h",false],[4,4,2,"h",false],[3,0,2,"v",false],[0,4,2,"v",false],[0,1,3,"h",false],[2,3,2,"v",false],[5,0,2,"h",false]],par:25,d:"Expert"},
+    {v:[[2,0,2,"h",true],[2,2,2,"v",false],[1,3,2,"v",false],[1,5,2,"v",false],[4,1,2,"v",false],[0,2,3,"h",false],[1,4,3,"v",false],[5,4,2,"h",false],[4,2,2,"h",false],[3,5,2,"v",false],[0,0,2,"v",false],[1,1,2,"h",false],[3,0,3,"v",false]],par:25,d:"Expert"},
+    {v:[[2,0,2,"h",true],[1,2,2,"v",false],[1,3,3,"v",false],[4,0,2,"v",false],[0,3,2,"h",false],[2,4,2,"v",false],[5,2,3,"h",false],[3,1,2,"h",false],[3,5,2,"v",false],[1,0,2,"h",false],[0,5,2,"v",false],[0,0,3,"h",false],[4,1,2,"h",false]],par:25,d:"Expert"},
+    {v:[[2,0,2,"h",true],[2,2,2,"v",false],[2,4,2,"v",false],[2,5,2,"v",false],[0,0,3,"h",false],[5,1,3,"h",false],[4,0,2,"v",false],[1,3,2,"h",false],[0,5,2,"v",false],[5,4,2,"h",false],[3,3,2,"v",false],[4,4,2,"h",false],[1,0,3,"h",false]],par:25,d:"Expert"},
+    {v:[[2,0,2,"h",true],[1,2,2,"v",false],[0,3,3,"v",false],[1,4,2,"v",false],[1,5,2,"v",false],[3,5,2,"v",false],[3,0,3,"h",false],[0,1,2,"h",false],[4,1,3,"h",false],[5,1,3,"h",false],[0,0,2,"v",false],[4,4,2,"v",false],[3,3,2,"h",false]],par:26,d:"Expert"},
+    {v:[[2,1,2,"h",true],[0,3,3,"v",false],[2,4,2,"v",false],[2,5,2,"v",false],[0,0,2,"v",false],[0,2,2,"v",false],[4,1,3,"h",false],[5,0,3,"h",false],[3,0,2,"h",false],[1,4,2,"h",false],[4,4,2,"v",false]],par:27,d:"Expert"},
+    {v:[[2,0,2,"h",true],[2,2,2,"v",false],[2,3,2,"v",false],[2,5,2,"v",false],[5,3,2,"h",false],[0,3,2,"v",false],[1,4,2,"h",false],[4,1,3,"h",false],[3,0,2,"v",false],[4,5,2,"v",false]],par:27,d:"Expert"},
+    {v:[[2,0,2,"h",true],[1,2,2,"v",false],[1,4,2,"v",false],[2,5,2,"v",false],[1,0,2,"h",false],[3,3,2,"h",false],[0,2,3,"h",false],[4,1,2,"v",false],[3,2,2,"v",false],[4,4,2,"h",false],[0,5,2,"v",false],[5,2,3,"h",false],[3,0,2,"v",false]],par:27,d:"Expert"},
+    {v:[[2,0,2,"h",true],[1,2,2,"v",false],[1,3,2,"v",false],[1,5,2,"v",false],[0,1,2,"h",false],[5,0,2,"h",false],[1,4,3,"v",false],[0,4,2,"h",false],[3,2,2,"h",false],[4,5,2,"v",false],[4,1,3,"h",false],[5,3,2,"h",false],[0,0,2,"v",false]],par:27,d:"Expert"},
+  ];
+
+  // --- Progress (localStorage) ---
+  const STORAGE_KEY = 'rush_hour_progress';
+  function loadProgress() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; }
+  }
+  function saveCompleted(idx) {
+    const p = loadProgress();
+    p[idx] = true;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
+  }
+  function isCompleted(idx) { return !!loadProgress()[idx]; }
+
+  // --- Level Select ---
+  function buildLevelSelect() {
+    levelSections.textContent = '';
+    const groups = [
+      { label: 'Beginner', cls: 'beginner' },
+      { label: 'Intermediate', cls: 'intermediate' },
+      { label: 'Advanced', cls: 'advanced' },
+      { label: 'Expert', cls: 'expert' },
+    ];
+    for (const group of groups) {
+      const indices = LEVELS.map((l, i) => l.d === group.label ? i : -1).filter(i => i >= 0);
+      if (!indices.length) continue;
+
+      const section = document.createElement('div');
+      section.className = 'difficulty-section';
+
+      const label = document.createElement('div');
+      label.className = 'difficulty-label ' + group.cls;
+      label.textContent = group.label;
+      section.appendChild(label);
+
+      const grid = document.createElement('div');
+      grid.className = 'level-grid';
+
+      for (const idx of indices) {
+        const cell = document.createElement('button');
+        cell.className = 'level-cell';
+        cell.textContent = idx + 1;
+        if (isCompleted(idx)) cell.classList.add('completed');
+
+        cell.addEventListener('click', () => { showGame(idx); });
+        grid.appendChild(cell);
+      }
+
+      section.appendChild(grid);
+      levelSections.appendChild(section);
+    }
+  }
+
+  function showSelect() {
+    buildLevelSelect();
+    welcomeScreen.classList.remove('active');
+    gameScreen.classList.remove('active');
+    selectScreen.classList.add('active');
+    stopDemo();
+  }
+
+  function showGame(idx) {
+    welcomeScreen.classList.remove('active');
+    selectScreen.classList.remove('active');
+    gameScreen.classList.add('active');
+    stopDemo();
+    loadLevel(idx);
+  }
+
+  // --- Game ---
+  let currentLevel = 0;
+  let vehicles = [];
+  let dragState = null;
+  let solveAnimation = null;
+  function clearHintUI() {
+    document.querySelectorAll('.hint-highlight').forEach(el => el.classList.remove('hint-highlight'));
+    document.querySelectorAll('.hint-arrow').forEach(el => el.remove());
+  }
+
+  function buildGrid() {
+    board.querySelectorAll('.grid-line-h, .grid-line-v').forEach(el => el.remove());
+    for (let i = 1; i < GRID; i++) {
+      const h = document.createElement('div');
+      h.className = 'grid-line-h';
+      h.style.top = (i * CELL) + 'px';
+      board.appendChild(h);
+      const v = document.createElement('div');
+      v.className = 'grid-line-v';
+      v.style.left = (i * CELL) + 'px';
+      board.appendChild(v);
+    }
+  }
+
+  function loadLevel(index) {
+    currentLevel = index;
+    clearHintUI();
+    if (solveAnimation) { clearInterval(solveAnimation); solveAnimation = null; }
+    winOverlay.classList.remove('visible');
+    const level = LEVELS[index];
+    levelBadge.textContent = `Level ${index + 1} / ${LEVELS.length}`;
+    diffBadge.textContent = level.d;
+    diffBadge.className = 'diff-badge ' + level.d.toLowerCase();
+
+    board.querySelectorAll('.vehicle').forEach(el => el.remove());
+    vehicles = [];
+
+    let colorIdx = 0;
+    level.v.forEach((vData, i) => {
+      const [row, col, size, orient, isTarget] = vData;
+      const el = document.createElement('div');
+      const isTruck = size === 3;
+      const orientClass = orient === 'h' ? 'h-vehicle' : 'v-vehicle';
+      el.className = 'vehicle ' + orientClass + (isTarget ? ' target' : '') + (isTruck ? ' truck' : '');
+
+      if (!isTarget) {
+        const c = COLORS[colorIdx % COLORS.length];
+        el.style.background = `linear-gradient(135deg, ${c}, ${c}cc)`;
+        colorIdx++;
+      }
+
+      const mk = (cls) => Object.assign(document.createElement('div'), { className: cls });
+
+      const wheels = mk('wheels');
+      for (const wc of ['fl','fr','rl','rr']) wheels.appendChild(mk('wheel ' + wc));
+      el.appendChild(wheels);
+
+      el.appendChild(mk('roof'));
+      el.appendChild(mk('windshield'));
+      el.appendChild(mk('bumper front'));
+      el.appendChild(mk('bumper rear'));
+
+      const hl = mk('headlights');
+      hl.appendChild(mk('headlight'));
+      hl.appendChild(mk('headlight'));
+      el.appendChild(hl);
+
+      const tl = mk('taillights');
+      tl.appendChild(mk('taillight'));
+      tl.appendChild(mk('taillight'));
+      el.appendChild(tl);
+
+      const veh = { row, col, size, orient, isTarget, el, id: i };
+      vehicles.push(veh);
+      positionVehicle(veh);
+      board.appendChild(el);
+      el.addEventListener('pointerdown', (e) => startDrag(e, veh));
+    });
+  }
+
+  function positionVehicle(v) {
+    v.el.style.width = (v.orient === 'h' ? v.size * CELL : CELL) - 4 + 'px';
+    v.el.style.height = (v.orient === 'v' ? v.size * CELL : CELL) - 4 + 'px';
+    v.el.style.left = v.col * CELL + 2 + 'px';
+    v.el.style.top = v.row * CELL + 2 + 'px';
+  }
+
+  function getOccupied(exclude) {
+    const grid = Array.from({ length: GRID }, () => Array(GRID).fill(false));
+    for (const v of vehicles) {
+      if (v === exclude) continue;
+      for (let i = 0; i < v.size; i++) {
+        const r = v.orient === 'v' ? v.row + i : v.row;
+        const c = v.orient === 'h' ? v.col + i : v.col;
+        if (r >= 0 && r < GRID && c >= 0 && c < GRID) grid[r][c] = true;
+      }
+    }
+    return grid;
+  }
+
+  function startDrag(e, veh) {
+    e.preventDefault();
+    const grid = getOccupied(veh);
+    let min, max;
+    if (veh.orient === 'h') {
+      let lo = veh.col; while (lo > 0 && !grid[veh.row][lo - 1]) lo--;
+      let hi = veh.col; while (hi + veh.size < GRID && !grid[veh.row][hi + veh.size]) hi++;
+      min = lo * CELL; max = hi * CELL;
+    } else {
+      let lo = veh.row; while (lo > 0 && !grid[lo - 1][veh.col]) lo--;
+      let hi = veh.row; while (hi + veh.size < GRID && !grid[hi + veh.size][veh.col]) hi++;
+      min = lo * CELL; max = hi * CELL;
+    }
+    const startMouse = veh.orient === 'h' ? e.clientX : e.clientY;
+    const startPos = veh.orient === 'h' ? veh.col * CELL : veh.row * CELL;
+    veh.el.classList.add('dragging');
+    veh.el.setPointerCapture(e.pointerId);
+    dragState = { veh, startMouse, startPos, min, max };
+    veh.el.addEventListener('pointermove', onDrag);
+    veh.el.addEventListener('pointerup', onDragEnd);
+    veh.el.addEventListener('pointercancel', onDragEnd);
+  }
+
+  function onDrag(e) {
+    if (!dragState) return;
+    const { veh, startMouse, startPos, min, max } = dragState;
+    const cur = veh.orient === 'h' ? e.clientX : e.clientY;
+    const pos = Math.max(min, Math.min(max, startPos + cur - startMouse));
+    if (veh.orient === 'h') veh.el.style.left = pos + 2 + 'px';
+    else veh.el.style.top = pos + 2 + 'px';
+  }
+
+  function onDragEnd(e) {
+    if (!dragState) return;
+    const { veh, startMouse, startPos, min, max } = dragState;
+    const cur = veh.orient === 'h' ? e.clientX : e.clientY;
+    const pos = Math.max(min, Math.min(max, startPos + cur - startMouse));
+    const snapped = Math.round(pos / CELL) * CELL;
+    if (veh.orient === 'h') veh.col = snapped / CELL;
+    else veh.row = snapped / CELL;
+    positionVehicle(veh);
+    veh.el.classList.remove('dragging');
+    veh.el.removeEventListener('pointermove', onDrag);
+    veh.el.removeEventListener('pointerup', onDragEnd);
+    veh.el.removeEventListener('pointercancel', onDragEnd);
+    dragState = null;
+    checkWin();
+  }
+
+  function checkWin() {
+    const target = vehicles.find(v => v.isTarget);
+    if (!target || target.col + target.size < GRID) return;
+    saveCompleted(currentLevel);
+    const isLast = currentLevel + 1 >= LEVELS.length;
+    winSubtitle.textContent = isLast ? 'You beat all levels!' : `Level ${currentLevel + 1} complete`;
+    nextBtn.textContent = isLast ? 'Play Again' : 'Next Level';
+    setTimeout(() => winOverlay.classList.add('visible'), 200);
+  }
+
+  // --- BFS Solver ---
+  function solveCurrent() {
+    const encode = vehs => vehs.map(v => `${v.row},${v.col}`).join('|');
+    const initial = vehicles.map(v => ({ row: v.row, col: v.col, size: v.size, orient: v.orient, isTarget: v.isTarget }));
+    const queue = [{ vehs: initial, path: [] }];
+    const seen = new Set([encode(initial)]);
+    while (queue.length) {
+      const { vehs, path } = queue.shift();
+      const target = vehs.find(v => v.isTarget);
+      if (target.col + target.size >= GRID) return path;
+      if (path.length >= 60) continue;
+      for (let vi = 0; vi < vehs.length; vi++) {
+        const grid = Array.from({ length: GRID }, () => Array(GRID).fill(false));
+        vehs.forEach((v, i) => {
+          if (i !== vi) for (let j = 0; j < v.size; j++) {
+            const r = v.orient === 'v' ? v.row + j : v.row;
+            const c = v.orient === 'h' ? v.col + j : v.col;
+            grid[r][c] = true;
+          }
+        });
+        const v = vehs[vi];
+        const tryM = (nr, nc) => {
+          const nv = vehs.map((x, i) => i === vi ? { ...x, row: nr, col: nc } : { ...x });
+          const k = encode(nv);
+          if (!seen.has(k)) {
+            seen.add(k);
+            queue.push({ vehs: nv, path: [...path, { idx: vi, row: nr, col: nc }] });
+          }
+        };
+        if (v.orient === 'h') {
+          for (let d = -1; v.col + d >= 0 && !grid[v.row][v.col + d]; d--) tryM(v.row, v.col + d);
+          for (let d = 1; v.col + v.size - 1 + d < GRID && !grid[v.row][v.col + v.size - 1 + d]; d++) tryM(v.row, v.col + d);
+        } else {
+          for (let d = -1; v.row + d >= 0 && !grid[v.row + d][v.col]; d--) tryM(v.row + d, v.col);
+          for (let d = 1; v.row + v.size - 1 + d < GRID && !grid[v.row + v.size - 1 + d][v.col]; d++) tryM(v.row + d, v.col);
+        }
+      }
+    }
+    return null;
+  }
+
+  function showHint() {
+    clearHintUI();
+    if (solveAnimation) { clearInterval(solveAnimation); solveAnimation = null; }
+    const solution = solveCurrent();
+    if (!solution || !solution.length) return;
+    const step = solution[0];
+    const veh = vehicles[step.idx];
+    veh.el.classList.add('hint-highlight');
+    const arrow = document.createElement('div');
+    arrow.className = 'hint-arrow';
+    const dr = step.row - veh.row, dc = step.col - veh.col;
+    if (dc > 0) arrow.textContent = '→';
+    else if (dc < 0) arrow.textContent = '←';
+    else if (dr > 0) arrow.textContent = '↓';
+    else arrow.textContent = '↑';
+    const cx = (veh.orient === 'h' ? (veh.col + step.col) / 2 + veh.size / 2 : veh.col + 0.5) * CELL;
+    const cy = (veh.orient === 'v' ? (veh.row + step.row) / 2 + veh.size / 2 : veh.row + 0.5) * CELL;
+    arrow.style.left = cx + 'px';
+    arrow.style.top = cy + 'px';
+    board.appendChild(arrow);
+    setTimeout(clearHintUI, 2000);
+  }
+
+  function animateSolve() {
+    clearHintUI();
+    if (solveAnimation) { clearInterval(solveAnimation); solveAnimation = null; }
+    const solution = solveCurrent();
+    if (!solution || !solution.length) return;
+    let i = 0;
+    solveBtn.disabled = true;
+    hintBtn.disabled = true;
+    solveAnimation = setInterval(() => {
+      if (i >= solution.length) {
+        clearInterval(solveAnimation);
+        solveAnimation = null;
+        solveBtn.disabled = false;
+        hintBtn.disabled = false;
+        checkWin();
+        return;
+      }
+      const step = solution[i];
+      const veh = vehicles[step.idx];
+      veh.row = step.row;
+      veh.col = step.col;
+      positionVehicle(veh);
+      veh.el.classList.add('hint-highlight');
+      setTimeout(() => veh.el.classList.remove('hint-highlight'), 350);
+      i++;
+    }, 450);
+  }
+
+  const hintBtn = document.getElementById('hintBtn');
+  const solveBtn = document.getElementById('solveBtn');
+  hintBtn.addEventListener('click', showHint);
+  solveBtn.addEventListener('click', animateSolve);
+
+  nextBtn.addEventListener('click', () => {
+    const next = (currentLevel + 1) % LEVELS.length;
+    loadLevel(next);
+  });
+
+  menuBtn.addEventListener('click', showSelect);
+  backBtn.addEventListener('click', showSelect);
+  resetBtn.addEventListener('click', () => {
+    if (solveAnimation) { clearInterval(solveAnimation); solveAnimation = null; }
+    clearHintUI();
+    solveBtn.disabled = false;
+    hintBtn.disabled = false;
+    loadLevel(currentLevel);
+  });
+
+  // --- Welcome Screen Demo ---
+  const demoBoard = document.getElementById('demoBoard');
+  const DC = 40; // demo cell size
+  let demoInterval = null;
+
+  function initDemo() {
+    demoBoard.textContent = '';
+    for (let i = 1; i < 6; i++) {
+      const h = document.createElement('div');
+      h.className = 'demo-gridline-h'; h.style.top = (i * DC) + 'px';
+      demoBoard.appendChild(h);
+      const v = document.createElement('div');
+      v.className = 'demo-gridline-v'; v.style.left = (i * DC) + 'px';
+      demoBoard.appendChild(v);
+    }
+    const exit = document.createElement('div');
+    exit.className = 'demo-exit';
+    demoBoard.appendChild(exit);
+
+    const demoCars = [
+      { row: 2, col: 0, size: 2, orient: 'h', color: '#ef4444', isTarget: true },
+      { row: 0, col: 3, size: 3, orient: 'v', color: '#3b82f6' },
+      { row: 1, col: 4, size: 2, orient: 'v', color: '#22c55e' },
+      { row: 4, col: 1, size: 3, orient: 'h', color: '#a855f7' },
+      { row: 0, col: 0, size: 2, orient: 'v', color: '#f97316' },
+      { row: 3, col: 5, size: 3, orient: 'v', color: '#06b6d4' },
+      { row: 0, col: 1, size: 2, orient: 'h', color: '#ec4899' },
+    ];
+
+    const moves = [
+      { idx: 1, row: 1, col: 3 },
+      { idx: 2, row: 3, col: 4 },
+      { idx: 3, row: 4, col: 2 },
+      { idx: 0, row: 2, col: 1 },
+      { idx: 4, row: 1, col: 0 },
+      { idx: 6, row: 0, col: 2 },
+      { idx: 0, row: 2, col: 2 },
+      { idx: 1, row: 0, col: 3 },
+      { idx: 0, row: 2, col: 4 },
+    ];
+
+    const els = demoCars.map(c => {
+      const el = document.createElement('div');
+      el.className = 'demo-car';
+      el.style.background = c.color;
+      el.style.width = (c.orient === 'h' ? c.size * DC : DC) - 4 + 'px';
+      el.style.height = (c.orient === 'v' ? c.size * DC : DC) - 4 + 'px';
+      el.style.left = c.col * DC + 2 + 'px';
+      el.style.top = c.row * DC + 2 + 'px';
+      if (c.isTarget) el.style.boxShadow = '0 0 12px rgba(239,68,68,0.4)';
+      demoBoard.appendChild(el);
+      return { el, ...c };
+    });
+
+    let step = 0;
+    demoInterval = setInterval(() => {
+      if (step >= moves.length) {
+        step = 0;
+        els.forEach((c, i) => {
+          c.row = demoCars[i].row; c.col = demoCars[i].col;
+          c.el.style.left = c.col * DC + 2 + 'px';
+          c.el.style.top = c.row * DC + 2 + 'px';
+        });
+        return;
+      }
+      const m = moves[step];
+      const car = els[m.idx];
+      car.row = m.row; car.col = m.col;
+      car.el.style.left = car.col * DC + 2 + 'px';
+      car.el.style.top = car.row * DC + 2 + 'px';
+      step++;
+    }, 1200);
+  }
+
+  function stopDemo() {
+    if (demoInterval) { clearInterval(demoInterval); demoInterval = null; }
+  }
+
+  // Background floating vehicles
+  (function initBgVehicles() {
+    const bg = document.getElementById('welcomeBg');
+    const colors = ['#ef4444','#3b82f6','#22c55e','#a855f7','#f97316','#06b6d4','#ec4899'];
+    for (let i = 0; i < 12; i++) {
+      const el = document.createElement('div');
+      el.className = 'bg-vehicle';
+      const w = (Math.random() < 0.5 ? 2 : 3) * 30;
+      el.style.width = w + 'px'; el.style.height = '24px';
+      el.style.background = colors[i % colors.length];
+      el.style.left = Math.random() * 100 + '%';
+      el.style.top = Math.random() * 100 + '%';
+      el.style.transform = 'rotate(' + (Math.random() * 360) + 'deg)';
+      bg.appendChild(el);
+    }
+  })();
+
+  document.getElementById('playBtn').addEventListener('click', showSelect);
+  initDemo();
+
+  buildGrid();
+  buildLevelSelect();
+})();
+</script>
+</body>
+</html>
