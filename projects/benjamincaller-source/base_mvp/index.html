@@ -105,25 +105,29 @@
   .exit-arrow { width: 16px; height: 60px; background: linear-gradient(90deg, transparent, #ef4444); border-radius: 0 4px 4px 0; }
   .exit-label { font-size: 11px; font-weight: 800; color: #ef4444; text-transform: uppercase; letter-spacing: 1px; writing-mode: vertical-lr; text-orientation: mixed; }
 
+  /* ---- Vehicle base ---- */
   .vehicle {
-    position: absolute; cursor: grab;
-    transition: box-shadow 0.15s ease, transform 0.1s ease, filter 0.15s ease;
+    position: absolute; border-radius: 12px; cursor: grab;
+    transition: box-shadow 0.15s ease, transform 0.1s ease;
+    overflow: hidden;
   }
-  .vehicle .car-body {
-    position: absolute; inset: 0; border-radius: 12px; overflow: hidden;
-    pointer-events: none;
-  }
-  /* Top gloss */
-  .vehicle .car-body::before {
-    content: ''; position: absolute; z-index: 2;
+
+  /* Body shine — glossy highlight across the top */
+  .vehicle::before {
+    content: ''; position: absolute; pointer-events: none; z-index: 2;
     border-radius: 8px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.08) 40%, transparent 60%);
-    pointer-events: none;
   }
-  .vehicle.h-vehicle .car-body::before { top: 3px; left: 10px; right: 10px; height: 45%; }
-  .vehicle.v-vehicle .car-body::before { top: 10px; left: 3px; right: 3px; height: 35%; }
-  /* Inset border for depth */
-  .vehicle .car-body::after {
+  .vehicle.h-vehicle::before {
+    top: 4px; left: 8px; right: 8px; height: 40%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.30) 0%, rgba(255,255,255,0.05) 60%, transparent 100%);
+  }
+  .vehicle.v-vehicle::before {
+    top: 8px; left: 4px; bottom: 60%; right: 4px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.30) 0%, rgba(255,255,255,0.05) 60%, transparent 100%);
+  }
+
+  /* Outer border for depth */
+  .vehicle::after {
     content: ''; position: absolute; inset: 0; border-radius: 12px;
     border: 1.5px solid rgba(255,255,255,0.12);
     border-bottom-color: rgba(0,0,0,0.35);
@@ -131,100 +135,132 @@
     pointer-events: none; z-index: 3;
   }
 
-  /* Roof panel — the darker center strip */
+  /* ---- Roof / cabin ---- */
   .vehicle .roof {
-    position: absolute; z-index: 1; pointer-events: none;
-    background: rgba(0,0,0,0.12); border-radius: 6px;
+    position: absolute; pointer-events: none; z-index: 1;
+    background: rgba(0,0,0,0.12);
+    border: 1px solid rgba(255,255,255,0.06);
   }
-  .vehicle.h-vehicle .roof { top: 10px; bottom: 10px; left: 18px; right: 18px; }
-  .vehicle.v-vehicle .roof { left: 10px; right: 10px; top: 18px; bottom: 18px; }
-  .vehicle.truck.h-vehicle .roof { left: 22px; right: 22px; }
-  .vehicle.truck.v-vehicle .roof { top: 22px; bottom: 22px; }
+  .vehicle.h-vehicle .roof {
+    top: 6px; bottom: 6px; border-radius: 6px;
+    left: 28%; right: 22%; /* offset towards rear */
+  }
+  .vehicle.v-vehicle .roof {
+    left: 6px; right: 6px; border-radius: 6px;
+    top: 22%; bottom: 28%;
+  }
+  .vehicle.truck .roof {
+    background: rgba(0,0,0,0.10);
+  }
+  .vehicle.h-vehicle.truck .roof { left: 45%; right: 12%; }
+  .vehicle.v-vehicle.truck .roof { top: 12%; bottom: 45%; }
 
-  /* Windshield */
+  /* ---- Windshield ---- */
   .vehicle .windshield {
-    position: absolute; z-index: 4; pointer-events: none;
-    border-radius: 5px;
-    background: linear-gradient(135deg, rgba(180,225,255,0.45), rgba(140,200,255,0.2));
-    border: 1px solid rgba(180,225,255,0.2);
-    box-shadow: inset 0 1px 2px rgba(255,255,255,0.15);
+    position: absolute; pointer-events: none; z-index: 4;
+    background: linear-gradient(135deg, rgba(170,215,255,0.45), rgba(130,190,240,0.2));
+    border: 1px solid rgba(170,215,255,0.25);
+    border-radius: 3px;
   }
-  .vehicle.h-vehicle .windshield { right: 14px; top: 10px; bottom: 10px; width: 10px; }
-  .vehicle.v-vehicle .windshield { bottom: 14px; left: 10px; right: 10px; height: 10px; }
-  .vehicle.truck.h-vehicle .windshield { right: 18px; width: 8px; }
-  .vehicle.truck.v-vehicle .windshield { bottom: 18px; height: 8px; }
-
-  /* Rear window */
-  .vehicle .rear-window {
-    position: absolute; z-index: 4; pointer-events: none;
-    border-radius: 4px;
-    background: rgba(140,180,220,0.2);
-    border: 1px solid rgba(140,180,220,0.1);
+  .vehicle.h-vehicle .windshield {
+    right: 14px; top: 10px; bottom: 10px; width: 10px;
   }
-  .vehicle.h-vehicle .rear-window { left: 14px; top: 12px; bottom: 12px; width: 8px; }
-  .vehicle.v-vehicle .rear-window { top: 14px; left: 12px; right: 12px; height: 8px; }
-  .vehicle.truck .rear-window { display: none; }
+  .vehicle.v-vehicle .windshield {
+    bottom: 14px; left: 10px; right: 10px; height: 10px;
+  }
+  .vehicle.h-vehicle.truck .windshield { right: 18px; width: 8px; }
+  .vehicle.v-vehicle.truck .windshield { bottom: 18px; height: 8px; }
 
-  /* Headlights (front) */
+  /* ---- Headlights (front) ---- */
   .vehicle .headlights {
-    position: absolute; z-index: 5; display: flex; gap: 6px; pointer-events: none;
+    position: absolute; z-index: 4; display: flex; pointer-events: none;
   }
-  .vehicle.h-vehicle .headlights { right: 4px; top: 50%; transform: translateY(-50%); flex-direction: column; }
-  .vehicle.v-vehicle .headlights { bottom: 4px; left: 50%; transform: translateX(-50%); flex-direction: row; }
+  .vehicle.h-vehicle .headlights {
+    right: 4px; top: 50%; transform: translateY(-50%);
+    flex-direction: column; gap: 8px;
+  }
+  .vehicle.v-vehicle .headlights {
+    bottom: 4px; left: 50%; transform: translateX(-50%);
+    flex-direction: row; gap: 8px;
+  }
   .headlight {
-    width: 7px; height: 5px; border-radius: 3px;
+    width: 7px; height: 5px; border-radius: 2px;
     background: rgba(255,255,220,0.9);
     box-shadow: 0 0 6px 2px rgba(255,255,200,0.35);
   }
   .vehicle.v-vehicle .headlight { width: 5px; height: 7px; }
 
-  /* Taillights (back) */
+  /* ---- Taillights (rear) ---- */
   .vehicle .taillights {
-    position: absolute; z-index: 5; display: flex; gap: 6px; pointer-events: none;
+    position: absolute; z-index: 4; display: flex; pointer-events: none;
   }
-  .vehicle.h-vehicle .taillights { left: 4px; top: 50%; transform: translateY(-50%); flex-direction: column; }
-  .vehicle.v-vehicle .taillights { top: 4px; left: 50%; transform: translateX(-50%); flex-direction: row; }
+  .vehicle.h-vehicle .taillights {
+    left: 4px; top: 50%; transform: translateY(-50%);
+    flex-direction: column; gap: 10px;
+  }
+  .vehicle.v-vehicle .taillights {
+    top: 4px; left: 50%; transform: translateX(-50%);
+    flex-direction: row; gap: 10px;
+  }
   .taillight {
-    width: 6px; height: 4px; border-radius: 2px;
-    background: rgba(255,80,80,0.7);
+    width: 5px; height: 4px; border-radius: 1px;
+    background: rgba(255,60,60,0.7);
     box-shadow: 0 0 4px 1px rgba(255,60,60,0.3);
   }
-  .vehicle.v-vehicle .taillight { width: 4px; height: 6px; }
+  .vehicle.v-vehicle .taillight { width: 4px; height: 5px; }
 
-  /* Bumpers */
+  /* ---- Wheels ---- */
+  .vehicle .wheels {
+    position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  }
+  .wheel {
+    position: absolute; border-radius: 3px;
+    background: #1a1a2e;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  /* Horizontal cars: wheels on top and bottom edges */
+  .vehicle.h-vehicle .wheel { width: 10px; height: 6px; }
+  .vehicle.h-vehicle .wheel.fl { left: 8px; top: -2px; }
+  .vehicle.h-vehicle .wheel.fr { right: 8px; top: -2px; }
+  .vehicle.h-vehicle .wheel.rl { left: 8px; bottom: -2px; }
+  .vehicle.h-vehicle .wheel.rr { right: 8px; bottom: -2px; }
+  /* Vertical cars: wheels on left and right edges */
+  .vehicle.v-vehicle .wheel { width: 6px; height: 10px; }
+  .vehicle.v-vehicle .wheel.fl { top: 8px; left: -2px; }
+  .vehicle.v-vehicle .wheel.fr { top: 8px; right: -2px; }
+  .vehicle.v-vehicle .wheel.rl { bottom: 8px; left: -2px; }
+  .vehicle.v-vehicle .wheel.rr { bottom: 8px; right: -2px; }
+
+  /* ---- Bumper stripe ---- */
   .vehicle .bumper {
-    position: absolute; z-index: 4; pointer-events: none;
-    background: rgba(0,0,0,0.2); border-radius: 3px;
+    position: absolute; pointer-events: none; z-index: 1;
+    background: rgba(0,0,0,0.15); border-radius: 2px;
   }
-  .vehicle.h-vehicle .bumper-front { right: 2px; top: 6px; bottom: 6px; width: 3px; border-radius: 0 4px 4px 0; }
-  .vehicle.h-vehicle .bumper-back { left: 2px; top: 6px; bottom: 6px; width: 3px; border-radius: 4px 0 0 4px; }
-  .vehicle.v-vehicle .bumper-front { bottom: 2px; left: 6px; right: 6px; height: 3px; border-radius: 0 0 4px 4px; }
-  .vehicle.v-vehicle .bumper-back { top: 2px; left: 6px; right: 6px; height: 3px; border-radius: 4px 4px 0 0; }
+  .vehicle.h-vehicle .bumper { width: 3px; top: 12px; bottom: 12px; }
+  .vehicle.h-vehicle .bumper.front { right: 2px; }
+  .vehicle.h-vehicle .bumper.rear { left: 2px; }
+  .vehicle.v-vehicle .bumper { height: 3px; left: 12px; right: 12px; }
+  .vehicle.v-vehicle .bumper.front { bottom: 2px; }
+  .vehicle.v-vehicle .bumper.rear { top: 2px; }
 
-  /* Truck stripe */
-  .vehicle.truck .truck-stripe {
-    position: absolute; z-index: 2; pointer-events: none;
-    background: rgba(255,255,255,0.08); border-radius: 2px;
-  }
-  .vehicle.h-vehicle.truck .truck-stripe { top: 50%; left: 20px; right: 20px; height: 2px; transform: translateY(-50%); }
-  .vehicle.v-vehicle.truck .truck-stripe { left: 50%; top: 20px; bottom: 20px; width: 2px; transform: translateX(-50%); }
-
-  /* Hover & drag */
+  /* ---- Interaction states ---- */
   .vehicle:hover {
-    box-shadow: 0 0 0 2px rgba(255,255,255,0.2), 0 8px 24px rgba(0,0,0,0.4);
-    z-index: 5; transform: scale(1.03); filter: brightness(1.08);
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.2), 0 8px 20px rgba(0,0,0,0.4);
+    z-index: 5; transform: scale(1.03);
   }
   .vehicle.dragging {
     cursor: grabbing;
     box-shadow: 0 0 0 2px rgba(255,255,255,0.3), 0 14px 36px rgba(0,0,0,0.5);
-    z-index: 10; transform: scale(1.05); filter: brightness(1.12);
+    z-index: 10; transform: scale(1.05);
   }
 
-  /* Target car (red) */
-  .vehicle.target .car-body { background: linear-gradient(135deg, #ef4444, #dc2626) !important; }
-  .vehicle.target { box-shadow: 0 0 24px rgba(239,68,68,0.25); }
+  /* ---- Target (red car) ---- */
+  .vehicle.target {
+    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+    box-shadow: 0 0 24px rgba(239,68,68,0.25);
+  }
   .vehicle.target .headlights .headlight {
-    background: rgba(255,255,220,1);
+    background: rgba(255,255,210,1);
     box-shadow: 0 0 10px 3px rgba(255,255,200,0.5);
   }
   .vehicle.target .taillights .taillight {
@@ -232,7 +268,26 @@
     box-shadow: 0 0 4px 1px rgba(255,200,50,0.4);
   }
 
-  .controls { display: flex; gap: 10px; }
+  .vehicle.hint-highlight {
+    animation: hintPulse 0.6s ease-in-out 3;
+    z-index: 8 !important;
+  }
+  @keyframes hintPulse {
+    0%, 100% { box-shadow: 0 0 0 3px rgba(251,191,36,0.0); }
+    50% { box-shadow: 0 0 0 4px rgba(251,191,36,0.8), 0 0 20px rgba(251,191,36,0.3); }
+  }
+  .hint-arrow {
+    position: absolute; z-index: 15; pointer-events: none;
+    font-size: 24px; color: #fbbf24;
+    text-shadow: 0 0 10px rgba(251,191,36,0.6);
+    animation: hintArrowBounce 0.5s ease-in-out infinite alternate;
+  }
+  @keyframes hintArrowBounce {
+    0% { transform: translate(-50%,-50%) scale(1); }
+    100% { transform: translate(-50%,-50%) scale(1.2); }
+  }
+
+  .controls { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
   .btn {
     padding: 9px 22px; border: none; border-radius: 10px;
     font-size: 14px; font-weight: 600; cursor: pointer;
@@ -242,6 +297,10 @@
   .btn:active { transform: translateY(0); }
   .btn-secondary { background: rgba(255,255,255,0.08); color: #e2e8f0; }
   .btn-secondary:hover { background: rgba(255,255,255,0.12); }
+  .btn-hint { background: rgba(251,191,36,0.15); color: #fbbf24; }
+  .btn-hint:hover { background: rgba(251,191,36,0.25); }
+  .btn-solve { background: rgba(34,197,94,0.15); color: #22c55e; }
+  .btn-solve:hover { background: rgba(34,197,94,0.25); }
 
   .overlay {
     position: absolute; inset: 0; display: flex; flex-direction: column;
@@ -305,6 +364,8 @@
   <div class="controls">
     <button class="btn btn-secondary" id="backBtn">← Levels</button>
     <button class="btn btn-secondary" id="resetBtn">Reset</button>
+    <button class="btn btn-hint" id="hintBtn">💡 Hint</button>
+    <button class="btn btn-solve" id="solveBtn">▶ Solve</button>
   </div>
   <p class="instructions">Drag vehicles along their lane to clear a path.<br>Get the <strong style="color:#ef4444">red car</strong> to the exit →</p>
 </div>
@@ -332,56 +393,66 @@
   ];
 
   const LEVELS = [
-    {v:[[2,0,2,"h",true],[0,5,3,"v",false],[4,3,2,"h",false],[2,4,2,"v",false]],par:3,d:"Beginner"},
-    {v:[[2,1,2,"h",true],[1,3,2,"v",false],[2,5,2,"v",false],[0,2,2,"h",false],[3,2,3,"v",false]],par:3,d:"Beginner"},
-    {v:[[2,1,2,"h",true],[0,4,3,"v",false],[5,1,2,"h",false],[3,0,3,"h",false],[1,3,3,"v",false],[0,0,2,"v",false]],par:3,d:"Beginner"},
-    {v:[[2,1,2,"h",true],[1,4,3,"v",false],[2,5,2,"v",false],[4,3,2,"v",false],[5,1,2,"h",false]],par:3,d:"Beginner"},
-    {v:[[2,0,2,"h",true],[2,2,3,"v",false],[0,0,2,"h",false],[0,4,2,"v",false],[5,2,2,"h",false],[3,0,3,"v",false]],par:3,d:"Beginner"},
-    {v:[[2,0,2,"h",true],[2,2,3,"v",false],[0,4,2,"h",false],[4,0,2,"h",false],[2,5,3,"v",false],[4,4,2,"v",false],[5,0,2,"h",false]],par:3,d:"Beginner"},
-    {v:[[2,1,2,"h",true],[2,4,3,"v",false],[0,3,2,"v",false],[0,0,3,"v",false],[3,1,3,"h",false],[2,5,3,"v",false],[4,1,2,"h",false]],par:3,d:"Beginner"},
-    {v:[[2,0,2,"h",true],[1,2,3,"v",false],[4,3,2,"h",false],[2,3,2,"v",false],[1,3,2,"h",false],[4,0,2,"v",false]],par:4,d:"Beginner"},
-    {v:[[2,1,2,"h",true],[2,4,2,"v",false],[4,1,3,"h",false],[0,3,3,"v",false]],par:4,d:"Beginner"},
-    {v:[[2,1,2,"h",true],[1,4,3,"v",false],[1,0,2,"h",false],[2,5,2,"v",false],[0,3,3,"h",false],[1,3,3,"v",false]],par:4,d:"Beginner"},
-    {v:[[2,1,2,"h",true],[0,3,3,"v",false],[5,2,2,"h",false],[3,2,3,"h",false],[1,1,2,"h",false],[4,0,2,"v",false]],par:4,d:"Beginner"},
-    {v:[[2,0,2,"h",true],[2,4,2,"v",false],[5,1,3,"h",false],[0,3,3,"v",false],[0,5,2,"v",false]],par:4,d:"Beginner"},
-    {v:[[2,1,2,"h",true],[1,4,3,"v",false],[2,5,3,"v",false],[5,4,2,"h",false],[4,2,3,"h",false],[0,0,3,"v",false]],par:5,d:"Beginner"},
-    {v:[[2,1,2,"h",true],[2,4,2,"v",false],[4,4,2,"h",false],[0,5,3,"v",false],[3,1,3,"v",false],[2,3,2,"v",false]],par:5,d:"Beginner"},
-    {v:[[2,1,2,"h",true],[2,4,2,"v",false],[1,5,3,"v",false],[4,2,2,"h",false],[4,4,2,"h",false]],par:5,d:"Beginner"},
-    {v:[[2,0,2,"h",true],[1,3,3,"v",false],[3,0,2,"v",false],[2,2,2,"v",false],[1,5,3,"v",false],[1,1,2,"h",false],[4,1,2,"h",false]],par:5,d:"Beginner"},
-    {v:[[2,0,2,"h",true],[0,4,3,"v",false],[4,2,2,"v",false],[4,3,3,"h",false],[2,5,2,"v",false],[0,5,2,"v",false]],par:5,d:"Beginner"},
-    {v:[[2,1,2,"h",true],[1,3,3,"v",false],[2,0,2,"v",false],[0,0,2,"v",false],[5,0,2,"h",false],[0,5,3,"v",false],[4,2,2,"v",false],[4,3,2,"h",false]],par:7,d:"Intermediate"},
-    {v:[[2,2,2,"h",true],[2,5,2,"v",false],[4,3,2,"h",false],[5,0,2,"h",false],[1,4,3,"v",false],[3,0,2,"v",false],[1,0,2,"h",false],[4,5,2,"v",false],[3,2,2,"v",false],[0,2,2,"h",false]],par:7,d:"Intermediate"},
-    {v:[[2,1,2,"h",true],[1,5,2,"v",false],[3,2,2,"v",false],[0,3,2,"v",false],[4,4,2,"h",false],[4,0,2,"h",false],[5,2,3,"h",false],[1,4,3,"v",false]],par:7,d:"Intermediate"},
-    {v:[[2,0,2,"h",true],[0,3,3,"v",false],[2,4,2,"v",false],[4,2,3,"h",false],[5,1,2,"h",false],[2,2,2,"v",false],[4,0,2,"v",false]],par:7,d:"Intermediate"},
-    {v:[[2,0,2,"h",true],[2,5,2,"v",false],[0,4,2,"v",false],[4,1,2,"h",false],[3,3,2,"v",false],[1,2,3,"v",false],[0,1,3,"h",false],[5,1,2,"h",false],[1,3,2,"v",false]],par:7,d:"Intermediate"},
-    {v:[[2,1,2,"h",true],[0,4,3,"v",false],[1,5,2,"v",false],[4,2,2,"v",false],[4,3,2,"v",false],[4,4,2,"h",false],[3,0,2,"h",false]],par:7,d:"Intermediate"},
-    {v:[[2,2,2,"h",true],[1,4,3,"v",false],[4,0,2,"v",false],[4,4,2,"h",false],[2,1,2,"v",false],[5,4,2,"h",false],[0,2,2,"v",false],[3,2,2,"h",false],[0,5,3,"v",false],[4,1,2,"h",false]],par:7,d:"Intermediate"},
-    {v:[[2,1,2,"h",true],[1,3,2,"v",false],[4,1,2,"h",false],[0,5,2,"v",false],[5,4,2,"h",false],[4,3,2,"v",false],[2,4,3,"v",false],[3,1,3,"h",false],[2,0,2,"v",false]],par:7,d:"Intermediate"},
-    {v:[[2,0,2,"h",true],[0,2,3,"v",false],[4,2,3,"h",false],[1,3,3,"h",false],[2,3,2,"v",false],[2,5,2,"v",false],[5,2,2,"h",false],[0,4,2,"h",false]],par:8,d:"Intermediate"},
-    {v:[[2,1,2,"h",true],[0,4,3,"v",false],[3,2,3,"h",false],[3,0,3,"v",false],[4,2,2,"v",false],[1,2,2,"h",false],[4,3,2,"h",false],[0,0,2,"h",false]],par:8,d:"Intermediate"},
-    {v:[[2,2,2,"h",true],[0,5,3,"v",false],[4,4,2,"h",false],[3,2,2,"v",false],[3,3,2,"v",false],[0,1,2,"h",false],[0,0,2,"v",false],[1,1,2,"h",false],[0,4,3,"v",false]],par:8,d:"Intermediate"},
-    {v:[[2,2,2,"h",true],[0,4,3,"v",false],[3,4,2,"h",false],[4,3,2,"h",false],[3,2,2,"v",false],[5,1,2,"h",false],[1,1,3,"h",false]],par:8,d:"Intermediate"},
-    {v:[[2,0,2,"h",true],[2,5,3,"v",false],[0,2,3,"v",false],[4,0,2,"h",false],[3,2,3,"h",false],[0,0,2,"h",false]],par:8,d:"Intermediate"},
-    {v:[[2,2,2,"h",true],[1,5,2,"v",false],[1,4,3,"v",false],[5,4,2,"h",false],[1,0,2,"v",false],[3,2,2,"v",false],[4,3,2,"h",false]],par:8,d:"Intermediate"},
-    {v:[[2,2,2,"h",true],[0,5,3,"v",false],[0,1,3,"h",false],[4,3,2,"v",false],[3,1,3,"h",false],[2,4,3,"v",false],[1,0,3,"h",false],[5,4,2,"h",false],[2,0,3,"v",false],[5,1,2,"h",false]],par:9,d:"Intermediate"},
-    {v:[[2,1,2,"h",true],[1,4,3,"v",false],[5,2,2,"h",false],[3,1,3,"h",false],[4,1,2,"v",false],[0,2,3,"h",false],[4,4,2,"h",false],[4,2,2,"h",false]],par:10,d:"Intermediate"},
-    {v:[[2,1,2,"h",true],[1,3,3,"v",false],[2,4,3,"v",false],[0,0,2,"v",false],[3,0,2,"v",false],[0,3,3,"h",false],[4,2,2,"h",false],[4,1,2,"v",false],[2,5,2,"v",false]],par:12,d:"Intermediate"},
-    {v:[[2,1,2,"h",true],[2,3,3,"v",false],[3,1,2,"v",false],[1,4,2,"v",false],[4,4,2,"h",false],[2,0,2,"v",false],[1,2,2,"h",false],[0,0,2,"v",false],[2,5,2,"v",false],[0,3,2,"h",false],[5,2,2,"h",false],[0,1,2,"h",false],[4,0,2,"v",false]],par:15,d:"Advanced"},
-    {v:[[2,0,2,"h",true],[0,3,3,"v",false],[0,5,2,"v",false],[2,2,2,"v",false],[4,0,2,"v",false],[2,5,3,"v",false],[4,1,3,"h",false],[5,2,3,"h",false],[0,0,3,"h",false]],par:15,d:"Advanced"},
-    {v:[[2,1,2,"h",true],[2,3,2,"v",false],[4,2,2,"h",false],[0,3,2,"v",false],[4,5,2,"v",false],[2,4,2,"v",false],[5,2,2,"h",false],[0,0,3,"v",false],[1,4,2,"h",false],[3,0,2,"h",false],[4,1,2,"v",false],[0,2,2,"v",false]],par:15,d:"Advanced"},
-    {v:[[2,0,2,"h",true],[1,3,3,"v",false],[0,3,3,"h",false],[1,5,2,"v",false],[2,2,2,"v",false],[5,4,2,"h",false],[4,1,2,"h",false],[4,3,2,"h",false],[1,4,2,"v",false],[1,0,2,"h",false],[3,0,2,"v",false]],par:15,d:"Advanced"},
-    {v:[[2,1,2,"h",true],[0,3,3,"v",false],[4,0,2,"v",false],[2,4,2,"v",false],[3,1,2,"v",false],[1,5,3,"v",false],[4,4,2,"v",false],[5,2,2,"h",false],[0,0,2,"h",false],[4,2,2,"h",false]],par:15,d:"Advanced"},
-    {v:[[2,2,2,"h",true],[1,4,3,"v",false],[3,0,3,"v",false],[0,3,2,"v",false],[4,4,2,"h",false],[3,2,2,"v",false],[4,1,2,"v",false],[1,1,2,"h",false],[0,0,3,"h",false]],par:15,d:"Advanced"},
-    {v:[[2,0,2,"h",true],[0,4,3,"v",false],[3,1,2,"v",false],[5,4,2,"h",false],[0,0,2,"v",false],[3,3,2,"v",false],[3,0,3,"v",false],[4,4,2,"h",false],[5,1,2,"h",false],[0,5,2,"v",false],[1,3,2,"v",false],[0,2,2,"h",false]],par:16,d:"Advanced"},
-    {v:[[2,1,2,"h",true],[1,4,3,"v",false],[2,5,2,"v",false],[3,0,3,"h",false],[4,3,2,"v",false],[0,3,2,"h",false],[0,2,2,"v",false],[5,4,2,"h",false],[4,2,2,"v",false],[4,1,2,"v",false]],par:16,d:"Advanced"},
-    {v:[[2,1,2,"h",true],[1,3,3,"v",false],[0,0,2,"v",false],[0,1,2,"h",false],[2,5,2,"v",false],[4,3,2,"h",false],[4,1,2,"v",false],[3,0,3,"v",false],[5,3,2,"h",false],[1,4,3,"v",false],[4,5,2,"v",false],[3,2,2,"v",false]],par:17,d:"Advanced"},
-    {v:[[2,2,2,"h",true],[1,5,3,"v",false],[4,3,2,"v",false],[1,0,2,"h",false],[4,4,2,"h",false],[2,1,3,"v",false],[3,2,2,"v",false],[5,0,2,"h",false],[0,2,2,"h",false],[3,0,2,"v",false],[1,4,2,"v",false],[3,3,2,"h",false],[0,4,2,"h",false]],par:17,d:"Advanced"},
-    {v:[[2,2,2,"h",true],[1,4,2,"v",false],[5,2,2,"h",false],[0,5,3,"v",false],[4,1,2,"v",false],[1,1,2,"v",false],[0,0,2,"h",false],[4,0,2,"v",false],[3,3,2,"v",false],[3,4,2,"h",false],[5,4,2,"h",false],[0,2,2,"v",false]],par:17,d:"Advanced"},
-    {v:[[2,0,2,"h",true],[1,5,3,"v",false],[4,2,2,"v",false],[3,0,2,"v",false],[5,3,2,"h",false],[3,1,2,"h",false],[1,1,3,"h",false],[0,1,2,"h",false],[2,3,2,"v",false],[0,4,2,"v",false],[4,3,2,"h",false],[5,0,2,"h",false],[0,0,2,"v",false]],par:17,d:"Advanced"},
-    {v:[[2,0,2,"h",true],[0,2,3,"v",false],[1,3,2,"h",false],[5,2,3,"h",false],[3,4,2,"v",false],[4,1,2,"h",false],[3,2,2,"h",false],[0,3,2,"h",false],[3,5,3,"v",false],[3,0,2,"h",false]],par:19,d:"Advanced"},
-    {v:[[2,1,2,"h",true],[2,4,2,"v",false],[3,1,2,"h",false],[5,4,2,"h",false],[5,0,2,"h",false],[0,2,2,"h",false],[3,0,2,"v",false],[4,2,2,"v",false],[0,4,2,"v",false],[4,3,2,"v",false],[0,1,2,"v",false],[2,5,3,"v",false],[2,3,2,"v",false]],par:19,d:"Advanced"},
-    {v:[[2,0,2,"h",true],[1,2,2,"v",false],[1,4,2,"v",false],[0,1,2,"h",false],[3,2,3,"h",false],[4,0,3,"h",false],[5,3,3,"h",false],[0,5,2,"v",false],[4,3,2,"h",false],[3,5,2,"v",false],[0,0,2,"v",false],[5,0,3,"h",false],[0,3,2,"v",false]],par:20,d:"Advanced"},
-    {v:[[2,0,2,"h",true],[1,3,3,"v",false],[1,2,2,"v",false],[3,5,2,"v",false],[3,0,2,"h",false],[4,2,2,"v",false],[3,4,2,"v",false],[4,0,2,"v",false],[1,5,2,"v",false],[1,4,2,"v",false],[5,3,2,"h",false],[0,3,2,"h",false],[0,1,2,"v",false]],par:24,d:"Advanced"},
+    {v:[[2,0,2,"h",true],[1,4,3,"v",false],[0,0,2,"v",false],[0,3,3,"v",false],[1,2,3,"v",false],[0,5,3,"v",false],[3,1,2,"v",false]],par:5,d:"Beginner"},
+    {v:[[2,1,2,"h",true],[1,3,3,"v",false],[4,4,2,"h",false],[2,0,3,"v",false],[0,2,2,"v",false],[4,1,3,"h",false],[1,5,2,"v",false]],par:5,d:"Beginner"},
+    {v:[[2,1,2,"h",true],[2,3,2,"v",false],[0,2,2,"h",false],[0,4,2,"h",false],[1,5,3,"v",false],[4,1,2,"h",false],[4,3,2,"h",false],[5,4,2,"h",false],[1,0,2,"h",false]],par:5,d:"Beginner"},
+    {v:[[2,0,2,"h",true],[1,4,2,"v",false],[1,2,2,"h",false],[4,5,2,"v",false],[4,2,2,"h",false],[5,0,2,"h",false],[2,2,2,"v",false],[1,5,2,"v",false]],par:5,d:"Beginner"},
+    {v:[[2,0,2,"h",true],[0,5,3,"v",false],[0,4,3,"v",false],[1,1,2,"h",false],[3,3,2,"h",false],[5,1,2,"h",false],[4,4,2,"h",false],[3,0,3,"v",false]],par:5,d:"Beginner"},
+    {v:[[2,0,2,"h",true],[2,2,2,"v",false],[1,4,2,"v",false],[0,4,2,"h",false],[4,5,2,"v",false],[2,5,2,"v",false]],par:5,d:"Beginner"},
+    {v:[[2,0,2,"h",true],[2,3,2,"v",false],[0,1,2,"v",false],[2,5,3,"v",false],[4,3,2,"v",false],[1,2,2,"h",false],[0,2,2,"h",false]],par:5,d:"Beginner"},
+    {v:[[2,0,2,"h",true],[1,2,3,"v",false],[1,5,2,"v",false],[0,1,2,"h",false],[0,0,2,"v",false],[4,0,2,"h",false],[4,2,3,"h",false],[5,2,2,"h",false]],par:5,d:"Beginner"},
+    {v:[[2,1,2,"h",true],[1,4,3,"v",false],[1,3,3,"v",false],[5,3,3,"h",false],[4,2,3,"h",false]],par:5,d:"Beginner"},
+    {v:[[2,2,2,"h",true],[0,4,3,"v",false],[3,3,2,"h",false],[3,2,2,"v",false],[1,1,3,"h",false],[1,0,2,"v",false],[2,5,3,"v",false]],par:5,d:"Beginner"},
+    {v:[[2,1,2,"h",true],[1,5,3,"v",false],[2,3,3,"v",false],[1,0,2,"h",false],[0,4,2,"h",false],[1,4,2,"v",false],[3,4,2,"v",false],[3,2,3,"v",false],[3,0,2,"h",false]],par:5,d:"Beginner"},
+    {v:[[2,2,2,"h",true],[1,5,3,"v",false],[4,2,2,"h",false],[5,0,3,"h",false],[0,2,2,"v",false],[0,4,2,"h",false],[5,4,2,"h",false],[0,0,3,"v",false],[4,4,2,"h",false]],par:5,d:"Beginner"},
+    {v:[[2,2,2,"h",true],[1,5,2,"v",false],[3,4,2,"h",false],[1,4,2,"v",false],[2,0,2,"h",false],[0,0,2,"h",false],[4,3,2,"h",false],[0,3,3,"h",false],[3,0,3,"v",false]],par:5,d:"Beginner"},
+    {v:[[2,1,2,"h",true],[2,4,3,"v",false],[5,3,2,"h",false],[4,0,2,"v",false],[0,3,3,"h",false],[0,0,3,"h",false],[1,5,2,"v",false],[2,3,2,"v",false]],par:5,d:"Beginner"},
+    {v:[[2,2,2,"h",true],[2,4,2,"v",false],[1,1,2,"h",false],[0,4,2,"v",false],[4,1,2,"v",false],[2,5,3,"v",false],[5,2,2,"h",false],[0,3,2,"v",false],[5,4,2,"h",false]],par:6,d:"Beginner"},
+    {v:[[2,2,2,"h",true],[2,5,2,"v",false],[1,4,2,"v",false],[0,3,2,"v",false],[0,4,2,"h",false],[3,4,2,"v",false],[1,0,2,"v",false],[4,0,2,"h",false]],par:6,d:"Beginner"},
+    {v:[[2,2,2,"h",true],[1,5,3,"v",false],[1,0,3,"h",false],[4,3,3,"h",false],[0,4,2,"v",false],[3,1,2,"v",false],[2,4,2,"v",false],[3,2,2,"h",false],[5,4,2,"h",false]],par:6,d:"Beginner"},
+    {v:[[2,0,2,"h",true],[2,5,3,"v",false],[3,2,2,"v",false],[4,3,2,"h",false],[0,3,2,"v",false],[0,4,3,"v",false],[3,1,3,"v",false],[5,2,2,"h",false],[3,3,2,"h",false]],par:6,d:"Beginner"},
+    {v:[[2,0,2,"h",true],[1,2,3,"v",false],[4,0,2,"v",false],[3,5,2,"v",false],[1,4,2,"h",false],[4,1,3,"h",false],[0,4,2,"h",false],[5,3,3,"h",false],[3,3,2,"h",false]],par:6,d:"Beginner"},
+    {v:[[2,0,2,"h",true],[1,3,2,"v",false],[4,2,2,"h",false],[1,4,3,"v",false],[0,2,2,"v",false],[4,4,2,"h",false],[4,0,2,"v",false]],par:7,d:"Beginner"},
+    {v:[[2,1,2,"h",true],[1,3,3,"v",false],[3,2,2,"v",false],[0,5,3,"v",false],[4,3,2,"h",false],[1,0,3,"v",false],[5,2,3,"h",false],[0,3,2,"h",false]],par:10,d:"Intermediate"},
+    {v:[[2,1,2,"h",true],[0,4,3,"v",false],[4,1,2,"v",false],[4,4,2,"h",false],[1,3,2,"v",false],[1,5,3,"v",false],[1,0,3,"v",false],[4,2,2,"v",false],[5,4,2,"h",false],[0,2,2,"h",false]],par:10,d:"Intermediate"},
+    {v:[[2,2,2,"h",true],[0,4,3,"v",false],[5,2,3,"h",false],[4,1,2,"v",false],[0,0,3,"v",false],[3,2,2,"v",false],[1,2,2,"h",false],[3,0,2,"v",false],[2,5,2,"v",false],[3,3,2,"h",false]],par:10,d:"Intermediate"},
+    {v:[[2,0,2,"h",true],[0,4,3,"v",false],[3,1,2,"h",false],[4,2,3,"h",false],[1,2,2,"h",false],[3,4,2,"h",false],[0,5,2,"v",false],[5,4,2,"h",false],[3,0,2,"v",false],[4,1,2,"v",false]],par:10,d:"Intermediate"},
+    {v:[[2,0,2,"h",true],[1,4,3,"v",false],[0,4,2,"h",false],[0,2,2,"v",false],[5,2,2,"h",false],[5,4,2,"h",false],[2,2,2,"v",false],[0,3,2,"v",false],[3,0,3,"v",false],[3,5,2,"v",false],[1,5,2,"v",false]],par:10,d:"Intermediate"},
+    {v:[[2,1,2,"h",true],[1,5,2,"v",false],[3,3,2,"v",false],[1,1,2,"h",false],[3,2,2,"v",false],[2,4,2,"v",false],[1,0,2,"v",false],[0,2,2,"h",false],[0,4,2,"v",false],[3,1,2,"v",false],[4,4,2,"h",false]],par:10,d:"Intermediate"},
+    {v:[[2,2,2,"h",true],[0,4,3,"v",false],[4,2,2,"v",false],[3,1,2,"h",false],[4,3,2,"h",false],[1,1,2,"h",false],[0,5,3,"v",false],[0,1,2,"h",false],[3,3,2,"h",false],[3,0,2,"v",false],[0,3,2,"v",false]],par:10,d:"Intermediate"},
+    {v:[[2,0,2,"h",true],[2,5,2,"v",false],[0,1,2,"v",false],[0,3,3,"h",false],[5,2,2,"h",false],[0,0,2,"v",false],[2,2,3,"v",false],[1,3,2,"v",false],[3,0,3,"v",false],[4,4,2,"v",false],[1,4,2,"v",false]],par:10,d:"Intermediate"},
+    {v:[[2,0,2,"h",true],[2,4,2,"v",false],[2,5,3,"v",false],[1,2,2,"h",false],[4,1,3,"h",false],[2,2,2,"v",false],[0,2,3,"h",false],[1,0,2,"h",false],[0,5,2,"v",false],[5,1,2,"h",false]],par:11,d:"Intermediate"},
+    {v:[[2,1,2,"h",true],[1,5,3,"v",false],[4,2,2,"h",false],[1,3,3,"v",false],[2,0,2,"v",false],[3,1,2,"v",false],[0,4,3,"v",false],[5,0,2,"h",false],[0,2,2,"v",false]],par:11,d:"Intermediate"},
+    {v:[[2,2,2,"h",true],[0,4,3,"v",false],[4,0,2,"v",false],[1,0,2,"v",false],[4,2,2,"v",false],[2,5,2,"v",false],[4,4,2,"h",false],[1,2,2,"h",false],[0,1,2,"h",false],[1,1,2,"v",false]],par:11,d:"Intermediate"},
+    {v:[[2,0,2,"h",true],[2,5,3,"v",false],[4,0,2,"h",false],[0,4,3,"v",false],[0,0,2,"h",false],[1,1,2,"h",false],[4,2,2,"v",false],[3,0,3,"h",false],[1,3,3,"v",false],[5,3,3,"h",false]],par:11,d:"Intermediate"},
+    {v:[[2,0,2,"h",true],[2,5,2,"v",false],[4,2,2,"h",false],[3,4,3,"v",false],[1,3,3,"v",false],[3,1,2,"v",false],[0,3,3,"h",false]],par:12,d:"Intermediate"},
+    {v:[[2,1,2,"h",true],[2,5,2,"v",false],[2,4,2,"v",false],[0,0,3,"h",false],[5,3,3,"h",false],[1,3,3,"v",false],[0,5,2,"v",false],[4,3,2,"h",false],[3,1,2,"h",false],[4,2,2,"v",false],[3,0,2,"v",false]],par:12,d:"Intermediate"},
+    {v:[[2,2,2,"h",true],[1,4,3,"v",false],[0,0,2,"v",false],[0,2,2,"h",false],[0,5,2,"v",false],[4,4,2,"h",false],[5,4,2,"h",false],[2,0,2,"v",false],[1,1,3,"h",false],[4,2,2,"v",false],[3,1,2,"h",false]],par:12,d:"Intermediate"},
+    {v:[[2,1,2,"h",true],[0,4,3,"v",false],[3,3,2,"v",false],[4,5,2,"v",false],[3,0,3,"h",false],[4,0,2,"h",false],[1,3,2,"v",false],[5,3,2,"h",false],[4,2,2,"v",false]],par:12,d:"Intermediate"},
+    {v:[[2,0,2,"h",true],[1,5,2,"v",false],[2,2,2,"v",false],[1,0,3,"h",false],[3,0,2,"h",false],[4,3,2,"h",false],[0,0,2,"h",false],[3,5,2,"v",false],[2,4,2,"v",false],[4,2,2,"v",false]],par:13,d:"Intermediate"},
+    {v:[[2,2,2,"h",true],[1,5,3,"v",false],[1,4,3,"v",false],[4,4,2,"h",false],[3,0,2,"h",false],[0,2,2,"v",false],[4,2,2,"h",false],[4,1,2,"v",false],[5,4,2,"h",false],[0,0,2,"v",false],[3,2,2,"h",false]],par:13,d:"Intermediate"},
+    {v:[[2,2,2,"h",true],[2,5,2,"v",false],[4,1,2,"h",false],[3,1,2,"h",false],[0,4,2,"h",false],[4,3,2,"v",false],[4,4,2,"v",false],[0,2,2,"v",false],[0,1,2,"v",false],[3,0,3,"v",false],[1,4,2,"v",false]],par:15,d:"Intermediate"},
+    {v:[[2,1,2,"h",true],[1,4,3,"v",false],[3,2,2,"v",false],[4,3,2,"h",false],[2,0,2,"v",false],[1,1,3,"h",false],[3,1,3,"v",false],[3,5,2,"v",false],[0,0,3,"h",false],[0,5,2,"v",false]],par:16,d:"Intermediate"},
+    {v:[[2,0,2,"h",true],[1,3,3,"v",false],[4,1,2,"v",false],[1,2,3,"v",false],[4,2,2,"h",false],[5,2,2,"h",false],[0,1,2,"h",false],[3,5,2,"v",false],[2,4,2,"v",false],[1,5,2,"v",false],[0,0,2,"v",false],[5,4,2,"h",false]],par:19,d:"Advanced"},
+    {v:[[2,0,2,"h",true],[1,3,2,"v",false],[3,4,3,"v",false],[0,2,3,"h",false],[4,1,2,"h",false],[2,5,2,"v",false],[1,0,3,"h",false],[2,2,2,"v",false],[3,3,2,"v",false],[0,5,2,"v",false],[5,0,2,"h",false],[3,0,2,"v",false]],par:19,d:"Advanced"},
+    {v:[[2,1,2,"h",true],[2,4,2,"v",false],[0,5,2,"v",false],[4,3,3,"h",false],[5,4,2,"h",false],[0,0,2,"h",false],[3,1,2,"v",false],[4,2,2,"v",false],[1,0,3,"v",false],[2,5,2,"v",false],[0,2,3,"h",false],[5,0,2,"h",false]],par:19,d:"Advanced"},
+    {v:[[2,0,2,"h",true],[2,2,2,"v",false],[1,1,3,"h",false],[4,1,2,"v",false],[5,4,2,"h",false],[4,3,2,"h",false],[2,3,2,"v",false],[0,2,2,"h",false],[2,4,2,"v",false],[4,0,2,"v",false],[4,2,2,"v",false],[2,5,2,"v",false],[3,0,2,"h",false]],par:19,d:"Advanced"},
+    {v:[[2,2,2,"h",true],[1,5,2,"v",false],[1,4,3,"v",false],[2,0,3,"v",false],[5,0,2,"h",false],[1,0,2,"h",false],[0,2,2,"h",false],[3,2,2,"h",false],[4,3,3,"h",false],[4,2,2,"v",false],[5,3,2,"h",false],[2,1,2,"v",false]],par:19,d:"Advanced"},
+    {v:[[2,0,2,"h",true],[1,2,3,"v",false],[2,4,2,"v",false],[4,2,2,"h",false],[5,1,3,"h",false],[0,2,3,"h",false],[4,4,2,"v",false],[2,3,2,"v",false],[2,5,3,"v",false],[3,0,2,"v",false]],par:19,d:"Advanced"},
+    {v:[[2,0,2,"h",true],[1,2,2,"v",false],[0,3,2,"v",false],[0,5,2,"v",false],[3,1,2,"v",false],[0,0,2,"h",false],[0,4,3,"v",false],[3,5,3,"v",false],[4,2,2,"v",false],[3,3,2,"h",false],[4,3,2,"h",false]],par:19,d:"Advanced"},
+    {v:[[2,0,2,"h",true],[0,3,3,"v",false],[5,3,2,"h",false],[1,4,2,"h",false],[3,3,2,"h",false],[0,1,2,"h",false],[3,1,2,"v",false],[5,1,2,"h",false],[3,2,2,"v",false],[4,5,2,"v",false],[4,3,2,"h",false]],par:19,d:"Advanced"},
+    {v:[[2,1,2,"h",true],[2,3,2,"v",false],[2,4,3,"v",false],[3,5,2,"v",false],[3,2,3,"v",false],[1,0,3,"h",false],[0,1,2,"h",false],[2,0,2,"v",false],[0,3,3,"h",false],[1,5,2,"v",false],[4,0,2,"h",false],[1,3,2,"h",false],[5,3,2,"h",false]],par:19,d:"Advanced"},
+    {v:[[2,0,2,"h",true],[2,4,2,"v",false],[0,5,2,"v",false],[5,2,3,"h",false],[1,2,2,"v",false],[3,1,2,"v",false],[2,3,2,"v",false],[0,1,3,"h",false],[4,3,2,"h",false],[3,2,2,"v",false],[1,0,2,"h",false],[4,0,2,"v",false]],par:21,d:"Advanced"},
+    {v:[[2,1,2,"h",true],[1,3,2,"v",false],[4,3,2,"h",false],[0,4,3,"v",false],[3,5,2,"v",false],[1,1,2,"h",false],[3,0,2,"h",false],[4,2,2,"v",false],[5,4,2,"h",false],[0,5,2,"v",false],[0,0,3,"h",false],[4,0,2,"v",false],[4,1,2,"v",false]],par:21,d:"Advanced"},
+    {v:[[2,2,2,"h",true],[1,4,3,"v",false],[5,0,2,"h",false],[3,5,2,"v",false],[0,1,3,"v",false],[4,2,2,"v",false],[0,4,2,"h",false],[2,0,2,"v",false],[3,1,2,"h",false],[1,2,2,"h",false],[5,3,2,"h",false],[4,3,2,"h",false],[1,5,2,"v",false]],par:21,d:"Advanced"},
+    {v:[[2,0,2,"h",true],[1,5,3,"v",false],[0,4,2,"h",false],[1,4,2,"v",false],[2,2,3,"v",false],[1,3,2,"v",false],[0,0,2,"h",false],[5,3,2,"h",false],[5,1,2,"h",false],[4,0,2,"v",false],[1,0,3,"h",false],[3,1,2,"v",false],[4,4,2,"h",false]],par:21,d:"Advanced"},
+    {v:[[2,1,2,"h",true],[1,3,2,"v",false],[4,0,2,"v",false],[0,3,3,"h",false],[2,5,3,"v",false],[4,1,2,"v",false],[2,4,3,"v",false],[4,2,2,"h",false],[5,4,2,"h",false],[1,4,2,"h",false],[0,2,2,"v",false]],par:22,d:"Advanced"},
+    {v:[[2,2,2,"h",true],[1,4,3,"v",false],[1,0,2,"v",false],[2,1,3,"v",false],[4,4,2,"h",false],[5,3,2,"h",false],[1,5,3,"v",false],[5,0,2,"h",false],[4,2,2,"v",false],[3,0,2,"v",false],[3,3,2,"v",false],[0,2,2,"h",false],[1,2,2,"h",false]],par:22,d:"Advanced"},
+    {v:[[2,0,2,"h",true],[1,3,3,"v",false],[4,3,2,"h",false],[5,3,2,"h",false],[1,5,2,"v",false],[4,5,2,"v",false],[3,0,3,"v",false],[0,1,3,"h",false],[3,1,2,"v",false],[2,2,2,"v",false]],par:23,d:"Advanced"},
+    {v:[[2,1,2,"h",true],[1,4,2,"v",false],[1,0,2,"v",false],[4,4,2,"v",false],[4,0,3,"h",false],[0,2,2,"v",false],[0,1,2,"v",false],[5,1,2,"h",false],[0,4,2,"h",false],[3,4,2,"h",false]],par:24,d:"Advanced"},
+    {v:[[2,1,2,"h",true],[1,4,3,"v",false],[1,3,2,"v",false],[4,4,2,"h",false],[2,5,2,"v",false],[0,0,3,"h",false],[4,2,2,"v",false],[3,0,2,"v",false],[1,0,3,"h",false],[3,3,2,"v",false],[5,3,2,"h",false]],par:24,d:"Advanced"},
+    {v:[[2,1,2,"h",true],[1,3,2,"v",false],[0,4,3,"v",false],[4,2,2,"v",false],[1,0,2,"v",false],[3,0,3,"h",false],[0,1,2,"h",false],[4,0,2,"h",false],[2,5,2,"v",false],[4,4,2,"h",false],[0,5,2,"v",false],[5,4,2,"h",false]],par:26,d:"Advanced"},
+    {v:[[2,1,2,"h",true],[1,4,2,"v",false],[4,0,3,"h",false],[3,0,2,"h",false],[0,2,2,"v",false],[3,5,2,"v",false],[1,3,2,"v",false],[3,3,2,"v",false],[5,2,3,"h",false],[0,0,2,"v",false],[3,4,2,"v",false],[1,5,2,"v",false],[0,3,2,"h",false]],par:27,d:"Advanced"},
   ];
 
   // --- Progress (localStorage) ---
@@ -450,6 +521,11 @@
   let currentLevel = 0;
   let vehicles = [];
   let dragState = null;
+  let solveAnimation = null;
+  function clearHintUI() {
+    document.querySelectorAll('.hint-highlight').forEach(el => el.classList.remove('hint-highlight'));
+    document.querySelectorAll('.hint-arrow').forEach(el => el.remove());
+  }
 
   function buildGrid() {
     board.querySelectorAll('.grid-line-h, .grid-line-v').forEach(el => el.remove());
@@ -467,6 +543,8 @@
 
   function loadLevel(index) {
     currentLevel = index;
+    clearHintUI();
+    if (solveAnimation) { clearInterval(solveAnimation); solveAnimation = null; }
     winOverlay.classList.remove('visible');
     const level = LEVELS[index];
     levelBadge.textContent = `Level ${index + 1} / ${LEVELS.length}`;
@@ -484,35 +562,32 @@
       const orientClass = orient === 'h' ? 'h-vehicle' : 'v-vehicle';
       el.className = 'vehicle ' + orientClass + (isTarget ? ' target' : '') + (isTruck ? ' truck' : '');
 
-      const body = document.createElement('div');
-      body.className = 'car-body';
       if (!isTarget) {
         const c = COLORS[colorIdx % COLORS.length];
-        body.style.background = `linear-gradient(145deg, ${c}, ${c}bb)`;
+        el.style.background = `linear-gradient(135deg, ${c}, ${c}cc)`;
         colorIdx++;
       }
-      el.appendChild(body);
 
-      el.appendChild(Object.assign(document.createElement('div'), { className: 'roof' }));
-      el.appendChild(Object.assign(document.createElement('div'), { className: 'windshield' }));
-      el.appendChild(Object.assign(document.createElement('div'), { className: 'rear-window' }));
+      const mk = (cls) => Object.assign(document.createElement('div'), { className: cls });
 
-      const hl = document.createElement('div'); hl.className = 'headlights';
-      hl.appendChild(Object.assign(document.createElement('div'), { className: 'headlight' }));
-      hl.appendChild(Object.assign(document.createElement('div'), { className: 'headlight' }));
+      const wheels = mk('wheels');
+      for (const wc of ['fl','fr','rl','rr']) wheels.appendChild(mk('wheel ' + wc));
+      el.appendChild(wheels);
+
+      el.appendChild(mk('roof'));
+      el.appendChild(mk('windshield'));
+      el.appendChild(mk('bumper front'));
+      el.appendChild(mk('bumper rear'));
+
+      const hl = mk('headlights');
+      hl.appendChild(mk('headlight'));
+      hl.appendChild(mk('headlight'));
       el.appendChild(hl);
 
-      const tl = document.createElement('div'); tl.className = 'taillights';
-      tl.appendChild(Object.assign(document.createElement('div'), { className: 'taillight' }));
-      tl.appendChild(Object.assign(document.createElement('div'), { className: 'taillight' }));
+      const tl = mk('taillights');
+      tl.appendChild(mk('taillight'));
+      tl.appendChild(mk('taillight'));
       el.appendChild(tl);
-
-      el.appendChild(Object.assign(document.createElement('div'), { className: 'bumper bumper-front' }));
-      el.appendChild(Object.assign(document.createElement('div'), { className: 'bumper bumper-back' }));
-
-      if (isTruck) {
-        el.appendChild(Object.assign(document.createElement('div'), { className: 'truck-stripe' }));
-      }
 
       const veh = { row, col, size, orient, isTarget, el, id: i };
       vehicles.push(veh);
@@ -596,10 +671,107 @@
     if (!target || target.col + target.size < GRID) return;
     saveCompleted(currentLevel);
     const isLast = currentLevel + 1 >= LEVELS.length;
-    winSubtitle.textContent = isLast ? 'You beat all 50 levels!' : `Level ${currentLevel + 1} complete`;
+    winSubtitle.textContent = isLast ? 'You beat all 60 levels!' : `Level ${currentLevel + 1} complete`;
     nextBtn.textContent = isLast ? 'Play Again' : 'Next Level';
     setTimeout(() => winOverlay.classList.add('visible'), 200);
   }
+
+  // --- BFS Solver ---
+  function solveCurrent() {
+    const encode = vehs => vehs.map(v => `${v.row},${v.col}`).join('|');
+    const initial = vehicles.map(v => ({ row: v.row, col: v.col, size: v.size, orient: v.orient, isTarget: v.isTarget }));
+    const queue = [{ vehs: initial, path: [] }];
+    const seen = new Set([encode(initial)]);
+    while (queue.length) {
+      const { vehs, path } = queue.shift();
+      const target = vehs.find(v => v.isTarget);
+      if (target.col + target.size >= GRID) return path;
+      if (path.length >= 60) continue;
+      for (let vi = 0; vi < vehs.length; vi++) {
+        const grid = Array.from({ length: GRID }, () => Array(GRID).fill(false));
+        vehs.forEach((v, i) => {
+          if (i !== vi) for (let j = 0; j < v.size; j++) {
+            const r = v.orient === 'v' ? v.row + j : v.row;
+            const c = v.orient === 'h' ? v.col + j : v.col;
+            grid[r][c] = true;
+          }
+        });
+        const v = vehs[vi];
+        const tryM = (nr, nc) => {
+          const nv = vehs.map((x, i) => i === vi ? { ...x, row: nr, col: nc } : { ...x });
+          const k = encode(nv);
+          if (!seen.has(k)) {
+            seen.add(k);
+            queue.push({ vehs: nv, path: [...path, { idx: vi, row: nr, col: nc }] });
+          }
+        };
+        if (v.orient === 'h') {
+          for (let d = -1; v.col + d >= 0 && !grid[v.row][v.col + d]; d--) tryM(v.row, v.col + d);
+          for (let d = 1; v.col + v.size - 1 + d < GRID && !grid[v.row][v.col + v.size - 1 + d]; d++) tryM(v.row, v.col + d);
+        } else {
+          for (let d = -1; v.row + d >= 0 && !grid[v.row + d][v.col]; d--) tryM(v.row + d, v.col);
+          for (let d = 1; v.row + v.size - 1 + d < GRID && !grid[v.row + v.size - 1 + d][v.col]; d++) tryM(v.row + d, v.col);
+        }
+      }
+    }
+    return null;
+  }
+
+  function showHint() {
+    clearHintUI();
+    if (solveAnimation) { clearInterval(solveAnimation); solveAnimation = null; }
+    const solution = solveCurrent();
+    if (!solution || !solution.length) return;
+    const step = solution[0];
+    const veh = vehicles[step.idx];
+    veh.el.classList.add('hint-highlight');
+    const arrow = document.createElement('div');
+    arrow.className = 'hint-arrow';
+    const dr = step.row - veh.row, dc = step.col - veh.col;
+    if (dc > 0) arrow.textContent = '→';
+    else if (dc < 0) arrow.textContent = '←';
+    else if (dr > 0) arrow.textContent = '↓';
+    else arrow.textContent = '↑';
+    const cx = (veh.orient === 'h' ? (veh.col + step.col) / 2 + veh.size / 2 : veh.col + 0.5) * CELL;
+    const cy = (veh.orient === 'v' ? (veh.row + step.row) / 2 + veh.size / 2 : veh.row + 0.5) * CELL;
+    arrow.style.left = cx + 'px';
+    arrow.style.top = cy + 'px';
+    board.appendChild(arrow);
+    setTimeout(clearHintUI, 2000);
+  }
+
+  function animateSolve() {
+    clearHintUI();
+    if (solveAnimation) { clearInterval(solveAnimation); solveAnimation = null; }
+    const solution = solveCurrent();
+    if (!solution || !solution.length) return;
+    let i = 0;
+    solveBtn.disabled = true;
+    hintBtn.disabled = true;
+    solveAnimation = setInterval(() => {
+      if (i >= solution.length) {
+        clearInterval(solveAnimation);
+        solveAnimation = null;
+        solveBtn.disabled = false;
+        hintBtn.disabled = false;
+        checkWin();
+        return;
+      }
+      const step = solution[i];
+      const veh = vehicles[step.idx];
+      veh.row = step.row;
+      veh.col = step.col;
+      positionVehicle(veh);
+      veh.el.classList.add('hint-highlight');
+      setTimeout(() => veh.el.classList.remove('hint-highlight'), 350);
+      i++;
+    }, 450);
+  }
+
+  const hintBtn = document.getElementById('hintBtn');
+  const solveBtn = document.getElementById('solveBtn');
+  hintBtn.addEventListener('click', showHint);
+  solveBtn.addEventListener('click', animateSolve);
 
   nextBtn.addEventListener('click', () => {
     const next = (currentLevel + 1) % LEVELS.length;
@@ -608,7 +780,13 @@
 
   menuBtn.addEventListener('click', showSelect);
   backBtn.addEventListener('click', showSelect);
-  resetBtn.addEventListener('click', () => loadLevel(currentLevel));
+  resetBtn.addEventListener('click', () => {
+    if (solveAnimation) { clearInterval(solveAnimation); solveAnimation = null; }
+    clearHintUI();
+    solveBtn.disabled = false;
+    hintBtn.disabled = false;
+    loadLevel(currentLevel);
+  });
 
   buildGrid();
   buildLevelSelect();
