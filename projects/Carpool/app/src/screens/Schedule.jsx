@@ -16,10 +16,9 @@ function LegStatusPill({ label, leg }) {
   const open = !leg.driver_id;
   const cls = open ? 'pill pill-yellow' : 'pill pill-green';
   const text = open ? 'OPEN' : 'COVERED';
-  const dot = open ? '●' : '✓';
   return (
     <span className={cls} style={{ fontSize: 11, letterSpacing: 0.3 }}>
-      {label}: {dot} {text}
+      {label}: {text}
     </span>
   );
 }
