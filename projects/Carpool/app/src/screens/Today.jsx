@@ -769,6 +769,30 @@ function NextDriveCard({ leg, ctx, meId, onSub, onLate }) {
               </button>
             )}
           </div>
+
+          <button
+            type="button"
+            onClick={() => ctx.navigate('active_ride', { legId: leg.id })}
+            style={{
+              marginTop: 8,
+              width: '100%',
+              background: '#fbbf24',
+              color: 'var(--green-900)',
+              border: 'none',
+              borderRadius: 12,
+              padding: '14px 8px',
+              fontSize: 15,
+              fontWeight: 800,
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+              cursor: 'pointer',
+            }}
+          >
+            🗺️ Open ride overview →
+          </button>
         </div>
       </div>
     </div>
