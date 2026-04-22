@@ -9,6 +9,34 @@ const COLORS = ['green', 'blue', 'purple', 'orange', 'pink', 'teal'];
 const STEPS = ['welcome', 'phone', 'profile', 'kids', 'group', 'calendar', 'done'];
 const HINT_KEY = 'carpool.hint.gamechanger';
 
+const MONTHS = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
+
+function daysInMonth(monthStr, yearStr) {
+  const month = Number(monthStr);
+  const year = Number(yearStr) || 2000; // 2000 is a leap year — safe default until year picked
+  if (!month || month < 1 || month > 12) return Array.from({ length: 31 }, (_, i) => i + 1);
+  const last = new Date(year, month, 0).getDate();
+  return Array.from({ length: last }, (_, i) => i + 1);
+}
+
+function birthYearOptions() {
+  const now = new Date().getFullYear();
+  const years = [];
+  for (let y = now; y >= now - 18; y--) years.push(y);
+  return years;
+}
+
+function toBirthdayIso(k) {
+  const m = Number(k.birthMonth);
+  const d = Number(k.birthDay);
+  const y = Number(k.birthYear);
+  if (!m || !d || !y) return null;
+  return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+}
+
 export function Onboarding({ ctx }) {
   const [step, setStep] = useState('welcome');
 
@@ -20,7 +48,7 @@ export function Onboarding({ ctx }) {
   const [avatarColor, setAvatarColor] = useState('green');
 
   const [kids, setKids] = useState([
-    { id: newId('tmp'), name: '', age: '', color: 'blue' },
+    { id: newId('tmp'), name: '', birthMonth: '', birthDay: '', birthYear: '', color: 'blue' },
   ]);
 
   const [groupMode, setGroupMode] = useState(null); // 'join' | 'create' | 'skip'
@@ -50,7 +78,9 @@ export function Onboarding({ ctx }) {
       phone,
       name,
       avatarColor,
-      kids: kids.filter((k) => k.name.trim()),
+      kids: kids
+        .filter((k) => k.name.trim())
+        .map((k) => ({ ...k, birthday: toBirthdayIso(k) })),
       team:
         groupMode === 'join'
           ? { mode: 'join', inviteCode }
@@ -376,7 +406,7 @@ function KidsStep({ kids, setKids, avatarColor, onNext }) {
   };
   const addKid = () => {
     const next = COLORS.filter((c) => c !== avatarColor)[kids.length % 5] || 'pink';
-    setKids((prev) => [...prev, { id: newId('tmp'), name: '', age: '', color: next }]);
+    setKids((prev) => [...prev, { id: newId('tmp'), name: '', birthMonth: '', birthDay: '', birthYear: '', color: next }]);
   };
   const removeKid = (id) => setKids((prev) => prev.filter((k) => k.id !== id));
 
@@ -403,20 +433,45 @@ function KidsStep({ kids, setKids, avatarColor, onNext }) {
                 </button>
               )}
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px', gap: 8, marginBottom: 8 }}>
-              <input
+            <input
+              className="input"
+              placeholder="First name"
+              value={k.name}
+              onChange={(e) => updateKid(k.id, { name: e.target.value })}
+              style={{ marginBottom: 8 }}
+            />
+            <div className="muted" style={{ fontSize: 12, marginBottom: 6 }}>Birthday</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr 1.1fr', gap: 8, marginBottom: 8 }}>
+              <select
                 className="input"
-                placeholder="First name"
-                value={k.name}
-                onChange={(e) => updateKid(k.id, { name: e.target.value })}
-              />
-              <input
+                value={k.birthMonth}
+                onChange={(e) => updateKid(k.id, { birthMonth: e.target.value })}
+              >
+                <option value="">Month</option>
+                {MONTHS.map((m, i) => (
+                  <option key={m} value={String(i + 1)}>{m}</option>
+                ))}
+              </select>
+              <select
                 className="input"
-                placeholder="Age"
-                inputMode="numeric"
-                value={k.age}
-                onChange={(e) => updateKid(k.id, { age: e.target.value.replace(/\D/g, '').slice(0, 2) })}
-              />
+                value={k.birthDay}
+                onChange={(e) => updateKid(k.id, { birthDay: e.target.value })}
+              >
+                <option value="">Day</option>
+                {daysInMonth(k.birthMonth, k.birthYear).map((d) => (
+                  <option key={d} value={String(d)}>{d}</option>
+                ))}
+              </select>
+              <select
+                className="input"
+                value={k.birthYear}
+                onChange={(e) => updateKid(k.id, { birthYear: e.target.value })}
+              >
+                <option value="">Year</option>
+                {birthYearOptions().map((y) => (
+                  <option key={y} value={String(y)}>{y}</option>
+                ))}
+              </select>
             </div>
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               {COLORS.map((c) => (

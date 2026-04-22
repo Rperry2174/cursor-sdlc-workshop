@@ -629,10 +629,14 @@ function dayLabel(yyyymmdd) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const diff = Math.round((d.getTime() - today.getTime()) / 86400000);
-  if (diff === 0) return 'Today';
-  if (diff === 1) return 'Tomorrow';
-  if (diff < 7) return d.toLocaleDateString([], { weekday: 'long' });
-  return d.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+  const datePart = d.toLocaleDateString([], { month: 'long', day: 'numeric' });
+  if (diff === 0) return `Today, ${datePart}`;
+  if (diff === 1) return `Tomorrow, ${datePart}`;
+  if (diff < 7) {
+    const weekday = d.toLocaleDateString([], { weekday: 'long' });
+    return `${weekday}, ${datePart}`;
+  }
+  return d.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
 }
 
 function groupByDay(legs) {

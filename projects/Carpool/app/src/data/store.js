@@ -167,10 +167,12 @@ export function completeOnboarding({ phone, name, avatarColor, kids, team }) {
   for (const k of kids || []) {
     if (!k.name?.trim()) continue;
     const childId = newId('c');
+    const ageFromBirthday = k.birthday ? ageFromDob(k.birthday) : null;
     const child = {
       id: childId,
       name: k.name.trim(),
-      age: Number(k.age) || null,
+      birthday: k.birthday || null,
+      age: ageFromBirthday ?? (Number(k.age) || null),
       avatar_color: k.color || avatarColor || 'green',
       school: k.school?.trim() || '',
       position: k.position?.trim() || '',
@@ -506,6 +508,17 @@ export function newId(prefix = 'id') {
 
 function nowIso() {
   return new Date().toISOString();
+}
+
+export function ageFromDob(birthday) {
+  if (!birthday) return null;
+  const dob = new Date(birthday + 'T00:00:00');
+  if (Number.isNaN(dob.getTime())) return null;
+  const today = new Date();
+  let age = today.getFullYear() - dob.getFullYear();
+  const m = today.getMonth() - dob.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age -= 1;
+  return age >= 0 ? age : null;
 }
 
 function pushNotif(recipient_id, kind, body, leg_id = null) {
