@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #f0f4f8;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    gap: 30px;
+    flex-wrap: wrap;
+  }
+  .phone {
+    width: 375px;
+    height: 760px;
+    background: #f8f9fb;
+    border-radius: 44px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.18), 0 0 0 2px #d1d5db;
+    overflow: hidden;
+    flex-shrink: 0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .phone-label {
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #6b7280;
+  }
+  .phone-wrap { display: flex; flex-direction: column; }
+
+  .status-bar {
+    background: #1a1f2e;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 24px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  /* Avatars */
+  .av-green { background: linear-gradient(135deg, #2d6a4f, #52b788); }
+  .av-blue { background: linear-gradient(135deg, #1d4ed8, #60a5fa); }
+  .av-purple { background: linear-gradient(135deg, #7c3aed, #a78bfa); }
+  .av-orange { background: linear-gradient(135deg, #c05621, #f6ad55); }
+  .av-teal { background: linear-gradient(135deg, #0d9488, #5eead4); }
+
+  .avatar-md {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; color: white;
+    flex-shrink: 0;
+  }
+  .avatar-sm {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: white;
+    flex-shrink: 0;
+  }
+
+  /* Backdrop for modals */
+  .scrim {
+    position: absolute;
+    inset: 0;
+    background: rgba(15,23,42,0.55);
+    z-index: 10;
+  }
+  .sheet {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: white;
+    border-radius: 28px 28px 0 0;
+    z-index: 11;
+    padding: 12px 18px 22px;
+    box-shadow: 0 -8px 32px rgba(0,0,0,0.15);
+  }
+  .sheet-handle {
+    width: 36px;
+    height: 4px;
+    background: #d1d5db;
+    border-radius: 2px;
+    margin: 0 auto 14px;
+  }
+  .sheet-title {
+    font-size: 17px;
+    font-weight: 800;
+    color: #111827;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+  .sheet-sub {
+    font-size: 12px;
+    color: #6b7280;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  .primary-btn {
+    background: linear-gradient(135deg, #2d6a4f, #40916c);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    padding: 14px;
+    font-size: 14px;
+    font-weight: 700;
+    width: 100%;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(45,106,79,0.3);
+  }
+  .ghost-btn {
+    background: transparent;
+    color: #6b7280;
+    border: none;
+    padding: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    width: 100%;
+    cursor: pointer;
+    margin-top: 4px;
+  }
+
+  /* ======================== PHONE 1: SIGN UP TO DRIVE SHEET ======================== */
+
+  .home-bg-content {
+    background: #f8f9fb;
+    flex: 1;
+    overflow: hidden;
+  }
+  .home-bg-header {
+    background: linear-gradient(135deg, #2d6a4f, #1b4332);
+    padding: 18px 18px 26px;
+    color: white;
+  }
+  .home-bg-name { font-size: 18px; font-weight: 700; }
+  .home-bg-pool { font-size: 12px; opacity: 0.7; }
+  .home-bg-card {
+    background: white;
+    margin: 12px;
+    margin-top: -10px;
+    border-radius: 16px;
+    padding: 14px;
+    opacity: 0.6;
+  }
+  .home-bg-card-title { font-size: 13px; font-weight: 700; color: #111827; }
+  .home-bg-card-sub { font-size: 11px; color: #9ca3af; margin-top: 4px; }
+
+  .signup-event-card {
+    background: #f9fafb;
+    border-radius: 14px;
+    padding: 12px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .signup-event-emoji {
+    width: 38px; height: 38px;
+    background: #fef3c7;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .signup-event-info { flex: 1; min-width: 0; }
+  .signup-event-name { font-size: 13px; font-weight: 700; color: #111827; }
+  .signup-event-meta { font-size: 11px; color: #6b7280; margin-top: 1px; }
+
+  .leg-spotlight {
+    background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+    border: 2px solid #86efac;
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 14px;
+  }
+  .leg-spotlight-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .leg-spotlight-icon {
+    width: 36px; height: 36px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  }
+  .leg-spotlight-info { flex: 1; }
+  .leg-spotlight-direction {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #065f46;
+  }
+  .leg-spotlight-time {
+    font-size: 16px;
+    font-weight: 800;
+    color: #111827;
+    margin-top: 2px;
+  }
+  .leg-spotlight-detail {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #bbf7d0;
+    font-size: 12px;
+    color: #064e3b;
+    line-height: 1.4;
+  }
+  .leg-spotlight-detail strong { font-weight: 700; }
+
+  .extra-options {
+    background: #f9fafb;
+    border-radius: 12px;
+    padding: 0 14px;
+    margin-bottom: 16px;
+  }
+  .option-toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  .option-toggle-row:last-child { border-bottom: none; }
+  .option-emoji { font-size: 18px; flex-shrink: 0; }
+  .option-text { flex: 1; min-width: 0; }
+  .option-title { font-size: 12px; font-weight: 700; color: #111827; }
+  .option-sub { font-size: 11px; color: #6b7280; margin-top: 1px; line-height: 1.3; }
+
+  .toggle {
+    width: 38px;
+    height: 22px;
+    background: #d1d5db;
+    border-radius: 22px;
+    position: relative;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+  .toggle.on { background: #2d6a4f; }
+  .toggle::after {
+    content: "";
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    background: white;
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+    transition: 0.2s;
+  }
+  .toggle.on::after { left: 18px; }
+
+  /* ======================== PHONE 2: DAY-OF PICKUP ======================== */
+
+  .header-green {
+    background: linear-gradient(135deg, #2d6a4f 0%, #1b4332 100%);
+    padding: 18px 18px 22px;
+    color: white;
+    flex-shrink: 0;
+  }
+  .header-greet { font-size: 13px; opacity: 0.8; }
+  .header-name { font-size: 18px; font-weight: 700; }
+  .header-pool { font-size: 12px; opacity: 0.7; margin-top: 1px; }
+
+  .scroll-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 14px 14px;
+  }
+
+  .upnext-card {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 2px solid #f59e0b;
+    border-radius: 20px;
+    padding: 16px;
+    box-shadow: 0 8px 24px rgba(245,158,11,0.25);
+    margin-top: -10px;
+    margin-bottom: 14px;
+    position: relative;
+  }
+  .upnext-pulse {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    background: #d97706;
+    color: white;
+    font-size: 9px;
+    font-weight: 800;
+    padding: 4px 9px;
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .pulse-dot {
+    width: 6px;
+    height: 6px;
+    background: white;
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .upnext-eyebrow {
+    font-size: 11px;
+    font-weight: 800;
+    color: #92400e;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  }
+  .upnext-countdown {
+    font-size: 28px;
+    font-weight: 800;
+    color: #78350f;
+    margin: 4px 0 2px;
+    line-height: 1.1;
+  }
+  .upnext-event {
+    font-size: 14px;
+    font-weight: 700;
+    color: #78350f;
+    margin-bottom: 12px;
+  }
+  .upnext-detail-grid {
+    background: rgba(255,255,255,0.6);
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+  }
+  .detail-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 12px;
+    color: #78350f;
+    line-height: 1.4;
+  }
+  .detail-row:last-child { margin-bottom: 0; }
+  .detail-icon { font-size: 14px; flex-shrink: 0; width: 18px; }
+  .detail-row strong { color: #451a03; font-weight: 700; }
+
+  .upnext-actions {
+    display: flex;
+    gap: 8px;
+  }
+  .nav-btn {
+    background: #1b4332;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    flex: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    box-shadow: 0 3px 8px rgba(27,67,50,0.3);
+  }
+  .small-action {
+    background: white;
+    border: 1.5px solid #d97706;
+    color: #92400e;
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    width: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .later-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #9ca3af;
+    margin: 12px 4px 8px;
+  }
+
+  .later-card {
+    background: white;
+    border-radius: 14px;
+    padding: 12px 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .later-time {
+    font-size: 11px;
+    font-weight: 800;
+    color: #6b7280;
+    width: 50px;
+    flex-shrink: 0;
+  }
+  .later-info { flex: 1; min-width: 0; }
+  .later-name { font-size: 12px; font-weight: 700; color: #111827; }
+  .later-driver { font-size: 11px; color: #6b7280; margin-top: 1px; display: flex; align-items: center; gap: 4px; }
+  .later-driver-av {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 7px; font-weight: 800; color: white;
+  }
+
+  /* ======================== PHONE 3: REQUEST A SUB SHEET ======================== */
+  .sub-helper {
+    background: #fef3c7;
+    border-radius: 12px;
+    padding: 11px 13px;
+    margin-bottom: 14px;
+    font-size: 11px;
+    color: #92400e;
+    line-height: 1.4;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .who-to-ask {
+    margin-bottom: 14px;
+  }
+  .who-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+  .ask-option {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+  }
+  .ask-option.selected {
+    border-color: #2d6a4f;
+    background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 60%);
+  }
+  .ask-icon {
+    width: 36px; height: 36px;
+    background: #f3f4f6;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .ask-option.selected .ask-icon { background: #d1fae5; }
+  .ask-text { flex: 1; }
+  .ask-title { font-size: 13px; font-weight: 700; color: #111827; }
+  .ask-sub { font-size: 11px; color: #6b7280; margin-top: 2px; }
+  .radio-circle {
+    width: 20px; height: 20px;
+    border: 2px solid #d1d5db;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .ask-option.selected .radio-circle {
+    border-color: #2d6a4f;
+    background: #2d6a4f;
+  }
+  .radio-dot {
+    width: 8px; height: 8px;
+    background: white;
+    border-radius: 50%;
+    display: none;
+  }
+  .ask-option.selected .radio-dot { display: block; }
+
+  .message-input {
+    background: #f9fafb;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 14px;
+  }
+  .input-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 4px;
+  }
+  .input-text {
+    font-size: 13px;
+    color: #374151;
+    line-height: 1.4;
+    min-height: 36px;
+  }
+  .input-placeholder { color: #9ca3af; font-style: italic; }
+
+  /* ======================== PHONE 4: GROUP CHAT ======================== */
+
+  .chat-header {
+    background: white;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid #f3f4f6;
+    flex-shrink: 0;
+  }
+  .chat-back { font-size: 22px; color: #6b7280; }
+  .chat-group-icon {
+    width: 38px; height: 38px;
+    background: #fef3c7;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 19px;
+  }
+  .chat-group-info { flex: 1; }
+  .chat-group-name { font-size: 14px; font-weight: 700; color: #111827; }
+  .chat-group-meta { font-size: 11px; color: #6b7280; }
+  .chat-menu { font-size: 22px; color: #6b7280; }
+
+  .pinned-card {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border: 1.5px solid #93c5fd;
+    border-radius: 14px;
+    padding: 12px;
+    margin: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .pin-icon { font-size: 13px; flex-shrink: 0; }
+  .pinned-info { flex: 1; min-width: 0; }
+  .pinned-eyebrow {
+    font-size: 9px;
+    font-weight: 800;
+    color: #1e40af;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .pinned-name { font-size: 12px; font-weight: 700; color: #1e3a8a; margin-top: 1px; }
+  .pinned-detail { font-size: 11px; color: #1e40af; margin-top: 1px; }
+
+  .chat-thread {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .day-divider {
+    text-align: center;
+    font-size: 10px;
+    font-weight: 700;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin: 6px 0;
+  }
+
+  .system-msg {
+    align-self: center;
+    background: #f3f4f6;
+    border-radius: 14px;
+    padding: 6px 12px;
+    font-size: 11px;
+    color: #4b5563;
+    max-width: 85%;
+    text-align: center;
+    line-height: 1.3;
+  }
+  .system-msg strong { color: #111827; font-weight: 700; }
+
+  .system-action-msg {
+    align-self: center;
+    background: #fef3c7;
+    border: 1px solid #fde68a;
+    border-radius: 14px;
+    padding: 8px 12px;
+    font-size: 11px;
+    color: #92400e;
+    max-width: 90%;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .system-action-msg strong { color: #78350f; font-weight: 700; }
+
+  .msg-row {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+    max-width: 85%;
+  }
+  .msg-row.them { align-self: flex-start; }
+  .msg-row.me { align-self: flex-end; flex-direction: row-reverse; }
+
+  .msg-bubble {
+    padding: 8px 12px;
+    border-radius: 16px;
+    font-size: 13px;
+    line-height: 1.4;
+    color: #111827;
+  }
+  .msg-row.them .msg-bubble { background: white; border-bottom-left-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+  .msg-row.me .msg-bubble { background: #2d6a4f; color: white; border-bottom-right-radius: 4px; }
+
+  .msg-meta {
+    font-size: 9px;
+    color: #9ca3af;
+    margin-top: 2px;
+    padding: 0 4px;
+    font-weight: 600;
+  }
+  .msg-content {
+    display: flex;
+    flex-direction: column;
+  }
+  .msg-row.me .msg-content { align-items: flex-end; }
+  .msg-name {
+    font-size: 10px;
+    font-weight: 700;
+    color: #6b7280;
+    margin-bottom: 2px;
+    padding: 0 4px;
+  }
+
+  .reaction-pill {
+    display: inline-flex;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 2px 7px;
+    font-size: 11px;
+    margin-top: 3px;
+    align-self: flex-start;
+    gap: 3px;
+  }
+  .reaction-count { font-size: 10px; color: #6b7280; font-weight: 700; }
+
+  .chat-input-area {
+    background: white;
+    padding: 10px 12px 12px;
+    border-top: 1px solid #f3f4f6;
+    flex-shrink: 0;
+  }
+  .quick-chips {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    margin-bottom: 8px;
+    padding-bottom: 2px;
+  }
+  .qchip {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 16px;
+    padding: 5px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #065f46;
+    white-space: nowrap;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .input-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .input-pill {
+    flex: 1;
+    background: #f3f4f6;
+    border-radius: 20px;
+    padding: 9px 14px;
+    font-size: 13px;
+    color: #9ca3af;
+  }
+  .send-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #2d6a4f;
+    color: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+</style>
+</head>
+<body>
+
+<!-- ============ PHONE 1: SIGN UP TO DRIVE BOTTOM SHEET ============ -->
+<div class="phone-wrap">
+<div class="phone-label">A · Sign up to drive</div>
+<div class="phone">
+  <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+
+  <!-- Faded background -->
+  <div class="home-bg-content">
+    <div class="home-bg-header">
+      <div class="home-bg-name">Hi Alex 👋</div>
+      <div class="home-bg-pool">10U Baseball — Tigers</div>
+    </div>
+    <div class="home-bg-card">
+      <div class="home-bg-card-title">Open driving slots</div>
+      <div class="home-bg-card-sub">Wed Apr 22 · Pick-up → home</div>
+    </div>
+    <div class="home-bg-card">
+      <div class="home-bg-card-title">Open driving slots</div>
+      <div class="home-bg-card-sub">Sat Apr 25 · Pick-up → home</div>
+    </div>
+  </div>
+
+  <!-- Scrim + Sheet -->
+  <div class="scrim"></div>
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Drive this leg?</div>
+    <div class="sheet-sub">You can change this anytime before the day-of.</div>
+
+    <div class="signup-event-card">
+      <div class="signup-event-emoji">⚾</div>
+      <div class="signup-event-info">
+        <div class="signup-event-name">Practice — Wed, Apr 22</div>
+        <div class="signup-event-meta">Riverside Field · 4:00–5:30 PM</div>
+      </div>
+    </div>
+
+    <div class="leg-spotlight">
+      <div class="leg-spotlight-row">
+        <div class="leg-spotlight-icon">🏡</div>
+        <div class="leg-spotlight-info">
+          <div class="leg-spotlight-direction">Pick-up → home</div>
+          <div class="leg-spotlight-time">5:30 PM</div>
+        </div>
+      </div>
+      <div class="leg-spotlight-detail">
+        <strong>Pick up 4 kids</strong> from Riverside Field and drive each to their home address.
+      </div>
+    </div>
+
+    <div class="extra-options">
+      <div class="option-toggle-row">
+        <div class="option-emoji">🚗</div>
+        <div class="option-text">
+          <div class="option-title">Also drive drop-off</div>
+          <div class="option-sub">Mike Chen has it covered</div>
+        </div>
+        <div class="toggle"></div>
+      </div>
+      <div class="option-toggle-row">
+        <div class="option-emoji">🔁</div>
+        <div class="option-text">
+          <div class="option-title">Repeat every Wednesday</div>
+          <div class="option-sub">Auto-claim 11 more pick-ups this season</div>
+        </div>
+        <div class="toggle on"></div>
+      </div>
+    </div>
+
+    <button class="primary-btn">✓ &nbsp;Yes, I'll drive (12 slots)</button>
+    <button class="ghost-btn">Cancel</button>
+  </div>
+</div>
+</div>
+
+<!-- ============ PHONE 2: DAY-OF PICKUP ============ -->
+<div class="phone-wrap">
+<div class="phone-label">B · Day-of pickup approaching</div>
+<div class="phone">
+  <div class="status-bar"><span>4:25</span><span>📶 🔋</span></div>
+
+  <div class="header-green">
+    <div class="header-greet">Good afternoon,</div>
+    <div class="header-name">Alex 👋</div>
+    <div class="header-pool">10U Baseball — Tigers</div>
+  </div>
+
+  <div class="scroll-content">
+
+    <div class="upnext-card">
+      <div class="upnext-pulse"><div class="pulse-dot"></div> Up next</div>
+      <div class="upnext-eyebrow">You're driving in</div>
+      <div class="upnext-countdown">1 hour 5 min</div>
+      <div class="upnext-event">Pick-up → home · Practice</div>
+
+      <div class="upnext-detail-grid">
+        <div class="detail-row">
+          <span class="detail-icon">📍</span>
+          <span><strong>Riverside Field</strong><br>2400 Riverside Dr · 12 min away</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-icon">🕐</span>
+          <span><strong>5:30 PM</strong> pickup · be there 5 min early</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-icon">👦</span>
+          <span><strong>4 kids:</strong> Lucas, Emma, Liam, Noah</span>
+        </div>
+      </div>
+
+      <div class="upnext-actions">
+        <button class="nav-btn">🧭 &nbsp;Start route</button>
+        <button class="small-action" title="Running late">⏰</button>
+        <button class="small-action" title="Need a sub">🔄</button>
+      </div>
+    </div>
+
+    <div class="later-section-title">Later today</div>
+    <div class="later-card">
+      <div class="later-time">7:30 PM</div>
+      <div class="later-info">
+        <div class="later-name">Girl Scouts pick-up</div>
+        <div class="later-driver">
+          <div class="later-driver-av av-purple">J</div>
+          Priya Johnson · confirmed
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ============ PHONE 3: REQUEST A SUB ============ -->
+<div class="phone-wrap">
+<div class="phone-label">C · Request a sub</div>
+<div class="phone">
+  <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+
+  <!-- Faded bg -->
+  <div class="home-bg-content">
+    <div class="home-bg-header">
+      <div class="home-bg-name">Hi Sarah 👋</div>
+      <div class="home-bg-pool">10U Baseball — Tigers</div>
+    </div>
+    <div class="home-bg-card">
+      <div class="home-bg-card-title">Today's events</div>
+      <div class="home-bg-card-sub">Practice · 3:30 PM drop-off</div>
+    </div>
+  </div>
+
+  <div class="scrim"></div>
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Need a sub?</div>
+    <div class="sheet-sub">Someone else will drive this leg for you.</div>
+
+    <div class="signup-event-card">
+      <div class="signup-event-emoji">⚾</div>
+      <div class="signup-event-info">
+        <div class="signup-event-name">Practice — Mon, Apr 20</div>
+        <div class="signup-event-meta">Drop-off → field · 3:30 PM</div>
+      </div>
+    </div>
+
+    <div class="who-to-ask">
+      <div class="who-label">Who should we ask?</div>
+
+      <div class="ask-option selected">
+        <div class="ask-icon">👨‍👩‍👧</div>
+        <div class="ask-text">
+          <div class="ask-title">Ask the whole group</div>
+          <div class="ask-sub">First parent to claim it gets the slot</div>
+        </div>
+        <div class="radio-circle"><div class="radio-dot"></div></div>
+      </div>
+
+      <div class="ask-option">
+        <div class="ask-icon">🎯</div>
+        <div class="ask-text">
+          <div class="ask-title">Ask a specific parent</div>
+          <div class="ask-sub">Choose one person to ask first</div>
+        </div>
+        <div class="radio-circle"><div class="radio-dot"></div></div>
+      </div>
+    </div>
+
+    <div class="message-input">
+      <div class="input-label">Message (optional)</div>
+      <div class="input-text input-placeholder">Work meeting ran long — really appreciate it 🙏</div>
+    </div>
+
+    <button class="primary-btn">📤 &nbsp;Send sub request</button>
+    <button class="ghost-btn">Cancel</button>
+  </div>
+</div>
+</div>
+
+<!-- ============ PHONE 4: GROUP CHAT ============ -->
+<div class="phone-wrap">
+<div class="phone-label">D · Group chat</div>
+<div class="phone">
+  <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+
+  <div class="chat-header">
+    <div class="chat-back">←</div>
+    <div class="chat-group-icon">⚾</div>
+    <div class="chat-group-info">
+      <div class="chat-group-name">10U Baseball — Tigers</div>
+      <div class="chat-group-meta">4 parents · 4 kids</div>
+    </div>
+    <div class="chat-menu">⋯</div>
+  </div>
+
+  <div class="pinned-card">
+    <div class="pin-icon">📌</div>
+    <div class="pinned-info">
+      <div class="pinned-eyebrow">Today · Practice</div>
+      <div class="pinned-name">Sarah → drop-off · You → pick-up</div>
+      <div class="pinned-detail">3:30 PM drop · 5:30 PM pick · Riverside Field</div>
+    </div>
+  </div>
+
+  <div class="chat-thread">
+    <div class="day-divider">— Yesterday —</div>
+
+    <div class="system-action-msg">
+      <span>🚗</span>
+      <span><strong>Mike</strong> requested a sub for <strong>Wed Apr 22 drop-off</strong></span>
+    </div>
+
+    <div class="msg-row them">
+      <div class="avatar-sm av-purple">J</div>
+      <div class="msg-content">
+        <div class="msg-name">Priya</div>
+        <div class="msg-bubble">I can take it! Lucas's school gets out early on Wednesdays anyway 👍</div>
+        <div class="msg-meta">3:42 PM</div>
+      </div>
+    </div>
+
+    <div class="system-action-msg">
+      <span>✓</span>
+      <span><strong>Priya</strong> claimed <strong>Wed Apr 22 drop-off</strong></span>
+    </div>
+
+    <div class="msg-row them">
+      <div class="avatar-sm av-blue">C</div>
+      <div class="msg-content">
+        <div class="msg-name">Mike</div>
+        <div class="msg-bubble">You're a lifesaver Priya, thank you 🙏</div>
+        <div class="msg-meta">3:45 PM</div>
+        <div class="reaction-pill">❤️ <span class="reaction-count">2</span></div>
+      </div>
+    </div>
+
+    <div class="day-divider">— Today —</div>
+
+    <div class="msg-row them">
+      <div class="avatar-sm av-green">S</div>
+      <div class="msg-content">
+        <div class="msg-name">Sarah</div>
+        <div class="msg-bubble">Heads up — practice field is muddy today, bring extra cleats if you have them ⚾</div>
+        <div class="msg-meta">9:12 AM</div>
+        <div class="reaction-pill">👍 <span class="reaction-count">3</span></div>
+      </div>
+    </div>
+
+    <div class="msg-row me">
+      <div class="avatar-sm av-teal">A</div>
+      <div class="msg-content">
+        <div class="msg-bubble">Got it, thanks!</div>
+        <div class="msg-meta">9:14 AM</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="chat-input-area">
+    <div class="quick-chips">
+      <div class="qchip">⏰ Running late</div>
+      <div class="qchip">🔄 Need a sub</div>
+      <div class="qchip">✓ On my way</div>
+    </div>
+    <div class="input-row">
+      <div class="input-pill">Message the group...</div>
+      <button class="send-btn">→</button>
+    </div>
+  </div>
+</div>
+</div>
+
+</body>
+</html>

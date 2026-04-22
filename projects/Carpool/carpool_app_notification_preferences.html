@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #f0f4f8;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    gap: 30px;
+    flex-wrap: wrap;
+  }
+  .phone {
+    width: 375px;
+    height: 820px;
+    background: #f8f9fb;
+    border-radius: 44px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.18), 0 0 0 2px #d1d5db;
+    overflow: hidden;
+    flex-shrink: 0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .phone-label {
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #6b7280;
+  }
+  .phone-wrap { display: flex; flex-direction: column; }
+
+  .av-green { background: linear-gradient(135deg, #2d6a4f, #52b788); }
+  .av-blue { background: linear-gradient(135deg, #1d4ed8, #60a5fa); }
+  .av-purple { background: linear-gradient(135deg, #7c3aed, #a78bfa); }
+
+  .status-bar {
+    background: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 24px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #111827;
+    flex-shrink: 0;
+  }
+
+  .screen-header {
+    background: white;
+    padding: 10px 16px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #f3f4f6;
+    flex-shrink: 0;
+  }
+  .header-back { font-size: 22px; color: #6b7280; cursor: pointer; }
+  .header-title { font-size: 15px; font-weight: 700; color: #111827; }
+  .header-spacer { width: 22px; }
+
+  .scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px;
+  }
+
+  /* Section */
+  .section-title {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #6b7280;
+    margin: 14px 4px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .section-title:first-child { margin-top: 0; }
+
+  .card {
+    background: white;
+    border-radius: 16px;
+    padding: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    margin-bottom: 10px;
+  }
+  .card-tight { padding: 0 14px; }
+
+  .toggle {
+    width: 38px;
+    height: 22px;
+    background: #d1d5db;
+    border-radius: 22px;
+    position: relative;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+  .toggle.on { background: #2d6a4f; }
+  .toggle::after {
+    content: "";
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    background: white;
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+    transition: 0.2s;
+  }
+  .toggle.on::after { left: 18px; }
+
+  /* ============ NOISE METER ============ */
+  .noise-card {
+    background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 100%);
+    color: white;
+    border-radius: 18px;
+    padding: 14px;
+    margin-bottom: 14px;
+    box-shadow: 0 6px 20px rgba(45,106,79,0.2);
+  }
+  .noise-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .noise-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    font-weight: 700;
+    opacity: 0.85;
+  }
+  .noise-week-pill {
+    background: rgba(255,255,255,0.2);
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 8px;
+    font-weight: 700;
+  }
+  .noise-stat-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .noise-num {
+    font-size: 32px;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .noise-context {
+    font-size: 12px;
+    opacity: 0.85;
+    line-height: 1.3;
+  }
+  .noise-bars {
+    display: flex;
+    gap: 4px;
+    align-items: flex-end;
+    height: 36px;
+    margin-bottom: 4px;
+  }
+  .noise-bar-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .noise-bar {
+    width: 100%;
+    background: rgba(255,255,255,0.7);
+    border-radius: 3px 3px 0 0;
+    min-height: 3px;
+  }
+  .noise-bar.muted { background: rgba(255,255,255,0.25); }
+  .noise-bar.today { background: #fbbf24; }
+  .noise-bar-label {
+    font-size: 9px;
+    opacity: 0.7;
+    font-weight: 600;
+  }
+
+  /* ============ QUIET HOURS ============ */
+  .quiet-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  .quiet-row:last-child { border-bottom: none; }
+  .quiet-emoji {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+    background: #f3f4f6;
+  }
+  .quiet-emoji.sleep { background: #ede9fe; }
+  .quiet-emoji.work { background: #dbeafe; }
+  .quiet-emoji.add { background: #f0fdf4; color: #2d6a4f; }
+  .quiet-text { flex: 1; min-width: 0; }
+  .quiet-name { font-size: 13px; font-weight: 700; color: #111827; }
+  .quiet-time-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 2px 7px;
+    font-size: 11px;
+    color: #374151;
+    font-weight: 600;
+    margin-top: 4px;
+    margin-right: 4px;
+  }
+  .quiet-days {
+    font-size: 11px;
+    color: #6b7280;
+    margin-top: 2px;
+  }
+
+  .add-quiet {
+    text-align: center;
+    color: #2d6a4f;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 10px 0;
+    cursor: pointer;
+  }
+
+  /* ============ TYPE ROWS ============ */
+  .type-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  .type-row:last-child { border-bottom: none; }
+  .type-icon-wrap {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .icon-critical { background: #fee2e2; color: #991b1b; }
+  .icon-important { background: #fef3c7; color: #92400e; }
+  .icon-social { background: #dbeafe; color: #1e40af; }
+  .icon-updates { background: #f3f4f6; color: #6b7280; }
+
+  .type-text { flex: 1; min-width: 0; }
+  .type-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #111827;
+  }
+  .type-desc {
+    font-size: 11px;
+    color: #6b7280;
+    margin-top: 1px;
+    line-height: 1.3;
+  }
+
+  .level-pill {
+    font-size: 10px;
+    font-weight: 800;
+    padding: 4px 9px;
+    border-radius: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+  }
+  .level-always { background: #fee2e2; color: #991b1b; }
+  .level-loud { background: #d1fae5; color: #065f46; }
+  .level-silent { background: #f3f4f6; color: #6b7280; }
+  .level-digest { background: #dbeafe; color: #1e40af; }
+  .level-off { background: #f9fafb; color: #9ca3af; border: 1px dashed #d1d5db; }
+
+  /* ============ PER-GROUP ============ */
+  .group-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 0;
+    border-bottom: 1px solid #f3f4f6;
+    cursor: pointer;
+  }
+  .group-row:last-child { border-bottom: none; }
+  .group-emoji {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .group-emoji.baseball { background: #fef3c7; }
+  .group-emoji.piano { background: #ede9fe; }
+  .group-emoji.scout { background: #dbeafe; }
+  .group-info { flex: 1; min-width: 0; }
+  .group-name { font-size: 13px; font-weight: 700; color: #111827; }
+  .group-state { font-size: 11px; color: #6b7280; margin-top: 1px; display: flex; align-items: center; gap: 4px; }
+  .state-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+  }
+  .dot-active { background: #2d6a4f; }
+  .dot-snoozed { background: #f59e0b; }
+  .dot-muted { background: #9ca3af; }
+  .group-chevron { color: #9ca3af; font-size: 18px; flex-shrink: 0; }
+
+  /* ============ SMART CARDS ============ */
+  .suggestion-card {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 1.5px solid #fcd34d;
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 14px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .sug-emoji { font-size: 22px; flex-shrink: 0; }
+  .sug-text { flex: 1; }
+  .sug-title { font-size: 13px; font-weight: 700; color: #78350f; margin-bottom: 3px; line-height: 1.3; }
+  .sug-desc { font-size: 11px; color: #92400e; line-height: 1.4; margin-bottom: 8px; }
+  .sug-actions { display: flex; gap: 6px; }
+  .sug-btn-primary {
+    background: #92400e;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 11px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .sug-btn-secondary {
+    background: transparent;
+    color: #92400e;
+    border: none;
+    padding: 6px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  /* ============ KID OVERRIDE ============ */
+  .override-card {
+    background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 60%);
+    border: 1.5px solid #86efac;
+    border-radius: 14px;
+    padding: 13px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 10px;
+  }
+  .override-icon {
+    width: 36px; height: 36px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .override-text { flex: 1; }
+  .override-title { font-size: 12px; font-weight: 700; color: #065f46; }
+  .override-desc { font-size: 11px; color: #047857; line-height: 1.3; margin-top: 2px; }
+
+  /* ============ PHONE 2: PER-GROUP DETAIL ============ */
+  .group-hero {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    padding: 18px 16px 22px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .group-hero-emoji {
+    width: 56px; height: 56px;
+    background: white;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    margin: 0 auto 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  }
+  .group-hero-name {
+    font-size: 17px;
+    font-weight: 800;
+    color: #78350f;
+  }
+  .group-hero-meta {
+    font-size: 11px;
+    color: #92400e;
+    margin-top: 3px;
+  }
+
+  .snooze-section {
+    background: white;
+    border-radius: 16px;
+    padding: 14px;
+    margin-top: -10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  }
+  .snooze-label {
+    font-size: 11px;
+    font-weight: 800;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+  .snooze-chips {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .snooze-chip {
+    background: #f9fafb;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 9px 8px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 700;
+    color: #374151;
+  }
+  .snooze-chip.active {
+    background: #fef3c7;
+    border-color: #f59e0b;
+    color: #92400e;
+  }
+  .snooze-chip-time {
+    font-size: 10px;
+    color: #9ca3af;
+    font-weight: 600;
+    margin-top: 2px;
+  }
+  .snooze-chip.active .snooze-chip-time { color: #b45309; }
+
+  .group-stats {
+    background: white;
+    border-radius: 14px;
+    padding: 12px 14px;
+    display: flex;
+    gap: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    align-items: center;
+  }
+  .gs-num { font-size: 22px; font-weight: 800; color: #2d6a4f; line-height: 1; }
+  .gs-label { font-size: 11px; color: #6b7280; line-height: 1.3; }
+  .gs-divider { width: 1px; height: 32px; background: #e5e7eb; }
+
+  .danger-row {
+    background: white;
+    border-radius: 14px;
+    padding: 14px;
+    margin-top: 10px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: #dc2626;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .footer-action {
+    background: white;
+    padding: 14px 16px;
+    border-top: 1px solid #f3f4f6;
+    flex-shrink: 0;
+  }
+  .primary-btn {
+    background: linear-gradient(135deg, #2d6a4f, #40916c);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    padding: 14px;
+    font-size: 14px;
+    font-weight: 700;
+    width: 100%;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(45,106,79,0.3);
+  }
+
+</style>
+</head>
+<body>
+
+<!-- ============ PHONE 1: NOTIFICATION PREFERENCES ============ -->
+<div class="phone-wrap">
+<div class="phone-label">A · Notification preferences (main)</div>
+<div class="phone">
+  <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+
+  <div class="screen-header">
+    <div class="header-back">←</div>
+    <div class="header-title">Notifications</div>
+    <div class="header-spacer"></div>
+  </div>
+
+  <div class="scroll-area">
+
+    <!-- Noise meter -->
+    <div class="noise-card">
+      <div class="noise-header-row">
+        <div class="noise-title">Your week so far</div>
+        <div class="noise-week-pill">Apr 13–19</div>
+      </div>
+      <div class="noise-stat-row">
+        <div class="noise-num">12</div>
+        <div class="noise-context">notifications<br>across 3 groups</div>
+      </div>
+      <div class="noise-bars">
+        <div class="noise-bar-col"><div class="noise-bar" style="height:60%"></div><div class="noise-bar-label">M</div></div>
+        <div class="noise-bar-col"><div class="noise-bar muted" style="height:20%"></div><div class="noise-bar-label">T</div></div>
+        <div class="noise-bar-col"><div class="noise-bar" style="height:80%"></div><div class="noise-bar-label">W</div></div>
+        <div class="noise-bar-col"><div class="noise-bar" style="height:40%"></div><div class="noise-bar-label">T</div></div>
+        <div class="noise-bar-col"><div class="noise-bar today" style="height:90%"></div><div class="noise-bar-label">F</div></div>
+        <div class="noise-bar-col"><div class="noise-bar muted" style="height:0%"></div><div class="noise-bar-label">S</div></div>
+        <div class="noise-bar-col"><div class="noise-bar muted" style="height:0%"></div><div class="noise-bar-label">S</div></div>
+      </div>
+    </div>
+
+    <!-- Smart suggestion -->
+    <div class="suggestion-card">
+      <div class="sug-emoji">💡</div>
+      <div class="sug-text">
+        <div class="sug-title">You're on 3 teams</div>
+        <div class="sug-desc">Switch chat & social pings to <strong>Daily Digest</strong> to cut ~7 pings/week without missing anything urgent.</div>
+        <div class="sug-actions">
+          <button class="sug-btn-primary">Try it</button>
+          <button class="sug-btn-secondary">Dismiss</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quiet hours -->
+    <div class="section-title">Quiet Hours</div>
+    <div class="card card-tight">
+      <div class="quiet-row">
+        <div class="quiet-emoji sleep">🌙</div>
+        <div class="quiet-text">
+          <div class="quiet-name">Sleep</div>
+          <div>
+            <span class="quiet-time-pill">10:00 PM → 7:00 AM</span>
+          </div>
+          <div class="quiet-days">Every day</div>
+        </div>
+        <div class="toggle on"></div>
+      </div>
+      <div class="quiet-row">
+        <div class="quiet-emoji work">💼</div>
+        <div class="quiet-text">
+          <div class="quiet-name">Work hours</div>
+          <div>
+            <span class="quiet-time-pill">9:00 AM → 5:00 PM</span>
+          </div>
+          <div class="quiet-days">Mon–Fri</div>
+        </div>
+        <div class="toggle on"></div>
+      </div>
+      <div class="quiet-row">
+        <div class="quiet-emoji add">＋</div>
+        <div class="quiet-text">
+          <div class="quiet-name" style="color:#2d6a4f">Add a quiet period</div>
+          <div class="quiet-days">e.g. school pickup, dinner</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="override-card">
+      <div class="override-icon">🚨</div>
+      <div class="override-text">
+        <div class="override-title">Always alert when MY kid is involved</div>
+        <div class="override-desc">Overrides quiet hours for things like "Lucas's pickup needs a sub"</div>
+      </div>
+      <div class="toggle on"></div>
+    </div>
+
+    <!-- By Type -->
+    <div class="section-title">By Type</div>
+    <div class="card card-tight">
+      <div class="type-row">
+        <div class="type-icon-wrap icon-critical">🚨</div>
+        <div class="type-text">
+          <div class="type-name">Your drive today</div>
+          <div class="type-desc">Reminders for legs you're driving</div>
+        </div>
+        <div class="level-pill level-always">🔔 Always</div>
+      </div>
+      <div class="type-row">
+        <div class="type-icon-wrap icon-important">🔄</div>
+        <div class="type-text">
+          <div class="type-name">Sub requests & schedule changes</div>
+          <div class="type-desc">When someone needs help or plans shift</div>
+        </div>
+        <div class="level-pill level-loud">🔊 Loud</div>
+      </div>
+      <div class="type-row">
+        <div class="type-icon-wrap icon-social">💬</div>
+        <div class="type-text">
+          <div class="type-name">Chat & reactions</div>
+          <div class="type-desc">Group messages, emoji reactions</div>
+        </div>
+        <div class="level-pill level-silent">🔕 Badge</div>
+      </div>
+      <div class="type-row">
+        <div class="type-icon-wrap icon-updates">📊</div>
+        <div class="type-text">
+          <div class="type-name">Activity & weekly summary</div>
+          <div class="type-desc">Slot claims, member joins, recaps</div>
+        </div>
+        <div class="level-pill level-digest">📬 Digest 7pm</div>
+      </div>
+    </div>
+
+    <!-- By Group -->
+    <div class="section-title">
+      <span>By Group</span>
+      <span style="color:#2d6a4f; font-weight:700;">Customize each →</span>
+    </div>
+    <div class="card card-tight">
+      <div class="group-row">
+        <div class="group-emoji baseball">⚾</div>
+        <div class="group-info">
+          <div class="group-name">10U Baseball — Tigers</div>
+          <div class="group-state"><div class="state-dot dot-active"></div> All notifications · 8 this week</div>
+        </div>
+        <div class="group-chevron">›</div>
+      </div>
+      <div class="group-row">
+        <div class="group-emoji piano">🎹</div>
+        <div class="group-info">
+          <div class="group-name">Piano Lessons</div>
+          <div class="group-state"><div class="state-dot dot-active"></div> Important only · 3 this week</div>
+        </div>
+        <div class="group-chevron">›</div>
+      </div>
+      <div class="group-row">
+        <div class="group-emoji scout">🏕️</div>
+        <div class="group-info">
+          <div class="group-name">Scouts Troop 47</div>
+          <div class="group-state"><div class="state-dot dot-snoozed"></div> Snoozed until Sunday · 1 this week</div>
+        </div>
+        <div class="group-chevron">›</div>
+      </div>
+    </div>
+
+    <div style="height:14px"></div>
+
+  </div>
+</div>
+</div>
+
+<!-- ============ PHONE 2: PER-GROUP DETAIL ============ -->
+<div class="phone-wrap">
+<div class="phone-label">B · Per-group notification settings</div>
+<div class="phone">
+  <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+
+  <div class="screen-header">
+    <div class="header-back">←</div>
+    <div class="header-title">Group Notifications</div>
+    <div class="header-spacer"></div>
+  </div>
+
+  <div class="group-hero">
+    <div class="group-hero-emoji">⚾</div>
+    <div class="group-hero-name">10U Baseball — Tigers</div>
+    <div class="group-hero-meta">4 parents · 23 events · 8 pings this week</div>
+  </div>
+
+  <div class="scroll-area">
+
+    <!-- Snooze chips -->
+    <div class="snooze-section">
+      <div class="snooze-label">⏸ Snooze this group</div>
+      <div class="snooze-chips">
+        <div class="snooze-chip">
+          1 hour
+          <div class="snooze-chip-time">until 10:41 AM</div>
+        </div>
+        <div class="snooze-chip">
+          Today
+          <div class="snooze-chip-time">until 11:59 PM</div>
+        </div>
+        <div class="snooze-chip">
+          Weekend
+          <div class="snooze-chip-time">until Mon 7 AM</div>
+        </div>
+        <div class="snooze-chip active">
+          Custom...
+          <div class="snooze-chip-time">pick dates</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="section-title">This week</div>
+    <div class="group-stats">
+      <div>
+        <div class="gs-num">8</div>
+        <div class="gs-label">Total pings</div>
+      </div>
+      <div class="gs-divider"></div>
+      <div>
+        <div class="gs-num" style="color:#dc2626">2</div>
+        <div class="gs-label">Critical</div>
+      </div>
+      <div class="gs-divider"></div>
+      <div>
+        <div class="gs-num" style="color:#1e40af">5</div>
+        <div class="gs-label">Chat</div>
+      </div>
+      <div class="gs-divider"></div>
+      <div>
+        <div class="gs-num" style="color:#9ca3af">1</div>
+        <div class="gs-label">Updates</div>
+      </div>
+    </div>
+
+    <!-- Type overrides -->
+    <div class="section-title">For this group only</div>
+    <div class="card card-tight">
+      <div class="type-row">
+        <div class="type-icon-wrap icon-critical">🚨</div>
+        <div class="type-text">
+          <div class="type-name">Your drive today</div>
+          <div class="type-desc">Always — overrides quiet hours</div>
+        </div>
+        <div class="toggle on"></div>
+      </div>
+      <div class="type-row">
+        <div class="type-icon-wrap icon-important">🔄</div>
+        <div class="type-text">
+          <div class="type-name">Sub requests</div>
+          <div class="type-desc">From any parent in this group</div>
+        </div>
+        <div class="toggle on"></div>
+      </div>
+      <div class="type-row">
+        <div class="type-icon-wrap icon-social">💬</div>
+        <div class="type-text">
+          <div class="type-name">Chat messages</div>
+          <div class="type-desc">Badge only · no sound</div>
+        </div>
+        <div class="toggle on"></div>
+      </div>
+      <div class="type-row">
+        <div class="type-icon-wrap icon-social">💬</div>
+        <div class="type-text">
+          <div class="type-name">@mentions only</div>
+          <div class="type-desc">Get loud pings only when tagged</div>
+        </div>
+        <div class="toggle"></div>
+      </div>
+      <div class="type-row">
+        <div class="type-icon-wrap icon-updates">📊</div>
+        <div class="type-text">
+          <div class="type-name">Slot claims & joins</div>
+          <div class="type-desc">When others claim or leave</div>
+        </div>
+        <div class="toggle"></div>
+      </div>
+    </div>
+
+    <div class="danger-row">
+      🔕 &nbsp;Mute this group entirely
+    </div>
+
+    <div style="height:14px"></div>
+
+  </div>
+</div>
+</div>
+
+</body>
+</html>
