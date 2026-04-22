@@ -179,7 +179,9 @@ export function completeOnboarding({ phone, name, avatarColor, kids, team }) {
     };
     data.children.push(child);
     data.parent_children.push({ parent_id: parentId, child_id: childId });
-    createdKids.push(child);
+    // Carry the team opt-in flag locally (not persisted on the child) so the
+    // team-linking loop below can decide whether to add this kid to the team.
+    createdKids.push({ ...child, _include_in_team: k.include_in_team });
   }
 
   let resolvedTeam = null;
@@ -200,6 +202,7 @@ export function completeOnboarding({ phone, name, avatarColor, kids, team }) {
         });
       }
       for (const c of createdKids) {
+        if (c._include_in_team === false) continue;
         const linked = data.child_teams.find(
           (ct) => ct.team_id === existing.id && ct.child_id === c.id,
         );
@@ -228,6 +231,7 @@ export function completeOnboarding({ phone, name, avatarColor, kids, team }) {
       driver_approved: true,
     });
     for (const c of createdKids) {
+      if (c._include_in_team === false) continue;
       data.child_teams.push({ team_id: teamId, child_id: c.id });
     }
   }

@@ -163,6 +163,8 @@ export function Onboarding({ ctx }) {
             setTeamSport={setTeamSport}
             teamSeason={teamSeason}
             setTeamSeason={setTeamSeason}
+            kids={kids}
+            setKids={setKids}
             onNext={goNext}
           />
         )}
@@ -533,8 +535,19 @@ function GroupStep(props) {
     teamName, setTeamName,
     teamSport, setTeamSport,
     teamSeason, setTeamSeason,
+    kids, setKids,
     onNext,
   } = props;
+
+  const namedKids = (kids || []).filter((k) => k.name.trim());
+  const showAssign = namedKids.length >= 2;
+  const toggleKid = (id) => {
+    setKids((prev) =>
+      prev.map((k) =>
+        k.id === id ? { ...k, include_in_team: k.include_in_team === false } : k,
+      ),
+    );
+  };
 
   const matchedTeam = useMemo(() => {
     if (mode !== 'join') return null;
@@ -616,6 +629,14 @@ function GroupStep(props) {
           </div>
         )}
 
+        {showAssign && matchedTeam && (
+          <KidTeamPicker
+            kids={namedKids}
+            teamLabel={matchedTeam.name}
+            toggleKid={toggleKid}
+          />
+        )}
+
         <button
           type="button"
           className="btn btn-primary"
@@ -672,6 +693,14 @@ function GroupStep(props) {
         style={{ marginBottom: 18 }}
       />
 
+      {showAssign && ok && (
+        <KidTeamPicker
+          kids={namedKids}
+          teamLabel={teamName.trim()}
+          toggleKid={toggleKid}
+        />
+      )}
+
       <button
         type="button"
         className="btn btn-primary"
@@ -688,6 +717,52 @@ function GroupStep(props) {
       >
         ← Use a different option
       </button>
+    </div>
+  );
+}
+
+function KidTeamPicker({ kids, teamLabel, toggleKid }) {
+  return (
+    <div
+      style={{
+        marginBottom: 14,
+        padding: 12,
+        borderRadius: 10,
+        background: 'var(--gray-100)',
+      }}
+    >
+      <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 4 }}>
+        Which kids are on {teamLabel || 'this team'}?
+      </div>
+      <div className="muted" style={{ fontSize: 12, marginBottom: 8 }}>
+        Tap a kid to opt them out — only included kids will show up on this team's events.
+      </div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+        {kids.map((k) => {
+          const on = k.include_in_team !== false;
+          return (
+            <button
+              key={k.id}
+              type="button"
+              onClick={() => toggleKid(k.id)}
+              style={{
+                padding: '6px 10px',
+                borderRadius: 999,
+                border: on
+                  ? '1px solid var(--green-700)'
+                  : '1px solid var(--gray-300, #d1d5db)',
+                background: on ? 'var(--green-100)' : 'white',
+                color: on ? 'var(--green-text)' : 'var(--gray-500)',
+                fontSize: 12,
+                fontWeight: 600,
+              }}
+            >
+              {on ? '✓ ' : ''}
+              {k.name.split(' ')[0]}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
