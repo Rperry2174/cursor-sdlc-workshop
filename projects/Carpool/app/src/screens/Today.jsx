@@ -1,69 +1,254 @@
 import { useState, useMemo, useEffect } from 'react';
 import {
   getCurrentParent,
-  getEventsForParent,
   getEventsByDate,
   getLegsForEvent,
   getKidsInLeg,
   getParent,
-  getOpenLegsForParent,
   getKidsForParent,
   getOpenSubRequestsForTeam,
   getTeamsForParent,
   getUpcomingSeatsForMyKids,
   getJoinableLegsForMyKids,
-  getSourcesForTeam,
   shouldShowGcHint,
   dismissGcHint,
   db,
 } from '../data/store.js';
-import { postRideStatus, releaseLeg, unseatKid, seatKid } from '../data/lifecycle.js';
+import {
+  postRideStatus,
+  releaseLeg,
+  unseatKid,
+  seatKid,
+  claimLeg,
+} from '../data/lifecycle.js';
 import { Avatar } from '../components/Avatar.jsx';
 import { Sheet } from '../components/Sheet.jsx';
-import { SourceBadge } from '../components/SourceBadge.jsx';
-import { CalendarEmptyCTA } from '../components/CalendarEmptyCTA.jsx';
+
+/* ========================================================================
+   Today / Home — redesigned around five principles:
+
+     1. One answer visible without scrolling   → summary band
+     2. The hero is an action, not a menu      → "Your next drive" card
+     3. Status is always loud                  → green / amber / red pills
+     4. Logistics belong to the app, not user  → computed stop chain + ETAs
+     5. Actions live where the problem lives   → inline (no global grid)
+   ======================================================================== */
 
 function dateKey(d) {
   return d.toISOString().slice(0, 10);
 }
 
-function formatTime(iso) {
+function todayKey() {
+  return dateKey(new Date());
+}
+
+function tomorrowKey() {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  return dateKey(d);
+}
+
+function fmtTime(iso) {
   return new Date(iso).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 }
 
-function fmtDOW(d) {
-  return d.toLocaleDateString([], { weekday: 'short' }).toUpperCase();
+function fmtDayDate(d) {
+  return d.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
 }
+
+/* ------------------------------------------------------------------ */
+/* Stop-chain synthesis                                                */
+/* The data model only stores depart/arrive endpoints, so we           */
+/* reconstruct the realistic multi-stop route by walking through       */
+/* each kid's parent's home_address. Times are estimated by            */
+/* working BACKWARDS from the activity start, with a 5-min buffer.     */
+/* ------------------------------------------------------------------ */
+
+const MIN_PER_STOP = 10; // pickup-to-pickup hop
+const PRE_ACTIVITY_BUFFER_MIN = 5;
+
+function buildStopChain(leg) {
+  const data = db();
+  const event = data.events.find((e) => e.id === leg.event_id);
+  if (!event || !leg.driver_id) return null;
+  const driver = data.parents.find((p) => p.id === leg.driver_id);
+  if (!driver) return null;
+
+  const kids = getKidsInLeg(leg.id);
+  // Map each kid -> their primary parent's home address (skip kids whose
+  // parent IS the driver — they board at home base, no extra stop).
+  const pickupStops = [];
+  const seen = new Set();
+  for (const kid of kids) {
+    const link = data.parent_children.find(
+      (pc) => pc.child_id === kid.id && pc.parent_id !== driver.id,
+    );
+    if (!link) continue;
+    if (seen.has(link.parent_id)) continue;
+    seen.add(link.parent_id);
+    const p = data.parents.find((x) => x.id === link.parent_id);
+    pickupStops.push({
+      kid,
+      parent: p,
+      address: p?.home_address || 'Home',
+    });
+  }
+
+  const isToEvent = leg.direction === 'to_event';
+
+  // Calculate arrival timestamp at activity (target = event start - buffer)
+  const eventStartMs = new Date(event.start_at).getTime();
+  const eventEndMs = new Date(event.end_at).getTime();
+
+  if (isToEvent) {
+    const targetArriveMs = eventStartMs - PRE_ACTIVITY_BUFFER_MIN * 60 * 1000;
+    // Stops: leave home, [pickup each], arrive
+    const totalHops = 1 + pickupStops.length; // home->stop1, stop->stop, lastStop->arrival
+    const hopMs = MIN_PER_STOP * 60 * 1000;
+    const arriveMs = targetArriveMs;
+    const departMs = arriveMs - totalHops * hopMs;
+
+    const stops = [];
+    let t = departMs;
+    stops.push({
+      time: new Date(t).toISOString(),
+      label: 'Leave home',
+      sub: driver.home_address || leg.departure_location,
+      kind: 'home',
+    });
+    for (let i = 0; i < pickupStops.length; i++) {
+      t += hopMs;
+      const s = pickupStops[i];
+      stops.push({
+        time: new Date(t).toISOString(),
+        label: `Pick up ${s.kid.name}`,
+        sub: s.address,
+        kind: 'stop',
+      });
+    }
+    t += hopMs;
+    stops.push({
+      time: new Date(t).toISOString(),
+      label: `Arrive ${event.location.split(',')[0]}`,
+      sub: `${event.location.includes(',') ? event.location.split(',').slice(1).join(',').trim() + ' · ' : ''}activity starts ${fmtTime(event.start_at)}`,
+      kind: 'end',
+      bufferMin: PRE_ACTIVITY_BUFFER_MIN,
+    });
+    const totalMin = totalHops * MIN_PER_STOP;
+    return {
+      stops,
+      totalMin,
+      totalMi: Math.round(totalHops * 3.5), // rough — 3.5 mi per hop
+      trafficMin: 4,
+      departMs,
+    };
+  } else {
+    // FROM event — reverse: leave event, drop each kid at home, end at home
+    const departMs = eventEndMs;
+    const totalHops = 1 + pickupStops.length;
+    const hopMs = MIN_PER_STOP * 60 * 1000;
+
+    const stops = [];
+    let t = departMs;
+    stops.push({
+      time: new Date(t).toISOString(),
+      label: `Leave ${event.location.split(',')[0]}`,
+      sub: `activity ends ${fmtTime(event.end_at)}`,
+      kind: 'home',
+    });
+    for (let i = 0; i < pickupStops.length; i++) {
+      t += hopMs;
+      const s = pickupStops[i];
+      stops.push({
+        time: new Date(t).toISOString(),
+        label: `Drop off ${s.kid.name}`,
+        sub: s.address,
+        kind: 'stop',
+      });
+    }
+    t += hopMs;
+    stops.push({
+      time: new Date(t).toISOString(),
+      label: 'Home',
+      sub: driver.home_address || 'Home',
+      kind: 'end',
+    });
+    return {
+      stops,
+      totalMin: totalHops * MIN_PER_STOP,
+      totalMi: Math.round(totalHops * 3.5),
+      trafficMin: 4,
+      departMs,
+    };
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Day status: all-covered vs needs-drivers                            */
+/* ------------------------------------------------------------------ */
+
+function dayStatus(parentId, dateStr) {
+  const events = getEventsByDate(parentId, dateStr);
+  let openLegs = 0;
+  let totalLegs = 0;
+  for (const e of events) {
+    const legs = getLegsForEvent(e.id);
+    for (const l of legs) {
+      totalLegs += 1;
+      if (!l.driver_id) openLegs += 1;
+    }
+  }
+  return {
+    events,
+    openLegs,
+    totalLegs,
+    label:
+      totalLegs === 0
+        ? 'Nothing scheduled'
+        : openLegs === 0
+        ? 'All covered'
+        : `${openLegs} ${openLegs === 1 ? 'gap' : 'gaps'}`,
+    tone: totalLegs === 0 ? 'muted' : openLegs === 0 ? 'ok' : 'warn',
+  };
+}
+
+/* ------------------------------------------------------------------ */
+/* Pretty "leaves in" countdown                                        */
+/* ------------------------------------------------------------------ */
+
+function leavesIn(iso) {
+  const ms = new Date(iso).getTime() - Date.now();
+  const min = Math.round(ms / 60000);
+  if (min < 0) return 'departed';
+  if (min < 60) return `${min} min`;
+  const h = Math.floor(min / 60);
+  const m = min % 60;
+  if (h < 24) return m === 0 ? `${h} hr` : `${h} hr ${m} min`;
+  const d = Math.floor(h / 24);
+  return `${d}d ${h % 24}h`;
+}
+
+/* ================================================================== */
+/* Main screen                                                         */
+/* ================================================================== */
 
 export function Today({ ctx }) {
   const me = getCurrentParent();
   const myKidIds = useMemo(() => getKidsForParent(me.id).map((k) => k.id), [me.id]);
 
-  const days = useMemo(() => {
-    const out = [];
-    const start = new Date();
-    start.setHours(0, 0, 0, 0);
-    for (let i = 0; i < 14; i++) {
-      const d = new Date(start);
-      d.setDate(start.getDate() + i);
-      out.push(d);
-    }
-    return out;
+  const [, force] = useState(0);
+  useEffect(() => {
+    const i = setInterval(() => force((x) => x + 1), 30_000);
+    return () => clearInterval(i);
   }, []);
 
-  const [selected, setSelected] = useState(dateKey(days[0]));
-  const events = getEventsByDate(me.id, selected);
-  const openLegs = getOpenLegsForParent(me.id, 14);
-
+  // Sheets (kept from previous version so behavior is preserved)
   const [needSubOpen, setNeedSubOpen] = useState(false);
   const [needSubLegId, setNeedSubLegId] = useState(null);
   const [needSubReason, setNeedSubReason] = useState('');
-
   const [lateOpen, setLateOpen] = useState(false);
   const [lateLegId, setLateLegId] = useState(null);
-
   const [kidOutOpen, setKidOutOpen] = useState(false);
-
   const [addKidOpen, setAddKidOpen] = useState(false);
 
   const myUpcomingDriving = useMemo(() => {
@@ -76,35 +261,35 @@ export function Today({ ctx }) {
           (l.status === 'filled' || l.status === 'in_progress'),
       )
       .sort((a, b) => a.departure_time.localeCompare(b.departure_time));
-  }, [me.id, selected]);
-
-  const myUpcomingSeats = useMemo(
-    () => getUpcomingSeatsForMyKids(me.id, 36),
-    [me.id, selected],
-  );
-
-  const joinableLegs = useMemo(
-    () => getJoinableLegsForMyKids(me.id, 14 * 24),
-    [me.id, selected],
-  );
-
-  // Find the imminent leg I'm driving (within next 90 min) for the day-of card.
-  const imminentLeg = useMemo(() => {
-    const data = db();
-    const horizon = Date.now() + 90 * 60 * 1000;
-    return data.carpool_legs
-      .filter(
-        (l) =>
-          l.driver_id === me.id &&
-          (l.status === 'filled' || l.status === 'in_progress') &&
-          new Date(l.departure_time).getTime() > Date.now() - 30 * 60 * 1000 &&
-          new Date(l.departure_time).getTime() < horizon,
-      )
-      .sort((a, b) => a.departure_time.localeCompare(b.departure_time))[0];
   }, [me.id]);
 
+  const myUpcomingSeats = useMemo(() => getUpcomingSeatsForMyKids(me.id, 36), [me.id]);
+  const joinableLegs = useMemo(() => getJoinableLegsForMyKids(me.id, 14 * 24), [me.id]);
+
+  // The hero: my soonest upcoming drive (within 36 hrs)
+  const nextDrive = myUpcomingDriving[0] || null;
+
+  // Day blocks
+  const today = useMemo(() => dayStatus(me.id, todayKey()), [me.id]);
+  const tomorrow = useMemo(() => dayStatus(me.id, tomorrowKey()), [me.id]);
+
+  // Outstanding sub requests I'M waiting on (no responses yet)
+  const myStalledSubs = useMemo(() => {
+    const data = db();
+    return (data.sub_requests || []).filter((s) => {
+      if (s.requested_by !== me.id) return false;
+      if (s.status !== 'open') return false;
+      const responses = (data.sub_request_responses || []).filter(
+        (r) => r.sub_request_id === s.id,
+      );
+      const hourOld = (Date.now() - new Date(s.created_at).getTime()) / 3_600_000;
+      return responses.length === 0 && hourOld > 0;
+    });
+  }, [me.id]);
+
+  // Inbound sub requests targeted to me
   const myTeams = getTeamsForParent(me.id);
-  const openSubsForMe = useMemo(() => {
+  const inboundSubs = useMemo(() => {
     const all = [];
     for (const t of myTeams) {
       for (const s of getOpenSubRequestsForTeam(t.id)) {
@@ -114,47 +299,20 @@ export function Today({ ctx }) {
     return all;
   }, [me.id, myTeams.length]);
 
-  const [, force] = useState(0);
-  useEffect(() => {
-    const i = setInterval(() => force((x) => x + 1), 30_000);
-    return () => clearInterval(i);
-  }, []);
-
-  // Per-day "has events that need a driver" flag
-  const needsDriverByDay = useMemo(() => {
-    const m = {};
-    for (const d of days) {
-      const evts = getEventsByDate(me.id, dateKey(d));
-      for (const e of evts) {
-        const legs = getLegsForEvent(e.id);
-        if (legs.some((l) => !l.driver_id)) {
-          m[dateKey(d)] = true;
-          break;
-        }
-      }
-    }
-    return m;
-  }, [days, me.id]);
-
   return (
     <>
-      <div className="app-header">
+      {/* ---------- Header ---------- */}
+      <div style={{ padding: '14px 20px 10px' }}>
         <div className="row-between">
-          <div>
-            <div className="greeting" style={{ fontSize: 13, opacity: 0.85 }}>
-              Good {greeting()},
-            </div>
-            <div style={{ fontSize: 22, fontWeight: 800, marginTop: 2 }}>
-              {me.name.split(' ')[0]}
-            </div>
+          <div style={{ fontSize: 26, fontWeight: 800, letterSpacing: '-0.3px' }}>
+            {me.name.split(' ')[0]}
           </div>
           <Avatar name={me.name} color={me.avatar_color} photo={me.photo} size="lg" />
         </div>
       </div>
 
-      <GameChangerHint me={me} ctx={ctx} />
-
-      {openSubsForMe.map((s) => {
+      {/* ---------- Inbound sub requests (urgent — keep loud) ---------- */}
+      {inboundSubs.map((s) => {
         const requester = getParent(s.requested_by);
         return (
           <button
@@ -173,171 +331,78 @@ export function Today({ ctx }) {
         );
       })}
 
-      {openLegs.length > 0 && (
-        <button
-          type="button"
-          onClick={() => ctx.navigate('open_shifts')}
-          className="alert-banner"
-          style={{
-            width: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            textAlign: 'left',
-            cursor: 'pointer',
+      <GameChangerHint me={me} ctx={ctx} />
+
+      {/* ---------- Summary band: the whole screen in one row ---------- */}
+      <SummaryBand today={today} tomorrow={tomorrow} driveCount={myUpcomingDriving.length} />
+
+      {/* ---------- Hero: your next drive ---------- */}
+      {nextDrive ? (
+        <NextDriveCard
+          leg={nextDrive}
+          ctx={ctx}
+          meId={me.id}
+          onSub={() => {
+            setNeedSubLegId(nextDrive.id);
+            setNeedSubReason('');
+            setNeedSubOpen(true);
           }}
-        >
-          <span style={{ fontSize: 18 }}>⚠️</span>
-          <span style={{ flex: 1 }}>
-            {openLegs.length} upcoming {openLegs.length === 1 ? 'leg' : 'legs'} still{' '}
-            {openLegs.length === 1 ? 'needs' : 'need'} a driver
-          </span>
-          <span style={{ fontWeight: 700 }}>View →</span>
-        </button>
+          onLate={() => {
+            setLateLegId(nextDrive.id);
+            setLateOpen(true);
+          }}
+        />
+      ) : (
+        <NoNextDriveCard ctx={ctx} />
       )}
 
-      {imminentLeg && (
-        <DayOfCard leg={imminentLeg} ctx={ctx} meId={me.id} />
-      )}
+      {/* ---------- Today day section ---------- */}
+      <DaySection
+        title="Today"
+        date={fmtDayDate(new Date())}
+        status={today}
+        events={today.events}
+        meId={me.id}
+        myKidIds={myKidIds}
+        ctx={ctx}
+      />
 
-      <div style={{ padding: '14px 16px 0' }}>
-        <button
-          type="button"
-          onClick={() => ctx.navigate('create_carpool')}
-          style={{
-            width: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 12,
-            padding: '14px 16px',
-            background: 'linear-gradient(135deg, var(--green-700) 0%, var(--green-900) 100%)',
-            color: 'white',
-            borderRadius: 16,
-            boxShadow: '0 6px 20px rgba(27,67,50,0.25)',
-            textAlign: 'left',
-          }}
-        >
-          <span
-            style={{
-              width: 38,
-              height: 38,
-              borderRadius: 12,
-              background: 'rgba(255,255,255,0.18)',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 20,
-              flexShrink: 0,
-            }}
-          >
-            ➕
-          </span>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 800, fontSize: 15 }}>Create a carpool</div>
-            <div style={{ fontSize: 12, opacity: 0.9, marginTop: 2 }}>
-              Birthday, away game, scout meeting — invite parents and drive
-            </div>
-          </div>
-          <span style={{ fontSize: 22, opacity: 0.85 }}>›</span>
-        </button>
-      </div>
+      {/* ---------- Tomorrow day section ---------- */}
+      <DaySection
+        title="Tomorrow"
+        date={fmtDayDate(addDays(new Date(), 1))}
+        status={tomorrow}
+        events={tomorrow.events}
+        meId={me.id}
+        myKidIds={myKidIds}
+        ctx={ctx}
+      />
 
-      <div style={{ padding: '12px 16px 0' }}>
-        <div className="caps muted" style={{ marginBottom: 8 }}>Quick actions</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
-          <QuickAction
-            icon="🔄"
-            iconBg="var(--red-100)"
-            label="Need a sub"
-            onClick={() => {
-              if (myUpcomingDriving.length === 0) {
-                ctx.showToast("You're not scheduled to drive anything coming up");
-                return;
-              }
-              setNeedSubLegId(
-                myUpcomingDriving.length === 1 ? myUpcomingDriving[0].id : null,
-              );
-              setNeedSubReason('');
-              setNeedSubOpen(true);
-            }}
-          />
-          <QuickAction
-            icon="⏰"
-            iconBg="var(--yellow-100)"
-            label="Running late"
-            onClick={() => {
-              if (myUpcomingDriving.length === 0) {
-                ctx.showToast("You're not scheduled to drive anything coming up");
-                return;
-              }
-              setLateLegId(
-                myUpcomingDriving.length === 1 ? myUpcomingDriving[0].id : null,
-              );
-              setLateOpen(true);
-            }}
-          />
-          <QuickAction
-            icon="🚫"
-            iconBg="var(--blue-100)"
-            label="Kid out today"
-            onClick={() => {
-              if (myUpcomingSeats.length === 0) {
-                ctx.showToast('None of your kids are signed up for upcoming rides');
-                return;
-              }
-              setKidOutOpen(true);
-            }}
-          />
-          <QuickAction
-            icon="➕"
-            iconBg="var(--green-100)"
-            label="Add my kid"
-            onClick={() => {
-              if (joinableLegs.length === 0) {
-                ctx.showToast('No upcoming legs with open seats');
-                return;
-              }
-              setAddKidOpen(true);
-            }}
-          />
-        </div>
-      </div>
+      {/* ---------- Attention card (only when there is something) ---------- */}
+      {myStalledSubs.map((sub) => (
+        <AttentionCard key={sub.id} sub={sub} meId={me.id} ctx={ctx} />
+      ))}
 
-      <div className="date-scrubber">
-        {days.map((d) => {
-          const k = dateKey(d);
-          const isSel = k === selected;
-          return (
-            <button
-              key={k}
-              type="button"
-              className={`date-chip ${isSel ? 'active' : ''}`}
-              onClick={() => setSelected(k)}
-            >
-              <div className="dow">{fmtDOW(d)}</div>
-              <div className="dom">{d.getDate()}</div>
-              {needsDriverByDay[k] && <div className="dot" />}
-            </button>
-          );
-        })}
-      </div>
+      {/* ---------- Footer with the rarely-needed actions ---------- */}
+      <FooterActions
+        ctx={ctx}
+        onKidOut={() => {
+          if (myUpcomingSeats.length === 0) {
+            ctx.showToast('None of your kids are signed up for upcoming rides');
+            return;
+          }
+          setKidOutOpen(true);
+        }}
+        onAddKid={() => {
+          if (joinableLegs.length === 0) {
+            ctx.showToast('No upcoming legs with open seats');
+            return;
+          }
+          setAddKidOpen(true);
+        }}
+      />
 
-      <div className="section">
-        {events.length === 0 && (
-          <>
-            <div className="empty">
-              <div className="icon">🗓️</div>
-              <div className="h3" style={{ marginBottom: 4 }}>No events</div>
-              <div>Nothing scheduled for this day.</div>
-            </div>
-            <CalendarEmptyCTA ctx={ctx} variant="today" />
-          </>
-        )}
-        {events.map((e) => (
-          <EventCard key={e.id} event={e} myKidIds={myKidIds} ctx={ctx} meId={me.id} />
-        ))}
-      </div>
-
+      {/* ---------- Sheets (preserved behavior) ---------- */}
       <NeedSubSheet
         open={needSubOpen}
         onClose={() => setNeedSubOpen(false)}
@@ -464,7 +529,842 @@ export function Today({ ctx }) {
   );
 }
 
-/* ---------- one-time GameChanger import nudge (post-onboarding) ---------- */
+function addDays(d, n) {
+  const x = new Date(d);
+  x.setDate(x.getDate() + n);
+  return x;
+}
+
+/* ================================================================== */
+/* Summary band                                                        */
+/* ================================================================== */
+
+function SummaryBand({ today, tomorrow, driveCount }) {
+  return (
+    <div
+      style={{
+        margin: '6px 16px 14px',
+        background: 'white',
+        border: '1px solid var(--gray-200)',
+        borderRadius: 14,
+        padding: '12px 14px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+      }}
+    >
+      <SBCol label="Today" value={today.label} tone={today.tone} />
+      <div style={{ width: 1, alignSelf: 'stretch', background: 'var(--gray-200)' }} />
+      <SBCol label="Tomorrow" value={tomorrow.label} tone={tomorrow.tone} />
+      <div style={{ width: 1, alignSelf: 'stretch', background: 'var(--gray-200)' }} />
+      <SBCol
+        label="You drive"
+        value={`${driveCount} ${driveCount === 1 ? 'leg' : 'legs'}`}
+        tone={driveCount > 0 ? 'info' : 'muted'}
+      />
+    </div>
+  );
+}
+
+function SBCol({ label, value, tone }) {
+  const dotColor =
+    tone === 'ok' ? 'var(--green-500)'
+    : tone === 'warn' ? 'var(--yellow-500)'
+    : tone === 'info' ? 'var(--green-700)'
+    : null;
+  return (
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 3, minWidth: 0 }}>
+      <div
+        style={{
+          fontSize: 10,
+          fontWeight: 700,
+          color: 'var(--gray-500)',
+          textTransform: 'uppercase',
+          letterSpacing: 0.5,
+        }}
+      >
+        {label}
+      </div>
+      <div
+        style={{
+          fontSize: 13,
+          fontWeight: 700,
+          color: 'var(--gray-900)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
+        }}
+      >
+        {dotColor && (
+          <span
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: 4,
+              background: dotColor,
+              flexShrink: 0,
+            }}
+          />
+        )}
+        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {value}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/* ================================================================== */
+/* Hero: "Your next drive"                                             */
+/* ================================================================== */
+
+function NextDriveCard({ leg, ctx, meId, onSub, onLate }) {
+  const event = db().events.find((e) => e.id === leg.event_id);
+  const kids = getKidsInLeg(leg.id);
+  const chain = useMemo(() => buildStopChain(leg), [leg.id]);
+  const inProgress = leg.status === 'in_progress';
+  const isToEvent = leg.direction === 'to_event';
+
+  return (
+    <div style={{ margin: '0 16px 14px' }}>
+      <div className="row-between" style={{ padding: '0 4px 8px' }}>
+        <div className="caps" style={{ color: 'var(--gray-500)', letterSpacing: 0.8 }}>
+          Your next drive
+        </div>
+        <button
+          type="button"
+          onClick={() => ctx.navigate('leg', { legId: leg.id })}
+          style={{
+            background: 'transparent',
+            color: 'var(--green-700)',
+            fontSize: 12,
+            fontWeight: 700,
+            padding: 0,
+          }}
+        >
+          See details →
+        </button>
+      </div>
+
+      <div
+        style={{
+          background: 'white',
+          borderRadius: 18,
+          border: '1.5px solid var(--green-700)',
+          overflow: 'hidden',
+          boxShadow: '0 6px 20px rgba(27,67,50,0.12)',
+        }}
+      >
+        {/* Strip */}
+        <div
+          style={{
+            background: 'var(--green-700)',
+            color: 'white',
+            padding: '10px 16px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <div
+            style={{
+              fontSize: 11,
+              fontWeight: 800,
+              letterSpacing: 0.8,
+              textTransform: 'uppercase',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+            }}
+          >
+            🚗 {inProgress ? 'In progress' : `Leaves in ${leavesIn(chain ? new Date(chain.departMs).toISOString() : leg.departure_time)}`}
+          </div>
+          <div style={{ fontSize: 12, fontWeight: 700, opacity: 0.95 }}>
+            {fmtTime(chain ? new Date(chain.departMs).toISOString() : leg.departure_time)}
+          </div>
+        </div>
+
+        {/* Body */}
+        <div style={{ padding: '14px 16px 16px' }}>
+          <div style={{ fontSize: 17, fontWeight: 800, color: 'var(--gray-900)' }}>
+            {event?.title} — {isToEvent ? 'drop-off' : 'pick-up'}
+          </div>
+          <div style={{ fontSize: 13, color: 'var(--gray-500)', marginTop: 2, marginBottom: 12 }}>
+            {event?.location?.split(',')[0] || 'TBD'} · {isToEvent ? `arrive ${fmtTime(event?.start_at)}` : `out ${fmtTime(event?.end_at)}`} · {kids.length} {kids.length === 1 ? 'kid' : 'kids'}
+          </div>
+
+          {chain ? <RouteMini chain={chain} /> : null}
+
+          <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+            <button
+              type="button"
+              onClick={() => {
+                const addr = encodeURIComponent(leg.departure_location || event?.location || '');
+                window.open(`https://maps.apple.com/?daddr=${addr}`, '_blank');
+                postRideStatus(leg.id, meId, 'en_route');
+                ctx.showToast('Status sent: on your way');
+              }}
+              style={{
+                flex: 1,
+                background: 'var(--green-700)',
+                color: 'white',
+                border: 'none',
+                borderRadius: 12,
+                padding: 12,
+                fontSize: 14,
+                fontWeight: 800,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 6,
+              }}
+            >
+              🧭 Start route
+            </button>
+            {inProgress ? (
+              <button
+                type="button"
+                onClick={onLate}
+                style={{
+                  background: 'white',
+                  color: 'var(--gray-700)',
+                  border: '1px solid var(--gray-300)',
+                  borderRadius: 12,
+                  padding: '12px 14px',
+                  fontSize: 14,
+                  fontWeight: 700,
+                }}
+              >
+                ⏰ Late
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={onSub}
+                style={{
+                  background: 'white',
+                  color: 'var(--gray-700)',
+                  border: '1px solid var(--gray-300)',
+                  borderRadius: 12,
+                  padding: '12px 14px',
+                  fontSize: 14,
+                  fontWeight: 700,
+                }}
+              >
+                Sub
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function NoNextDriveCard({ ctx }) {
+  return (
+    <div style={{ margin: '0 16px 14px' }}>
+      <div className="caps" style={{ color: 'var(--gray-500)', letterSpacing: 0.8, padding: '0 4px 8px' }}>
+        Your next drive
+      </div>
+      <div
+        style={{
+          background: 'white',
+          borderRadius: 16,
+          border: '1px solid var(--gray-200)',
+          padding: 18,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+        }}
+      >
+        <span style={{ fontSize: 28 }}>🌿</span>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--gray-900)' }}>
+            You're not driving anything in the next 36 hours
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--gray-500)', marginTop: 2 }}>
+            See the schedule below for what's coming up.
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => ctx.navigate('open_shifts')}
+          style={{
+            background: 'var(--gray-100)',
+            color: 'var(--gray-900)',
+            border: 'none',
+            borderRadius: 10,
+            padding: '8px 12px',
+            fontSize: 12,
+            fontWeight: 700,
+          }}
+        >
+          Open shifts
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ================================================================== */
+/* Mini route timeline                                                 */
+/* ================================================================== */
+
+function RouteMini({ chain }) {
+  return (
+    <div
+      style={{
+        background: 'var(--gray-50)',
+        borderRadius: 12,
+        padding: '12px 14px',
+        position: 'relative',
+      }}
+    >
+      {chain.stops.map((s, i) => (
+        <div
+          key={i}
+          style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: 10,
+            position: 'relative',
+            padding: '4px 0',
+          }}
+        >
+          <div
+            style={{
+              fontSize: 12,
+              fontWeight: 800,
+              color: 'var(--gray-900)',
+              width: 56,
+              flexShrink: 0,
+              paddingTop: 1,
+              letterSpacing: '-0.2px',
+            }}
+          >
+            {fmtTime(s.time)}
+          </div>
+          <div
+            style={{
+              width: 16,
+              flexShrink: 0,
+              position: 'relative',
+              display: 'flex',
+              justifyContent: 'center',
+              paddingTop: 5,
+            }}
+          >
+            <div
+              style={{
+                width: 10,
+                height: 10,
+                borderRadius: 5,
+                background:
+                  s.kind === 'home' ? 'var(--gray-500)' : 'var(--green-700)',
+                border: '2px solid white',
+                boxShadow: s.kind === 'end' ? '0 0 0 3px var(--green-700)' : undefined,
+                zIndex: 2,
+              }}
+            />
+            {i < chain.stops.length - 1 && (
+              <div
+                style={{
+                  position: 'absolute',
+                  left: 7,
+                  top: 14,
+                  bottom: -14,
+                  width: 2,
+                  background: 'var(--gray-300)',
+                  zIndex: 1,
+                }}
+              />
+            )}
+          </div>
+          <div style={{ flex: 1 }}>
+            <div
+              style={{
+                fontSize: 13,
+                fontWeight: 700,
+                color: 'var(--gray-900)',
+                lineHeight: 1.3,
+              }}
+            >
+              {s.label}
+              {s.bufferMin ? (
+                <span
+                  style={{
+                    display: 'inline-block',
+                    fontSize: 10,
+                    fontWeight: 800,
+                    background: 'var(--green-100)',
+                    color: 'var(--green-text)',
+                    padding: '1px 6px',
+                    borderRadius: 4,
+                    marginLeft: 6,
+                  }}
+                >
+                  {s.bufferMin}-min buffer
+                </span>
+              ) : null}
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--gray-500)', marginTop: 1 }}>{s.sub}</div>
+          </div>
+        </div>
+      ))}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+          padding: '8px 2px 0',
+          fontSize: 11,
+          color: 'var(--gray-500)',
+          borderTop: '1px solid var(--gray-200)',
+          marginTop: 6,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          🛣️ <strong style={{ color: 'var(--gray-900)' }}>{chain.totalMi} mi</strong>
+        </div>
+        <div style={{ width: 1, height: 10, background: 'var(--gray-200)' }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          ⏱️ <strong style={{ color: 'var(--gray-900)' }}>{chain.totalMin} min</strong>
+        </div>
+        <div style={{ width: 1, height: 10, background: 'var(--gray-200)' }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          🚦 +{chain.trafficMin} min traffic
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ================================================================== */
+/* Day section (Today / Tomorrow)                                      */
+/* ================================================================== */
+
+function DaySection({ title, date, status, events, meId, myKidIds, ctx }) {
+  return (
+    <div style={{ margin: '0 16px 18px' }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'baseline',
+          gap: 8,
+          marginBottom: 8,
+          padding: '0 2px',
+          flexWrap: 'wrap',
+        }}
+      >
+        <span
+          style={{
+            fontSize: 16,
+            fontWeight: 800,
+            color: 'var(--gray-900)',
+            letterSpacing: '-0.2px',
+          }}
+        >
+          {title}
+        </span>
+        <span style={{ fontSize: 12, color: 'var(--gray-500)', fontWeight: 500 }}>· {date}</span>
+        {status.totalLegs > 0 && (
+          <span
+            style={{
+              fontSize: 11,
+              fontWeight: 800,
+              padding: '2px 8px',
+              borderRadius: 8,
+              background:
+                status.tone === 'ok' ? 'var(--green-100)' : 'var(--yellow-100)',
+              color:
+                status.tone === 'ok' ? 'var(--green-text)' : 'var(--yellow-text)',
+            }}
+          >
+            {status.tone === 'ok' ? 'All covered' : 'Needs drivers'}
+          </span>
+        )}
+      </div>
+
+      {events.length === 0 ? (
+        <div
+          style={{
+            background: 'white',
+            borderRadius: 14,
+            border: '1px dashed var(--gray-200)',
+            padding: '14px 16px',
+            color: 'var(--gray-500)',
+            fontSize: 13,
+            textAlign: 'center',
+          }}
+        >
+          Nothing scheduled.
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {events.map((e) => (
+            <RideCard key={e.id} event={e} meId={meId} myKidIds={myKidIds} ctx={ctx} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function RideCard({ event, meId, myKidIds, ctx }) {
+  const legs = getLegsForEvent(event.id);
+  const emoji =
+    event.type === 'game' ? '⚾'
+    : event.type === 'practice' ? '🏟️'
+    : event.type === 'imported' ? '📅'
+    : event.title?.toLowerCase().includes('piano') ? '🎹'
+    : event.title?.toLowerCase().includes('art') ? '🎨'
+    : '📍';
+
+  return (
+    <div
+      style={{
+        background: 'white',
+        border: '1px solid var(--gray-200)',
+        borderRadius: 14,
+        overflow: 'hidden',
+      }}
+    >
+      <div
+        style={{
+          padding: '11px 14px 6px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+        }}
+      >
+        <div
+          style={{
+            width: 24,
+            height: 24,
+            borderRadius: 8,
+            background: 'var(--gray-100)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 14,
+            flexShrink: 0,
+          }}
+        >
+          {emoji}
+        </div>
+        <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--gray-900)', flex: 1, minWidth: 0 }}>
+          {event.title}
+        </div>
+        <div style={{ fontSize: 11, color: 'var(--gray-500)', fontWeight: 600 }}>
+          {fmtTime(event.start_at)} – {fmtTime(event.end_at)}
+        </div>
+      </div>
+      {legs.map((leg, idx) => (
+        <LegRow
+          key={leg.id}
+          leg={leg}
+          first={idx === 0}
+          meId={meId}
+          myKidIds={myKidIds}
+          ctx={ctx}
+        />
+      ))}
+    </div>
+  );
+}
+
+function LegRow({ leg, first, meId, myKidIds, ctx }) {
+  const driver = leg.driver_id ? getParent(leg.driver_id) : null;
+  const kids = getKidsInLeg(leg.id);
+  const isMine = leg.driver_id === meId;
+  const isOpen = !leg.driver_id;
+  const myKidsHere = kids.filter((k) => myKidIds.includes(k.id));
+
+  const directionLabel = leg.direction === 'to_event' ? 'Drop-off' : 'Pick-up';
+  const kidLabel =
+    myKidsHere.length > 0
+      ? myKidsHere.map((k) => k.name).join(', ')
+      : kids.length > 0
+      ? `${kids.length} ${kids.length === 1 ? 'kid' : 'kids'}`
+      : 'No kids yet';
+
+  return (
+    <div
+      style={{
+        padding: '8px 14px 10px 46px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 10,
+        borderTop: first ? 'none' : '1px solid var(--gray-100)',
+        cursor: 'pointer',
+      }}
+      onClick={() => ctx.navigate('leg', { legId: leg.id })}
+      role="button"
+      tabIndex={0}
+    >
+      <div
+        style={{
+          fontSize: 10,
+          fontWeight: 800,
+          color: 'var(--gray-500)',
+          textTransform: 'uppercase',
+          letterSpacing: 0.5,
+          minWidth: 52,
+        }}
+      >
+        {directionLabel}
+      </div>
+      <div
+        style={{
+          fontSize: 12,
+          color: 'var(--gray-700)',
+          fontWeight: 600,
+          flex: 1,
+          minWidth: 0,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {kidLabel}
+      </div>
+      <DriverPill leg={leg} driver={driver} isMine={isMine} isOpen={isOpen} />
+      {isOpen && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            const r = claimLeg(leg.id, meId);
+            if (r.ok) ctx.showToast(`You're driving the ${directionLabel.toLowerCase()}`);
+            else ctx.showToast(`Could not claim: ${r.reason}`);
+          }}
+          style={{
+            marginLeft: 4,
+            background: 'var(--green-700)',
+            color: 'white',
+            border: 'none',
+            borderRadius: 6,
+            padding: '4px 9px',
+            fontSize: 10,
+            fontWeight: 800,
+            flexShrink: 0,
+          }}
+        >
+          I'll drive
+        </button>
+      )}
+    </div>
+  );
+}
+
+function DriverPill({ leg, driver, isMine, isOpen }) {
+  if (isMine) {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 5,
+          fontSize: 11,
+          fontWeight: 800,
+          padding: '3px 9px',
+          borderRadius: 16,
+          background: 'var(--green-700)',
+          color: 'white',
+          flexShrink: 0,
+        }}
+      >
+        YOU · {fmtTime(leg.departure_time)}
+      </div>
+    );
+  }
+  if (isOpen) {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 5,
+          fontSize: 11,
+          fontWeight: 800,
+          padding: '3px 9px',
+          borderRadius: 16,
+          background: 'var(--yellow-100)',
+          color: 'var(--yellow-text)',
+          border: '1px dashed var(--yellow-500)',
+          flexShrink: 0,
+        }}
+      >
+        ? No driver
+      </div>
+    );
+  }
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 5,
+        fontSize: 11,
+        fontWeight: 800,
+        padding: '3px 9px',
+        borderRadius: 16,
+        background: 'var(--gray-100)',
+        color: 'var(--gray-700)',
+        flexShrink: 0,
+      }}
+    >
+      <span
+        style={{
+          width: 14,
+          height: 14,
+          borderRadius: 7,
+          background: 'var(--gray-300)',
+          color: 'white',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: 8,
+          fontWeight: 800,
+        }}
+      >
+        {(driver?.name || '?').slice(0, 1).toUpperCase()}
+      </span>
+      {driver?.name?.split(' ')[0] || 'TBD'} · {fmtTime(leg.departure_time)}
+    </div>
+  );
+}
+
+/* ================================================================== */
+/* Attention card — only when there's something stalled                */
+/* ================================================================== */
+
+function AttentionCard({ sub, meId, ctx }) {
+  const data = db();
+  const leg = data.carpool_legs.find((l) => l.id === sub.leg_id);
+  const event = leg ? data.events.find((e) => e.id === leg.event_id) : null;
+  const hoursAgo = Math.round((Date.now() - new Date(sub.created_at).getTime()) / 3_600_000);
+
+  return (
+    <div
+      style={{
+        margin: '0 16px 16px',
+        background: '#FFFBEB',
+        border: '1px solid #FDE68A',
+        borderRadius: 14,
+        padding: '12px 14px',
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: 10,
+      }}
+    >
+      <div
+        style={{
+          width: 28,
+          height: 28,
+          borderRadius: 14,
+          background: 'white',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: 14,
+          flexShrink: 0,
+        }}
+      >
+        ⏳
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 13, fontWeight: 800, color: '#78350F', lineHeight: 1.3 }}>
+          No one has answered your sub request
+        </div>
+        <div style={{ fontSize: 11, color: 'var(--yellow-text)', marginTop: 2 }}>
+          Sent {hoursAgo}h ago · {event?.title} · {leg ? fmtTime(leg.departure_time) : ''}
+        </div>
+        <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
+          <button
+            type="button"
+            onClick={() => ctx.showToast('Nudge sent to your team')}
+            style={{
+              background: 'var(--yellow-text)',
+              color: 'white',
+              border: 'none',
+              borderRadius: 6,
+              padding: '5px 10px',
+              fontSize: 11,
+              fontWeight: 800,
+            }}
+          >
+            Nudge group
+          </button>
+          <button
+            type="button"
+            onClick={() => ctx.navigate('leg', { legId: sub.leg_id })}
+            style={{
+              background: 'transparent',
+              color: 'var(--yellow-text)',
+              border: '1px solid #FCD34D',
+              borderRadius: 6,
+              padding: '5px 10px',
+              fontSize: 11,
+              fontWeight: 800,
+            }}
+          >
+            View leg
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ================================================================== */
+/* Footer actions — rare actions, out of the way                       */
+/* ================================================================== */
+
+function FooterActions({ ctx, onKidOut, onAddKid }) {
+  return (
+    <div
+      style={{
+        margin: '0 16px 18px',
+        padding: '12px 4px',
+        borderTop: '1px solid var(--gray-200)',
+        display: 'flex',
+        gap: 8,
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+      }}
+    >
+      <FooterBtn label="Kid out today" onClick={onKidOut} />
+      <FooterBtn label="Add my kid to a ride" onClick={onAddKid} />
+      <FooterBtn label="Create a carpool" onClick={() => ctx.navigate('create_carpool')} />
+    </div>
+  );
+}
+
+function FooterBtn({ label, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        background: 'transparent',
+        color: 'var(--gray-700)',
+        border: '1px solid var(--gray-300)',
+        borderRadius: 999,
+        padding: '6px 12px',
+        fontSize: 12,
+        fontWeight: 700,
+      }}
+    >
+      {label}
+    </button>
+  );
+}
+
+/* ================================================================== */
+/* GameChanger import nudge (preserved)                                */
+/* ================================================================== */
 
 function GameChangerHint({ me, ctx }) {
   if (!shouldShowGcHint(me.id)) return null;
@@ -481,7 +1381,7 @@ function GameChangerHint({ me, ctx }) {
     <div
       className="card"
       style={{
-        margin: '12px 16px 0',
+        margin: '0 16px 14px',
         padding: 14,
         background: 'var(--blue-100)',
         borderRadius: 14,
@@ -508,29 +1408,21 @@ function GameChangerHint({ me, ctx }) {
         <strong>{team.name}</strong> from GameChanger, TeamSnap, Apple/Google Calendar, or any{' '}
         <code>.ics</code> link.
       </div>
-      <div style={{ fontSize: 12, color: 'var(--blue-text)', marginBottom: 10, opacity: 0.85 }}>
-        📍 You'll find this any time at <strong>👤 Profile → 📅 Schedule sources</strong>.
-      </div>
       <div className="row" style={{ gap: 8 }}>
-        <button
-          type="button"
-          className="btn btn-primary"
-          style={{ flex: 1 }}
-          onClick={open}
-        >
+        <button type="button" className="btn btn-primary" style={{ flex: 1 }} onClick={open}>
           Import now
         </button>
-        <button
-          type="button"
-          className="btn btn-secondary"
-          onClick={dismiss}
-        >
+        <button type="button" className="btn btn-secondary" onClick={dismiss}>
           Not now
         </button>
       </div>
     </div>
   );
 }
+
+/* ================================================================== */
+/* Sheets (preserved logic from previous version)                      */
+/* ================================================================== */
 
 function NeedSubSheet({
   open,
@@ -682,10 +1574,7 @@ function LegPickerRow({ leg, onClick, compact = false }) {
   const inner = (
     <>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-          <div style={{ fontWeight: 700, fontSize: 14 }}>{event?.title || 'Leg'}</div>
-          <SourceBadge event={event} />
-        </div>
+        <div style={{ fontWeight: 700, fontSize: 14 }}>{event?.title || 'Leg'}</div>
         <div className="muted" style={{ fontSize: 12, marginTop: 2 }}>
           {directionLabel} · {when} · {time}
         </div>
@@ -875,9 +1764,9 @@ function RunningLateSheet({ open, onClose, legs, selectedLegId, onPickLeg, onSen
   );
 }
 
-function KidOutSheet({ open, onClose, rows, meId, onRemove }) {
-  const [step, setStep] = useState('pick'); // 'pick' | 'confirm'
-  const [picked, setPicked] = useState(null); // { childId, eventId }
+function KidOutSheet({ open, onClose, rows, meId: _meId, onRemove }) {
+  const [step, setStep] = useState('pick');
+  const [picked, setPicked] = useState(null);
   const [reason, setReason] = useState('');
 
   useEffect(() => {
@@ -950,13 +1839,6 @@ function KidOutSheet({ open, onClose, rows, meId, onRemove }) {
                       {g.legs
                         .map((l) => (l.direction === 'to_event' ? 'drop-off' : 'pick-up'))
                         .join(' + ')}
-                    </div>
-                    <div className="muted" style={{ fontSize: 11, marginTop: 2 }}>
-                      Driver:{' '}
-                      {g.legs[0].driver_id
-                        ? rows.find((r) => r.leg.id === g.legs[0].id)?.driver?.name?.split(' ')[0] ||
-                          'TBD'
-                        : 'open'}
                     </div>
                   </div>
                   <span style={{ fontSize: 18, color: 'var(--gray-500)' }}>›</span>
@@ -1044,18 +1926,7 @@ function KidOutSheet({ open, onClose, rows, meId, onRemove }) {
                 }}
               >
                 <strong>Less than 30 min away.</strong> Too close to remove silently — please call
-                your driver
-                {pickedGroup.legs[0].driver_id ? (
-                  <>
-                    {' '}
-                    (
-                    <strong>
-                      {rows.find((r) => r.leg.id === pickedGroup.legs[0].id)?.driver?.phone}
-                    </strong>
-                    )
-                  </>
-                ) : null}
-                directly.
+                your driver directly.
               </div>
             ) : (
               <button
@@ -1181,290 +2052,5 @@ function AddMyKidSheet({ open, onClose, rows, onAdd }) {
         </button>
       </div>
     </Sheet>
-  );
-}
-
-function QuickAction({ icon, iconBg, label, onClick }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      style={{
-        background: 'white',
-        borderRadius: 16,
-        padding: '14px 8px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: 8,
-        boxShadow: 'var(--shadow-sm)',
-      }}
-    >
-      <span
-        style={{
-          width: 42,
-          height: 42,
-          borderRadius: 12,
-          background: iconBg,
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: 20,
-        }}
-      >
-        {icon}
-      </span>
-      <span
-        style={{
-          fontSize: 11,
-          fontWeight: 700,
-          color: 'var(--gray-700)',
-          textAlign: 'center',
-          lineHeight: 1.2,
-        }}
-      >
-        {label}
-      </span>
-    </button>
-  );
-}
-
-function DayOfCard({ leg, ctx, meId }) {
-  const event = db().events.find((e) => e.id === leg.event_id);
-  const kids = getKidsInLeg(leg.id);
-  const minutes = Math.max(0, Math.round((new Date(leg.departure_time).getTime() - Date.now()) / 60000));
-  const inProgress = leg.status === 'in_progress';
-
-  return (
-    <div
-      style={{
-        background: 'linear-gradient(135deg, #1b4332 0%, #2d6a4f 100%)',
-        color: 'white',
-        padding: 20,
-        margin: '12px 16px',
-        borderRadius: 20,
-        boxShadow: '0 12px 32px rgba(27,67,50,0.35)',
-      }}
-    >
-      <div className="caps" style={{ opacity: 0.85 }}>
-        {inProgress ? '🚗 Ride in progress' : '⏰ Coming up'}
-      </div>
-      <div style={{ fontSize: 26, fontWeight: 800, marginTop: 6, letterSpacing: '-0.02em' }}>
-        {inProgress ? 'You\'re driving now' : `Leaves in ${minutes} min`}
-      </div>
-      <div style={{ fontSize: 14, opacity: 0.9, marginTop: 4 }}>
-        {leg.direction === 'to_event' ? 'Drop-off' : 'Pick-up'} · {event?.title}
-      </div>
-      <div style={{ fontSize: 13, opacity: 0.85, marginTop: 8 }}>
-        📍 {leg.departure_location} → {leg.arrival_location}
-      </div>
-
-      <div style={{ marginTop: 14, display: 'flex', gap: -8 }}>
-        {kids.map((k, i) => (
-          <div key={k.id} style={{ marginLeft: i === 0 ? 0 : -10 }}>
-            <Avatar name={k.name} color={k.avatar_color} photo={k.photo} size="sm" />
-          </div>
-        ))}
-        <div style={{ marginLeft: 8, fontSize: 13, alignSelf: 'center', opacity: 0.95 }}>
-          {kids.length} {kids.length === 1 ? 'passenger' : 'passengers'}
-        </div>
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 14 }}>
-        <button
-          type="button"
-          style={{
-            background: 'white',
-            color: 'var(--green-900)',
-            padding: '12px 8px',
-            borderRadius: 12,
-            fontWeight: 700,
-            fontSize: 14,
-          }}
-          onClick={() => {
-            const addr = encodeURIComponent(leg.departure_location);
-            window.open(`https://maps.apple.com/?daddr=${addr}`, '_blank');
-            postRideStatus(leg.id, meId, 'en_route');
-            ctx.showToast('Status sent: on your way');
-          }}
-        >
-          🗺️ Start route
-        </button>
-        <button
-          type="button"
-          style={{
-            background: 'rgba(255,255,255,0.18)',
-            color: 'white',
-            padding: '12px 8px',
-            borderRadius: 12,
-            fontWeight: 700,
-            fontSize: 14,
-            border: '1px solid rgba(255,255,255,0.3)',
-          }}
-          onClick={() => {
-            postRideStatus(leg.id, meId, 'running_late');
-            ctx.showToast('Parents notified: running late');
-          }}
-        >
-          ⏰ I'm late
-        </button>
-        <button
-          type="button"
-          style={{
-            background: '#fbbf24',
-            color: '#1b4332',
-            padding: '14px 8px',
-            borderRadius: 12,
-            fontWeight: 800,
-            fontSize: 15,
-            gridColumn: '1 / -1',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-          }}
-          onClick={() => ctx.navigate('active_ride', { legId: leg.id })}
-        >
-          🗺️ Open ride mode →
-        </button>
-        <button
-          type="button"
-          style={{
-            background: 'rgba(255,255,255,0.18)',
-            color: 'white',
-            padding: '10px 8px',
-            borderRadius: 12,
-            fontWeight: 600,
-            fontSize: 13,
-            gridColumn: '1 / -1',
-            border: '1px solid rgba(255,255,255,0.3)',
-          }}
-          onClick={() => ctx.navigate('leg', { legId: leg.id })}
-        >
-          Edit leg details
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function greeting() {
-  const h = new Date().getHours();
-  if (h < 12) return 'morning';
-  if (h < 18) return 'afternoon';
-  return 'evening';
-}
-
-function EventCard({ event, myKidIds, ctx, meId }) {
-  const legs = getLegsForEvent(event.id);
-  return (
-    <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-      <div style={{ padding: '14px 16px 10px' }}>
-        <div className="row-between">
-          <div>
-            <div style={{ fontWeight: 700, fontSize: 16 }}>
-              {event.type === 'game' ? '⚾ ' : event.type === 'imported' ? '📅 ' : '🏟️ '}
-              {event.title}
-            </div>
-            <div className="muted" style={{ fontSize: 13, marginTop: 2 }}>
-              {formatTime(event.start_at)} · {event.location}
-            </div>
-            <div style={{ marginTop: 6 }}>
-              <SourceBadge event={event} />
-            </div>
-          </div>
-          <span className={`pill ${event.type === 'game' ? 'pill-yellow' : 'pill-gray'}`}>
-            {event.type}
-          </span>
-        </div>
-      </div>
-      <div style={{ borderTop: '1px solid var(--gray-100)' }}>
-        {legs.map((leg) => (
-          <LegRow key={leg.id} leg={leg} myKidIds={myKidIds} ctx={ctx} meId={meId} />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function LegRow({ leg, myKidIds, ctx, meId }) {
-  const kids = getKidsInLeg(leg.id);
-  const driver = leg.driver_id ? getParent(leg.driver_id) : null;
-  const isMine = leg.driver_id === meId;
-  const isOpen = !leg.driver_id;
-  const hasMyKid = kids.some((k) => myKidIds.includes(k.id));
-
-  let stateClass = '';
-  let badge = null;
-  if (isMine) {
-    stateClass = 'your-turn';
-    badge = <span className="pill pill-green">YOUR TURN</span>;
-  } else if (isOpen) {
-    stateClass = 'needs-driver';
-    badge = <span className="pill pill-yellow">NEEDS DRIVER</span>;
-  } else {
-    badge = <span className="pill pill-gray">✓ {driver?.name?.split(' ')[0]}</span>;
-  }
-
-  return (
-    <button
-      type="button"
-      onClick={() => ctx.navigate('leg', { legId: leg.id })}
-      style={{
-        display: 'block',
-        width: '100%',
-        textAlign: 'left',
-        padding: '14px 16px',
-        background:
-          stateClass === 'your-turn'
-            ? 'linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%)'
-            : stateClass === 'needs-driver'
-            ? '#fffbeb'
-            : 'transparent',
-        borderTop: '1px solid var(--gray-100)',
-        position: 'relative',
-      }}
-    >
-      <div className="row-between">
-        <div style={{ flex: 1 }}>
-          <div className="caps muted" style={{ marginBottom: 4 }}>
-            {leg.direction === 'to_event' ? 'Drop-off' : 'Pick-up'} · {formatTime(leg.departure_time)}
-          </div>
-          <div className="row" style={{ gap: 8 }}>
-            {isOpen ? (
-              <>
-                <span
-                  className="avatar avatar-gray"
-                  style={{ background: 'var(--yellow-100)', color: 'var(--yellow-text)', fontSize: 18 }}
-                >
-                  ?
-                </span>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: 15 }}>No driver yet</div>
-                  <div className="muted" style={{ fontSize: 12 }}>Tap to sign up</div>
-                </div>
-              </>
-            ) : (
-              <>
-                <Avatar name={driver.name} color={driver.avatar_color} photo={driver.photo} />
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: 15 }}>{driver.name}</div>
-                  <div className="muted" style={{ fontSize: 12 }}>
-                    {kids.length}/{leg.seat_capacity} seats ·{' '}
-                    {kids.map((k) => k.name).join(', ') || 'no kids yet'}
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-          {hasMyKid && !isMine && (
-            <div className="pill pill-blue" style={{ marginTop: 8 }}>
-              ★ Your kid is in this car
-            </div>
-          )}
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
-          {badge}
-          <span className="muted" style={{ fontSize: 18 }}>›</span>
-        </div>
-      </div>
-    </button>
   );
 }
