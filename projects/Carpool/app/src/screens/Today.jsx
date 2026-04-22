@@ -269,6 +269,16 @@ export function Today({ ctx }) {
   // The hero: my soonest upcoming drive (within 36 hrs)
   const nextDrive = myUpcomingDriving[0] || null;
 
+  // Fallback hero: when I'm not driving, show my kid's next trip with someone
+  // else driving. Soonest upcoming leg where my kid is seated and driver != me.
+  const nextKidTrip = useMemo(() => {
+    if (nextDrive) return null;
+    const eligible = myUpcomingSeats
+      .filter((row) => row.leg.driver_id && row.leg.driver_id !== me.id)
+      .sort((a, b) => a.leg.departure_time.localeCompare(b.leg.departure_time));
+    return eligible[0] || null;
+  }, [nextDrive, myUpcomingSeats, me.id]);
+
   // Day blocks
   const today = useMemo(() => dayStatus(me.id, todayKey()), [me.id]);
   const tomorrow = useMemo(() => dayStatus(me.id, tomorrowKey()), [me.id]);
@@ -336,7 +346,7 @@ export function Today({ ctx }) {
       {/* ---------- Summary band: the whole screen in one row ---------- */}
       <SummaryBand today={today} tomorrow={tomorrow} driveCount={myUpcomingDriving.length} />
 
-      {/* ---------- Hero: your next drive ---------- */}
+      {/* ---------- Hero: your next drive OR your kids' next trip ---------- */}
       {nextDrive ? (
         <NextDriveCard
           leg={nextDrive}
@@ -352,6 +362,8 @@ export function Today({ ctx }) {
             setLateOpen(true);
           }}
         />
+      ) : nextKidTrip ? (
+        <KidsNextTripCard row={nextKidTrip} meId={me.id} ctx={ctx} />
       ) : (
         <NoNextDriveCard ctx={ctx} />
       )}
@@ -366,6 +378,9 @@ export function Today({ ctx }) {
         myKidIds={myKidIds}
         ctx={ctx}
       />
+
+      {/* ---------- Create a carpool: permanent CTA under Today ---------- */}
+      <CreateCarpoolCard ctx={ctx} />
 
       {/* ---------- Tomorrow day section ---------- */}
       <DaySection
@@ -385,7 +400,6 @@ export function Today({ ctx }) {
 
       {/* ---------- Footer with the rarely-needed actions ---------- */}
       <FooterActions
-        ctx={ctx}
         onKidOut={() => {
           if (myUpcomingSeats.length === 0) {
             ctx.showToast('None of your kids are signed up for upcoming rides');
@@ -781,10 +795,10 @@ function NoNextDriveCard({ ctx }) {
         <span style={{ fontSize: 28 }}>🌿</span>
         <div style={{ flex: 1 }}>
           <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--gray-900)' }}>
-            You're not driving anything in the next 36 hours
+            Nothing on the calendar for your kids in the next 36 hours
           </div>
           <div style={{ fontSize: 12, color: 'var(--gray-500)', marginTop: 2 }}>
-            See the schedule below for what's coming up.
+            See the schedule below for what's coming up further out.
           </div>
         </div>
         <button
@@ -803,6 +817,238 @@ function NoNextDriveCard({ ctx }) {
           Open shifts
         </button>
       </div>
+    </div>
+  );
+}
+
+/* ================================================================== */
+/* "Your kids' next trip" — when someone else is driving               */
+/* ================================================================== */
+
+function KidsNextTripCard({ row, meId, ctx }) {
+  const { leg, event, child, driver } = row;
+  const isToEvent = leg.direction === 'to_event';
+  const chain = useMemo(() => buildStopChain(leg), [leg.id]);
+
+  // Find the stop in the chain that matches MY kid (if any).
+  // The chain labels stops as "Pick up [name]" / "Drop off [name]".
+  const kidStop = chain
+    ? chain.stops.find(
+        (s) => s.label === `Pick up ${child.name}` || s.label === `Drop off ${child.name}`,
+      )
+    : null;
+
+  // For to_event: when does the driver arrive at our house?
+  // For from_event: when does the driver pick the kid up FROM the event?
+  //   (= leg.departure_time — when they leave the field)
+  const beReadyTime = isToEvent
+    ? kidStop?.time || leg.departure_time
+    : leg.departure_time;
+  const beReadyLabel = isToEvent
+    ? `Be ready by ${fmtTime(beReadyTime)}`
+    : `${driver?.name?.split(' ')[0] || 'Driver'} picks them up from event at ${fmtTime(beReadyTime)}`;
+  const beReadyWhere = isToEvent
+    ? 'at home — driver swings by'
+    : event?.location?.split(',')[0] || 'event location';
+
+  // All kids of mine on this leg (rare, but possible — e.g., siblings)
+  const allKidsOnLeg = getKidsInLeg(leg.id);
+
+  return (
+    <div style={{ margin: '0 16px 14px' }}>
+      <div className="row-between" style={{ padding: '0 4px 8px' }}>
+        <div className="caps" style={{ color: 'var(--gray-500)', letterSpacing: 0.8 }}>
+          Your kid's next trip
+        </div>
+        <button
+          type="button"
+          onClick={() => ctx.navigate('leg', { legId: leg.id })}
+          style={{
+            background: 'transparent',
+            color: 'var(--green-700)',
+            fontSize: 12,
+            fontWeight: 700,
+            padding: 0,
+          }}
+        >
+          See details →
+        </button>
+      </div>
+
+      <div
+        style={{
+          background: 'white',
+          borderRadius: 18,
+          border: '1.5px solid var(--gray-300)',
+          overflow: 'hidden',
+          boxShadow: '0 6px 20px rgba(15,23,42,0.08)',
+        }}
+      >
+        {/* Strip — gray (not green) since I'm not driving */}
+        <div
+          style={{
+            background: 'var(--gray-700)',
+            color: 'white',
+            padding: '10px 16px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <div
+            style={{
+              fontSize: 11,
+              fontWeight: 800,
+              letterSpacing: 0.8,
+              textTransform: 'uppercase',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+            }}
+          >
+            🚗 {isToEvent ? `Pickup in ${leavesIn(beReadyTime)}` : `Picks up in ${leavesIn(beReadyTime)}`}
+          </div>
+          <div style={{ fontSize: 12, fontWeight: 700, opacity: 0.95 }}>
+            {fmtTime(beReadyTime)}
+          </div>
+        </div>
+
+        {/* Body */}
+        <div style={{ padding: '14px 16px 16px' }}>
+          <div style={{ fontSize: 17, fontWeight: 800, color: 'var(--gray-900)' }}>
+            {child.name} → {event?.title}
+          </div>
+          <div style={{ fontSize: 13, color: 'var(--gray-500)', marginTop: 2, marginBottom: 12 }}>
+            {event?.location?.split(',')[0] || 'TBD'} · {isToEvent ? `arrive ${fmtTime(event?.start_at)}` : `out ${fmtTime(event?.end_at)}`} · {allKidsOnLeg.length} {allKidsOnLeg.length === 1 ? 'kid' : 'kids'} in car
+          </div>
+
+          {/* Be-ready row — the most important info */}
+          <div
+            style={{
+              background: 'var(--green-100)',
+              border: '1px solid var(--green-500)',
+              borderRadius: 12,
+              padding: '12px 14px',
+              marginBottom: 12,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 10,
+                fontWeight: 800,
+                letterSpacing: 0.5,
+                textTransform: 'uppercase',
+                color: 'var(--green-text)',
+                marginBottom: 4,
+              }}
+            >
+              {isToEvent ? `Be ready · ${child.name}` : `Coming home · ${child.name}`}
+            </div>
+            <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--green-text)' }}>
+              {beReadyLabel}
+            </div>
+            <div style={{ fontSize: 12, color: 'var(--green-text)', marginTop: 2, opacity: 0.85 }}>
+              {beReadyWhere}
+            </div>
+          </div>
+
+          {/* Driver row */}
+          {driver && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '10px 12px',
+                background: 'var(--gray-50)',
+                borderRadius: 12,
+                marginBottom: 12,
+              }}
+            >
+              <Avatar name={driver.name} color={driver.avatar_color} photo={driver.photo} size="sm" />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--gray-900)' }}>
+                  {driver.name} is driving
+                </div>
+                <div style={{ fontSize: 11, color: 'var(--gray-500)', marginTop: 1 }}>
+                  Leaves their house at {fmtTime(leg.departure_time)} · {allKidsOnLeg.length} {allKidsOnLeg.length === 1 ? 'kid' : 'kids'} on board
+                </div>
+              </div>
+              {driver.phone && (
+                <a
+                  href={`tel:${driver.phone}`}
+                  style={{
+                    background: 'var(--gray-200)',
+                    color: 'var(--gray-900)',
+                    borderRadius: 8,
+                    padding: '6px 10px',
+                    fontSize: 11,
+                    fontWeight: 800,
+                    textDecoration: 'none',
+                    flexShrink: 0,
+                  }}
+                >
+                  Call
+                </a>
+              )}
+            </div>
+          )}
+
+          {/* Optional: full stop chain so mom can see the ordering */}
+          {chain ? <RouteMini chain={chain} /> : null}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ================================================================== */
+/* Permanent "Create a carpool" rich card under Today's events         */
+/* ================================================================== */
+
+function CreateCarpoolCard({ ctx }) {
+  return (
+    <div style={{ margin: '0 16px 18px' }}>
+      <button
+        type="button"
+        onClick={() => ctx.navigate('create_carpool')}
+        style={{
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+          padding: '14px 16px',
+          background: 'linear-gradient(135deg, var(--green-700) 0%, var(--green-900) 100%)',
+          color: 'white',
+          borderRadius: 16,
+          boxShadow: '0 6px 20px rgba(27,67,50,0.25)',
+          textAlign: 'left',
+          border: 'none',
+        }}
+      >
+        <span
+          style={{
+            width: 38,
+            height: 38,
+            borderRadius: 12,
+            background: 'rgba(255,255,255,0.18)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 20,
+            flexShrink: 0,
+          }}
+        >
+          ➕
+        </span>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: 800, fontSize: 15 }}>Create a carpool</div>
+          <div style={{ fontSize: 12, opacity: 0.9, marginTop: 2 }}>
+            Birthday, away game, scout meeting — invite parents and drive
+          </div>
+        </div>
+        <span style={{ fontSize: 22, opacity: 0.85 }}>›</span>
+      </button>
     </div>
   );
 }
@@ -1322,7 +1568,7 @@ function AttentionCard({ sub, meId, ctx }) {
 /* Footer actions — rare actions, out of the way                       */
 /* ================================================================== */
 
-function FooterActions({ ctx, onKidOut, onAddKid }) {
+function FooterActions({ onKidOut, onAddKid }) {
   return (
     <div
       style={{
@@ -1337,7 +1583,6 @@ function FooterActions({ ctx, onKidOut, onAddKid }) {
     >
       <FooterBtn label="Kid out today" onClick={onKidOut} />
       <FooterBtn label="Add my kid to a ride" onClick={onAddKid} />
-      <FooterBtn label="Create a carpool" onClick={() => ctx.navigate('create_carpool')} />
     </div>
   );
 }
