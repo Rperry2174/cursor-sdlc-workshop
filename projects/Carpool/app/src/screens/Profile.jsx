@@ -12,6 +12,8 @@ import {
   removeAutoClaimRule,
   setParentPhoto,
   setChildPhoto,
+  getTeamsForChild,
+  setChildTeams,
 } from '../data/store.js';
 import { applyAutoClaimRules } from '../data/lifecycle.js';
 import { Avatar } from '../components/Avatar.jsx';
@@ -87,6 +89,7 @@ export function Profile({ ctx }) {
                   )}
                 </div>
               </div>
+              <KidTeamsRow kid={k} teams={teams} ctx={ctx} />
             </div>
           );
         })}
@@ -661,6 +664,83 @@ function ChipBtn({ label, active, onClick }) {
     >
       {label}
     </button>
+  );
+}
+
+function KidTeamsRow({ kid, teams, ctx }) {
+  const assignedIds = getTeamsForChild(kid.id).map((t) => t.id);
+  const allowedIds = teams.map((t) => t.id);
+
+  if (teams.length === 0) {
+    return (
+      <div
+        className="muted"
+        style={{
+          marginTop: 10,
+          paddingTop: 10,
+          borderTop: '1px solid var(--gray-100)',
+          fontSize: 12,
+        }}
+      >
+        Join or create a team first to assign {kid.name.split(' ')[0]} to one.
+      </div>
+    );
+  }
+
+  const toggle = (teamId) => {
+    const isOn = assignedIds.includes(teamId);
+    const next = isOn
+      ? assignedIds.filter((id) => id !== teamId)
+      : [...assignedIds, teamId];
+    setChildTeams(kid.id, next, { allowedTeamIds: allowedIds });
+    const team = teams.find((t) => t.id === teamId);
+    ctx.showToast(
+      isOn
+        ? `Removed ${kid.name.split(' ')[0]} from ${team?.name || 'team'}`
+        : `Added ${kid.name.split(' ')[0]} to ${team?.name || 'team'}`,
+    );
+  };
+
+  return (
+    <div
+      style={{
+        marginTop: 10,
+        paddingTop: 10,
+        borderTop: '1px solid var(--gray-100)',
+      }}
+    >
+      <div className="caps muted" style={{ marginBottom: 6, fontSize: 11 }}>
+        Teams
+      </div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+        {teams.map((t) => {
+          const on = assignedIds.includes(t.id);
+          return (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => toggle(t.id)}
+              style={{
+                padding: '6px 10px',
+                borderRadius: 999,
+                border: on
+                  ? '1px solid var(--green-700)'
+                  : '1px solid var(--gray-300, #d1d5db)',
+                background: on ? 'var(--green-100)' : 'white',
+                color: on ? 'var(--green-text)' : 'var(--gray-700)',
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              {on ? '✓ ' : ''}
+              {t.sport === 'Baseball' ? '⚾ ' : '🏆 '}
+              {t.name}
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 

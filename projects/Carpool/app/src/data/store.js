@@ -300,6 +300,43 @@ export function getCoParentsForChild(childId) {
   return data.parents.filter((p) => parentIds.includes(p.id));
 }
 
+export function getTeamsForChild(childId) {
+  const data = load();
+  const teamIds = data.child_teams
+    .filter((ct) => ct.child_id === childId)
+    .map((ct) => ct.team_id);
+  return data.teams.filter((t) => teamIds.includes(t.id));
+}
+
+/**
+ * Replace the full set of teams a child belongs to.
+ *
+ * Why a full-replace API rather than add/remove primitives: the UI
+ * shows all of the parent's teams as toggleable chips, so it's
+ * simpler to send the desired final state in one call than to diff
+ * client-side. We scope deletes to the parent's own teams to avoid
+ * accidentally clearing a team the parent doesn't actually manage
+ * (e.g. a co-parent's team).
+ */
+export function setChildTeams(childId, teamIds, { allowedTeamIds = null } = {}) {
+  const data = load();
+  const desired = new Set(teamIds);
+  data.child_teams = data.child_teams.filter((ct) => {
+    if (ct.child_id !== childId) return true;
+    if (allowedTeamIds && !allowedTeamIds.includes(ct.team_id)) return true;
+    return desired.has(ct.team_id);
+  });
+  for (const teamId of desired) {
+    if (allowedTeamIds && !allowedTeamIds.includes(teamId)) continue;
+    const exists = data.child_teams.some(
+      (ct) => ct.child_id === childId && ct.team_id === teamId,
+    );
+    if (!exists) data.child_teams.push({ team_id: teamId, child_id: childId });
+  }
+  persist();
+  return getTeamsForChild(childId);
+}
+
 export function getTeam(teamId) {
   return load().teams.find((t) => t.id === teamId) || null;
 }
