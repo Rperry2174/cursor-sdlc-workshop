@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="vaultTitle vaultDesc">
+  <title id="vaultTitle">Bank vault</title>
+  <desc id="vaultDesc">A circular metal vault door on a wall.</desc>
+  <rect x="8" y="12" width="112" height="104" rx="10" fill="#cbd5e1" stroke="#475569" stroke-width="4"/>
+  <circle cx="64" cy="64" r="34" fill="#e2e8f0" stroke="#334155" stroke-width="4"/>
+  <circle cx="64" cy="64" r="8" fill="#94a3b8" stroke="#334155" stroke-width="3"/>
+  <line x1="64" y1="30" x2="64" y2="98" stroke="#475569" stroke-width="4"/>
+  <line x1="30" y1="64" x2="98" y2="64" stroke="#475569" stroke-width="4"/>
+  <line x1="40" y1="40" x2="88" y2="88" stroke="#64748b" stroke-width="3"/>
+  <line x1="88" y1="40" x2="40" y2="88" stroke="#64748b" stroke-width="3"/>
+</svg>
