@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scary Birds · Spooky Physics Puzzle</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="card" data-screen="title">
+        <h1>Scary Birds</h1>
+        <p class="sub">
+          Launch cursed birds, smash haunted structures, and haunt every pig.
+        </p>
+        <div class="row">
+          <button id="playBtn" class="btn">Play</button>
+          <button id="editorBtn" class="btn btn-secondary">Open Editor</button>
+        </div>
+      </section>
+
+      <section class="card hidden" data-screen="map">
+        <h2>World Map</h2>
+        <p class="sub">Complete levels to unlock the next one.</p>
+        <div id="mapBoard" class="map-board" aria-label="Level map board">
+          <svg id="mapPaths" class="map-paths" viewBox="0 0 1000 440" preserveAspectRatio="none"></svg>
+          <div id="mapDecor" class="map-decor" aria-hidden="true"></div>
+          <div id="chapterBanners" class="map-banners" aria-hidden="true"></div>
+          <div id="mapBirdToken" class="map-bird-token" aria-hidden="true"><span>YOU</span></div>
+          <div id="levelGrid" class="map-nodes" aria-label="Level select"></div>
+        </div>
+        <div class="row">
+          <button id="mapBackBtn" class="btn btn-secondary">Back</button>
+        </div>
+      </section>
+
+      <section class="card hidden" data-screen="game">
+        <header class="hud">
+          <div class="hud-top">
+            <strong id="levelLabel">Level</strong>
+            <span id="status">Drag bird to aim, release to launch.</span>
+          </div>
+          <div class="hud-controls">
+            <span id="birdsQueue" class="chip">Birds: -</span>
+            <span id="score" class="chip">Score: 0</span>
+            <button id="pauseBtn" class="btn btn-secondary">Pause</button>
+            <button id="resetBtn" class="btn btn-secondary">Reset</button>
+            <button id="toMapBtn" class="btn btn-secondary">Map</button>
+          </div>
+        </header>
+        <canvas id="game" width="960" height="540" aria-label="Game canvas"></canvas>
+      </section>
+
+      <section class="card hidden" data-screen="result">
+        <h2 id="resultTitle">Level Complete</h2>
+        <p id="resultText" class="sub"></p>
+        <div id="starsView" class="stars" aria-label="Star rating">☆☆☆</div>
+        <div class="row">
+          <button id="retryBtn" class="btn btn-secondary">Retry</button>
+          <button id="nextBtn" class="btn">Next Level</button>
+          <button id="resultMapBtn" class="btn btn-secondary">Map</button>
+        </div>
+      </section>
+
+      <section class="card hidden" data-screen="editor">
+        <h2>Level Editor</h2>
+        <p class="sub">
+          Place entities, move/rotate blocks, then playtest and export JSON.
+        </p>
+        <div class="editor-controls">
+          <label>
+            Tool
+            <select id="toolSelect">
+              <option value="select">Select / Move</option>
+              <option value="wood">Add Wood Block</option>
+              <option value="stone">Add Stone Block</option>
+              <option value="glass">Add Glass Block</option>
+              <option value="pig">Add Pig</option>
+            </select>
+          </label>
+          <label>
+            Grid
+            <input type="checkbox" id="gridSnap" checked />
+          </label>
+          <button id="rotateLeftBtn" class="btn btn-secondary">Rotate Left</button>
+          <button id="rotateRightBtn" class="btn btn-secondary">Rotate Right</button>
+          <button id="deleteBtn" class="btn btn-secondary">Delete Selected</button>
+        </div>
+        <div class="editor-controls">
+          <button id="playtestBtn" class="btn">Playtest</button>
+          <button id="exportBtn" class="btn btn-secondary">Export JSON</button>
+          <button id="importBtn" class="btn btn-secondary">Import JSON</button>
+          <button id="editorMapBtn" class="btn btn-secondary">Back to Map</button>
+        </div>
+        <textarea id="jsonBox" rows="10" spellcheck="false"></textarea>
+        <p id="editorHint" class="hint">
+          Click canvas to place. Drag selected entity to move.
+        </p>
+      </section>
+    </main>
+
+    <script src="./game.js" defer></script>
+  </body>
+</html>
