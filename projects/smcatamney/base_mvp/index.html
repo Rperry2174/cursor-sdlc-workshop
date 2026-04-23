@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RadiusFit Today</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <h1>RadiusFit Today</h1>
+      <p class="subtitle">Same-day classes within 5 miles.</p>
+      <p class="data-note">
+        Use <strong>Use my location</strong> to load real gyms near you from OpenStreetMap. Class times and
+        waitlist status stay demo-only until you connect a studio booking API.
+        <strong>Book class</strong> opens Google Maps for that place.
+      </p>
+
+      <section class="controls">
+        <button id="use-demo-location">Use demo location</button>
+        <button id="use-my-location">Use my location</button>
+        <button id="simulate-open">Simulate spot opened</button>
+      </section>
+
+      <fieldset class="preferences">
+        <legend>Class type</legend>
+        <p class="pref-hint">Show only the kinds of workouts you want.</p>
+        <div class="pref-options">
+          <label><input type="checkbox" name="pref" value="yoga" checked /> Yoga</label>
+          <label><input type="checkbox" name="pref" value="pilates" checked /> Pilates</label>
+          <label><input type="checkbox" name="pref" value="hiit" checked /> HIIT</label>
+          <label><input type="checkbox" name="pref" value="cycling" checked /> Cycling</label>
+        </div>
+      </fieldset>
+
+      <p id="status" class="status"></p>
+      <section id="classes" class="classes"></section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
