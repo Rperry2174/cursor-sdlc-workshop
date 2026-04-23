@@ -1,0 +1,14 @@
+{
+  "id": "summer-field-painting",
+  "title": "Summer Field",
+  "category": "painting",
+  "medium": "Oil on canvas",
+  "year": 2021,
+  "dimensions": "30×40 in",
+  "description": "A loose, warm study of a field at golden hour.",
+  "image": "/images/artworks/summer-field.svg",
+  "featured": false,
+  "collections": ["landscapes"],
+  "inquirable": true
+}
+

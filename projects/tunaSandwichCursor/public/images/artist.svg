@@ -1,0 +1,12 @@
+<svg width="800" height="1000" viewBox="0 0 800 1000" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Artist portrait placeholder</title>
+  <desc id="desc">Simplified illustration of a person in a studio space.</desc>
+  <rect width="800" height="1000" fill="#FAFAF8"/>
+  <rect x="80" y="760" width="640" height="80" fill="#E8E4DF"/>
+  <circle cx="400" cy="260" r="110" fill="#E8E4DF"/>
+  <rect x="250" y="380" width="300" height="260" rx="40" fill="#C7B8A2"/>
+  <rect x="210" y="430" width="380" height="320" rx="60" fill="#8B7355"/>
+  <rect x="120" y="170" width="90" height="140" fill="#F5F3EF" stroke="#D5CCC0" stroke-width="6"/>
+  <rect x="590" y="210" width="80" height="110" fill="#F5F3EF" stroke="#D5CCC0" stroke-width="6"/>
+</svg>
+

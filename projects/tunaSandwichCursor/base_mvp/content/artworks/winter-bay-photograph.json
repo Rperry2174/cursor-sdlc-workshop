@@ -1,0 +1,14 @@
+{
+  "id": "winter-bay-photograph",
+  "title": "Winter Bay",
+  "category": "photography",
+  "medium": "Digital photograph",
+  "year": 2024,
+  "dimensions": "24×36 in",
+  "description": "Soft winter light over a quiet bay.",
+  "image": "/images/artworks/winter-bay.svg",
+  "featured": true,
+  "collections": ["winter-2025"],
+  "inquirable": true
+}
+
