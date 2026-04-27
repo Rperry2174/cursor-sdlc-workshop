@@ -1,648 +1,313 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Flappy Bird</title>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: #1a1a2e;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    overflow: hidden;
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-    user-select: none;
-  }
-
-  #game-wrapper {
-    position: relative;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 0 60px rgba(0, 0, 0, 0.5);
-  }
-
-  canvas {
-    display: block;
-    cursor: pointer;
-  }
-
-  .overlay {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.25s ease;
-  }
-
-  .overlay.visible {
-    pointer-events: auto;
-    opacity: 1;
-  }
-
-  .overlay-bg {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.55);
-    backdrop-filter: blur(4px);
-  }
-
-  .overlay-content {
-    position: relative;
-    z-index: 1;
-    text-align: center;
-    color: #fff;
-  }
-
-  .game-title {
-    font-size: 42px;
-    font-weight: 800;
-    color: #ffd700;
-    text-shadow: 2px 3px 0 #b8860b, 0 0 20px rgba(255, 215, 0, 0.3);
-    margin-bottom: 8px;
-    letter-spacing: -1px;
-  }
-
-  .subtitle {
-    font-size: 16px;
-    color: rgba(255, 255, 255, 0.7);
-    margin-bottom: 32px;
-  }
-
-  .tap-prompt {
-    font-size: 20px;
-    color: #fff;
-    animation: pulse 1.5s ease-in-out infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 0.5; transform: scale(1); }
-    50% { opacity: 1; transform: scale(1.05); }
-  }
-
-  .game-over-title {
-    font-size: 36px;
-    font-weight: 800;
-    color: #ff4444;
-    text-shadow: 2px 3px 0 #8b0000;
-    margin-bottom: 24px;
-  }
-
-  .score-display {
-    margin-bottom: 20px;
-  }
-
-  .score-label {
-    font-size: 14px;
-    color: rgba(255, 255, 255, 0.6);
-    text-transform: uppercase;
-    letter-spacing: 2px;
-  }
-
-  .score-value {
-    font-size: 48px;
-    font-weight: 800;
-    color: #fff;
-    line-height: 1.1;
-  }
-
-  .best-score {
-    font-size: 16px;
-    color: #ffd700;
-    margin-bottom: 32px;
-  }
-
-  .btn {
-    background: #ffd700;
-    color: #1a1a2e;
-    border: none;
-    padding: 14px 40px;
-    font-size: 18px;
-    font-weight: 700;
-    border-radius: 50px;
-    cursor: pointer;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-
-  .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4); }
-  .btn:active { transform: translateY(0); }
-
-  .sound-toggle {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    z-index: 10;
-    background: rgba(0, 0, 0, 0.4);
-    border: none;
-    color: #fff;
-    font-size: 22px;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(4px);
-    transition: background 0.2s;
-  }
-
-  .sound-toggle:hover { background: rgba(0, 0, 0, 0.6); }
-
-  .new-best {
-    color: #ffd700;
-    font-size: 14px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    animation: pulse 1s ease-in-out infinite;
-    margin-bottom: 8px;
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NYC Pilates Studio Ranker</title>
+  <style>
+    :root {
+      --bg: #f6f3ef;
+      --card: #fff;
+      --text: #1c1917;
+      --muted: #57534e;
+      --accent: #4a6741;
+      --accent-soft: #e8efe6;
+      --border: #e7e5e4;
+      --brooklyn: #1e3a5f;
+      --manhattan: #44403c;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+      padding: 1.5rem clamp(1rem, 4vw, 2.5rem) 3rem;
+    }
+    header {
+      max-width: 42rem;
+      margin-bottom: 1.75rem;
+    }
+    h1 {
+      font-size: clamp(1.5rem, 4vw, 2rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.35rem;
+    }
+    .lede {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+    #load-error {
+      display: none;
+      max-width: 42rem;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #7f1d1d;
+      padding: 1rem 1.25rem;
+      border-radius: 10px;
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+    }
+    #load-error.visible { display: block; }
+    #load-error code {
+      display: block;
+      margin-top: 0.5rem;
+      font-size: 0.8rem;
+      background: #fff;
+      padding: 0.5rem 0.65rem;
+      border-radius: 6px;
+      border: 1px solid #fecaca;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    #app { display: none; }
+    #app.ready { display: block; }
+    .list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      max-width: 42rem;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.15rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.75rem 1rem;
+      box-shadow: 0 1px 2px rgba(28, 25, 23, 0.04);
+    }
+    .card-main { flex: 1; min-width: 12rem; }
+    .card h2 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+    .meta {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    .borough {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      margin-top: 0.45rem;
+    }
+    .borough.manhattan {
+      background: #f5f5f4;
+      color: var(--manhattan);
+    }
+    .borough.brooklyn {
+      background: #e0e7ef;
+      color: var(--brooklyn);
+    }
+    .score-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      align-items: flex-end;
+    }
+    .score-wrap label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+    }
+    select {
+      font: inherit;
+      font-size: 0.95rem;
+      padding: 0.4rem 0.6rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--accent-soft);
+      color: var(--text);
+      cursor: pointer;
+      min-width: 5.5rem;
+    }
+    select:focus {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .hint {
+      margin-top: 1.5rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+      max-width: 42rem;
+    }
+  </style>
 </head>
 <body>
+  <header>
+    <h1>NYC Pilates Studio Ranker</h1>
+    <p class="lede">Manhattan &amp; Brooklyn studios only. Rate each studio; your list re-sorts with favorites on top. Scores are saved in this browser.</p>
+  </header>
 
-<div id="game-wrapper">
-  <canvas id="game"></canvas>
-
-  <button class="sound-toggle" id="soundBtn" title="Toggle sound">🔊</button>
-
-  <div class="overlay visible" id="readyOverlay">
-    <div class="overlay-bg"></div>
-    <div class="overlay-content">
-      <div class="game-title">Flappy Bird</div>
-      <div class="subtitle">A simple tap-to-fly game</div>
-      <div class="tap-prompt">Tap or Press Space to Start</div>
-    </div>
+  <div id="load-error" role="alert"></div>
+  <div id="app" aria-live="polite">
+    <ul class="list" id="studio-list"></ul>
+    <p class="hint">Higher scores float up. Same score? Sorted A–Z by studio name. Unrated studios stay at the bottom.</p>
   </div>
 
-  <div class="overlay" id="gameOverOverlay">
-    <div class="overlay-bg"></div>
-    <div class="overlay-content">
-      <div class="game-over-title">Game Over</div>
-      <div id="newBestLabel" class="new-best" style="display:none">New Best!</div>
-      <div class="score-display">
-        <div class="score-label">Score</div>
-        <div class="score-value" id="finalScore">0</div>
-      </div>
-      <div class="best-score">Best: <span id="bestScoreDisplay">0</span></div>
-      <button class="btn" id="retryBtn">Retry</button>
-    </div>
-  </div>
-</div>
+  <script>
+    (function () {
+      var STORAGE_KEY = 'nyc-pilates-ranker-scores-v1';
+      var DATA_URL = 'data/studios.json';
 
-<script>
-(function () {
-  const canvas = document.getElementById('game');
-  const ctx = canvas.getContext('2d');
+      /** @type {{ id: string, name: string, neighborhood: string, borough: string }[]} */
+      var studios = [];
+      var originalIndex = {};
 
-  const CANVAS_W = 400;
-  const CANVAS_H = 600;
-  canvas.width = CANVAS_W;
-  canvas.height = CANVAS_H;
-
-  const readyOverlay = document.getElementById('readyOverlay');
-  const gameOverOverlay = document.getElementById('gameOverOverlay');
-  const finalScoreEl = document.getElementById('finalScore');
-  const bestScoreEl = document.getElementById('bestScoreDisplay');
-  const newBestLabel = document.getElementById('newBestLabel');
-  const retryBtn = document.getElementById('retryBtn');
-  const soundBtn = document.getElementById('soundBtn');
-
-  // --- Audio (Web Audio API, no external files) ---
-  let soundEnabled = true;
-  const AudioCtx = window.AudioContext || window.webkitAudioContext;
-  let audioCtx;
-
-  function ensureAudio() {
-    if (!audioCtx) audioCtx = new AudioCtx();
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-  }
-
-  function playTone(freq, duration, type, volume) {
-    if (!soundEnabled || !audioCtx) return;
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = type || 'square';
-    osc.frequency.value = freq;
-    gain.gain.setValueAtTime(volume || 0.15, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start();
-    osc.stop(audioCtx.currentTime + duration);
-  }
-
-  function sfxFlap() { playTone(440, 0.08, 'sine', 0.12); }
-  function sfxScore() {
-    playTone(660, 0.08, 'sine', 0.15);
-    setTimeout(() => playTone(880, 0.12, 'sine', 0.12), 60);
-  }
-  function sfxHit() { playTone(180, 0.15, 'sawtooth', 0.15); }
-  function sfxDie() {
-    playTone(300, 0.1, 'square', 0.12);
-    setTimeout(() => playTone(200, 0.2, 'square', 0.1), 80);
-    setTimeout(() => playTone(120, 0.3, 'square', 0.08), 180);
-  }
-
-  soundBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    soundEnabled = !soundEnabled;
-    soundBtn.textContent = soundEnabled ? '🔊' : '🔇';
-  });
-
-  // --- Game Constants ---
-  const GRAVITY = 0.28;
-  const FLAP_IMPULSE = -5.5;
-  const TERMINAL_VEL = 7;
-  const BIRD_X = 80;
-  const BIRD_RADIUS = 14;
-  const PIPE_WIDTH = 56;
-  const PIPE_GAP = 160;
-  const PIPE_SPEED = 2.2;
-  const PIPE_SPAWN_INTERVAL = 110;
-  const GROUND_H = 60;
-  const GAP_MARGIN_TOP = 80;
-  const GAP_MARGIN_BOTTOM = 80 + GROUND_H;
-
-  // --- Colors ---
-  const SKY_TOP = '#70c5ce';
-  const SKY_BOTTOM = '#e8f0f2';
-  const GROUND_COLOR = '#ded895';
-  const GROUND_DARK = '#c4b56a';
-  const PIPE_COLOR = '#5cb85c';
-  const PIPE_DARK = '#4a9e4a';
-  const PIPE_CAP_H = 24;
-  const BIRD_BODY = '#f5c542';
-  const BIRD_WING = '#e8a317';
-  const BIRD_EYE_WHITE = '#fff';
-  const BIRD_EYE_BLACK = '#333';
-  const BIRD_BEAK = '#e87040';
-
-  // --- State ---
-  let state = 'ready'; // ready | playing | gameover
-  let bird, pipes, score, bestScore, frameCount, shakeTimer, flashAlpha;
-
-  bestScore = parseInt(localStorage.getItem('flappy_best') || '0', 10);
-
-  function resetGame() {
-    bird = { y: CANVAS_H / 2 - 30, vel: 0, rotation: 0 };
-    pipes = [];
-    score = 0;
-    frameCount = 0;
-    shakeTimer = 0;
-    flashAlpha = 0;
-  }
-
-  resetGame();
-
-  // --- Drawing helpers ---
-  function drawBackground() {
-    const grad = ctx.createLinearGradient(0, 0, 0, CANVAS_H - GROUND_H);
-    grad.addColorStop(0, SKY_TOP);
-    grad.addColorStop(1, SKY_BOTTOM);
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, CANVAS_W, CANVAS_H - GROUND_H);
-  }
-
-  function drawGround() {
-    const groundY = CANVAS_H - GROUND_H;
-    ctx.fillStyle = GROUND_COLOR;
-    ctx.fillRect(0, groundY, CANVAS_W, GROUND_H);
-    ctx.fillStyle = GROUND_DARK;
-    ctx.fillRect(0, groundY, CANVAS_W, 4);
-
-    ctx.strokeStyle = GROUND_DARK;
-    ctx.lineWidth = 1;
-    const offset = (frameCount * PIPE_SPEED) % 24;
-    for (let x = -offset; x < CANVAS_W; x += 24) {
-      ctx.beginPath();
-      ctx.moveTo(x, groundY + 12);
-      ctx.lineTo(x + 12, groundY + 4);
-      ctx.stroke();
-    }
-  }
-
-  function drawClouds() {
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-    const offset = (frameCount * 0.3) % (CANVAS_W + 200);
-    const clouds = [
-      { x: 50, y: 60, r: 25 },
-      { x: 80, y: 50, r: 30 },
-      { x: 110, y: 60, r: 25 },
-      { x: 250, y: 100, r: 20 },
-      { x: 275, y: 90, r: 28 },
-      { x: 300, y: 100, r: 22 },
-    ];
-    for (const c of clouds) {
-      const cx = ((c.x - offset + CANVAS_W + 200) % (CANVAS_W + 200)) - 100;
-      ctx.beginPath();
-      ctx.arc(cx, c.y, c.r, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  }
-
-  function drawPipe(pipe) {
-    const topH = pipe.gapY - PIPE_GAP / 2;
-    const bottomY = pipe.gapY + PIPE_GAP / 2;
-    const bottomH = CANVAS_H - GROUND_H - bottomY;
-
-    // Top pipe body
-    ctx.fillStyle = PIPE_COLOR;
-    ctx.fillRect(pipe.x, 0, PIPE_WIDTH, topH);
-    ctx.fillStyle = PIPE_DARK;
-    ctx.fillRect(pipe.x, 0, 4, topH);
-    ctx.fillRect(pipe.x + PIPE_WIDTH - 4, 0, 4, topH);
-
-    // Top pipe cap
-    ctx.fillStyle = PIPE_COLOR;
-    ctx.fillRect(pipe.x - 4, topH - PIPE_CAP_H, PIPE_WIDTH + 8, PIPE_CAP_H);
-    ctx.fillStyle = PIPE_DARK;
-    ctx.fillRect(pipe.x - 4, topH - PIPE_CAP_H, PIPE_WIDTH + 8, 3);
-    ctx.fillRect(pipe.x - 4, topH - 3, PIPE_WIDTH + 8, 3);
-
-    // Bottom pipe body
-    ctx.fillStyle = PIPE_COLOR;
-    ctx.fillRect(pipe.x, bottomY, PIPE_WIDTH, bottomH);
-    ctx.fillStyle = PIPE_DARK;
-    ctx.fillRect(pipe.x, bottomY, 4, bottomH);
-    ctx.fillRect(pipe.x + PIPE_WIDTH - 4, bottomY, 4, bottomH);
-
-    // Bottom pipe cap
-    ctx.fillStyle = PIPE_COLOR;
-    ctx.fillRect(pipe.x - 4, bottomY, PIPE_WIDTH + 8, PIPE_CAP_H);
-    ctx.fillStyle = PIPE_DARK;
-    ctx.fillRect(pipe.x - 4, bottomY, PIPE_WIDTH + 8, 3);
-    ctx.fillRect(pipe.x - 4, bottomY + PIPE_CAP_H - 3, PIPE_WIDTH + 8, 3);
-  }
-
-  function drawBird() {
-    ctx.save();
-    ctx.translate(BIRD_X, bird.y);
-    ctx.rotate(bird.rotation);
-
-    // Body
-    ctx.fillStyle = BIRD_BODY;
-    ctx.beginPath();
-    ctx.ellipse(0, 0, BIRD_RADIUS + 2, BIRD_RADIUS, 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Wing
-    ctx.fillStyle = BIRD_WING;
-    ctx.beginPath();
-    const wingFlap = Math.sin(frameCount * 0.3) * 4;
-    ctx.ellipse(-4, 2 + wingFlap, 10, 6, -0.3, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Eye white
-    ctx.fillStyle = BIRD_EYE_WHITE;
-    ctx.beginPath();
-    ctx.arc(8, -4, 6, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Eye pupil
-    ctx.fillStyle = BIRD_EYE_BLACK;
-    ctx.beginPath();
-    ctx.arc(10, -4, 3, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Beak
-    ctx.fillStyle = BIRD_BEAK;
-    ctx.beginPath();
-    ctx.moveTo(14, -2);
-    ctx.lineTo(22, 2);
-    ctx.lineTo(14, 6);
-    ctx.closePath();
-    ctx.fill();
-
-    ctx.restore();
-  }
-
-  function drawScore() {
-    if (state !== 'playing') return;
-    ctx.save();
-    ctx.font = 'bold 48px "Segoe UI", system-ui, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
-    ctx.fillText(score, CANVAS_W / 2 + 2, 62);
-    ctx.fillStyle = '#fff';
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
-    ctx.lineWidth = 3;
-    ctx.strokeText(score, CANVAS_W / 2, 60);
-    ctx.fillText(score, CANVAS_W / 2, 60);
-    ctx.restore();
-  }
-
-  // --- Collision ---
-  function checkCollision() {
-    const groundY = CANVAS_H - GROUND_H;
-    if (bird.y + BIRD_RADIUS > groundY || bird.y - BIRD_RADIUS < 0) return true;
-
-    for (const pipe of pipes) {
-      const topH = pipe.gapY - PIPE_GAP / 2;
-      const bottomY = pipe.gapY + PIPE_GAP / 2;
-
-      if (BIRD_X + BIRD_RADIUS > pipe.x && BIRD_X - BIRD_RADIUS < pipe.x + PIPE_WIDTH) {
-        if (bird.y - BIRD_RADIUS < topH || bird.y + BIRD_RADIUS > bottomY) {
-          return true;
+      function getScores() {
+        try {
+          var raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return {};
+          var parsed = JSON.parse(raw);
+          return parsed && typeof parsed === 'object' ? parsed : {};
+        } catch (e) {
+          return {};
         }
       }
-    }
-    return false;
-  }
 
-  // --- Flap ---
-  function flap() {
-    ensureAudio();
-    if (state === 'ready') {
-      state = 'playing';
-      readyOverlay.classList.remove('visible');
-      resetGame();
-      bird.vel = Math.min(bird.vel, 2);
-      bird.vel = Math.min(bird.vel + FLAP_IMPULSE, FLAP_IMPULSE);
-      sfxFlap();
-      return;
-    }
-    if (state === 'playing') {
-      // Cap downward momentum before applying flap so dives recover smoothly.
-      bird.vel = Math.min(bird.vel, 2);
-      bird.vel = Math.min(bird.vel + FLAP_IMPULSE, FLAP_IMPULSE);
-      sfxFlap();
-    }
-  }
-
-  // --- Game Over ---
-  function triggerGameOver() {
-    state = 'gameover';
-    sfxHit();
-    setTimeout(sfxDie, 150);
-    shakeTimer = 12;
-    flashAlpha = 0.6;
-
-    let isNewBest = false;
-    if (score > bestScore) {
-      bestScore = score;
-      localStorage.setItem('flappy_best', String(bestScore));
-      isNewBest = true;
-    }
-
-    setTimeout(() => {
-      finalScoreEl.textContent = score;
-      bestScoreEl.textContent = bestScore;
-      newBestLabel.style.display = isNewBest ? 'block' : 'none';
-      gameOverOverlay.classList.add('visible');
-    }, 500);
-  }
-
-  function retry() {
-    gameOverOverlay.classList.remove('visible');
-    state = 'playing';
-    resetGame();
-    bird.vel = FLAP_IMPULSE;
-  }
-
-  // --- Update ---
-  function update() {
-    if (state !== 'playing') return;
-
-    frameCount++;
-
-    // Bird physics
-    bird.vel += GRAVITY;
-    if (bird.vel > TERMINAL_VEL) bird.vel = TERMINAL_VEL;
-    bird.y += bird.vel;
-
-    // Ease into the target angle so the bird doesn't snap between frames.
-    const targetRotation = bird.vel < 0
-      ? Math.max(-0.4, bird.vel * 0.05)
-      : Math.min(1.0, bird.vel * 0.07);
-    bird.rotation += (targetRotation - bird.rotation) * 0.15;
-
-    // Spawn pipes
-    if (frameCount % PIPE_SPAWN_INTERVAL === 0) {
-      const minGapY = GAP_MARGIN_TOP + PIPE_GAP / 2;
-      const maxGapY = CANVAS_H - GAP_MARGIN_BOTTOM - PIPE_GAP / 2;
-      const gapY = minGapY + Math.random() * (maxGapY - minGapY);
-      pipes.push({ x: CANVAS_W, gapY, scored: false });
-    }
-
-    // Move and score pipes
-    for (let i = pipes.length - 1; i >= 0; i--) {
-      pipes[i].x -= PIPE_SPEED;
-
-      if (!pipes[i].scored && pipes[i].x + PIPE_WIDTH < BIRD_X) {
-        pipes[i].scored = true;
-        score++;
-        sfxScore();
+      function setScore(id, value) {
+        var scores = getScores();
+        if (value === 0 || value === '0') {
+          delete scores[id];
+        } else {
+          scores[id] = Number(value);
+        }
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(scores));
       }
 
-      if (pipes[i].x + PIPE_WIDTH < -10) {
-        pipes.splice(i, 1);
+      function scoreFor(id, scores) {
+        var n = scores[id];
+        return typeof n === 'number' && n >= 1 && n <= 5 ? n : 0;
       }
-    }
 
-    // Collision
-    if (checkCollision()) {
-      triggerGameOver();
-    }
-  }
+      function sortedStudios(list, scores) {
+        return list.slice().sort(function (a, b) {
+          var sa = scoreFor(a.id, scores);
+          var sb = scoreFor(b.id, scores);
+          if (sb !== sa) return sb - sa;
+          var na = a.name.toLowerCase();
+          var nb = b.name.toLowerCase();
+          if (na < nb) return -1;
+          if (na > nb) return 1;
+          return (originalIndex[a.id] || 0) - (originalIndex[b.id] || 0);
+        });
+      }
 
-  // --- Render ---
-  function render() {
-    ctx.save();
+      function render() {
+        var scores = getScores();
+        var ordered = sortedStudios(studios, scores);
+        var ul = document.getElementById('studio-list');
+        ul.replaceChildren();
 
-    // Screen shake
-    if (shakeTimer > 0) {
-      shakeTimer--;
-      const intensity = shakeTimer * 0.8;
-      ctx.translate(
-        (Math.random() - 0.5) * intensity * 2,
-        (Math.random() - 0.5) * intensity * 2
-      );
-    }
+        ordered.forEach(function (studio) {
+          var li = document.createElement('li');
+          li.className = 'card';
 
-    drawBackground();
-    drawClouds();
+          var main = document.createElement('div');
+          main.className = 'card-main';
 
-    for (const pipe of pipes) drawPipe(pipe);
+          var h2 = document.createElement('h2');
+          h2.textContent = studio.name;
+          main.appendChild(h2);
 
-    drawGround();
-    drawBird();
-    drawScore();
+          var meta = document.createElement('p');
+          meta.className = 'meta';
+          meta.textContent = studio.neighborhood;
+          main.appendChild(meta);
 
-    // Flash on death
-    if (flashAlpha > 0) {
-      ctx.fillStyle = `rgba(255, 255, 255, ${flashAlpha})`;
-      ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
-      flashAlpha -= 0.05;
-    }
+          var badge = document.createElement('span');
+          badge.className = 'borough ' + (studio.borough === 'Brooklyn' ? 'brooklyn' : 'manhattan');
+          badge.textContent = studio.borough;
+          main.appendChild(badge);
 
-    ctx.restore();
-  }
+          var wrap = document.createElement('div');
+          wrap.className = 'score-wrap';
 
-  // --- Game loop ---
-  function gameLoop() {
-    update();
-    render();
-    requestAnimationFrame(gameLoop);
-  }
+          var lbl = document.createElement('label');
+          lbl.setAttribute('for', 'score-' + studio.id);
+          lbl.textContent = 'Your score';
+          wrap.appendChild(lbl);
 
-  // --- Ready screen idle animation ---
-  function idleUpdate() {
-    if (state === 'ready') {
-      frameCount++;
-      bird.y = CANVAS_H / 2 - 30 + Math.sin(frameCount * 0.05) * 12;
-    }
-  }
-  const originalUpdate = update;
+          var sel = document.createElement('select');
+          sel.id = 'score-' + studio.id;
+          sel.setAttribute('aria-label', 'Score for ' + studio.name);
 
-  function wrappedLoop() {
-    if (state === 'ready') {
-      idleUpdate();
-    } else {
-      update();
-    }
-    render();
-    requestAnimationFrame(wrappedLoop);
-  }
+          ;[
+            { v: '0', t: '—' },
+            { v: '1', t: '1' },
+            { v: '2', t: '2' },
+            { v: '3', t: '3' },
+            { v: '4', t: '4' },
+            { v: '5', t: '5' }
+          ].forEach(function (opt) {
+            var o = document.createElement('option');
+            o.value = opt.v;
+            o.textContent = opt.t;
+            sel.appendChild(o);
+          });
 
-  // --- Input ---
-  canvas.addEventListener('pointerdown', (e) => {
-    e.preventDefault();
-    flap();
-  });
+          var current = scoreFor(studio.id, scores);
+          sel.value = String(current);
 
-  document.addEventListener('keydown', (e) => {
-    if (e.code === 'Space' || e.code === 'ArrowUp') {
-      e.preventDefault();
-      flap();
-    }
-  });
+          sel.addEventListener('change', function () {
+            var v = parseInt(sel.value, 10);
+            setScore(studio.id, isNaN(v) ? 0 : v);
+            render();
+          });
 
-  retryBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    ensureAudio();
-    retry();
-  });
+          wrap.appendChild(sel);
+          li.appendChild(main);
+          li.appendChild(wrap);
+          ul.appendChild(li);
+        });
+      }
 
-  // Prevent double-tap zoom on mobile
-  document.addEventListener('dblclick', (e) => e.preventDefault());
+      function showLoadError(message, commandText) {
+        var el = document.getElementById('load-error');
+        el.textContent = message;
+        if (commandText) {
+          var code = document.createElement('code');
+          code.textContent = commandText;
+          el.appendChild(code);
+        }
+        el.classList.add('visible');
+      }
 
-  // Start
-  wrappedLoop();
-})();
-</script>
+      fetch(DATA_URL)
+        .then(function (r) {
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.json();
+        })
+        .then(function (data) {
+          if (!Array.isArray(data)) throw new Error('Invalid data');
+          studios = data;
+          studios.forEach(function (s, i) {
+            originalIndex[s.id] = i;
+          });
+          document.getElementById('app').classList.add('ready');
+          render();
+        })
+        .catch(function () {
+          showLoadError(
+            'Could not load studio data. Browsers often block loading JSON when you open this file as file://. From the base_mvp folder, run a local server and open localhost:',
+            'python3 -m http.server 8765\n\nthen open → http://localhost:8765/'
+          );
+        });
+    })();
+  </script>
 </body>
 </html>
