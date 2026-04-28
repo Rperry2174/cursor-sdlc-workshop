@@ -18,6 +18,12 @@ import {
 } from '../data/store.js';
 import { applyAutoClaimRules } from '../data/lifecycle.js';
 import { updateBackendChildTeams } from '../data/backendMutations.js';
+import {
+  addCoparentToChild,
+  loadShareableTeammates,
+  removeCoparentFromChild,
+} from '../data/operationalBackend.js';
+import { getSupabase, isSupabaseConfigured } from '../data/supabase.js';
 import { Avatar } from '../components/Avatar.jsx';
 import { TopNav } from '../components/TopNav.jsx';
 import { compressImageToDataUrl } from '../lib/imageUtils.js';
@@ -576,11 +582,200 @@ export function KidProfile({ childId, ctx }) {
           <KidTeamsRow kid={kid} teams={teams} ctx={ctx} />
         </div>
 
+        <CoparentManager childId={kid.id} childName={kid.name} ctx={ctx} />
+
         <button type="button" className="btn btn-primary" onClick={save}>
           Save kid profile
         </button>
       </div>
     </>
+  );
+}
+
+/**
+ * Manages co-parent links for a kid in backend mode. Lists the current
+ * co-parents and offers a picker of teammates the caller could add as
+ * additional co-parents. Hidden when Supabase isn't configured.
+ */
+function CoparentManager({ childId, childName, ctx }) {
+  const [state, setState] = useState({
+    status: 'loading',
+    currentParents: [],
+    candidateParents: [],
+    callerParentId: null,
+  });
+  const [busy, setBusy] = useState(false);
+
+  const refresh = async () => {
+    if (!isSupabaseConfigured()) {
+      setState((s) => ({ ...s, status: 'unavailable' }));
+      return;
+    }
+    const supabase = getSupabase();
+    const { data: userResult } = await supabase.auth.getUser();
+    const authUserId = userResult?.user?.id;
+    if (!authUserId) {
+      setState((s) => ({ ...s, status: 'unavailable' }));
+      return;
+    }
+    const { data: callerParent } = await supabase
+      .from('parents')
+      .select('id')
+      .eq('auth_user_id', authUserId)
+      .maybeSingle();
+    if (!callerParent) {
+      setState((s) => ({ ...s, status: 'unavailable' }));
+      return;
+    }
+
+    const { data: links } = await supabase
+      .from('parent_children')
+      .select('parent_id')
+      .eq('child_id', childId);
+    const linkedIds = (links || []).map((l) => l.parent_id);
+    const { data: linkedParents } = linkedIds.length
+      ? await supabase
+          .from('parents')
+          .select('id, name, avatar_color, photo_url')
+          .in('id', linkedIds)
+      : { data: [] };
+
+    const teammatesResult = await loadShareableTeammates();
+    const candidates = teammatesResult.ok
+      ? (teammatesResult.parents || []).filter((p) => !linkedIds.includes(p.id))
+      : [];
+
+    setState({
+      status: 'ready',
+      currentParents: linkedParents || [],
+      candidateParents: candidates,
+      callerParentId: callerParent.id,
+    });
+  };
+
+  useEffect(() => {
+    refresh();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [childId]);
+
+  const onAdd = async (parent) => {
+    setBusy(true);
+    const result = await addCoparentToChild({ childId, parentId: parent.id });
+    setBusy(false);
+    if (result.ok) {
+      ctx.showToast(`${parent.name.split(' ')[0]} added as co-parent of ${childName}`);
+      refresh();
+    } else {
+      ctx.showToast(`Could not add co-parent: ${result.reason || 'unknown error'}`);
+    }
+  };
+
+  const onRemove = async (parent) => {
+    if (parent.id === state.callerParentId) {
+      ctx.showToast("You can't remove yourself this way — leave the kid via Profile instead.");
+      return;
+    }
+    setBusy(true);
+    const result = await removeCoparentFromChild({ childId, parentId: parent.id });
+    setBusy(false);
+    if (result.ok) {
+      ctx.showToast(`${parent.name.split(' ')[0]} removed as co-parent`);
+      refresh();
+    } else {
+      ctx.showToast(`Could not remove: ${result.reason || 'unknown error'}`);
+    }
+  };
+
+  if (state.status === 'unavailable') return null;
+  if (state.status === 'loading') {
+    return (
+      <div className="card">
+        <div className="caps muted" style={{ marginBottom: 8 }}>Co-parents</div>
+        <div className="muted" style={{ fontSize: 13 }}>Loading…</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="card">
+      <div className="caps muted" style={{ marginBottom: 8 }}>Co-parents</div>
+      <div style={{ fontSize: 13, color: 'var(--gray-700)', marginBottom: 12 }}>
+        Other parents linked to {childName}. Adding a co-parent gives them access to {childName}'s
+        rides without creating a duplicate kid record.
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 12 }}>
+        {state.currentParents.map((parent) => (
+          <div key={parent.id} className="list-row" style={{ alignItems: 'center' }}>
+            <Avatar
+              name={parent.name}
+              color={parent.avatar_color}
+              photo={parent.photo_url}
+              size="sm"
+            />
+            <div style={{ flex: 1, fontWeight: 600, fontSize: 14 }}>
+              {parent.name}
+              {parent.id === state.callerParentId && (
+                <span className="muted" style={{ fontWeight: 400 }}> (you)</span>
+              )}
+            </div>
+            {parent.id !== state.callerParentId && (
+              <button
+                type="button"
+                className="btn btn-ghost"
+                style={{ width: 'auto', padding: '4px 8px', fontSize: 12, color: 'var(--red-text)' }}
+                onClick={() => onRemove(parent)}
+                disabled={busy}
+              >
+                Remove
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {state.candidateParents.length > 0 ? (
+        <div>
+          <div className="caps muted" style={{ marginBottom: 6, fontSize: 11 }}>
+            Add a co-parent
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            {state.candidateParents.map((parent) => (
+              <button
+                key={parent.id}
+                type="button"
+                onClick={() => onAdd(parent)}
+                disabled={busy}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '6px 10px',
+                  borderRadius: 999,
+                  border: '1px solid var(--gray-300)',
+                  background: 'white',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                <Avatar
+                  name={parent.name}
+                  color={parent.avatar_color}
+                  photo={parent.photo_url}
+                  size="sm"
+                />
+                + {parent.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="muted" style={{ fontSize: 12 }}>
+          No teammates available to add. Co-parents must share at least one team with you.
+        </div>
+      )}
+    </div>
   );
 }
 

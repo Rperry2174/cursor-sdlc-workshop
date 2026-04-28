@@ -329,6 +329,74 @@ export async function seatKidBackend({ legId, childId, parentId }) {
   return { ok: true, seat: data };
 }
 
+export async function addCoparentToChild({ childId, parentId }) {
+  const session = await getSessionResult();
+  if (!session.ok) return session;
+  const { data, error } = await session.supabase.rpc('add_coparent_to_child', {
+    p_child_id: childId,
+    p_parent_id: parentId,
+  });
+  if (error) return { ok: false, reason: error.message };
+  return { ok: true, inserted: data?.inserted };
+}
+
+export async function removeCoparentFromChild({ childId, parentId }) {
+  const session = await getSessionResult();
+  if (!session.ok) return session;
+  const { error } = await session.supabase.rpc('remove_coparent_from_child', {
+    p_child_id: childId,
+    p_parent_id: parentId,
+  });
+  if (error) return { ok: false, reason: error.message };
+  return { ok: true };
+}
+
+/**
+ * Pull every parent the caller shares at least one team with — used by the
+ * Kid Profile co-parent picker so Mike can grant Jessica co-parent status
+ * on Lucas without typing her name.
+ */
+export async function loadShareableTeammates() {
+  const session = await getSessionResult();
+  if (!session.ok) return session;
+  const { supabase } = session;
+
+  const { data: userResult } = await supabase.auth.getUser();
+  const authUserId = userResult?.user?.id;
+  if (!authUserId) return { ok: false, skipped: true, reason: 'not_signed_in' };
+
+  const { data: parent } = await supabase
+    .from('parents')
+    .select('id')
+    .eq('auth_user_id', authUserId)
+    .maybeSingle();
+  if (!parent) return { ok: false, reason: 'parent_not_found' };
+
+  const { data: myMemberships } = await supabase
+    .from('team_members')
+    .select('team_id')
+    .eq('parent_id', parent.id)
+    .is('removed_at', null);
+  const teamIds = (myMemberships || []).map((m) => m.team_id);
+  if (teamIds.length === 0) return { ok: true, parents: [] };
+
+  const { data: allMemberships } = await supabase
+    .from('team_members')
+    .select('parent_id')
+    .in('team_id', teamIds)
+    .is('removed_at', null);
+  const otherParentIds = Array.from(
+    new Set((allMemberships || []).map((m) => m.parent_id).filter((id) => id && id !== parent.id)),
+  );
+  if (otherParentIds.length === 0) return { ok: true, parents: [] };
+
+  const { data: parents } = await supabase
+    .from('parents')
+    .select('id, name, avatar_color, photo_url')
+    .in('id', otherParentIds);
+  return { ok: true, parents: parents || [] };
+}
+
 export async function unseatKidBackend({ legId, childId }) {
   const session = await getSessionResult();
   if (!session.ok) return session;
