@@ -110,7 +110,7 @@ export const projectSlides = [
     type: SLIDE_TYPES.browserDemo,
     section: { badge: 'Section 1', tone: 'section1' },
     phaseBadge: 'Phase 2: Design',
-    title: 'Run It — See It In Your Browser',
+    title: 'Run It - See It In Your Browser',
     subtitle:
       'When you ask Cursor to run your project, you should see it live in your web browser:',
     browserMock: {
@@ -122,7 +122,7 @@ export const projectSlides = [
       tone: 'green',
       label: 'Ask Cursor:',
       body:
-        '"How do I run this project?" — then open the URL it gives you. If something looks wrong, tell Cursor what you see!',
+        '"How do I run this project?" - then open the URL it gives you. If something looks wrong, tell Cursor what you see!',
     },
   }),
   makeSlide({

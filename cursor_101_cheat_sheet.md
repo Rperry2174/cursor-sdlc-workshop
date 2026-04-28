@@ -1,4 +1,4 @@
-# Cursor 101 Presentation Cheat Sheet
+# Cursor 101 Presentation Cheat Sheet for Sales Engineers
 
 ## Opening (3-5 min)
 - **Reassure the audience**: You do not need to be an engineer to understand the product surfaces.
