@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import {
   getCurrentParent,
   getEventsByDate,
@@ -21,6 +21,10 @@ import {
   seatKid,
   claimLeg,
 } from '../data/lifecycle.js';
+import {
+  loadBackendOperationalState,
+  claimLegBackend,
+} from '../data/operationalBackend.js';
 import { Avatar } from '../components/Avatar.jsx';
 import { Sheet } from '../components/Sheet.jsx';
 
@@ -213,6 +217,127 @@ function dayStatus(parentId, dateStr) {
 }
 
 /* ------------------------------------------------------------------ */
+/* Backend-mode lookups + selectors                                    */
+/*                                                                     */
+/* When loadBackendOperationalState() succeeds, we index the flat      */
+/* arrays it returns into Maps so the existing Today components can    */
+/* resolve event/legs/seats/parent by id without a fresh round trip.   */
+/* When backend mode is off (lookups === null), every component falls  */
+/* back to the imported store.js helpers, so the local-only flow is    */
+/* untouched.                                                          */
+/* ------------------------------------------------------------------ */
+
+function buildBackendLookups(backend) {
+  if (!backend) return null;
+  const eventsById = new Map();
+  for (const e of backend.events || []) eventsById.set(e.id, e);
+
+  const legsById = new Map();
+  const legsByEventId = new Map();
+  for (const l of backend.legs || []) {
+    legsById.set(l.id, l);
+    if (!legsByEventId.has(l.event_id)) legsByEventId.set(l.event_id, []);
+    legsByEventId.get(l.event_id).push(l);
+  }
+  for (const arr of legsByEventId.values()) {
+    arr.sort((a, b) => (a.direction === 'to_event' ? -1 : 1));
+  }
+
+  const seatsByLegId = new Map();
+  for (const s of backend.seats || []) {
+    if (!seatsByLegId.has(s.leg_id)) seatsByLegId.set(s.leg_id, []);
+    seatsByLegId.get(s.leg_id).push(s);
+  }
+
+  // Normalize parents so the existing UI can read either `photo` or
+  // `photo_url` without caring which side the row came from.
+  const parentsById = new Map();
+  const normalizeParent = (p) => ({ ...p, photo: p.photo || p.photo_url });
+  if (backend.parent) parentsById.set(backend.parent.id, normalizeParent(backend.parent));
+  for (const p of backend.parents || []) parentsById.set(p.id, normalizeParent(p));
+
+  return {
+    eventsById,
+    legsById,
+    legsByEventId,
+    seatsByLegId,
+    parentsById,
+    parent: backend.parent || null,
+    events: backend.events || [],
+    legs: backend.legs || [],
+  };
+}
+
+function getEventBE(eventId, lookups) {
+  if (lookups) return lookups.eventsById.get(eventId) || null;
+  return db().events.find((e) => e.id === eventId) || null;
+}
+
+function getLegsForEventBE(eventId, lookups) {
+  return lookups ? lookups.legsByEventId.get(eventId) || [] : getLegsForEvent(eventId);
+}
+
+function getKidsInLegBE(legId, lookups) {
+  if (lookups) {
+    // Backend mode does not load children; we surface seat-level
+    // placeholders so kid counts and seat-count math still work, but
+    // names will be empty until a future slice loads child data.
+    const seats = lookups.seatsByLegId.get(legId) || [];
+    return seats.map((s) => ({ id: s.child_id, name: '' }));
+  }
+  return getKidsInLeg(legId);
+}
+
+function getParentBE(parentId, lookups) {
+  if (!parentId) return null;
+  return lookups ? lookups.parentsById.get(parentId) || null : getParent(parentId);
+}
+
+function dayStatusBackend(lookups, dateStr) {
+  const events = (lookups.events || []).filter(
+    (e) => typeof e.start_at === 'string' && e.start_at.slice(0, 10) === dateStr,
+  );
+  let openLegs = 0;
+  let totalLegs = 0;
+  for (const e of events) {
+    const legs = lookups.legsByEventId.get(e.id) || [];
+    for (const l of legs) {
+      totalLegs += 1;
+      if (!l.driver_id) openLegs += 1;
+    }
+  }
+  return {
+    events,
+    openLegs,
+    totalLegs,
+    label:
+      totalLegs === 0
+        ? 'Nothing scheduled'
+        : openLegs === 0
+        ? 'All covered'
+        : `${openLegs} ${openLegs === 1 ? 'gap' : 'gaps'}`,
+    tone: totalLegs === 0 ? 'muted' : openLegs === 0 ? 'ok' : 'warn',
+  };
+}
+
+function myUpcomingDrivingBackend(lookups) {
+  const myId = lookups?.parent?.id;
+  if (!myId) return [];
+  const now = Date.now();
+  const lower = now - 15 * 60 * 1000;
+  const upper = now + 36 * 60 * 60 * 1000;
+  return lookups.legs
+    .filter(
+      (l) =>
+        l.driver_id === myId &&
+        new Date(l.departure_time).getTime() > lower &&
+        new Date(l.departure_time).getTime() < upper &&
+        (l.status === 'filled' || l.status === 'in_progress'),
+    )
+    .sort((a, b) => a.departure_time.localeCompare(b.departure_time));
+}
+
+/* ------------------------------------------------------------------ */
 /* Pretty "leaves in" countdown                                        */
 /* ------------------------------------------------------------------ */
 
@@ -242,6 +367,44 @@ export function Today({ ctx }) {
     return () => clearInterval(i);
   }, []);
 
+  // ---------- Backend read-mode state (Agent C slice) ----------
+  // status === 'loading' renders local data (so the screen is never
+  // blank); on success we flip to 'ready' and the existing components
+  // re-derive from backend rows via `lookups`. 'fallback'/'error'
+  // both keep the local-only behavior unchanged.
+  const [backendState, setBackendState] = useState({
+    status: 'loading',
+    backend: null,
+    reason: null,
+  });
+
+  useEffect(() => {
+    let cancelled = false;
+    loadBackendOperationalState().then((res) => {
+      if (cancelled) return;
+      if (res.ok) {
+        setBackendState({ status: 'ready', backend: res, reason: null });
+      } else if (res.skipped) {
+        setBackendState({ status: 'fallback', backend: null, reason: res.reason });
+      } else {
+        setBackendState({ status: 'error', backend: null, reason: res.reason });
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const refreshBackend = useCallback(async () => {
+    const res = await loadBackendOperationalState();
+    if (res.ok) setBackendState({ status: 'ready', backend: res, reason: null });
+  }, []);
+
+  const lookups = useMemo(
+    () => (backendState.status === 'ready' ? buildBackendLookups(backendState.backend) : null),
+    [backendState],
+  );
+
   // Sheets (kept from previous version so behavior is preserved)
   const [needSubOpen, setNeedSubOpen] = useState(false);
   const [needSubLegId, setNeedSubLegId] = useState(null);
@@ -252,6 +415,7 @@ export function Today({ ctx }) {
   const [addKidOpen, setAddKidOpen] = useState(false);
 
   const myUpcomingDriving = useMemo(() => {
+    if (lookups) return myUpcomingDrivingBackend(lookups);
     return db()
       .carpool_legs.filter(
         (l) =>
@@ -261,8 +425,13 @@ export function Today({ ctx }) {
           (l.status === 'filled' || l.status === 'in_progress'),
       )
       .sort((a, b) => a.departure_time.localeCompare(b.departure_time));
-  }, [me.id]);
+  }, [me.id, lookups]);
 
+  // myUpcomingSeats and joinableLegs depend on knowing which children
+  // belong to me — backend mode does not load parent_children/children
+  // in this slice, so we leave these on the local store. Sheets that
+  // consume them therefore continue to operate on local data, which
+  // is the explicit requirement for this agent.
   const myUpcomingSeats = useMemo(() => getUpcomingSeatsForMyKids(me.id, 36), [me.id]);
   const joinableLegs = useMemo(() => getJoinableLegsForMyKids(me.id, 14 * 24), [me.id]);
 
@@ -271,17 +440,56 @@ export function Today({ ctx }) {
 
   // Fallback hero: when I'm not driving, show my kid's next trip with someone
   // else driving. Soonest upcoming leg where my kid is seated and driver != me.
+  // In backend mode we can't compute this without kid data, so the hero
+  // falls through to NoNextDriveCard in that case.
   const nextKidTrip = useMemo(() => {
     if (nextDrive) return null;
+    if (lookups) return null;
     const eligible = myUpcomingSeats
       .filter((row) => row.leg.driver_id && row.leg.driver_id !== me.id)
       .sort((a, b) => a.leg.departure_time.localeCompare(b.leg.departure_time));
     return eligible[0] || null;
-  }, [nextDrive, myUpcomingSeats, me.id]);
+  }, [nextDrive, myUpcomingSeats, me.id, lookups]);
 
   // Day blocks
-  const today = useMemo(() => dayStatus(me.id, todayKey()), [me.id]);
-  const tomorrow = useMemo(() => dayStatus(me.id, tomorrowKey()), [me.id]);
+  const today = useMemo(
+    () => (lookups ? dayStatusBackend(lookups, todayKey()) : dayStatus(me.id, todayKey())),
+    [me.id, lookups],
+  );
+  const tomorrow = useMemo(
+    () => (lookups ? dayStatusBackend(lookups, tomorrowKey()) : dayStatus(me.id, tomorrowKey())),
+    [me.id, lookups],
+  );
+
+  // Backend "I'll drive" callback — passed to LegRow when in backend
+  // mode. Falls through to local claimLeg on `{ skipped: true }` so a
+  // race with sign-out doesn't leave the user without a working button.
+  const claimBackendCb = useCallback(
+    async (leg) => {
+      const dirLabel = leg.direction === 'to_event' ? 'drop-off' : 'pick-up';
+      const r = await claimLegBackend(leg.id);
+      if (r.skipped) {
+        const localR = claimLeg(leg.id, me.id);
+        if (localR.ok) ctx.showToast(`You're driving the ${dirLabel}`);
+        else ctx.showToast(`Could not claim: ${localR.reason}`);
+        return;
+      }
+      if (r.ok) {
+        ctx.showToast('Claimed via Kinpala backend');
+        refreshBackend();
+      } else if (r.reason === 'taken') {
+        ctx.showToast('Already claimed');
+        refreshBackend();
+      } else if (r.reason === 'not_found') {
+        ctx.showToast('Could not claim — leg not found');
+      } else if (r.reason === 'not_member') {
+        ctx.showToast('Could not claim — not a team member');
+      } else {
+        ctx.showToast(`Could not claim: ${r.reason || 'unknown error'}`);
+      }
+    },
+    [me.id, ctx, refreshBackend],
+  );
 
   // Outstanding sub requests I'M waiting on (no responses yet)
   const myStalledSubs = useMemo(() => {
@@ -314,8 +522,11 @@ export function Today({ ctx }) {
       {/* ---------- Header ---------- */}
       <div style={{ padding: '14px 20px 10px' }}>
         <div className="row-between">
-          <div style={{ fontSize: 26, fontWeight: 800, letterSpacing: '-0.3px' }}>
-            {me.name.split(' ')[0]}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ fontSize: 26, fontWeight: 800, letterSpacing: '-0.3px' }}>
+              {me.name.split(' ')[0]}
+            </div>
+            {lookups && <LiveDataPill />}
           </div>
           <Avatar name={me.name} color={me.avatar_color} photo={me.photo} size="lg" />
         </div>
@@ -352,6 +563,7 @@ export function Today({ ctx }) {
           leg={nextDrive}
           ctx={ctx}
           meId={me.id}
+          lookups={lookups}
           onSub={() => {
             setNeedSubLegId(nextDrive.id);
             setNeedSubReason('');
@@ -377,6 +589,8 @@ export function Today({ ctx }) {
         meId={me.id}
         myKidIds={myKidIds}
         ctx={ctx}
+        lookups={lookups}
+        claimBackend={claimBackendCb}
       />
 
       {/* ---------- Create a carpool: permanent CTA under Today ---------- */}
@@ -391,6 +605,8 @@ export function Today({ ctx }) {
         meId={me.id}
         myKidIds={myKidIds}
         ctx={ctx}
+        lookups={lookups}
+        claimBackend={claimBackendCb}
       />
 
       {/* ---------- Attention card (only when there is something) ---------- */}
@@ -632,10 +848,13 @@ function SBCol({ label, value, tone }) {
 /* Hero: "Your next drive"                                             */
 /* ================================================================== */
 
-function NextDriveCard({ leg, ctx, meId, onSub, onLate }) {
-  const event = db().events.find((e) => e.id === leg.event_id);
-  const kids = getKidsInLeg(leg.id);
-  const chain = useMemo(() => buildStopChain(leg), [leg.id]);
+function NextDriveCard({ leg, ctx, meId, onSub, onLate, lookups }) {
+  const event = getEventBE(leg.event_id, lookups);
+  const kids = getKidsInLegBE(leg.id, lookups);
+  // buildStopChain reads parent_children + per-parent home_address out
+  // of the local store, neither of which we load in backend mode this
+  // slice — so the route mini-timeline is omitted in that case.
+  const chain = useMemo(() => (lookups ? null : buildStopChain(leg)), [leg.id, lookups]);
   const inProgress = leg.status === 'in_progress';
   const isToEvent = leg.direction === 'to_event';
 
@@ -1214,7 +1433,7 @@ function RouteMini({ chain }) {
 /* Day section (Today / Tomorrow)                                      */
 /* ================================================================== */
 
-function DaySection({ title, date, status, events, meId, myKidIds, ctx }) {
+function DaySection({ title, date, status, events, meId, myKidIds, ctx, lookups, claimBackend }) {
   return (
     <div style={{ margin: '0 16px 18px' }}>
       <div
@@ -1273,7 +1492,15 @@ function DaySection({ title, date, status, events, meId, myKidIds, ctx }) {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {events.map((e) => (
-            <RideCard key={e.id} event={e} meId={meId} myKidIds={myKidIds} ctx={ctx} />
+            <RideCard
+              key={e.id}
+              event={e}
+              meId={meId}
+              myKidIds={myKidIds}
+              ctx={ctx}
+              lookups={lookups}
+              claimBackend={claimBackend}
+            />
           ))}
         </div>
       )}
@@ -1281,8 +1508,8 @@ function DaySection({ title, date, status, events, meId, myKidIds, ctx }) {
   );
 }
 
-function RideCard({ event, meId, myKidIds, ctx }) {
-  const legs = getLegsForEvent(event.id);
+function RideCard({ event, meId, myKidIds, ctx, lookups, claimBackend }) {
+  const legs = getLegsForEventBE(event.id, lookups);
   const emoji =
     event.type === 'game' ? '⚾'
     : event.type === 'practice' ? '🏟️'
@@ -1338,16 +1565,18 @@ function RideCard({ event, meId, myKidIds, ctx }) {
           meId={meId}
           myKidIds={myKidIds}
           ctx={ctx}
+          lookups={lookups}
+          claimBackend={claimBackend}
         />
       ))}
     </div>
   );
 }
 
-function LegRow({ leg, first, meId, myKidIds, ctx }) {
-  const driver = leg.driver_id ? getParent(leg.driver_id) : null;
-  const kids = getKidsInLeg(leg.id);
-  const isMine = leg.driver_id === meId;
+function LegRow({ leg, first, meId, myKidIds, ctx, lookups, claimBackend }) {
+  const driver = leg.driver_id ? getParentBE(leg.driver_id, lookups) : null;
+  const kids = getKidsInLegBE(leg.id, lookups);
+  const isMine = leg.driver_id === meId || (lookups && leg.driver_id === lookups.parent?.id);
   const isOpen = !leg.driver_id;
   const myKidsHere = kids.filter((k) => myKidIds.includes(k.id));
 
@@ -1405,6 +1634,12 @@ function LegRow({ leg, first, meId, myKidIds, ctx }) {
           type="button"
           onClick={(e) => {
             e.stopPropagation();
+            if (lookups && claimBackend) {
+              // Fire-and-forget — the callback handles its own toasts
+              // and re-fetches backend state on success.
+              claimBackend(leg);
+              return;
+            }
             const r = claimLeg(leg.id, meId);
             if (r.ok) ctx.showToast(`You're driving the ${directionLabel.toLowerCase()}`);
             else ctx.showToast(`Could not claim: ${r.reason}`);
@@ -1628,6 +1863,42 @@ function FooterBtn({ label, onClick }) {
     >
       {label}
     </button>
+  );
+}
+
+/* ================================================================== */
+/* Backend-mode "live data" indicator                                  */
+/* ================================================================== */
+
+function LiveDataPill() {
+  return (
+    <span
+      title="Today and Open Shifts are reading from the Kinpala backend"
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 4,
+        padding: '2px 8px',
+        borderRadius: 999,
+        background: 'var(--green-100)',
+        color: 'var(--green-text)',
+        fontSize: 10,
+        fontWeight: 800,
+        letterSpacing: 0.4,
+        textTransform: 'uppercase',
+        border: '1px solid var(--green-500)',
+      }}
+    >
+      <span
+        style={{
+          width: 6,
+          height: 6,
+          borderRadius: 3,
+          background: 'var(--green-700)',
+        }}
+      />
+      Live data
+    </span>
   );
 }
 

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   getCurrentParent,
   getOpenLegsForParent,
@@ -11,6 +11,10 @@ import {
   getParent,
 } from '../data/store.js';
 import { claimLeg, seatKid, applyAutoClaimRules } from '../data/lifecycle.js';
+import {
+  loadBackendOperationalState,
+  claimLegBackend,
+} from '../data/operationalBackend.js';
 import { TopNav } from '../components/TopNav.jsx';
 import { Avatar } from '../components/Avatar.jsx';
 import { CalendarEmptyCTA } from '../components/CalendarEmptyCTA.jsx';
@@ -38,13 +42,108 @@ export function OpenShifts({ ctx }) {
 
   const teams = getTeamsForParent(me.id);
 
+  // ---------- Backend read-mode state (Agent C slice) ----------
+  // Same envelope-driven loader Today.jsx uses. We default to the
+  // local prototype while loading so the screen is never blank, and
+  // never blow away local fallback if Supabase is unconfigured.
+  const [backendState, setBackendState] = useState({
+    status: 'loading',
+    backend: null,
+    reason: null,
+  });
+
+  useEffect(() => {
+    let cancelled = false;
+    loadBackendOperationalState().then((res) => {
+      if (cancelled) return;
+      if (res.ok) {
+        setBackendState({ status: 'ready', backend: res, reason: null });
+      } else if (res.skipped) {
+        setBackendState({ status: 'fallback', backend: null, reason: res.reason });
+      } else {
+        setBackendState({ status: 'error', backend: null, reason: res.reason });
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const refreshBackend = useCallback(async () => {
+    const res = await loadBackendOperationalState();
+    if (res.ok) setBackendState({ status: 'ready', backend: res, reason: null });
+  }, []);
+
+  const lookups = useMemo(
+    () => (backendState.status === 'ready' ? buildBackendLookups(backendState.backend) : null),
+    [backendState],
+  );
+
   // Recomputed every render — App.jsx subscribes to the store and re-renders
   // on every mutation, so this stays in sync after a claim/undo.
-  const allOpenLegs = getOpenLegsForParent(me.id, HORIZON_DAYS);
+  const allOpenLegsLocal = getOpenLegsForParent(me.id, HORIZON_DAYS);
   const allOpenSeats = getOpenSeatsForMyKids(me.id, HORIZON_DAYS);
 
+  const allOpenLegsBackend = useMemo(() => {
+    if (!lookups) return [];
+    const now = Date.now();
+    const horizon = now + HORIZON_DAYS * 86400000;
+    const eventIdsInWindow = new Set(
+      lookups.events
+        .filter((e) => {
+          const t = new Date(e.start_at).getTime();
+          return t >= now && t <= horizon;
+        })
+        .map((e) => e.id),
+    );
+    return lookups.legs.filter(
+      (l) => eventIdsInWindow.has(l.event_id) && !l.driver_id && l.status === 'open',
+    );
+  }, [lookups]);
+
+  const allOpenLegs = lookups ? allOpenLegsBackend : allOpenLegsLocal;
+
+  // Backend-mode claim handler — falls back to local if the backend
+  // call reports `skipped: true` (e.g. signed out mid-session).
+  const claimViaBackend = useCallback(
+    async (legId) => {
+      const r = await claimLegBackend(legId);
+      if (r.skipped) {
+        const localR = claimLeg(legId, me.id);
+        if (!localR.ok) {
+          if (localR.reason === 'taken' && localR.currentDriver) {
+            ctx.showToast(
+              `Just claimed by ${localR.currentDriver.name.split(' ')[0]} — refresh to see the latest`,
+            );
+          } else {
+            ctx.showToast('Could not claim — try again');
+          }
+          return;
+        }
+        ctx.showToast("Claimed — you're on the schedule");
+        return;
+      }
+      if (r.ok) {
+        ctx.showToast('Claimed via Kinpala backend');
+        refreshBackend();
+      } else if (r.reason === 'taken') {
+        ctx.showToast('Already claimed');
+        refreshBackend();
+      } else if (r.reason === 'not_found') {
+        ctx.showToast('Could not claim — leg not found');
+      } else if (r.reason === 'not_member') {
+        ctx.showToast('Could not claim — not a team member');
+      } else {
+        ctx.showToast(`Could not claim: ${r.reason || 'unknown error'}`);
+      }
+    },
+    [me.id, ctx, refreshBackend],
+  );
+
   // Run auto-claim once per visit (per render isn't safe — claimLeg would
-  // be called every state tick). Ref-gate it.
+  // be called every state tick). Ref-gate it. Auto-claim is local-only
+  // because the rules live in the local store; we leave it on so the
+  // local-only flow is unchanged.
   const autoRanRef = useRef(false);
   useEffect(() => {
     if (autoRanRef.current) return;
@@ -62,6 +161,12 @@ export function OpenShifts({ ctx }) {
       <TopNav title="Open shifts" />
 
       <div className="section" style={{ paddingTop: 8 }}>
+        {lookups && (
+          <div style={{ marginBottom: 10 }}>
+            <LiveDataPill />
+          </div>
+        )}
+
         <SegmentedTabs
           tab={tab}
           onChange={setTab}
@@ -83,6 +188,8 @@ export function OpenShifts({ ctx }) {
             setDirId={setDirId}
             teamId={teamId}
             setTeamId={setTeamId}
+            lookups={lookups}
+            claimBackend={lookups ? claimViaBackend : null}
           />
         ) : (
           <SeatsTab
@@ -165,16 +272,36 @@ function SegBtn({ active, onClick, label, count }) {
 
 /* ---------- Need-driver tab ---------- */
 
-function DriversTab({ ctx, me, teams, allOpen, rangeId, setRangeId, dirId, setDirId, teamId, setTeamId }) {
+function DriversTab({
+  ctx,
+  me,
+  teams,
+  allOpen,
+  rangeId,
+  setRangeId,
+  dirId,
+  setDirId,
+  teamId,
+  setTeamId,
+  lookups,
+  claimBackend,
+}) {
   const range = RANGE_OPTIONS.find((r) => r.id === rangeId) || RANGE_OPTIONS[0];
   const cutoff = Date.now() + range.days * 86400000;
+
+  // Backend events don't ride through getEvent(), so when filtering by
+  // team in backend mode we look the event up via the lookups index.
+  const eventForFilter = (legEventId) => {
+    if (lookups) return lookups.eventsById.get(legEventId) || null;
+    return getEvent(legEventId);
+  };
 
   const filtered = allOpen
     .filter((l) => new Date(l.departure_time).getTime() <= cutoff)
     .filter((l) => dirId === 'all' || l.direction === dirId)
     .filter((l) => {
       if (teamId === 'all') return true;
-      const evt = getEvent(l.event_id);
+      const evt = eventForFilter(l.event_id);
       return evt?.team_id === teamId;
     })
     .sort((a, b) => new Date(a.departure_time) - new Date(b.departure_time));
@@ -182,6 +309,11 @@ function DriversTab({ ctx, me, teams, allOpen, rangeId, setRangeId, dirId, setDi
   const grouped = groupByDay(filtered);
 
   const claim = (legId) => {
+    if (claimBackend) {
+      // Fire-and-forget — toasts + refresh are handled by the parent.
+      claimBackend(legId);
+      return;
+    }
     const r = claimLeg(legId, me.id);
     if (!r.ok) {
       if (r.reason === 'taken' && r.currentDriver) {
@@ -257,7 +389,13 @@ function DriversTab({ ctx, me, teams, allOpen, rangeId, setRangeId, dirId, setDi
             {dayLabel(dayKey)}
           </div>
           {dayLegs.map((l) => (
-            <ShiftCard key={l.id} leg={l} ctx={ctx} onClaim={() => claim(l.id)} />
+            <ShiftCard
+              key={l.id}
+              leg={l}
+              ctx={ctx}
+              onClaim={() => claim(l.id)}
+              lookups={lookups}
+            />
           ))}
         </div>
       ))}
@@ -265,13 +403,20 @@ function DriversTab({ ctx, me, teams, allOpen, rangeId, setRangeId, dirId, setDi
   );
 }
 
-function ShiftCard({ leg, ctx, onClaim }) {
-  const evt = getEvent(leg.event_id);
-  const team = evt?.team_id ? getTeam(evt.team_id) : null;
-  const kids = getKidsInLeg(leg.id);
+function ShiftCard({ leg, ctx, onClaim, lookups }) {
+  // Backend mode does not load teams, sub_requests, or children — for
+  // those views we resolve via lookups where we can and fall through
+  // to nullish so the card hides those sub-sections gracefully.
+  const evt = lookups
+    ? lookups.eventsById.get(leg.event_id) || null
+    : getEvent(leg.event_id);
+  const team = !lookups && evt?.team_id ? getTeam(evt.team_id) : null;
+  const kids = lookups
+    ? (lookups.seatsByLegId.get(leg.id) || []).map((s) => ({ id: s.child_id, name: '' }))
+    : getKidsInLeg(leg.id);
   const dir = leg.direction === 'to_event' ? 'Drop-off' : 'Pick-up';
   const dirIcon = leg.direction === 'to_event' ? '➡️' : '⬅️';
-  const sub = getOpenSubRequestForLeg(leg.id);
+  const sub = lookups ? null : getOpenSubRequestForLeg(leg.id);
   const releaser = sub ? getParent(sub.requested_by) : null;
 
   return (
@@ -647,4 +792,82 @@ function groupByDay(legs) {
     map.get(k).push(l);
   }
   return [...map.entries()];
+}
+
+/* ---------- backend-mode helpers ---------- */
+
+/**
+ * Index the flat arrays returned by loadBackendOperationalState() into
+ * Maps so the existing card components can resolve event/legs/seats
+ * by id without round-tripping. This mirrors the same shape Today.jsx
+ * builds — duplicated here intentionally to keep the file self-
+ * contained per the agent's hard-scope rules (no shared selector
+ * module beyond the backend client itself).
+ */
+function buildBackendLookups(backend) {
+  if (!backend) return null;
+  const eventsById = new Map();
+  for (const e of backend.events || []) eventsById.set(e.id, e);
+
+  const legsById = new Map();
+  const legsByEventId = new Map();
+  for (const l of backend.legs || []) {
+    legsById.set(l.id, l);
+    if (!legsByEventId.has(l.event_id)) legsByEventId.set(l.event_id, []);
+    legsByEventId.get(l.event_id).push(l);
+  }
+
+  const seatsByLegId = new Map();
+  for (const s of backend.seats || []) {
+    if (!seatsByLegId.has(s.leg_id)) seatsByLegId.set(s.leg_id, []);
+    seatsByLegId.get(s.leg_id).push(s);
+  }
+
+  const parentsById = new Map();
+  const normalizeParent = (p) => ({ ...p, photo: p.photo || p.photo_url });
+  if (backend.parent) parentsById.set(backend.parent.id, normalizeParent(backend.parent));
+  for (const p of backend.parents || []) parentsById.set(p.id, normalizeParent(p));
+
+  return {
+    eventsById,
+    legsById,
+    legsByEventId,
+    seatsByLegId,
+    parentsById,
+    parent: backend.parent || null,
+    events: backend.events || [],
+    legs: backend.legs || [],
+  };
+}
+
+function LiveDataPill() {
+  return (
+    <span
+      title="Open Shifts is reading from the Kinpala backend"
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 4,
+        padding: '2px 8px',
+        borderRadius: 999,
+        background: 'var(--green-100)',
+        color: 'var(--green-text)',
+        fontSize: 10,
+        fontWeight: 800,
+        letterSpacing: 0.4,
+        textTransform: 'uppercase',
+        border: '1px solid var(--green-500)',
+      }}
+    >
+      <span
+        style={{
+          width: 6,
+          height: 6,
+          borderRadius: 3,
+          background: 'var(--green-700)',
+        }}
+      />
+      Live data
+    </span>
+  );
 }
