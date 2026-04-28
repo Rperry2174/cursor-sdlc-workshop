@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { addScheduleSource, completeOnboarding, db, getSource, markOnboarded, _internals } from '../data/store.js';
-import { syncSource } from '../data/lifecycle.js';
+import { syncSource, fetchIcs } from '../data/lifecycle.js';
+import { parseIcs } from '../data/ics.js';
 import { Avatar } from '../components/Avatar.jsx';
 import { capture, identify } from '../data/analytics.js';
 import {
@@ -8,6 +9,10 @@ import {
   sendMagicLink,
   verifyMagicLinkSession,
 } from '../data/onboardingSupabase.js';
+import {
+  addBackendScheduleSource,
+  importBackendEvents,
+} from '../data/scheduleBackend.js';
 
 const { newId } = _internals;
 
@@ -1179,15 +1184,59 @@ function CalendarStep({ createdParent, createdTeam, finishCore, busy, setBusy, c
             setBusy(true);
             const { team } = ensureCore();
             if (!team) { setBusy(false); goDone(); return; }
+            const sourceName = `${team.name} (sample season)`;
+            const sampleUrl = '/sample/sample-baseball.ics';
+            const defaultLegs = {
+              drop_off_minutes_before: 15,
+              pick_up_minutes_after: 0,
+            };
             try {
               const source = addScheduleSource({
                 team_id: team.id,
-                name: `${team.name} (sample season)`,
+                name: sourceName,
                 kind: 'sample',
-                url: '/sample/sample-baseball.ics',
+                url: sampleUrl,
+                default_legs: defaultLegs,
               });
               await syncSource(source);
-              ctx.showToast('Sample season imported 🎉');
+
+              // Mirror the sample import to Supabase too. Without this the
+              // wizard would create a real backend team but no events, which
+              // makes Today / Schedule / Open look empty in backend mode even
+              // though the local prototype shows the sample.
+              let backendNote = '';
+              try {
+                const sampleRes = await fetch(sampleUrl);
+                const sampleText = sampleRes.ok ? await sampleRes.text() : '';
+                const parsed = sampleText
+                  ? parseIcs(sampleText, { horizonDays: 120 })
+                  : null;
+                const eligible = parsed
+                  ? parsed.events.filter((ev) => !ev.cancelled)
+                  : [];
+
+                const backendSourceResult = await addBackendScheduleSource({
+                  teamId: team.id,
+                  name: sourceName,
+                  kind: 'sample',
+                  url: sampleUrl,
+                  defaultLegs,
+                });
+                if (backendSourceResult.ok && backendSourceResult.source?.id) {
+                  const backendImport = await importBackendEvents(
+                    backendSourceResult.source.id,
+                    eligible,
+                  );
+                  if (backendImport.ok) {
+                    const c = backendImport.counts || {};
+                    backendNote = ` · ${(c.added || 0) + (c.updated || 0)} on Kinpala backend`;
+                  }
+                }
+              } catch (mirrorErr) {
+                console.warn('Backend sample mirror failed:', mirrorErr);
+              }
+
+              ctx.showToast(`Sample season imported${backendNote}`);
             } catch (e) {
               console.error(e);
               ctx.showToast('Could not import sample — you can try again later');
