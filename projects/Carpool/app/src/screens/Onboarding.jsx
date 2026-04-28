@@ -3,7 +3,11 @@ import { addScheduleSource, completeOnboarding, db, getSource, markOnboarded, _i
 import { syncSource } from '../data/lifecycle.js';
 import { Avatar } from '../components/Avatar.jsx';
 import { capture, identify } from '../data/analytics.js';
-import { completeOnboardingInSupabase } from '../data/onboardingSupabase.js';
+import {
+  completeOnboardingInSupabase,
+  sendMagicLink,
+  verifyMagicLinkSession,
+} from '../data/onboardingSupabase.js';
 
 const { newId } = _internals;
 
@@ -53,9 +57,11 @@ function finishOnboarding(exitPath) {
 export function Onboarding({ ctx }) {
   const [step, setStep] = useState('welcome');
 
+  const [email, setEmail] = useState('');
+  const [emailSent, setEmailSent] = useState(false);
+  const [authBusy, setAuthBusy] = useState(false);
+  const [authError, setAuthError] = useState('');
   const [phone, setPhone] = useState('');
-  const [otpSent, setOtpSent] = useState(false);
-  const [otp, setOtp] = useState('');
 
   const [name, setName] = useState('');
   const [avatarColor, setAvatarColor] = useState('green');
@@ -188,13 +194,15 @@ export function Onboarding({ ctx }) {
       <div style={{ flex: 1, padding: '8px 20px 24px' }}>
         {step === 'welcome' && <WelcomeStep onNext={goNext} />}
         {step === 'phone' && (
-          <PhoneStep
-            phone={phone}
-            setPhone={setPhone}
-            otpSent={otpSent}
-            setOtpSent={setOtpSent}
-            otp={otp}
-            setOtp={setOtp}
+          <EmailAuthStep
+            email={email}
+            setEmail={setEmail}
+            emailSent={emailSent}
+            setEmailSent={setEmailSent}
+            busy={authBusy}
+            setBusy={setAuthBusy}
+            error={authError}
+            setError={setAuthError}
             onNext={goNext}
           />
         )}
@@ -202,6 +210,8 @@ export function Onboarding({ ctx }) {
           <ProfileStep
             name={name}
             setName={setName}
+            phone={phone}
+            setPhone={setPhone}
             avatarColor={avatarColor}
             setAvatarColor={setAvatarColor}
             onNext={goNext}
@@ -327,39 +337,93 @@ function Highlight({ icon, title, body }) {
   );
 }
 
-/* ---------- step 2: phone + fake OTP ---------- */
+/* ---------- step 2: email magic-link auth ---------- */
 
-function PhoneStep({ phone, setPhone, otpSent, setOtpSent, otp, setOtp, onNext }) {
-  const phoneOk = phone.replace(/\D/g, '').length >= 10;
-  const otpOk = otp.replace(/\D/g, '').length === 4;
+function EmailAuthStep({
+  email,
+  setEmail,
+  emailSent,
+  setEmailSent,
+  busy,
+  setBusy,
+  error,
+  setError,
+  onNext,
+}) {
+  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+
+  const sendLink = async () => {
+    setError('');
+    setBusy(true);
+    try {
+      const result = await sendMagicLink(email);
+      if (!result.ok) {
+        setError(result.reason || 'Could not send sign-in link.');
+        return;
+      }
+      setEmailSent(true);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const checkSession = async () => {
+    setError('');
+    setBusy(true);
+    try {
+      const result = await verifyMagicLinkSession(email);
+      if (!result.ok) {
+        if (result.reason === 'not_signed_in') {
+          setError(
+            'Still not signed in. Make sure the email link opened in this same browser tab/window, not Safari vs Chrome or your phone.',
+          );
+        } else if (result.reason === 'email_mismatch') {
+          setError('That browser is signed in with a different email. Use the magic link for this email address.');
+        } else {
+          setError(result.reason || 'Could not restore your sign-in session.');
+        }
+        return;
+      }
+      onNext();
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
     <div style={{ paddingTop: 16 }}>
-      <div className="h2" style={{ marginBottom: 6 }}>What's your number?</div>
+      <div className="h2" style={{ marginBottom: 6 }}>Sign in with email</div>
       <div className="muted" style={{ fontSize: 14, marginBottom: 20 }}>
-        We'll only text you about your rides — never marketing.
+        We'll send a secure magic link. This lets you reopen Kinpala on another
+        phone or browser and load the same team profile.
       </div>
 
-      <label className="field">Mobile number</label>
+      <label className="field">Email address</label>
       <input
         className="input"
-        type="tel"
-        value={phone}
-        onChange={(e) => setPhone(e.target.value)}
-        placeholder="(555) 123-4567"
-        disabled={otpSent}
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="you@example.com"
+        disabled={emailSent || busy}
         style={{ marginBottom: 14 }}
       />
 
-      {!otpSent ? (
+      {error && (
+        <div style={{ color: 'var(--red-text)', fontSize: 13, marginBottom: 10 }}>
+          ⚠️ {error}
+        </div>
+      )}
+
+      {!emailSent ? (
         <button
           type="button"
           className="btn btn-primary"
           style={{ width: '100%' }}
-          disabled={!phoneOk}
-          onClick={() => setOtpSent(true)}
+          disabled={!emailOk || busy}
+          onClick={sendLink}
         >
-          Send code
+          {busy ? 'Sending…' : 'Send magic link'}
         </button>
       ) : (
         <>
@@ -373,34 +437,27 @@ function PhoneStep({ phone, setPhone, otpSent, setOtpSent, otp, setOtp, onNext }
               marginBottom: 14,
             }}
           >
-            ✓ Code sent. <strong>For the demo, any 4 digits work.</strong>
+            ✓ Magic link sent to <strong>{email.trim()}</strong>. Open that email on this device,
+            then come back here.
           </div>
-          <label className="field">4-digit code</label>
-          <input
-            className="input"
-            type="tel"
-            inputMode="numeric"
-            maxLength={4}
-            value={otp}
-            onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 4))}
-            placeholder="••••"
-            style={{ marginBottom: 14, fontSize: 22, letterSpacing: 8, textAlign: 'center' }}
-          />
           <button
             type="button"
             className="btn btn-primary"
             style={{ width: '100%' }}
-            disabled={!otpOk}
-            onClick={onNext}
+            disabled={busy}
+            onClick={checkSession}
           >
-            Verify & continue
+            {busy ? 'Checking…' : "I've clicked the link — continue"}
           </button>
           <button
             type="button"
-            onClick={() => setOtpSent(false)}
+            onClick={() => {
+              setEmailSent(false);
+              setError('');
+            }}
             style={{ display: 'block', margin: '12px auto 0', fontSize: 13, color: 'var(--gray-500)' }}
           >
-            Wrong number?
+            Use a different email
           </button>
         </>
       )}
@@ -410,13 +467,15 @@ function PhoneStep({ phone, setPhone, otpSent, setOtpSent, otp, setOtp, onNext }
 
 /* ---------- step 3: profile ---------- */
 
-function ProfileStep({ name, setName, avatarColor, setAvatarColor, onNext }) {
-  const ok = name.trim().length >= 2;
+function ProfileStep({ name, setName, phone, setPhone, avatarColor, setAvatarColor, onNext }) {
+  const phoneOk = phone.replace(/\D/g, '').length >= 10;
+  const ok = name.trim().length >= 2 && phoneOk;
   return (
     <div style={{ paddingTop: 16 }}>
       <div className="h2" style={{ marginBottom: 6 }}>What should we call you?</div>
       <div className="muted" style={{ fontSize: 14, marginBottom: 20 }}>
-        Other parents will see this name when you claim a leg or send a message.
+        Other parents will see this name. Your mobile number is used for ride
+        coordination and tap-to-call from active rides.
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 18 }}>
@@ -429,6 +488,16 @@ function ProfileStep({ name, setName, avatarColor, setAvatarColor, onNext }) {
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder="e.g. Sarah Chen"
+        style={{ marginBottom: 14 }}
+      />
+
+      <label className="field">Mobile number</label>
+      <input
+        className="input"
+        type="tel"
+        value={phone}
+        onChange={(e) => setPhone(e.target.value)}
+        placeholder="(555) 123-4567"
         style={{ marginBottom: 18 }}
       />
 
