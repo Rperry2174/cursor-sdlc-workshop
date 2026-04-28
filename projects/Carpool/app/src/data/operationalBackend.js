@@ -195,6 +195,27 @@ export async function releaseLegBackend(legId) {
 }
 
 /**
+ * Fire-and-forget notify-team-leg-claimed Edge Function. Used after a
+ * successful claim_leg or release_leg RPC to email every other team
+ * member that coverage has changed.
+ *
+ * Returns { ok, sent?, reason?, skipped? }. We surface skipped/error
+ * cases to the caller so the toast can include "(notification failed)"
+ * when needed, but the surrounding flow should never block on email.
+ */
+export async function notifyTeamLegChange(legId, kind) {
+  const session = await getSessionResult();
+  if (!session.ok) return session;
+
+  const { data, error } = await session.supabase.functions.invoke(
+    'notify-team-leg-claimed',
+    { body: { legId, kind } },
+  );
+  if (error) return { ok: false, reason: error.message };
+  return { ok: true, sent: data?.sent ?? 0, failures: data?.failures || [] };
+}
+
+/**
  * Subscribe to realtime changes on carpool_legs and call onChange whenever
  * a row is inserted, updated, or deleted. Returns an unsubscribe function;
  * callers should invoke it on component unmount or session change.

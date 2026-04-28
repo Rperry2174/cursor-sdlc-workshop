@@ -14,6 +14,7 @@ import { claimLeg, seatKid, applyAutoClaimRules } from '../data/lifecycle.js';
 import {
   loadBackendOperationalState,
   claimLegBackend,
+  notifyTeamLegChange,
   subscribeToCarpoolLegs,
 } from '../data/operationalBackend.js';
 import { TopNav } from '../components/TopNav.jsx';
@@ -137,6 +138,9 @@ export function OpenShifts({ ctx }) {
       if (r.ok) {
         ctx.showToast('Claimed via Kinpala backend');
         refreshBackend();
+        notifyTeamLegChange(legId, 'claimed').catch((err) => {
+          console.warn('notifyTeamLegChange failed:', err);
+        });
       } else if (r.reason === 'taken') {
         ctx.showToast('Already claimed');
         refreshBackend();

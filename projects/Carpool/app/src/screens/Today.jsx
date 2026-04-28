@@ -24,6 +24,7 @@ import {
 import {
   loadBackendOperationalState,
   claimLegBackend,
+  notifyTeamLegChange,
   subscribeToCarpoolLegs,
 } from '../data/operationalBackend.js';
 import { Avatar } from '../components/Avatar.jsx';
@@ -490,6 +491,12 @@ export function Today({ ctx }) {
       if (r.ok) {
         ctx.showToast('Claimed via Kinpala backend');
         refreshBackend();
+        // Fire-and-forget: notify the rest of the team. We don't await
+        // because email shouldn't block the UI; failures are logged but
+        // don't surface to the user unless we choose to later.
+        notifyTeamLegChange(leg.id, 'claimed').catch((err) => {
+          console.warn('notifyTeamLegChange failed:', err);
+        });
       } else if (r.reason === 'taken') {
         ctx.showToast('Already claimed');
         refreshBackend();
