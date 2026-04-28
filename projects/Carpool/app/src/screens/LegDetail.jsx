@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   getCurrentParent,
   getLeg,
@@ -20,6 +20,15 @@ import {
   createRecurringCommitmentAndMaterialize,
   postSystemChat,
 } from '../data/lifecycle.js';
+import {
+  claimLegBackend,
+  loadBackendLegDetail,
+  notifyTeamLegChange,
+  releaseLegBackend,
+  seatKidBackend,
+  subscribeToCarpoolLegs,
+  unseatKidBackend,
+} from '../data/operationalBackend.js';
 import { Avatar } from '../components/Avatar.jsx';
 import { Sheet } from '../components/Sheet.jsx';
 import { Toggle } from '../components/Toggle.jsx';
@@ -41,20 +50,23 @@ function dayOfWeek(iso) {
 
 export function LegDetail({ legId, ctx }) {
   const me = getCurrentParent();
-  const leg = getLeg(legId);
-  const event = leg ? getEvent(leg.event_id) : null;
+  const localLeg = getLeg(legId);
+  const localEvent = localLeg ? getEvent(localLeg.event_id) : null;
+
+  // If the leg is in the local prototype store, render the rich legacy UI
+  // unchanged. Otherwise this is a backend-mode click (real Supabase UUID),
+  // so we delegate to the backend-aware view below.
+  if (!localLeg || !localEvent) {
+    return <BackendLegDetail legId={legId} ctx={ctx} />;
+  }
+
+  return <LocalLegDetail legId={legId} leg={localLeg} event={localEvent} me={me} ctx={ctx} />;
+}
+
+function LocalLegDetail({ legId, leg, event, me, ctx }) {
   const [signUpOpen, setSignUpOpen] = useState(false);
   const [assignOpen, setAssignOpen] = useState(false);
   const [emergencyOpen, setEmergencyOpen] = useState(false);
-
-  if (!leg || !event) {
-    return (
-      <>
-        <TopNav title="Leg" onBack={() => ctx.navigate('today')} />
-        <div className="empty">This leg no longer exists.</div>
-      </>
-    );
-  }
 
   const driver = leg.driver_id ? getParent(leg.driver_id) : null;
   const kids = getKidsInLeg(leg.id);
@@ -598,4 +610,298 @@ function EmergencySheet({ open, onClose, legId, meId, ctx }) {
 function estimateRecurringCount(eventIso) {
   // Count how many same-DOW occurrences we'd cover until end of season (~12 weeks).
   return 12;
+}
+
+/* ==========================================================================
+ * Backend mode: leg detail rendered from Supabase rather than the local
+ * prototype store. Triggered when the legId on the URL is a real Supabase
+ * UUID that the local store doesn't know about. Intentionally simpler than
+ * the legacy LocalLegDetail above — covers the operational essentials
+ * (event + driver + seated kids + claim/release/seat/unseat) without
+ * porting every legacy flow (sub requests, recurring commitments, etc.)
+ * which can come in a follow-up slice.
+ * ========================================================================== */
+
+function BackendLegDetail({ legId, ctx }) {
+  const [state, setState] = useState({ status: 'loading', data: null, reason: null });
+  const [busy, setBusy] = useState(false);
+
+  const refresh = async () => {
+    const result = await loadBackendLegDetail(legId);
+    if (result.ok) {
+      setState({ status: 'ready', data: result, reason: null });
+    } else if (result.skipped) {
+      setState({ status: 'unavailable', data: null, reason: 'not_signed_in' });
+    } else {
+      setState({ status: 'error', data: null, reason: result.reason });
+    }
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+    loadBackendLegDetail(legId).then((result) => {
+      if (cancelled) return;
+      if (result.ok) {
+        setState({ status: 'ready', data: result, reason: null });
+      } else if (result.skipped) {
+        setState({ status: 'unavailable', data: null, reason: 'not_signed_in' });
+      } else {
+        setState({ status: 'error', data: null, reason: result.reason });
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [legId]);
+
+  // Realtime: any teammate editing this leg refetches.
+  useEffect(() => {
+    if (state.status !== 'ready') return undefined;
+    const unsubscribe = subscribeToCarpoolLegs(() => refresh());
+    return unsubscribe;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.status, legId]);
+
+  if (state.status === 'loading') {
+    return (
+      <>
+        <TopNav title="Leg" onBack={() => ctx.navigate('today')} />
+        <div className="muted" style={{ padding: 24, textAlign: 'center', fontSize: 13 }}>
+          Loading from Kinpala backend…
+        </div>
+      </>
+    );
+  }
+  if (state.status !== 'ready') {
+    return (
+      <>
+        <TopNav title="Leg" onBack={() => ctx.navigate('today')} />
+        <div className="empty">
+          {state.reason === 'leg_not_found'
+            ? 'This leg no longer exists.'
+            : `Could not load this leg: ${state.reason || 'unknown error'}`}
+        </div>
+      </>
+    );
+  }
+
+  const { parent, leg, event, driver, seatedKids, myKids } = state.data;
+  const seatsLeft = (leg.seat_capacity || 0) - (state.data.seats?.length || 0);
+  const isDriver = leg.driver_id === parent.id;
+  const isOpen = !leg.driver_id;
+  const isCancelled = leg.status === 'cancelled';
+  const myKidsInLeg = seatedKids.filter((k) => myKids.some((mk) => mk.id === k.id));
+  const seatableMyKids = myKids.filter((mk) => !seatedKids.some((sk) => sk.id === mk.id));
+
+  const claimHere = async () => {
+    setBusy(true);
+    const result = await claimLegBackend(leg.id);
+    setBusy(false);
+    if (result.ok) {
+      ctx.showToast(`You're driving the ${leg.direction === 'to_event' ? 'drop-off' : 'pick-up'}`);
+      notifyTeamLegChange(leg.id, 'claimed').catch((err) =>
+        console.warn('notifyTeamLegChange failed:', err),
+      );
+      refresh();
+    } else if (result.reason === 'taken') {
+      ctx.showToast('Already claimed by someone else');
+      refresh();
+    } else {
+      ctx.showToast(`Could not claim: ${result.reason || 'unknown error'}`);
+    }
+  };
+
+  const releaseHere = async () => {
+    setBusy(true);
+    const result = await releaseLegBackend(leg.id);
+    setBusy(false);
+    if (result.ok) {
+      ctx.showToast('Leg released — anyone can claim it now');
+      refresh();
+    } else {
+      ctx.showToast(`Could not release: ${result.reason || 'unknown error'}`);
+    }
+  };
+
+  const addKidHere = async (kid) => {
+    setBusy(true);
+    const result = await seatKidBackend({ legId: leg.id, childId: kid.id, parentId: parent.id });
+    setBusy(false);
+    if (result.ok) {
+      ctx.showToast(`${kid.name} added to this ride`);
+      refresh();
+    } else {
+      ctx.showToast(`Could not add ${kid.name}: ${result.reason || 'unknown error'}`);
+    }
+  };
+
+  const removeKidHere = async (kid) => {
+    setBusy(true);
+    const result = await unseatKidBackend({ legId: leg.id, childId: kid.id });
+    setBusy(false);
+    if (result.ok) {
+      ctx.showToast(`${kid.name} removed from this ride`);
+      refresh();
+    } else {
+      ctx.showToast(`Could not remove ${kid.name}: ${result.reason || 'unknown error'}`);
+    }
+  };
+
+  return (
+    <>
+      <TopNav
+        title={leg.direction === 'to_event' ? 'Drop-off' : 'Pick-up'}
+        onBack={() => ctx.navigate('today')}
+      />
+
+      <div className="section">
+        <div style={{ margin: '0 4px 8px' }}>
+          <span className="pill pill-green" style={{ fontSize: 11, letterSpacing: 0.3 }}>
+            Loaded from Kinpala backend
+          </span>
+        </div>
+
+        {/* Event header */}
+        <div className="card">
+          <div className="caps muted">{fmtFullDate(event.start_at)}</div>
+          <div className="h2" style={{ marginTop: 4 }}>
+            {event.type === 'game' ? '⚾ ' : event.type === 'imported' ? '📅 ' : '🏟️ '}
+            {event.title}
+          </div>
+          <div style={{ marginTop: 12, display: 'grid', gap: 6 }}>
+            <Row icon="🕒" label="Departure" value={fmtTime(leg.departure_time)} />
+            <Row icon="📍" label="From" value={leg.departure_location} />
+            <Row icon="🏁" label="To" value={leg.arrival_location} />
+          </div>
+        </div>
+
+        {/* Driver */}
+        <div className="card">
+          <div className="caps muted">Driver</div>
+          {driver ? (
+            <div className="row" style={{ marginTop: 8 }}>
+              <Avatar name={driver.name} color={driver.avatar_color} photo={driver.photo_url} size="lg" />
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 700, fontSize: 17 }}>{driver.name}</div>
+                <div className="muted" style={{ fontSize: 13 }}>
+                  {leg.seat_capacity} seats · {Math.max(0, seatsLeft)} open
+                </div>
+              </div>
+              {driver.phone && (
+                <a
+                  href={`tel:${driver.phone}`}
+                  className="btn btn-secondary"
+                  style={{ width: 'auto', padding: '10px 14px', fontSize: 13 }}
+                >
+                  📞 Call
+                </a>
+              )}
+            </div>
+          ) : (
+            <div style={{ marginTop: 8 }}>
+              <div className="muted" style={{ fontSize: 14, marginBottom: 12 }}>
+                No one has signed up yet.
+              </div>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={claimHere}
+                disabled={busy || isCancelled}
+              >
+                {busy ? 'Working…' : "I'll drive this leg"}
+              </button>
+            </div>
+          )}
+          {isDriver && !isCancelled && (
+            <button
+              type="button"
+              className="btn btn-ghost"
+              style={{ marginTop: 12, color: 'var(--red-text)' }}
+              onClick={releaseHere}
+              disabled={busy}
+            >
+              Release this leg
+            </button>
+          )}
+        </div>
+
+        {/* Passengers */}
+        <div className="card">
+          <div className="row-between">
+            <div className="caps muted">Passengers</div>
+            <div className="muted" style={{ fontSize: 12 }}>
+              {seatedKids.length} / {leg.seat_capacity}
+            </div>
+          </div>
+          {seatedKids.length === 0 ? (
+            <div className="muted" style={{ marginTop: 8, fontSize: 14 }}>
+              No kids assigned yet.
+            </div>
+          ) : (
+            <div style={{ marginTop: 8 }}>
+              {seatedKids.map((k) => {
+                const isMine = myKids.some((mk) => mk.id === k.id);
+                return (
+                  <div key={k.id} className="list-row">
+                    <Avatar name={k.name} color={k.avatar_color} photo={k.photo_url} />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 700, fontSize: 15 }}>{k.name}</div>
+                      <div className="muted" style={{ fontSize: 12 }}>
+                        {k.age ? `age ${k.age}` : ''}
+                        {isMine ? ' · your kid' : ''}
+                      </div>
+                    </div>
+                    {isMine && (
+                      <button
+                        type="button"
+                        className="btn btn-ghost"
+                        style={{ width: 'auto', padding: '6px 10px', fontSize: 12, color: 'var(--red-text)' }}
+                        onClick={() => removeKidHere(k)}
+                        disabled={busy}
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          {seatableMyKids.length > 0 && !isCancelled && seatsLeft > 0 && (
+            <div style={{ marginTop: 12, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {seatableMyKids.map((kid) => (
+                <button
+                  key={kid.id}
+                  type="button"
+                  className="btn btn-secondary"
+                  style={{ width: 'auto', padding: '8px 12px', fontSize: 13 }}
+                  onClick={() => addKidHere(kid)}
+                  disabled={busy || !leg.driver_id}
+                >
+                  + Add {kid.name}
+                </button>
+              ))}
+              {!leg.driver_id && (
+                <div className="muted" style={{ fontSize: 11, marginTop: 6, width: '100%' }}>
+                  A driver needs to claim the leg first.
+                </div>
+              )}
+            </div>
+          )}
+          {myKidsInLeg.length > 0 && (
+            <div className="pill pill-blue" style={{ marginTop: 12 }}>
+              ★ Your {myKidsInLeg.length === 1 ? 'kid is' : 'kids are'} in this car
+            </div>
+          )}
+        </div>
+
+        {leg.notes && (
+          <div className="card">
+            <div className="caps muted">Driver note</div>
+            <div style={{ marginTop: 6, fontSize: 14 }}>{leg.notes}</div>
+          </div>
+        )}
+      </div>
+    </>
+  );
 }
