@@ -9,6 +9,57 @@ import { getSupabase, isSupabaseConfigured } from './supabase.js';
  * plain async function — no React imports, no module state.
  */
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const isUuid = (value) => typeof value === 'string' && UUID_RE.test(value);
+
+/**
+ * Resolve the caller's backend team_id from a hint (typically the local
+ * prototype's string team id like "t_xxx", paired with the local team name).
+ * The wizard creates parallel local + backend teams, so the local id is not
+ * a UUID; we have to look up the real backend team via the parent's
+ * team_members rows. If the parent has multiple teams, prefer one whose
+ * name matches; otherwise fall back to the only team they belong to.
+ */
+async function resolveBackendTeamId(supabase, { teamId, teamName }) {
+  if (isUuid(teamId)) return teamId;
+
+  const { data: userResult, error: userErr } = await supabase.auth.getUser();
+  if (userErr) return null;
+  const authUserId = userResult?.user?.id;
+  if (!authUserId) return null;
+
+  const { data: parent, error: parentErr } = await supabase
+    .from('parents')
+    .select('id')
+    .eq('auth_user_id', authUserId)
+    .maybeSingle();
+  if (parentErr || !parent) return null;
+
+  const { data: memberships, error: memberErr } = await supabase
+    .from('team_members')
+    .select('team_id')
+    .eq('parent_id', parent.id)
+    .is('removed_at', null);
+  if (memberErr) return null;
+
+  const teamIds = (memberships || []).map((m) => m.team_id);
+  if (teamIds.length === 0) return null;
+  if (teamIds.length === 1 && !teamName) return teamIds[0];
+
+  const { data: teams, error: teamsErr } = await supabase
+    .from('teams')
+    .select('id, name')
+    .in('id', teamIds);
+  if (teamsErr || !teams?.length) return null;
+
+  if (teamName) {
+    const wanted = teamName.trim().toLowerCase();
+    const match = teams.find((t) => (t.name || '').trim().toLowerCase() === wanted);
+    if (match) return match.id;
+  }
+  return teams.length === 1 ? teams[0].id : null;
+}
+
 async function getSessionResult() {
   if (!isSupabaseConfigured()) {
     return { ok: false, skipped: true, reason: 'supabase_not_configured' };
@@ -23,15 +74,25 @@ async function getSessionResult() {
 /**
  * Create a schedule_sources row via the add_schedule_source RPC.
  *
- * The RPC validates that the caller belongs to teamId and persists the
+ * The RPC validates that the caller belongs to team_id and persists the
  * default_legs jsonb knobs the importer reads later.
+ *
+ * `teamId` may be either a real backend UUID or — more commonly today — a
+ * local prototype id like "t_xxxx". When it's not a UUID we look up the
+ * real backend team via the caller's team_members rows, preferring a name
+ * match against `teamName` so multi-team users land in the right one.
  */
-export async function addBackendScheduleSource({ teamId, name, kind, url, defaultLegs }) {
+export async function addBackendScheduleSource({ teamId, teamName, name, kind, url, defaultLegs }) {
   const session = await getSessionResult();
   if (!session.ok) return session;
 
+  const backendTeamId = await resolveBackendTeamId(session.supabase, { teamId, teamName });
+  if (!backendTeamId) {
+    return { ok: false, reason: 'no_matching_backend_team' };
+  }
+
   const payload = {
-    team_id: teamId,
+    team_id: backendTeamId,
     name,
     kind,
     url: url || null,

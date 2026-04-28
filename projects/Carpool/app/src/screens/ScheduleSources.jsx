@@ -302,6 +302,7 @@ export function AddScheduleSource({ teamId, prefillUrl, ctx }) {
     try {
       const backendSourceResult = await addBackendScheduleSource({
         teamId,
+        teamName: team?.name,
         name: sourceName,
         kind: sourceKind,
         url: sourceUrl,

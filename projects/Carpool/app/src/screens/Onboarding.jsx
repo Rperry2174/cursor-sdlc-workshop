@@ -1217,6 +1217,7 @@ function CalendarStep({ createdParent, createdTeam, finishCore, busy, setBusy, c
 
                 const backendSourceResult = await addBackendScheduleSource({
                   teamId: team.id,
+                  teamName: team.name,
                   name: sourceName,
                   kind: 'sample',
                   url: sampleUrl,
