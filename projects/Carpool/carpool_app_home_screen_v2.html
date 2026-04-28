@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #f0f4f8;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  .phone {
+    width: 375px;
+    background: #f8f9fb;
+    border-radius: 44px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.18), 0 0 0 2px #d1d5db;
+    overflow: hidden;
+    padding-bottom: 24px;
+  }
+  .status-bar {
+    background: #1a1f2e;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 24px 10px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .header {
+    background: linear-gradient(135deg, #2d6a4f 0%, #1b4332 100%);
+    padding: 20px 20px 28px;
+    color: white;
+  }
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .greeting { font-size: 13px; opacity: 0.8; }
+  .header-name { font-size: 20px; font-weight: 700; }
+  .notif-btn {
+    width: 36px; height: 36px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    cursor: pointer;
+    position: relative;
+  }
+  .notif-dot {
+    width: 8px; height: 8px;
+    background: #f59e0b;
+    border-radius: 50%;
+    position: absolute;
+    top: 4px; right: 4px;
+    border: 1.5px solid #1b4332;
+  }
+  .pool-name { font-size: 13px; opacity: 0.7; margin-top: 2px; }
+
+  .content { padding: 0 16px; margin-top: -14px; }
+
+  /* Today card */
+  .today-card {
+    background: white;
+    border-radius: 20px;
+    padding: 18px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    margin-bottom: 14px;
+    margin-top: 14px;
+  }
+  .card-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #9ca3af;
+    margin-bottom: 10px;
+  }
+  .driver-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .avatar {
+    width: 46px; height: 46px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+  }
+  .avatar-sm {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: white;
+    flex-shrink: 0;
+  }
+  .avatar-green { background: linear-gradient(135deg, #2d6a4f, #52b788); }
+  .avatar-blue { background: linear-gradient(135deg, #1d4ed8, #60a5fa); }
+  .avatar-purple { background: linear-gradient(135deg, #7c3aed, #a78bfa); }
+  .avatar-orange { background: linear-gradient(135deg, #c05621, #f6ad55); }
+  .driver-info { flex: 1; }
+  .driver-name { font-size: 16px; font-weight: 700; color: #111827; }
+  .driver-sub { font-size: 13px; color: #6b7280; margin-top: 1px; }
+  .badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+  .badge-you { background: #d1fae5; color: #065f46; }
+
+  .time-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .time-chip {
+    flex: 1;
+    background: #f9fafb;
+    border-radius: 12px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .time-chip .icon { font-size: 16px; }
+  .time-chip .tc-label { font-size: 10px; color: #9ca3af; font-weight: 600; text-transform: uppercase; }
+  .time-chip .tc-val { font-size: 14px; font-weight: 700; color: #111827; }
+
+  .kids-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+  .kid-chip {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .confirm-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #2d6a4f, #40916c);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 13px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  /* Quick actions */
+  .quick-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .qa-btn {
+    background: white;
+    border: none;
+    border-radius: 16px;
+    padding: 14px 8px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  }
+  .qa-icon {
+    width: 38px; height: 38px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .qa-red { background: #fee2e2; }
+  .qa-yellow { background: #fef3c7; }
+  .qa-blue { background: #dbeafe; }
+  .qa-label { font-size: 11px; font-weight: 600; color: #374151; text-align: center; line-height: 1.2; }
+
+  /* Section */
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .section-title { font-size: 14px; font-weight: 700; color: #111827; }
+  .see-all { font-size: 12px; color: #2d6a4f; font-weight: 600; cursor: pointer; }
+
+  /* NEW Schedule */
+  .schedule-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .event-card {
+    background: white;
+    border-radius: 16px;
+    padding: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    display: flex;
+    gap: 12px;
+  }
+  .event-date {
+    width: 44px;
+    background: #f9fafb;
+    border-radius: 10px;
+    text-align: center;
+    padding: 8px 0;
+    flex-shrink: 0;
+    height: fit-content;
+  }
+  .event-day { font-size: 10px; color: #9ca3af; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+  .event-num { font-size: 18px; font-weight: 800; color: #111827; line-height: 1.1; margin-top: 1px; }
+  .event-body { flex: 1; min-width: 0; }
+  .event-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+  .event-times {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    font-size: 11px;
+    color: #6b7280;
+  }
+  .event-times .et-item { display: flex; align-items: center; gap: 3px; }
+  .event-times strong { color: #111827; font-weight: 700; }
+
+  .driver-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding-top: 10px;
+    border-top: 1px solid #f3f4f6;
+  }
+  .driver-tag {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+  }
+  .driver-tag-text { font-size: 12px; min-width: 0; }
+  .driver-tag-label {
+    font-size: 9px;
+    color: #9ca3af;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .driver-tag-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #111827;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Confirmed (someone signed up) */
+  .status-confirmed-pill {
+    background: #d1fae5;
+    color: #065f46;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    flex-shrink: 0;
+  }
+
+  /* You're driving */
+  .event-card.you-card {
+    background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 60%);
+    border: 1.5px solid #86efac;
+  }
+  .status-you-pill {
+    background: #2d6a4f;
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    flex-shrink: 0;
+  }
+
+  /* NEEDS DRIVER */
+  .event-card.open-card {
+    background: #fffbeb;
+    border: 1.5px dashed #f59e0b;
+  }
+  .open-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+  }
+  .open-icon {
+    width: 28px; height: 28px;
+    background: #fef3c7;
+    border: 1.5px dashed #f59e0b;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .open-text {
+    font-size: 12px;
+    font-weight: 700;
+    color: #92400e;
+  }
+  .open-sub {
+    font-size: 10px;
+    color: #b45309;
+    font-weight: 500;
+    margin-top: 1px;
+  }
+  .signup-btn {
+    background: #f59e0b;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 7px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(245,158,11,0.3);
+  }
+
+  /* Families */
+  .families-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .family-card {
+    background: white;
+    border-radius: 16px;
+    padding: 12px;
+    min-width: 90px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .family-av {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 700; color: white;
+  }
+  .family-name { font-size: 11px; font-weight: 600; color: #374151; text-align: center; }
+  .family-kids { font-size: 10px; color: #9ca3af; }
+
+  /* Bottom nav */
+  .bottom-nav {
+    background: white;
+    border-top: 1px solid #f3f4f6;
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0 4px;
+    margin: 8px 0 0;
+  }
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    cursor: pointer;
+    padding: 4px 12px;
+  }
+  .nav-icon { font-size: 20px; }
+  .nav-label { font-size: 10px; font-weight: 600; color: #9ca3af; }
+
+  /* Alert */
+  .alert-banner {
+    background: #fef3c7;
+    border-radius: 12px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    border: 1px solid #fde68a;
+  }
+  .alert-icon { font-size: 18px; }
+  .alert-text { font-size: 12px; color: #92400e; font-weight: 600; flex: 1; }
+  .alert-action { font-size: 12px; color: #d97706; font-weight: 700; cursor: pointer; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="greeting">Good morning,</div>
+        <div class="header-name">Sarah 👋</div>
+        <div class="pool-name">Maplewood Neighborhood Pool</div>
+      </div>
+      <div class="notif-btn">🔔<div class="notif-dot"></div></div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <div class="alert-banner">
+      <div class="alert-icon">⚠️</div>
+      <div class="alert-text">2 upcoming events still need a driver</div>
+      <div class="alert-action">View →</div>
+    </div>
+
+    <div class="today-card">
+      <div class="card-label">Today — Friday, Apr 17</div>
+      <div class="driver-row">
+        <div class="avatar avatar-green">S</div>
+        <div class="driver-info">
+          <div class="driver-name">10U Baseball Practice</div>
+          <div class="driver-sub">You're driving</div>
+        </div>
+        <div class="badge badge-you">YOU</div>
+      </div>
+      <div class="time-row">
+        <div class="time-chip">
+          <div class="icon">🚗</div>
+          <div>
+            <div class="tc-label">Pickup</div>
+            <div class="tc-val">3:30 PM</div>
+          </div>
+        </div>
+        <div class="time-chip">
+          <div class="icon">🏠</div>
+          <div>
+            <div class="tc-label">Dropoff</div>
+            <div class="tc-val">5:30 PM</div>
+          </div>
+        </div>
+      </div>
+      <div class="kids-row">
+        <div class="kid-chip">👧 Emma</div>
+        <div class="kid-chip">👦 Liam</div>
+        <div class="kid-chip">👧 Zoe</div>
+        <div class="kid-chip">👦 Noah</div>
+      </div>
+      <button class="confirm-btn">✓ &nbsp;Confirm I'm driving</button>
+    </div>
+
+    <div class="section-header">
+      <div class="section-title">Quick Actions</div>
+    </div>
+    <div class="quick-actions">
+      <button class="qa-btn">
+        <div class="qa-icon qa-red">🔄</div>
+        <div class="qa-label">Need a Sub</div>
+      </button>
+      <button class="qa-btn">
+        <div class="qa-icon qa-yellow">⏰</div>
+        <div class="qa-label">Running Late</div>
+      </button>
+      <button class="qa-btn">
+        <div class="qa-icon qa-blue">🚫</div>
+        <div class="qa-label">Kid Out Today</div>
+      </button>
+    </div>
+
+    <!-- REVISED Upcoming schedule -->
+    <div class="section-header">
+      <div class="section-title">Upcoming Schedule</div>
+      <div class="see-all">See all</div>
+    </div>
+    <div class="schedule-list">
+
+      <!-- Confirmed driver -->
+      <div class="event-card">
+        <div class="event-date">
+          <div class="event-day">Mon</div>
+          <div class="event-num">20</div>
+        </div>
+        <div class="event-body">
+          <div class="event-name">Soccer practice — U8 Tigers</div>
+          <div class="event-times">
+            <div class="et-item">🚗 <strong>4:00 PM</strong></div>
+            <div class="et-item">🏠 <strong>5:45 PM</strong></div>
+          </div>
+          <div class="driver-status">
+            <div class="driver-tag">
+              <div class="avatar-sm avatar-blue">C</div>
+              <div class="driver-tag-text">
+                <div class="driver-tag-label">Driver</div>
+                <div class="driver-tag-name">Mike Chen</div>
+              </div>
+            </div>
+            <div class="status-confirmed-pill">✓ Confirmed</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NEEDS DRIVER -->
+      <div class="event-card open-card">
+        <div class="event-date">
+          <div class="event-day">Tue</div>
+          <div class="event-num">21</div>
+        </div>
+        <div class="event-body">
+          <div class="event-name">Piano lessons</div>
+          <div class="event-times">
+            <div class="et-item">🚗 <strong>3:45 PM</strong></div>
+            <div class="et-item">🏠 <strong>5:00 PM</strong></div>
+          </div>
+          <div class="driver-status" style="border-color:#fde68a">
+            <div class="open-status">
+              <div class="open-icon">?</div>
+              <div>
+                <div class="open-text">Needs a driver</div>
+                <div class="open-sub">2 kids • Emma, Zoe</div>
+              </div>
+            </div>
+            <button class="signup-btn">Sign up</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- You're driving -->
+      <div class="event-card you-card">
+        <div class="event-date" style="background:white">
+          <div class="event-day">Wed</div>
+          <div class="event-num">22</div>
+        </div>
+        <div class="event-body">
+          <div class="event-name">10U Baseball practice</div>
+          <div class="event-times">
+            <div class="et-item">🚗 <strong>3:30 PM</strong></div>
+            <div class="et-item">🏠 <strong>5:30 PM</strong></div>
+          </div>
+          <div class="driver-status" style="border-color:#bbf7d0">
+            <div class="driver-tag">
+              <div class="avatar-sm avatar-green">S</div>
+              <div class="driver-tag-text">
+                <div class="driver-tag-label">Driver</div>
+                <div class="driver-tag-name">You</div>
+              </div>
+            </div>
+            <div class="status-you-pill">YOUR TURN</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NEEDS DRIVER -->
+      <div class="event-card open-card">
+        <div class="event-date">
+          <div class="event-day">Thu</div>
+          <div class="event-num">23</div>
+        </div>
+        <div class="event-body">
+          <div class="event-name">Girl Scouts meeting</div>
+          <div class="event-times">
+            <div class="et-item">🚗 <strong>5:30 PM</strong></div>
+            <div class="et-item">🏠 <strong>7:00 PM</strong></div>
+          </div>
+          <div class="driver-status" style="border-color:#fde68a">
+            <div class="open-status">
+              <div class="open-icon">?</div>
+              <div>
+                <div class="open-text">Needs a driver</div>
+                <div class="open-sub">3 kids • Emma, Zoe, Mia</div>
+              </div>
+            </div>
+            <button class="signup-btn">Sign up</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Confirmed driver -->
+      <div class="event-card">
+        <div class="event-date">
+          <div class="event-day">Fri</div>
+          <div class="event-num">24</div>
+        </div>
+        <div class="event-body">
+          <div class="event-name">Swim team practice</div>
+          <div class="event-times">
+            <div class="et-item">🚗 <strong>4:15 PM</strong></div>
+            <div class="et-item">🏠 <strong>6:00 PM</strong></div>
+          </div>
+          <div class="driver-status">
+            <div class="driver-tag">
+              <div class="avatar-sm avatar-purple">J</div>
+              <div class="driver-tag-text">
+                <div class="driver-tag-label">Driver</div>
+                <div class="driver-tag-name">Priya Johnson</div>
+              </div>
+            </div>
+            <div class="status-confirmed-pill">✓ Confirmed</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="section-header">
+      <div class="section-title">Your Pool Families</div>
+      <div class="see-all">Manage</div>
+    </div>
+    <div class="families-row">
+      <div class="family-card">
+        <div class="family-av avatar-green">S</div>
+        <div class="family-name">Martínez</div>
+        <div class="family-kids">Emma</div>
+      </div>
+      <div class="family-card">
+        <div class="family-av avatar-blue">C</div>
+        <div class="family-name">Chen</div>
+        <div class="family-kids">Liam</div>
+      </div>
+      <div class="family-card">
+        <div class="family-av avatar-orange">P</div>
+        <div class="family-name">Park</div>
+        <div class="family-kids">Zoe</div>
+      </div>
+      <div class="family-card">
+        <div class="family-av avatar-purple">J</div>
+        <div class="family-name">Johnson</div>
+        <div class="family-kids">Noah</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-item"><div class="nav-icon">🏠</div><div class="nav-label" style="color:#2d6a4f">Home</div></div>
+    <div class="nav-item"><div class="nav-icon">📅</div><div class="nav-label">Schedule</div></div>
+    <div class="nav-item"><div class="nav-icon">💬</div><div class="nav-label">Chat</div></div>
+    <div class="nav-item"><div class="nav-icon">👨‍👩‍👧</div><div class="nav-label">Pool</div></div>
+    <div class="nav-item"><div class="nav-icon">⚙️</div><div class="nav-label">Settings</div></div>
+  </div>
+</div>
+</body>
+</html>

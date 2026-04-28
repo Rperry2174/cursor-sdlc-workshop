@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #f0f4f8;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    gap: 30px;
+    flex-wrap: wrap;
+  }
+  .phone {
+    width: 375px;
+    background: #f8f9fb;
+    border-radius: 44px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.18), 0 0 0 2px #d1d5db;
+    overflow: hidden;
+    padding-bottom: 24px;
+    flex-shrink: 0;
+  }
+  .phone-label {
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #6b7280;
+  }
+  .phone-wrap { display: flex; flex-direction: column; }
+
+  .status-bar {
+    background: #1a1f2e;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 24px 10px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .header {
+    background: linear-gradient(135deg, #2d6a4f 0%, #1b4332 100%);
+    padding: 20px 20px 28px;
+    color: white;
+  }
+  .header-top { display: flex; justify-content: space-between; align-items: center; }
+  .greeting { font-size: 13px; opacity: 0.8; }
+  .header-name { font-size: 20px; font-weight: 700; }
+  .pool-name { font-size: 13px; opacity: 0.7; margin-top: 2px; }
+  .notif-btn {
+    width: 36px; height: 36px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    position: relative;
+  }
+  .notif-dot {
+    width: 8px; height: 8px;
+    background: #f59e0b;
+    border-radius: 50%;
+    position: absolute;
+    top: 4px; right: 4px;
+    border: 1.5px solid #1b4332;
+  }
+
+  .content { padding: 0 16px; margin-top: -14px; }
+
+  /* Today section */
+  .today-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 16px 4px 10px;
+  }
+  .today-label-text {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #6b7280;
+  }
+  .today-count {
+    font-size: 11px;
+    font-weight: 700;
+    color: #2d6a4f;
+    background: #d1fae5;
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+
+  .event-today-card {
+    background: white;
+    border-radius: 20px;
+    padding: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .event-today-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  .event-emoji {
+    width: 42px; height: 42px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .emoji-baseball { background: #fef3c7; }
+  .emoji-piano { background: #ede9fe; }
+  .event-today-info { flex: 1; min-width: 0; }
+  .event-today-name { font-size: 15px; font-weight: 700; color: #111827; }
+  .event-today-kids { font-size: 12px; color: #6b7280; margin-top: 2px; }
+
+  /* Leg row */
+  .leg-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    border-radius: 12px;
+    margin-bottom: 6px;
+  }
+  .leg-row:last-child { margin-bottom: 0; }
+  .leg-row-you { background: #f0fdf4; border: 1.5px solid #86efac; }
+  .leg-row-confirmed { background: #f9fafb; }
+  .leg-row-open { background: #fffbeb; border: 1.5px dashed #f59e0b; }
+
+  .leg-icon-wrap {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+    background: white;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  .leg-info { flex: 1; min-width: 0; }
+  .leg-label-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 2px;
+  }
+  .leg-direction {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #6b7280;
+  }
+  .leg-time {
+    font-size: 12px;
+    font-weight: 700;
+    color: #111827;
+  }
+  .leg-driver-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .leg-avatar-sm {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-weight: 700;
+    color: white;
+  }
+  .av-green { background: linear-gradient(135deg, #2d6a4f, #52b788); }
+  .av-blue { background: linear-gradient(135deg, #1d4ed8, #60a5fa); }
+  .av-purple { background: linear-gradient(135deg, #7c3aed, #a78bfa); }
+  .av-orange { background: linear-gradient(135deg, #c05621, #f6ad55); }
+  .leg-driver-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: #374151;
+  }
+  .check-mark {
+    color: #059669;
+    font-weight: 800;
+    font-size: 11px;
+  }
+  .leg-action {
+    flex-shrink: 0;
+  }
+  .confirm-leg-btn {
+    background: #2d6a4f;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .signup-leg-btn {
+    background: #f59e0b;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 1px 4px rgba(245,158,11,0.3);
+  }
+  .open-icon-q {
+    width: 18px; height: 18px;
+    background: #fef3c7;
+    border: 1.5px dashed #f59e0b;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    color: #92400e;
+    font-weight: 800;
+  }
+  .open-text-leg {
+    font-size: 12px;
+    font-weight: 700;
+    color: #92400e;
+  }
+
+  /* Bottom nav */
+  .bottom-nav {
+    background: white;
+    border-top: 1px solid #f3f4f6;
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0 4px;
+    margin: 8px 0 0;
+  }
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 4px 12px;
+  }
+  .nav-icon { font-size: 20px; }
+  .nav-label { font-size: 10px; font-weight: 600; color: #9ca3af; }
+
+  /* ============ CREATE GROUP SCREEN ============ */
+  .create-header {
+    background: white;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  .back-arrow {
+    font-size: 22px;
+    color: #6b7280;
+    width: 32px;
+  }
+  .create-title { font-size: 17px; font-weight: 700; color: #111827; }
+
+  .create-content { padding: 20px 16px; }
+
+  .create-intro {
+    margin-bottom: 18px;
+  }
+  .create-intro-h {
+    font-size: 22px;
+    font-weight: 800;
+    color: #111827;
+    margin-bottom: 6px;
+    line-height: 1.2;
+  }
+  .create-intro-sub {
+    font-size: 13px;
+    color: #6b7280;
+    line-height: 1.5;
+  }
+
+  .create-options { display: flex; flex-direction: column; gap: 12px; margin-bottom: 18px; }
+  .create-option {
+    background: white;
+    border-radius: 18px;
+    padding: 16px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  }
+  .create-option.recommended {
+    border-color: #2d6a4f;
+    background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 60%);
+  }
+  .create-option-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .option-icon {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .option-icon-green { background: #d1fae5; }
+  .option-icon-blue { background: #dbeafe; }
+
+  .option-title-wrap { flex: 1; }
+  .option-title { font-size: 15px; font-weight: 700; color: #111827; }
+  .option-tagline { font-size: 12px; color: #6b7280; margin-top: 1px; }
+  .recommended-pill {
+    background: #2d6a4f;
+    color: white;
+    font-size: 9px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+  }
+
+  .option-desc {
+    font-size: 12px;
+    color: #4b5563;
+    line-height: 1.4;
+    margin-bottom: 12px;
+  }
+  .sources-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .source-chip {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 5px 9px;
+    font-size: 10px;
+    font-weight: 600;
+    color: #374151;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .source-icon { font-size: 11px; }
+
+  .manual-features {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .feature-line {
+    font-size: 11px;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .feature-dot { color: #2d6a4f; font-weight: 700; }
+
+  /* Footer note */
+  .footer-note {
+    background: #eff6ff;
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .footer-icon { font-size: 16px; flex-shrink: 0; }
+  .footer-text { font-size: 11px; color: #1e40af; line-height: 1.4; }
+  .footer-text strong { font-weight: 700; }
+
+</style>
+</head>
+<body>
+
+<!-- ============ PHONE 1: HOME WITH NEW TODAY CARD ============ -->
+<div class="phone-wrap">
+<div class="phone-label">Home — Today Card</div>
+<div class="phone">
+  <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="greeting">Good morning,</div>
+        <div class="header-name">Sarah 👋</div>
+        <div class="pool-name">Maplewood Neighborhood Pool</div>
+      </div>
+      <div class="notif-btn">🔔<div class="notif-dot"></div></div>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="today-label">
+      <div class="today-label-text">Today — Friday, Apr 17</div>
+      <div class="today-count">2 events</div>
+    </div>
+
+    <!-- Event 1: Baseball -->
+    <div class="event-today-card">
+      <div class="event-today-header">
+        <div class="event-emoji emoji-baseball">⚾</div>
+        <div class="event-today-info">
+          <div class="event-today-name">10U Baseball Practice</div>
+          <div class="event-today-kids">Emma, Liam, Zoe, Noah · Riverside Field</div>
+        </div>
+      </div>
+
+      <!-- Leg 1: Drop-off (You) -->
+      <div class="leg-row leg-row-you">
+        <div class="leg-icon-wrap">🚗</div>
+        <div class="leg-info">
+          <div class="leg-label-row">
+            <span class="leg-direction">Drop-off → field</span>
+            <span class="leg-time">3:30 PM</span>
+          </div>
+          <div class="leg-driver-row">
+            <div class="leg-avatar-sm av-green">S</div>
+            <div class="leg-driver-name">You're driving</div>
+          </div>
+        </div>
+        <div class="leg-action">
+          <button class="confirm-leg-btn">✓ Confirm</button>
+        </div>
+      </div>
+
+      <!-- Leg 2: Pick-up (Mike) -->
+      <div class="leg-row leg-row-confirmed">
+        <div class="leg-icon-wrap">🏡</div>
+        <div class="leg-info">
+          <div class="leg-label-row">
+            <span class="leg-direction">Pick-up → home</span>
+            <span class="leg-time">5:30 PM</span>
+          </div>
+          <div class="leg-driver-row">
+            <div class="leg-avatar-sm av-blue">C</div>
+            <div class="leg-driver-name">Mike Chen</div>
+            <span class="check-mark">✓</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Event 2: Piano -->
+    <div class="event-today-card">
+      <div class="event-today-header">
+        <div class="event-emoji emoji-piano">🎹</div>
+        <div class="event-today-info">
+          <div class="event-today-name">Piano Lessons</div>
+          <div class="event-today-kids">Emma, Zoe · Mrs. Park's Studio</div>
+        </div>
+      </div>
+
+      <!-- Leg 1: Drop-off (Priya) -->
+      <div class="leg-row leg-row-confirmed">
+        <div class="leg-icon-wrap">🚗</div>
+        <div class="leg-info">
+          <div class="leg-label-row">
+            <span class="leg-direction">Drop-off → studio</span>
+            <span class="leg-time">3:45 PM</span>
+          </div>
+          <div class="leg-driver-row">
+            <div class="leg-avatar-sm av-purple">J</div>
+            <div class="leg-driver-name">Priya Johnson</div>
+            <span class="check-mark">✓</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Leg 2: Pick-up (OPEN) -->
+      <div class="leg-row leg-row-open">
+        <div class="leg-icon-wrap">🏡</div>
+        <div class="leg-info">
+          <div class="leg-label-row">
+            <span class="leg-direction">Pick-up → home</span>
+            <span class="leg-time">5:00 PM</span>
+          </div>
+          <div class="leg-driver-row">
+            <div class="open-icon-q">?</div>
+            <div class="open-text-leg">Needs a driver</div>
+          </div>
+        </div>
+        <div class="leg-action">
+          <button class="signup-leg-btn">Sign up</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-item"><div class="nav-icon">🏠</div><div class="nav-label" style="color:#2d6a4f">Home</div></div>
+    <div class="nav-item"><div class="nav-icon">📅</div><div class="nav-label">Schedule</div></div>
+    <div class="nav-item"><div class="nav-icon">💬</div><div class="nav-label">Chat</div></div>
+    <div class="nav-item"><div class="nav-icon">👨‍👩‍👧</div><div class="nav-label">Pool</div></div>
+    <div class="nav-item"><div class="nav-icon">⚙️</div><div class="nav-label">Settings</div></div>
+  </div>
+</div>
+</div>
+
+<!-- ============ PHONE 2: CREATE A GROUP ============ -->
+<div class="phone-wrap">
+<div class="phone-label">Create a Group Flow</div>
+<div class="phone">
+  <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+
+  <div class="create-header">
+    <div class="back-arrow">←</div>
+    <div class="create-title">New Group</div>
+  </div>
+
+  <div class="create-content">
+    <div class="create-intro">
+      <div class="create-intro-h">Start a new carpool group</div>
+      <div class="create-intro-sub">Set up the group first, then invite other parents to join with a code or link.</div>
+    </div>
+
+    <div class="create-options">
+
+      <!-- Option 1: Sync (Recommended) -->
+      <div class="create-option recommended">
+        <div class="create-option-header">
+          <div class="option-icon option-icon-green">🔄</div>
+          <div class="option-title-wrap">
+            <div class="option-title">Sync a team schedule</div>
+            <div class="option-tagline">Best for sports & recurring activities</div>
+          </div>
+          <div class="recommended-pill">Recommended</div>
+        </div>
+        <div class="option-desc">
+          Auto-import every practice, game, and event. Updates automatically when the schedule changes.
+        </div>
+        <div class="sources-row">
+          <div class="source-chip"><span class="source-icon">🏟️</span> TeamSnap</div>
+          <div class="source-chip"><span class="source-icon">⚾</span> GameChanger</div>
+          <div class="source-chip"><span class="source-icon">🏆</span> SportsEngine</div>
+          <div class="source-chip"><span class="source-icon">📅</span> Google Cal</div>
+          <div class="source-chip"><span class="source-icon">📅</span> Apple Cal</div>
+          <div class="source-chip"><span class="source-icon">📎</span> .ics file</div>
+        </div>
+      </div>
+
+      <!-- Option 2: Manual -->
+      <div class="create-option">
+        <div class="create-option-header">
+          <div class="option-icon option-icon-blue">✏️</div>
+          <div class="option-title-wrap">
+            <div class="option-title">Create manually</div>
+            <div class="option-tagline">Best for any activity</div>
+          </div>
+        </div>
+        <div class="option-desc">
+          Name the group, add events one at a time, and invite parents.
+        </div>
+        <div class="manual-features">
+          <div class="feature-line"><span class="feature-dot">•</span> Set a group name (e.g. "10U Baseball")</div>
+          <div class="feature-line"><span class="feature-dot">•</span> Add a kid + activity location</div>
+          <div class="feature-line"><span class="feature-dot">•</span> Create one-time or repeating events</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="footer-note">
+      <div class="footer-icon">🔗</div>
+      <div class="footer-text">
+        <strong>You'll get an invite code & link</strong> to share with other parents once your group is set up.
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #f0f4f8;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    gap: 30px;
+    flex-wrap: wrap;
+  }
+  .phone {
+    width: 375px;
+    height: 800px;
+    background: #f8f9fb;
+    border-radius: 44px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.18), 0 0 0 2px #d1d5db;
+    overflow: hidden;
+    flex-shrink: 0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .phone-label {
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #6b7280;
+  }
+  .phone-wrap { display: flex; flex-direction: column; }
+
+  /* Avatars */
+  .av-green { background: linear-gradient(135deg, #2d6a4f, #52b788); }
+  .av-blue { background: linear-gradient(135deg, #1d4ed8, #60a5fa); }
+  .av-purple { background: linear-gradient(135deg, #7c3aed, #a78bfa); }
+  .av-orange { background: linear-gradient(135deg, #c05621, #f6ad55); }
+  .av-teal { background: linear-gradient(135deg, #0d9488, #5eead4); }
+  .av-pink { background: linear-gradient(135deg, #db2777, #f472b6); }
+  .av-amber { background: linear-gradient(135deg, #b45309, #fbbf24); }
+
+  .status-bar {
+    background: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 24px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    flex-shrink: 0;
+    color: #111827;
+  }
+
+  .screen-header {
+    background: white;
+    padding: 10px 16px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #f3f4f6;
+    flex-shrink: 0;
+  }
+  .header-back { font-size: 22px; color: #6b7280; cursor: pointer; }
+  .header-title { font-size: 15px; font-weight: 700; color: #111827; }
+  .header-spacer { width: 22px; }
+
+  .scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+  }
+
+  .primary-btn {
+    background: linear-gradient(135deg, #2d6a4f, #40916c);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    padding: 14px;
+    font-size: 14px;
+    font-weight: 700;
+    width: 100%;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(45,106,79,0.3);
+  }
+  .ghost-btn {
+    background: transparent;
+    color: #6b7280;
+    border: none;
+    padding: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    width: 100%;
+    cursor: pointer;
+  }
+
+  .footer-action {
+    background: white;
+    padding: 14px 16px;
+    border-top: 1px solid #f3f4f6;
+    flex-shrink: 0;
+  }
+
+  /* ==================== PHONE 1: BLACKOUT FLOW ==================== */
+
+  .type-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  .type-card {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .type-card.selected {
+    border-color: #2d6a4f;
+    background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 60%);
+  }
+  .type-emoji {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+  .type-card.selected .type-emoji { background: #d1fae5; }
+  .type-text { flex: 1; }
+  .type-name { font-size: 12px; font-weight: 700; color: #111827; }
+  .type-sub { font-size: 10px; color: #9ca3af; }
+
+  .calendar-card {
+    background: white;
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  }
+  .cal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .cal-month { font-size: 14px; font-weight: 700; color: #111827; }
+  .cal-nav {
+    display: flex;
+    gap: 8px;
+  }
+  .cal-arrow {
+    width: 26px; height: 26px;
+    border-radius: 8px;
+    background: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    color: #6b7280;
+    cursor: pointer;
+  }
+
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+  }
+  .cal-dow {
+    text-align: center;
+    font-size: 10px;
+    font-weight: 700;
+    color: #9ca3af;
+    text-transform: uppercase;
+    padding: 6px 0;
+  }
+  .cal-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: #374151;
+    cursor: pointer;
+    position: relative;
+    border-radius: 50%;
+  }
+  .cal-day.muted { color: #d1d5db; }
+  .cal-day.in-range {
+    background: #d1fae5;
+    border-radius: 0;
+    color: #065f46;
+  }
+  .cal-day.range-start, .cal-day.range-end {
+    background: #2d6a4f;
+    color: white;
+    border-radius: 50%;
+    z-index: 1;
+  }
+  .cal-day.range-start::before {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 50%;
+    background: #d1fae5;
+    z-index: -1;
+  }
+  .cal-day.range-end::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 50%;
+    background: #d1fae5;
+    z-index: -1;
+  }
+
+  .name-input {
+    background: white;
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  }
+  .input-label-tiny {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #9ca3af;
+    margin-bottom: 4px;
+  }
+  .input-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #111827;
+  }
+
+  .affected-card {
+    background: #fffbeb;
+    border: 1.5px solid #fde68a;
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 14px;
+  }
+  .affected-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .affected-title { font-size: 13px; font-weight: 700; color: #92400e; flex: 1; }
+  .affected-pill {
+    background: #fde68a;
+    color: #78350f;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 3px 7px;
+    border-radius: 8px;
+  }
+  .affected-list {
+    background: white;
+    border-radius: 10px;
+    padding: 0 12px;
+  }
+  .affected-item {
+    padding: 8px 0;
+    border-bottom: 1px solid #f3f4f6;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+  }
+  .affected-item:last-child { border-bottom: none; }
+  .affected-date {
+    font-size: 11px;
+    font-weight: 800;
+    color: #92400e;
+    width: 56px;
+    flex-shrink: 0;
+  }
+  .affected-info { flex: 1; min-width: 0; }
+  .affected-name { font-size: 12px; font-weight: 600; color: #111827; }
+  .affected-leg { font-size: 10px; color: #9ca3af; }
+
+  .auto-sub-row {
+    background: white;
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  }
+  .auto-emoji { font-size: 22px; }
+  .auto-text { flex: 1; }
+  .auto-title { font-size: 13px; font-weight: 700; color: #111827; }
+  .auto-sub { font-size: 11px; color: #6b7280; margin-top: 2px; line-height: 1.3; }
+  .toggle {
+    width: 38px;
+    height: 22px;
+    background: #d1d5db;
+    border-radius: 22px;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .toggle.on { background: #2d6a4f; }
+  .toggle::after {
+    content: "";
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    background: white;
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+  }
+  .toggle.on::after { left: 18px; }
+
+  /* ==================== PHONE 2: POST-DECLINE STATUS ==================== */
+
+  .urgency-banner {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    border: 2px solid #fca5a5;
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .urgency-icon {
+    width: 44px; height: 44px;
+    background: white;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .urgency-text { flex: 1; }
+  .urgency-eyebrow {
+    font-size: 10px;
+    font-weight: 800;
+    color: #991b1b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .urgency-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: #7f1d1d;
+    margin-top: 2px;
+    line-height: 1.2;
+  }
+  .urgency-sub {
+    font-size: 11px;
+    color: #991b1b;
+    margin-top: 2px;
+    line-height: 1.3;
+  }
+
+  .request-summary {
+    background: white;
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  }
+  .req-emoji {
+    width: 38px; height: 38px;
+    background: #fef3c7;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+  .req-info { flex: 1; }
+  .req-name { font-size: 13px; font-weight: 700; color: #111827; }
+  .req-meta { font-size: 11px; color: #6b7280; margin-top: 1px; }
+
+  .section-mini-title {
+    font-size: 11px;
+    font-weight: 800;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin: 4px 4px 8px;
+  }
+
+  .response-list {
+    background: white;
+    border-radius: 14px;
+    padding: 0 14px;
+    margin-bottom: 18px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  }
+  .response-row {
+    padding: 11px 0;
+    border-bottom: 1px solid #f3f4f6;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .response-row:last-child { border-bottom: none; }
+  .resp-av {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+  }
+  .resp-info { flex: 1; min-width: 0; }
+  .resp-name { font-size: 13px; font-weight: 700; color: #111827; }
+  .resp-status { font-size: 11px; color: #6b7280; margin-top: 1px; }
+  .resp-status-pill {
+    font-size: 10px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 10px;
+    flex-shrink: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .pill-declined { background: #fee2e2; color: #991b1b; }
+  .pill-noresp { background: #f3f4f6; color: #6b7280; }
+
+  .next-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .option-btn {
+    background: white;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 12px 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-align: left;
+  }
+  .option-btn.recommended {
+    border-color: #2d6a4f;
+    background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 60%);
+  }
+  .opt-icon {
+    width: 36px; height: 36px;
+    background: #f3f4f6;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .option-btn.recommended .opt-icon { background: #d1fae5; }
+  .opt-text { flex: 1; }
+  .opt-title { font-size: 13px; font-weight: 700; color: #111827; }
+  .opt-sub { font-size: 11px; color: #6b7280; margin-top: 1px; line-height: 1.3; }
+  .opt-chevron { color: #9ca3af; font-size: 16px; flex-shrink: 0; }
+
+  /* ==================== PHONE 3: ORGANIZER BALANCE ==================== */
+
+  .balance-stat-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .balance-stat {
+    background: white;
+    border-radius: 14px;
+    padding: 12px 8px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  }
+  .bs-num {
+    font-size: 22px;
+    font-weight: 800;
+    color: #111827;
+    line-height: 1;
+  }
+  .bs-num.warn { color: #d97706; }
+  .bs-num.good { color: #2d6a4f; }
+  .bs-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-top: 6px;
+  }
+
+  .open-warn-card {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 1.5px solid #fcd34d;
+    border-radius: 14px;
+    padding: 12px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .open-warn-icon { font-size: 20px; }
+  .open-warn-text { flex: 1; font-size: 12px; color: #92400e; line-height: 1.3; }
+  .open-warn-text strong { font-weight: 800; color: #78350f; }
+  .open-warn-btn {
+    background: #92400e;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 11px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .balance-section {
+    background: white;
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  }
+  .balance-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .balance-title { font-size: 13px; font-weight: 700; color: #111827; }
+  .balance-period {
+    font-size: 10px;
+    background: #f3f4f6;
+    color: #6b7280;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 8px;
+  }
+  .fair-line-label {
+    font-size: 10px;
+    color: #6b7280;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .fair-tick {
+    display: inline-block;
+    width: 1.5px;
+    height: 10px;
+    background: #6b7280;
+    margin: 0 2px;
+  }
+
+  .parent-bar-row {
+    margin-bottom: 14px;
+  }
+  .parent-bar-row:last-child { margin-bottom: 0; }
+  .pbar-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .pbar-av {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+  }
+  .pbar-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: #111827;
+    flex: 1;
+  }
+  .pbar-org-tag {
+    font-size: 8px;
+    font-weight: 800;
+    background: #d1fae5;
+    color: #065f46;
+    padding: 1px 5px;
+    border-radius: 5px;
+    margin-left: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .pbar-count {
+    font-size: 12px;
+    font-weight: 800;
+    color: #111827;
+  }
+  .pbar-delta {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 6px;
+    margin-left: 4px;
+  }
+  .delta-over { background: #fee2e2; color: #991b1b; }
+  .delta-under { background: #fef3c7; color: #92400e; }
+  .delta-fair { background: #d1fae5; color: #065f46; }
+
+  .pbar-track {
+    position: relative;
+    height: 12px;
+    background: #f3f4f6;
+    border-radius: 6px;
+    overflow: visible;
+  }
+  .pbar-fill {
+    height: 100%;
+    border-radius: 6px;
+  }
+  .fill-over { background: linear-gradient(90deg, #f97316, #dc2626); }
+  .fill-under { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
+  .fill-fair { background: linear-gradient(90deg, #34d399, #2d6a4f); }
+
+  .fair-marker {
+    position: absolute;
+    top: -3px;
+    width: 2px;
+    height: 18px;
+    background: #1f2937;
+    border-radius: 1px;
+  }
+  .fair-marker::after {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -3px;
+    width: 8px;
+    height: 8px;
+    background: #1f2937;
+    transform: rotate(45deg);
+  }
+
+  .nudge-action-row {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+  }
+  .nudge-btn {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    color: #374151;
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .nudge-btn.primary {
+    background: #2d6a4f;
+    color: white;
+    border-color: #2d6a4f;
+  }
+
+  /* ==================== PHONE 4: PROFILE / FAMILY SETUP ==================== */
+
+  .profile-intro {
+    margin-bottom: 16px;
+  }
+  .profile-h1 {
+    font-size: 24px;
+    font-weight: 800;
+    color: #111827;
+    line-height: 1.2;
+    margin-bottom: 4px;
+  }
+  .profile-sub {
+    font-size: 13px;
+    color: #6b7280;
+    line-height: 1.4;
+  }
+
+  .you-card {
+    background: white;
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  }
+  .you-av {
+    width: 50px; height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+  }
+  .you-info { flex: 1; }
+  .you-label { font-size: 10px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.4px; }
+  .you-name { font-size: 15px; font-weight: 700; color: #111827; margin-top: 1px; }
+  .you-detail { font-size: 11px; color: #6b7280; margin-top: 2px; }
+  .you-edit { font-size: 12px; color: #2d6a4f; font-weight: 700; }
+
+  .kids-section-title {
+    font-size: 11px;
+    font-weight: 800;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin: 4px 4px 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .kids-count {
+    background: #d1fae5;
+    color: #065f46;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: 8px;
+  }
+
+  .kid-card {
+    background: white;
+    border-radius: 18px;
+    padding: 14px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  }
+  .kid-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .kid-photo {
+    width: 56px; height: 56px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .kid-photo-edit {
+    position: absolute;
+    bottom: -3px;
+    right: -3px;
+    width: 22px;
+    height: 22px;
+    background: white;
+    border: 2px solid white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: #2d6a4f;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  .kid-info { flex: 1; min-width: 0; }
+  .kid-name {
+    font-size: 16px;
+    font-weight: 800;
+    color: #111827;
+    line-height: 1.1;
+  }
+  .kid-meta {
+    font-size: 12px;
+    color: #6b7280;
+    margin-top: 3px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .kid-meta-dot {
+    width: 3px; height: 3px;
+    background: #d1d5db;
+    border-radius: 50%;
+  }
+  .kid-edit-btn {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    background: #f9fafb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6b7280;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .activity-section {
+    border-top: 1px solid #f3f4f6;
+    padding-top: 12px;
+  }
+  .activity-label {
+    font-size: 10px;
+    font-weight: 800;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+  .activity-chips {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .activity-chip {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 18px;
+    padding: 5px 10px 5px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #065f46;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .activity-chip-emoji {
+    font-size: 13px;
+  }
+  .add-activity-chip {
+    background: white;
+    border: 1.5px dashed #d1d5db;
+    border-radius: 18px;
+    padding: 5px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+  }
+
+  .add-kid-card {
+    background: white;
+    border: 1.5px dashed #d1d5db;
+    border-radius: 18px;
+    padding: 16px;
+    text-align: center;
+    cursor: pointer;
+  }
+  .add-kid-icon {
+    width: 44px; height: 44px;
+    background: #f0fdf4;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    margin: 0 auto 6px;
+    color: #2d6a4f;
+  }
+  .add-kid-text { font-size: 13px; font-weight: 700; color: #2d6a4f; }
+  .add-kid-sub { font-size: 11px; color: #9ca3af; margin-top: 2px; }
+
+</style>
+</head>
+<body>
+
+<!-- ============ PHONE 1: BLACKOUT FLOW ============ -->
+<div class="phone-wrap">
+<div class="phone-label">A · Blackout date setup</div>
+<div class="phone">
+  <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+
+  <div class="screen-header">
+    <div class="header-back">←</div>
+    <div class="header-title">Add Blackout Dates</div>
+    <div class="header-spacer"></div>
+  </div>
+
+  <div class="scroll-area">
+
+    <div class="type-row">
+      <div class="type-card selected">
+        <div class="type-emoji">🏖️</div>
+        <div class="type-text">
+          <div class="type-name">Vacation</div>
+          <div class="type-sub">Out of town</div>
+        </div>
+      </div>
+      <div class="type-card">
+        <div class="type-emoji">💼</div>
+        <div class="type-text">
+          <div class="type-name">Work travel</div>
+          <div class="type-sub">Business trip</div>
+        </div>
+      </div>
+      <div class="type-card">
+        <div class="type-emoji">🤒</div>
+        <div class="type-text">
+          <div class="type-name">Sick</div>
+          <div class="type-sub">Recovering</div>
+        </div>
+      </div>
+      <div class="type-card">
+        <div class="type-emoji">✏️</div>
+        <div class="type-text">
+          <div class="type-name">Other</div>
+          <div class="type-sub">Custom reason</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="calendar-card">
+      <div class="cal-header">
+        <div class="cal-month">May 2026</div>
+        <div class="cal-nav">
+          <div class="cal-arrow">‹</div>
+          <div class="cal-arrow">›</div>
+        </div>
+      </div>
+      <div class="cal-grid">
+        <div class="cal-dow">S</div>
+        <div class="cal-dow">M</div>
+        <div class="cal-dow">T</div>
+        <div class="cal-dow">W</div>
+        <div class="cal-dow">T</div>
+        <div class="cal-dow">F</div>
+        <div class="cal-dow">S</div>
+
+        <div class="cal-day muted">26</div>
+        <div class="cal-day muted">27</div>
+        <div class="cal-day muted">28</div>
+        <div class="cal-day muted">29</div>
+        <div class="cal-day muted">30</div>
+        <div class="cal-day">1</div>
+        <div class="cal-day">2</div>
+
+        <div class="cal-day">3</div>
+        <div class="cal-day">4</div>
+        <div class="cal-day">5</div>
+        <div class="cal-day">6</div>
+        <div class="cal-day">7</div>
+        <div class="cal-day">8</div>
+        <div class="cal-day">9</div>
+
+        <div class="cal-day">10</div>
+        <div class="cal-day">11</div>
+        <div class="cal-day">12</div>
+        <div class="cal-day">13</div>
+        <div class="cal-day">14</div>
+        <div class="cal-day range-start">15</div>
+        <div class="cal-day in-range">16</div>
+
+        <div class="cal-day in-range">17</div>
+        <div class="cal-day in-range">18</div>
+        <div class="cal-day in-range">19</div>
+        <div class="cal-day in-range">20</div>
+        <div class="cal-day in-range">21</div>
+        <div class="cal-day range-end">22</div>
+        <div class="cal-day">23</div>
+
+        <div class="cal-day">24</div>
+        <div class="cal-day">25</div>
+        <div class="cal-day">26</div>
+        <div class="cal-day">27</div>
+        <div class="cal-day">28</div>
+        <div class="cal-day">29</div>
+        <div class="cal-day">30</div>
+      </div>
+    </div>
+
+    <div class="name-input">
+      <div class="input-label-tiny">Note (optional)</div>
+      <div class="input-value">Family beach trip 🏖️</div>
+    </div>
+
+    <div class="affected-card">
+      <div class="affected-header">
+        <div class="affected-title">Affected commitments</div>
+        <div class="affected-pill">3 slots</div>
+      </div>
+      <div class="affected-list">
+        <div class="affected-item">
+          <div class="affected-date">May 18</div>
+          <div class="affected-info">
+            <div class="affected-name">10U Baseball — Pick-up</div>
+            <div class="affected-leg">Mon · Riverside Field · 5:30 PM</div>
+          </div>
+        </div>
+        <div class="affected-item">
+          <div class="affected-date">May 20</div>
+          <div class="affected-info">
+            <div class="affected-name">10U Baseball — Pick-up</div>
+            <div class="affected-leg">Wed · Riverside Field · 5:30 PM</div>
+          </div>
+        </div>
+        <div class="affected-item">
+          <div class="affected-date">May 22</div>
+          <div class="affected-info">
+            <div class="affected-name">Piano — Drop-off</div>
+            <div class="affected-leg">Fri · Mrs. Park's Studio · 3:45 PM</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="auto-sub-row">
+      <div class="auto-emoji">✨</div>
+      <div class="auto-text">
+        <div class="auto-title">Auto-find subs</div>
+        <div class="auto-sub">Send sub requests for these 3 slots when blackout saves</div>
+      </div>
+      <div class="toggle on"></div>
+    </div>
+
+  </div>
+
+  <div class="footer-action">
+    <button class="primary-btn">Save Blackout (May 15–22)</button>
+  </div>
+</div>
+</div>
+
+<!-- ============ PHONE 2: POST-DECLINE STATUS ============ -->
+<div class="phone-wrap">
+<div class="phone-label">B · Sub request — no one accepted</div>
+<div class="phone">
+  <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+
+  <div class="screen-header">
+    <div class="header-back">←</div>
+    <div class="header-title">Sub Request Status</div>
+    <div class="header-spacer"></div>
+  </div>
+
+  <div class="scroll-area">
+
+    <div class="urgency-banner">
+      <div class="urgency-icon">⏰</div>
+      <div class="urgency-text">
+        <div class="urgency-eyebrow">No driver yet</div>
+        <div class="urgency-title">Event in 6 hours</div>
+        <div class="urgency-sub">2 declined · 1 hasn't responded · You're still on the hook unless someone covers</div>
+      </div>
+    </div>
+
+    <div class="request-summary">
+      <div class="req-emoji">⚾</div>
+      <div class="req-info">
+        <div class="req-name">Practice — Today</div>
+        <div class="req-meta">Drop-off → field · 3:30 PM · 4 kids</div>
+      </div>
+    </div>
+
+    <div class="section-mini-title">Responses (sent 1h ago)</div>
+    <div class="response-list">
+      <div class="response-row">
+        <div class="resp-av av-blue">C</div>
+        <div class="resp-info">
+          <div class="resp-name">Mike Chen</div>
+          <div class="resp-status">"At work until 4 — sorry!" · 42m ago</div>
+        </div>
+        <div class="resp-status-pill pill-declined">Declined</div>
+      </div>
+      <div class="response-row">
+        <div class="resp-av av-purple">J</div>
+        <div class="resp-info">
+          <div class="resp-name">Priya Johnson</div>
+          <div class="resp-status">No reason given · 18m ago</div>
+        </div>
+        <div class="resp-status-pill pill-declined">Declined</div>
+      </div>
+      <div class="response-row">
+        <div class="resp-av av-teal">A</div>
+        <div class="resp-info">
+          <div class="resp-name">Alex Patel</div>
+          <div class="resp-status">Notification opened · waiting</div>
+        </div>
+        <div class="resp-status-pill pill-noresp">No reply</div>
+      </div>
+    </div>
+
+    <div class="section-mini-title">What now?</div>
+    <div class="next-options">
+
+      <div class="option-btn recommended">
+        <div class="opt-icon">📣</div>
+        <div class="opt-text">
+          <div class="opt-title">Send a reminder ping</div>
+          <div class="opt-sub">Push notify Alex (the only undecided parent)</div>
+        </div>
+        <div class="opt-chevron">›</div>
+      </div>
+
+      <div class="option-btn">
+        <div class="opt-icon">🔗</div>
+        <div class="opt-text">
+          <div class="opt-title">Share request outside the group</div>
+          <div class="opt-sub">Text or email a friend or family member</div>
+        </div>
+        <div class="opt-chevron">›</div>
+      </div>
+
+      <div class="option-btn">
+        <div class="opt-icon">📞</div>
+        <div class="opt-text">
+          <div class="opt-title">Contact organizer</div>
+          <div class="opt-sub">Sarah Martínez can reassign or cancel the leg</div>
+        </div>
+        <div class="opt-chevron">›</div>
+      </div>
+
+      <div class="option-btn" style="border-color:#fecaca">
+        <div class="opt-icon" style="background:#fee2e2;">⚠️</div>
+        <div class="opt-text">
+          <div class="opt-title" style="color:#991b1b">Cancel my commitment</div>
+          <div class="opt-sub">Last resort — kids may not have a ride</div>
+        </div>
+        <div class="opt-chevron">›</div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- ============ PHONE 3: ORGANIZER BALANCE ============ -->
+<div class="phone-wrap">
+<div class="phone-label">C · Organizer — season balance</div>
+<div class="phone">
+  <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+
+  <div class="screen-header">
+    <div class="header-back">←</div>
+    <div class="header-title">Driving Load</div>
+    <div class="header-spacer"></div>
+  </div>
+
+  <div class="scroll-area">
+
+    <div class="balance-stat-row">
+      <div class="balance-stat">
+        <div class="bs-num good">42</div>
+        <div class="bs-label">Claimed</div>
+      </div>
+      <div class="balance-stat">
+        <div class="bs-num warn">18</div>
+        <div class="bs-label">Open</div>
+      </div>
+      <div class="balance-stat">
+        <div class="bs-num">10.5</div>
+        <div class="bs-label">Fair Share</div>
+      </div>
+    </div>
+
+    <div class="open-warn-card">
+      <div class="open-warn-icon">⚠️</div>
+      <div class="open-warn-text">
+        <strong>18 slots</strong> still need a driver this season
+      </div>
+      <button class="open-warn-btn">View</button>
+    </div>
+
+    <div class="balance-section">
+      <div class="balance-header">
+        <div class="balance-title">By parent</div>
+        <div class="balance-period">Full season</div>
+      </div>
+      <div class="fair-line-label">
+        <span class="fair-tick"></span> Fair share = 10.5 slots / parent
+      </div>
+
+      <!-- Sarah - overcommitted -->
+      <div class="parent-bar-row">
+        <div class="pbar-meta">
+          <div class="pbar-av av-green">S</div>
+          <div class="pbar-name">Sarah Martínez<span class="pbar-org-tag">Org</span></div>
+          <div class="pbar-count">18</div>
+          <div class="pbar-delta delta-over">+7</div>
+        </div>
+        <div class="pbar-track">
+          <div class="pbar-fill fill-over" style="width: 90%"></div>
+          <div class="fair-marker" style="left: 52%"></div>
+        </div>
+      </div>
+
+      <!-- Priya - slightly over -->
+      <div class="parent-bar-row">
+        <div class="pbar-meta">
+          <div class="pbar-av av-purple">J</div>
+          <div class="pbar-name">Priya Johnson</div>
+          <div class="pbar-count">12</div>
+          <div class="pbar-delta delta-fair">+1</div>
+        </div>
+        <div class="pbar-track">
+          <div class="pbar-fill fill-fair" style="width: 60%"></div>
+          <div class="fair-marker" style="left: 52%"></div>
+        </div>
+      </div>
+
+      <!-- Mike - slightly under -->
+      <div class="parent-bar-row">
+        <div class="pbar-meta">
+          <div class="pbar-av av-blue">C</div>
+          <div class="pbar-name">Mike Chen</div>
+          <div class="pbar-count">8</div>
+          <div class="pbar-delta delta-fair">-2</div>
+        </div>
+        <div class="pbar-track">
+          <div class="pbar-fill fill-fair" style="width: 40%"></div>
+          <div class="fair-marker" style="left: 52%"></div>
+        </div>
+      </div>
+
+      <!-- Alex - way under -->
+      <div class="parent-bar-row">
+        <div class="pbar-meta">
+          <div class="pbar-av av-teal">A</div>
+          <div class="pbar-name">Alex Patel</div>
+          <div class="pbar-count">4</div>
+          <div class="pbar-delta delta-under">-6</div>
+        </div>
+        <div class="pbar-track">
+          <div class="pbar-fill fill-under" style="width: 20%"></div>
+          <div class="fair-marker" style="left: 52%"></div>
+        </div>
+        <div class="nudge-action-row">
+          <button class="nudge-btn primary">📣 Nudge to claim more</button>
+          <button class="nudge-btn">⇄ Suggest swap</button>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- ============ PHONE 4: FAMILY PROFILE SETUP ============ -->
+<div class="phone-wrap">
+<div class="phone-label">D · Profile — set up your family</div>
+<div class="phone">
+  <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+
+  <div class="screen-header">
+    <div class="header-back">←</div>
+    <div class="header-title">My Family</div>
+    <div class="header-spacer"></div>
+  </div>
+
+  <div class="scroll-area">
+
+    <div class="profile-intro">
+      <div class="profile-h1">Set up your family</div>
+      <div class="profile-sub">Add your kids and the activities they need rides for. You can edit anytime.</div>
+    </div>
+
+    <div class="you-card">
+      <div class="you-av av-teal">A</div>
+      <div class="you-info">
+        <div class="you-label">You</div>
+        <div class="you-name">Alex Patel</div>
+        <div class="you-detail">📱 (555) 234-1198 · ✉️ alex.patel@gmail.com</div>
+      </div>
+      <div class="you-edit">Edit</div>
+    </div>
+
+    <div class="kids-section-title">
+      <span>Your kids</span>
+      <span class="kids-count">2 added</span>
+    </div>
+
+    <!-- Kid 1: Lucas -->
+    <div class="kid-card">
+      <div class="kid-header">
+        <div class="kid-photo av-amber">
+          L
+          <div class="kid-photo-edit">📷</div>
+        </div>
+        <div class="kid-info">
+          <div class="kid-name">Lucas Patel</div>
+          <div class="kid-meta">
+            <span>9 years old</span>
+            <span class="kid-meta-dot"></span>
+            <span>Maplewood Elementary</span>
+          </div>
+        </div>
+        <div class="kid-edit-btn">✏️</div>
+      </div>
+      <div class="activity-section">
+        <div class="activity-label">Activities</div>
+        <div class="activity-chips">
+          <div class="activity-chip">
+            <span class="activity-chip-emoji">⚾</span> 10U Baseball — Tigers
+          </div>
+          <div class="activity-chip">
+            <span class="activity-chip-emoji">🏕️</span> Scouts Troop 47
+          </div>
+          <div class="add-activity-chip">＋ Add activity</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Kid 2: Mia -->
+    <div class="kid-card">
+      <div class="kid-header">
+        <div class="kid-photo av-pink">
+          M
+          <div class="kid-photo-edit">📷</div>
+        </div>
+        <div class="kid-info">
+          <div class="kid-name">Mia Patel</div>
+          <div class="kid-meta">
+            <span>7 years old</span>
+            <span class="kid-meta-dot"></span>
+            <span>Maplewood Elementary</span>
+          </div>
+        </div>
+        <div class="kid-edit-btn">✏️</div>
+      </div>
+      <div class="activity-section">
+        <div class="activity-label">Activities</div>
+        <div class="activity-chips">
+          <div class="activity-chip">
+            <span class="activity-chip-emoji">🎹</span> Piano Lessons
+          </div>
+          <div class="add-activity-chip">＋ Add activity</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add child -->
+    <div class="add-kid-card">
+      <div class="add-kid-icon">👶</div>
+      <div class="add-kid-text">＋ Add another child</div>
+      <div class="add-kid-sub">Name, age, photo, and their activities</div>
+    </div>
+
+  </div>
+
+  <div class="footer-action">
+    <button class="primary-btn">Save & Continue</button>
+  </div>
+</div>
+</div>
+
+</body>
+</html>
