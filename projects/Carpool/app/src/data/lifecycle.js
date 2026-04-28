@@ -579,11 +579,43 @@ export async function fetchIcs(url) {
 export function importIcsForTeam({ source, team_id, parsed }) {
   const data = db();
   if (!parsed) return { added: 0, updated: 0, cancelled: 0 };
-  const { events: incoming, skipped } = parsed;
+  const { skipped } = parsed;
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  const incoming = (parsed.events || []).filter(
+    (event) => new Date(event.start).getTime() >= todayStart.getTime(),
+  );
+  const skippedPast = (parsed.events || []).length - incoming.length;
 
   let added = 0;
   let updated = 0;
   let cancelled = 0;
+
+  // If a previous import accidentally pulled historical feed entries, remove
+  // those local imported events now. Parents care about the operational window:
+  // today forward. This only touches events from this schedule source.
+  const pastEventIds = data.events
+    .filter(
+      (event) =>
+        event.source === source.id &&
+        new Date(event.start_at).getTime() < todayStart.getTime(),
+    )
+    .map((event) => event.id);
+  if (pastEventIds.length > 0) {
+    const pastLegIds = data.carpool_legs
+      .filter((leg) => pastEventIds.includes(leg.event_id))
+      .map((leg) => leg.id);
+    data.events = data.events.filter((event) => !pastEventIds.includes(event.id));
+    data.carpool_legs = data.carpool_legs.filter((leg) => !pastLegIds.includes(leg.id));
+    data.seats = data.seats.filter((seat) => !pastLegIds.includes(seat.leg_id));
+    data.ride_status_events = data.ride_status_events.filter(
+      (status) => !pastLegIds.includes(status.leg_id),
+    );
+    data.sub_requests = data.sub_requests.filter((request) => !pastLegIds.includes(request.leg_id));
+    data.notifications = data.notifications.filter(
+      (notification) => !pastLegIds.includes(notification.leg_id),
+    );
+  }
 
   for (const inc of incoming) {
     const existing = data.events.find(
@@ -663,7 +695,14 @@ export function importIcsForTeam({ source, team_id, parsed }) {
   });
   persist();
 
-  return { added, updated, cancelled, skipped };
+  return {
+    added,
+    updated,
+    cancelled,
+    removedPast: pastEventIds.length,
+    skippedPast,
+    skipped,
+  };
 }
 
 function spawnDefaultLegs({ event_id, start, end, location, defaults }) {

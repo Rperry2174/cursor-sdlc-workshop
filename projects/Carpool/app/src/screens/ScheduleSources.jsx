@@ -222,11 +222,19 @@ export function AddScheduleSource({ teamId, prefillUrl, ctx }) {
         icsText = await fetchIcs(url.trim());
       }
       const parsed = parseIcs(icsText, { horizonDays: 120 });
-      const eligible = parsed.events.filter((e) => !e.cancelled);
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      const eligible = parsed.events.filter(
+        (e) => !e.cancelled && new Date(e.start).getTime() >= todayStart.getTime(),
+      );
       if (eligible.length === 0) {
         throw new Error("We parsed the feed but didn't find any upcoming events.");
       }
-      setPreview({ ...parsed, eligible });
+      setPreview({
+        ...parsed,
+        eligible,
+        skippedPast: parsed.events.length - eligible.length,
+      });
       if (!name.trim()) {
         setName(parsed.calendar?.name || 'Imported schedule');
       }
@@ -253,6 +261,7 @@ export function AddScheduleSource({ teamId, prefillUrl, ctx }) {
       const parts = [];
       if (result.added) parts.push(`${result.added} events`);
       if (result.updated) parts.push(`${result.updated} updated`);
+      if (result.removedPast) parts.push(`${result.removedPast} past removed`);
       ctx.showToast(`Imported ${parts.join(' · ') || '0 events'} from ${src.name}`);
       ctx.navigate('schedule');
       return;
@@ -433,6 +442,11 @@ export function AddScheduleSource({ teamId, prefillUrl, ctx }) {
               {preview.calendar?.name && (
                 <div style={{ fontSize: 13, color: 'var(--gray-700)', marginTop: 4 }}>
                   from <strong>{preview.calendar.name}</strong>
+                </div>
+              )}
+              {preview.skippedPast > 0 && (
+                <div className="muted" style={{ fontSize: 12, marginTop: 6 }}>
+                  Ignoring {preview.skippedPast} past event{preview.skippedPast === 1 ? '' : 's'}.
                 </div>
               )}
               <div
