@@ -31,7 +31,7 @@ set search_path = public
 as $$
 declare
   v_caller_parent_id uuid := auth_parent_id();
-  v_inserted bool := false;
+  v_inserted_count int := 0;
 begin
   if auth.uid() is null then
     raise exception 'add_coparent_to_child requires an authenticated user';
@@ -70,11 +70,11 @@ begin
   insert into parent_children (parent_id, child_id)
   values (p_parent_id, p_child_id)
   on conflict (parent_id, child_id) do nothing;
-  get diagnostics v_inserted = ROW_COUNT;
+  get diagnostics v_inserted_count = ROW_COUNT;
 
   return jsonb_build_object(
     'ok', true,
-    'inserted', v_inserted > 0,
+    'inserted', v_inserted_count > 0,
     'parent_id', p_parent_id,
     'child_id', p_child_id
   );
