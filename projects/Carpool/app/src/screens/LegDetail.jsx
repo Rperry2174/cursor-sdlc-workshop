@@ -24,6 +24,7 @@ import {
   claimLegBackend,
   loadBackendLegDetail,
   notifyTeamLegChange,
+  openSubRequestForLegBackend,
   releaseLegBackend,
   seatKidBackend,
   subscribeToCarpoolLegs,
@@ -60,10 +61,10 @@ export function LegDetail({ legId, ctx }) {
     return <BackendLegDetail legId={legId} ctx={ctx} />;
   }
 
-  return <LocalLegDetail legId={legId} leg={localLeg} event={localEvent} me={me} ctx={ctx} />;
+  return <LocalLegDetail leg={localLeg} event={localEvent} me={me} ctx={ctx} />;
 }
 
-function LocalLegDetail({ legId, leg, event, me, ctx }) {
+function LocalLegDetail({ leg, event, me, ctx }) {
   const [signUpOpen, setSignUpOpen] = useState(false);
   const [assignOpen, setAssignOpen] = useState(false);
   const [emergencyOpen, setEmergencyOpen] = useState(false);
@@ -77,7 +78,6 @@ function LocalLegDetail({ legId, leg, event, me, ctx }) {
     getCoParentsForChild(k.id).some((p) => p.id === me.id),
   );
   const isDriver = leg.driver_id === me.id;
-  const isOpen = !leg.driver_id;
   const isCancelled = leg.status === 'cancelled';
   const openSub = getOpenSubRequestForLeg(leg.id);
 
@@ -607,7 +607,7 @@ function EmergencySheet({ open, onClose, legId, meId, ctx }) {
   );
 }
 
-function estimateRecurringCount(eventIso) {
+function estimateRecurringCount() {
   // Count how many same-DOW occurrences we'd cover until end of season (~12 weeks).
   return 12;
 }
@@ -625,6 +625,8 @@ function estimateRecurringCount(eventIso) {
 function BackendLegDetail({ legId, ctx }) {
   const [state, setState] = useState({ status: 'loading', data: null, reason: null });
   const [busy, setBusy] = useState(false);
+  const [subSheetOpen, setSubSheetOpen] = useState(false);
+  const [subReason, setSubReason] = useState('');
 
   const refresh = async () => {
     const result = await loadBackendLegDetail(legId);
@@ -688,7 +690,6 @@ function BackendLegDetail({ legId, ctx }) {
   const { parent, leg, event, driver, seatedKids, myKids } = state.data;
   const seatsLeft = (leg.seat_capacity || 0) - (state.data.seats?.length || 0);
   const isDriver = leg.driver_id === parent.id;
-  const isOpen = !leg.driver_id;
   const isCancelled = leg.status === 'cancelled';
   const myKidsInLeg = seatedKids.filter((k) => myKids.some((mk) => mk.id === k.id));
   const seatableMyKids = myKids.filter((mk) => !seatedKids.some((sk) => sk.id === mk.id));
@@ -725,11 +726,13 @@ function BackendLegDetail({ legId, ctx }) {
 
   const addKidHere = async (kid) => {
     setBusy(true);
-    const result = await seatKidBackend({ legId: leg.id, childId: kid.id, parentId: parent.id });
+    const result = await seatKidBackend({ legId: leg.id, childId: kid.id });
     setBusy(false);
     if (result.ok) {
       ctx.showToast(`${kid.name} added to this ride`);
       refresh();
+    } else if (result.reason === 'full') {
+      ctx.showToast('This car is full — no seats left');
     } else {
       ctx.showToast(`Could not add ${kid.name}: ${result.reason || 'unknown error'}`);
     }
@@ -744,6 +747,29 @@ function BackendLegDetail({ legId, ctx }) {
       refresh();
     } else {
       ctx.showToast(`Could not remove ${kid.name}: ${result.reason || 'unknown error'}`);
+    }
+  };
+
+  const requestSubHere = async () => {
+    setBusy(true);
+    const result = await openSubRequestForLegBackend({
+      legId: leg.id,
+      reason: subReason,
+      emergency: false,
+    });
+    setBusy(false);
+    if (result.ok) {
+      setSubSheetOpen(false);
+      setSubReason('');
+      ctx.showToast('Sub request sent — your team was notified');
+      notifyTeamLegChange(leg.id, 'released').catch((err) =>
+        console.warn('notifyTeamLegChange failed:', err),
+      );
+      refresh();
+    } else if (result.reason === 'requires_emergency') {
+      ctx.showToast('Too close to departure — contact your team or use emergency options.');
+    } else {
+      ctx.showToast(`Could not open sub request: ${result.reason || 'unknown error'}`);
     }
   };
 
@@ -813,15 +839,26 @@ function BackendLegDetail({ legId, ctx }) {
             </div>
           )}
           {isDriver && !isCancelled && (
-            <button
-              type="button"
-              className="btn btn-ghost"
-              style={{ marginTop: 12, color: 'var(--red-text)' }}
-              onClick={releaseHere}
-              disabled={busy}
-            >
-              Release this leg
-            </button>
+            <div style={{ marginTop: 12, display: 'grid', gap: 8 }}>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                style={{ width: '100%' }}
+                onClick={() => setSubSheetOpen(true)}
+                disabled={busy}
+              >
+                Need a sub — notify team
+              </button>
+              <button
+                type="button"
+                className="btn btn-ghost"
+                style={{ color: 'var(--red-text)' }}
+                onClick={releaseHere}
+                disabled={busy}
+              >
+                Release this leg (no sub request)
+              </button>
+            </div>
           )}
         </div>
 
@@ -902,6 +939,39 @@ function BackendLegDetail({ legId, ctx }) {
           </div>
         )}
       </div>
+
+      <Sheet open={subSheetOpen} onClose={() => setSubSheetOpen(false)}>
+        <div style={{ padding: '4px 4px 12px' }}>
+          <div className="h2" style={{ marginBottom: 6 }}>
+            Ask for a sub
+          </div>
+          <div className="muted" style={{ fontSize: 13, marginBottom: 12 }}>
+            You will be removed as driver and teammates get a notification so someone else can claim this leg.
+          </div>
+          <label className="field">
+            Reason (optional)
+            <textarea
+              className="input"
+              rows={3}
+              value={subReason}
+              onChange={(e) => setSubReason(e.target.value)}
+              style={{ marginTop: 6, resize: 'vertical' }}
+            />
+          </label>
+          <button
+            type="button"
+            className="btn btn-primary"
+            style={{ marginTop: 14, width: '100%' }}
+            onClick={requestSubHere}
+            disabled={busy}
+          >
+            {busy ? 'Sending…' : 'Send sub request'}
+          </button>
+          <button type="button" className="btn btn-ghost" style={{ marginTop: 8 }} onClick={() => setSubSheetOpen(false)}>
+            Cancel
+          </button>
+        </div>
+      </Sheet>
     </>
   );
 }

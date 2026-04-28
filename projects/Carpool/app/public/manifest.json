@@ -1,0 +1,10 @@
+{
+  "name": "Kinpala Carpool",
+  "short_name": "Kinpala",
+  "description": "Team carpool coordination for busy families",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8faf8",
+  "theme_color": "#1b4332",
+  "icons": []
+}

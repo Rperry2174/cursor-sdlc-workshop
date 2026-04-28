@@ -26,7 +26,11 @@ import {
   claimLegBackend,
   notifyTeamLegChange,
   subscribeToCarpoolLegs,
+  openSubRequestForLegBackend,
+  markChildAbsenceBackend,
+  seatKidBackend,
 } from '../data/operationalBackend.js';
+import { capture } from '../data/analytics.js';
 import { Avatar } from '../components/Avatar.jsx';
 import { Sheet } from '../components/Sheet.jsx';
 
@@ -242,7 +246,10 @@ function buildBackendLookups(backend) {
     legsByEventId.get(l.event_id).push(l);
   }
   for (const arr of legsByEventId.values()) {
-    arr.sort((a, b) => (a.direction === 'to_event' ? -1 : 1));
+    arr.sort((a, b) => {
+      if (a.direction === b.direction) return 0;
+      return a.direction === 'to_event' ? -1 : 1;
+    });
   }
 
   const seatsByLegId = new Map();
@@ -258,12 +265,29 @@ function buildBackendLookups(backend) {
   if (backend.parent) parentsById.set(backend.parent.id, normalizeParent(backend.parent));
   for (const p of backend.parents || []) parentsById.set(p.id, normalizeParent(p));
 
+  const childrenById = new Map();
+  const myChildren = backend.myChildren || [];
+  for (const c of myChildren) {
+    childrenById.set(c.id, { ...c, photo: c.photo || c.photo_url });
+  }
+
+  const teamIdSet = new Set(backend.teamIds || []);
+  const childTeamKeys = new Set(
+    (backend.childTeams || []).map((ct) => `${ct.team_id}:${ct.child_id}`),
+  );
+
   return {
     eventsById,
     legsById,
     legsByEventId,
     seatsByLegId,
     parentsById,
+    childrenById,
+    myChildren,
+    teamIdSet,
+    childTeamKeys,
+    rawSubRequests: backend.subRequests || [],
+    subResponseCounts: backend.subResponseCounts || {},
     parent: backend.parent || null,
     events: backend.events || [],
     legs: backend.legs || [],
@@ -281,11 +305,17 @@ function getLegsForEventBE(eventId, lookups) {
 
 function getKidsInLegBE(legId, lookups) {
   if (lookups) {
-    // Backend mode does not load children; we surface seat-level
-    // placeholders so kid counts and seat-count math still work, but
-    // names will be empty until a future slice loads child data.
     const seats = lookups.seatsByLegId.get(legId) || [];
-    return seats.map((s) => ({ id: s.child_id, name: '' }));
+    return seats.map((s) => {
+      const c = lookups.childrenById.get(s.child_id);
+      return {
+        id: s.child_id,
+        name: c?.name || '',
+        age: c?.age,
+        avatar_color: c?.avatar_color,
+        photo: c?.photo,
+      };
+    });
   }
   return getKidsInLeg(legId);
 }
@@ -339,6 +369,86 @@ function myUpcomingDrivingBackend(lookups) {
     .sort((a, b) => a.departure_time.localeCompare(b.departure_time));
 }
 
+function myUpcomingSeatsBackend(lookups, hoursAhead = 36) {
+  const myKidIdSet = new Set((lookups.myChildren || []).map((c) => c.id));
+  if (myKidIdSet.size === 0) return [];
+  const now = Date.now();
+  const horizon = now + hoursAhead * 60 * 60 * 1000;
+  const rows = [];
+  for (const leg of lookups.legs) {
+    const t = new Date(leg.departure_time).getTime();
+    if (t < now - 30 * 60 * 1000 || t > horizon) continue;
+    if (leg.status === 'cancelled' || leg.status === 'completed') continue;
+    const event = lookups.eventsById.get(leg.event_id);
+    if (!event) continue;
+    for (const seat of lookups.seatsByLegId.get(leg.id) || []) {
+      if (!myKidIdSet.has(seat.child_id)) continue;
+      const child = lookups.childrenById.get(seat.child_id);
+      if (!child) continue;
+      const driver = leg.driver_id ? getParentBE(leg.driver_id, lookups) : null;
+      rows.push({ seat, leg, event, child, driver });
+    }
+  }
+  rows.sort((a, b) => a.leg.departure_time.localeCompare(b.leg.departure_time));
+  return rows;
+}
+
+function nextKidTripBackend(lookups) {
+  const myId = lookups.parent.id;
+  const myKidIdSet = new Set((lookups.myChildren || []).map((c) => c.id));
+  if (myKidIdSet.size === 0) return null;
+  const now = Date.now();
+  const lower = now - 15 * 60 * 1000;
+  const upper = now + 36 * 60 * 60 * 1000;
+  const candidates = [];
+  for (const leg of lookups.legs) {
+    if (!leg.driver_id || leg.driver_id === myId) continue;
+    const t = new Date(leg.departure_time).getTime();
+    if (t < lower || t > upper) continue;
+    if (leg.status === 'cancelled' || leg.status === 'completed') continue;
+    const event = lookups.eventsById.get(leg.event_id);
+    if (!event) continue;
+    for (const seat of lookups.seatsByLegId.get(leg.id) || []) {
+      if (!myKidIdSet.has(seat.child_id)) continue;
+      const child = lookups.childrenById.get(seat.child_id);
+      if (!child) continue;
+      const driver = getParentBE(leg.driver_id, lookups);
+      candidates.push({ leg, event, child, driver, seat });
+    }
+  }
+  candidates.sort((a, b) => a.leg.departure_time.localeCompare(b.leg.departure_time));
+  return candidates[0] || null;
+}
+
+function joinableLegsBackend(lookups, hoursAhead = 14 * 24) {
+  const myKids = lookups.myChildren || [];
+  if (myKids.length === 0) return [];
+  const now = Date.now();
+  const horizon = now + hoursAhead * 60 * 60 * 1000;
+  const rows = [];
+  for (const leg of lookups.legs) {
+    const t = new Date(leg.departure_time).getTime();
+    if (t < now + 30 * 60 * 1000 || t > horizon) continue;
+    if (leg.status === 'cancelled' || leg.status === 'completed' || leg.status === 'in_progress') {
+      continue;
+    }
+    const event = lookups.eventsById.get(leg.event_id);
+    if (!event?.team_id) continue;
+    const seats = lookups.seatsByLegId.get(leg.id) || [];
+    const seatsLeft = (leg.seat_capacity || 4) - seats.length;
+    if (seatsLeft <= 0 && leg.driver_id) continue;
+    const driver = leg.driver_id ? getParentBE(leg.driver_id, lookups) : null;
+    for (const kid of myKids) {
+      if (seats.some((s) => s.child_id === kid.id)) continue;
+      const key = `${event.team_id}:${kid.id}`;
+      if (!lookups.childTeamKeys.has(key)) continue;
+      rows.push({ leg, event, kid, driver, seatsLeft });
+    }
+  }
+  rows.sort((a, b) => a.leg.departure_time.localeCompare(b.leg.departure_time));
+  return rows;
+}
+
 /* ------------------------------------------------------------------ */
 /* Pretty "leaves in" countdown                                        */
 /* ------------------------------------------------------------------ */
@@ -355,13 +465,22 @@ function leavesIn(iso) {
   return `${d}d ${h % 24}h`;
 }
 
+/** Minutes from wall-clock now until `iso` (for cancel windows, sheets). */
+function minutesFromNow(iso) {
+  return Math.round((new Date(iso).getTime() - Date.now()) / 60000);
+}
+
+/** Whole hours since an ISO timestamp (for "sent Xh ago" labels). */
+function hoursSinceIso(iso) {
+  return Math.round((Date.now() - new Date(iso).getTime()) / 3_600_000);
+}
+
 /* ================================================================== */
 /* Main screen                                                         */
 /* ================================================================== */
 
 export function Today({ ctx }) {
   const me = getCurrentParent();
-  const myKidIds = useMemo(() => getKidsForParent(me.id).map((k) => k.id), [me.id]);
 
   const [, force] = useState(0);
   useEffect(() => {
@@ -419,6 +538,11 @@ export function Today({ ctx }) {
     [backendState],
   );
 
+  const myKidIds = useMemo(
+    () => (lookups ? (lookups.myChildren || []).map((k) => k.id) : getKidsForParent(me.id).map((k) => k.id)),
+    [me.id, lookups],
+  );
+
   // Sheets (kept from previous version so behavior is preserved)
   const [needSubOpen, setNeedSubOpen] = useState(false);
   const [needSubLegId, setNeedSubLegId] = useState(null);
@@ -430,24 +554,30 @@ export function Today({ ctx }) {
 
   const myUpcomingDriving = useMemo(() => {
     if (lookups) return myUpcomingDrivingBackend(lookups);
+    // Wall-clock window for "your next drive" — intentionally live.
+    // eslint-disable-next-line react-hooks/purity -- Date.now() for relative time window
+    const now = Date.now();
     return db()
       .carpool_legs.filter(
         (l) =>
           l.driver_id === me.id &&
-          new Date(l.departure_time).getTime() > Date.now() - 15 * 60 * 1000 &&
-          new Date(l.departure_time).getTime() < Date.now() + 36 * 60 * 60 * 1000 &&
+          new Date(l.departure_time).getTime() > now - 15 * 60 * 1000 &&
+          new Date(l.departure_time).getTime() < now + 36 * 60 * 60 * 1000 &&
           (l.status === 'filled' || l.status === 'in_progress'),
       )
       .sort((a, b) => a.departure_time.localeCompare(b.departure_time));
   }, [me.id, lookups]);
 
-  // myUpcomingSeats and joinableLegs depend on knowing which children
-  // belong to me — backend mode does not load parent_children/children
-  // in this slice, so we leave these on the local store. Sheets that
-  // consume them therefore continue to operate on local data, which
-  // is the explicit requirement for this agent.
-  const myUpcomingSeats = useMemo(() => getUpcomingSeatsForMyKids(me.id, 36), [me.id]);
-  const joinableLegs = useMemo(() => getJoinableLegsForMyKids(me.id, 14 * 24), [me.id]);
+  // myUpcomingSeats / joinableLegs / nextKidTrip: backend mode uses
+  // operational payload (children + seats + child_teams).
+  const myUpcomingSeats = useMemo(
+    () => (lookups ? myUpcomingSeatsBackend(lookups) : getUpcomingSeatsForMyKids(me.id, 36)),
+    [me.id, lookups],
+  );
+  const joinableLegs = useMemo(
+    () => (lookups ? joinableLegsBackend(lookups) : getJoinableLegsForMyKids(me.id, 14 * 24)),
+    [me.id, lookups],
+  );
 
   // The hero: my soonest upcoming drive (within 36 hrs)
   const nextDrive = myUpcomingDriving[0] || null;
@@ -458,7 +588,7 @@ export function Today({ ctx }) {
   // falls through to NoNextDriveCard in that case.
   const nextKidTrip = useMemo(() => {
     if (nextDrive) return null;
-    if (lookups) return null;
+    if (lookups) return nextKidTripBackend(lookups);
     const eligible = myUpcomingSeats
       .filter((row) => row.leg.driver_id && row.leg.driver_id !== me.id)
       .sort((a, b) => a.leg.departure_time.localeCompare(b.leg.departure_time));
@@ -513,6 +643,16 @@ export function Today({ ctx }) {
 
   // Outstanding sub requests I'M waiting on (no responses yet)
   const myStalledSubs = useMemo(() => {
+    if (lookups) {
+      const counts = lookups.subResponseCounts || {};
+      return (lookups.rawSubRequests || []).filter((s) => {
+        if (s.requested_by !== lookups.parent.id) return false;
+        if (s.status !== 'open') return false;
+        if ((counts[s.id] || 0) > 0) return false;
+        const hourOld = hoursSinceIso(s.created_at);
+        return hourOld > 0;
+      });
+    }
     const data = db();
     return (data.sub_requests || []).filter((s) => {
       if (s.requested_by !== me.id) return false;
@@ -520,14 +660,22 @@ export function Today({ ctx }) {
       const responses = (data.sub_request_responses || []).filter(
         (r) => r.sub_request_id === s.id,
       );
-      const hourOld = (Date.now() - new Date(s.created_at).getTime()) / 3_600_000;
+      const hourOld = hoursSinceIso(s.created_at);
       return responses.length === 0 && hourOld > 0;
     });
-  }, [me.id]);
+  }, [me.id, lookups]);
 
-  // Inbound sub requests targeted to me
   const myTeams = getTeamsForParent(me.id);
   const inboundSubs = useMemo(() => {
+    if (lookups) {
+      return (lookups.rawSubRequests || []).filter((s) => {
+        if (s.requested_by === lookups.parent.id) return false;
+        const leg = lookups.legsById.get(s.leg_id);
+        if (!leg) return false;
+        const ev = lookups.eventsById.get(leg.event_id);
+        return ev && lookups.teamIdSet.has(ev.team_id);
+      });
+    }
     const all = [];
     for (const t of myTeams) {
       for (const s of getOpenSubRequestsForTeam(t.id)) {
@@ -535,7 +683,7 @@ export function Today({ ctx }) {
       }
     }
     return all;
-  }, [me.id, myTeams.length]);
+  }, [me.id, myTeams, lookups]);
 
   return (
     <>
@@ -595,7 +743,7 @@ export function Today({ ctx }) {
           }}
         />
       ) : nextKidTrip ? (
-        <KidsNextTripCard row={nextKidTrip} meId={me.id} ctx={ctx} />
+        <KidsNextTripCard row={nextKidTrip} ctx={ctx} lookups={lookups} />
       ) : (
         <NoNextDriveCard ctx={ctx} />
       )}
@@ -631,7 +779,7 @@ export function Today({ ctx }) {
 
       {/* ---------- Attention card (only when there is something) ---------- */}
       {myStalledSubs.map((sub) => (
-        <AttentionCard key={sub.id} sub={sub} meId={me.id} ctx={ctx} />
+        <AttentionCard key={sub.id} sub={sub} ctx={ctx} />
       ))}
 
       {/* ---------- Footer with the rarely-needed actions ---------- */}
@@ -661,8 +809,42 @@ export function Today({ ctx }) {
         onPickLeg={setNeedSubLegId}
         reason={needSubReason}
         onChangeReason={setNeedSubReason}
-        onSubmit={() => {
+        onSubmit={async () => {
           if (!needSubLegId) return;
+          if (lookups) {
+            const r = await openSubRequestForLegBackend({
+              legId: needSubLegId,
+              reason: needSubReason,
+              emergency: false,
+            });
+            setNeedSubOpen(false);
+            if (r.skipped) {
+              const localR = releaseLeg(needSubLegId, me.id, { reason: needSubReason });
+              if (localR.ok && localR.mode === 'released_with_sub_request') {
+                ctx.showToast('Sub request sent to your team');
+              } else if (localR.reason === 'requires_emergency') {
+                ctx.showToast('Within 30 min — open this leg to mark it an emergency');
+                ctx.navigate('leg', { legId: needSubLegId });
+              } else {
+                ctx.showToast(`Could not release: ${localR.reason}`);
+              }
+              return;
+            }
+            if (r.ok) {
+              capture('sub_requested', { leg_id: needSubLegId, backend: true });
+              ctx.showToast('Sub request sent to your team');
+              refreshBackend();
+              notifyTeamLegChange(needSubLegId, 'released').catch((err) =>
+                console.warn('notifyTeamLegChange failed:', err),
+              );
+            } else if (r.reason === 'requires_emergency') {
+              ctx.showToast('Within 30 min — open this leg to mark it an emergency');
+              ctx.navigate('leg', { legId: needSubLegId });
+            } else {
+              ctx.showToast(`Could not open sub request: ${r.reason || 'unknown error'}`);
+            }
+            return;
+          }
           const r = releaseLeg(needSubLegId, me.id, { reason: needSubReason });
           setNeedSubOpen(false);
           if (r.ok && r.mode === 'released_with_sub_request') {
@@ -720,8 +902,34 @@ export function Today({ ctx }) {
         open={kidOutOpen}
         onClose={() => setKidOutOpen(false)}
         rows={myUpcomingSeats}
-        meId={me.id}
-        onRemove={(eventRows, reason) => {
+        onRemove={async (eventRows, reason) => {
+          if (lookups && eventRows.length > 0) {
+            const first = eventRows[0];
+            const onDate = first.leg.departure_time.slice(0, 10);
+            const r = await markChildAbsenceBackend({
+              childId: first.child.id,
+              onDate,
+              absent: true,
+              reason,
+            });
+            setKidOutOpen(false);
+            if (r.skipped) {
+              ctx.showToast('Sign in to update rides on the Kinpala backend');
+              return;
+            }
+            if (r.ok) {
+              const kid = first.child.name;
+              const evtName = first.event.title;
+              const reasonText = reason ? ` — ${reason.toLowerCase()}` : '';
+              ctx.showToast(
+                `${kid} marked out for ${onDate} on ${evtName}${reasonText} (${r.seatsRemoved ?? 0} seat(s))`,
+              );
+              refreshBackend();
+            } else {
+              ctx.showToast(`Could not update: ${r.reason || 'unknown error'}`);
+            }
+            return;
+          }
           const undos = [];
           let blocked = false;
           for (const row of eventRows) {
@@ -753,7 +961,43 @@ export function Today({ ctx }) {
         open={addKidOpen}
         onClose={() => setAddKidOpen(false)}
         rows={joinableLegs}
-        onAdd={(row) => {
+        onAdd={async (row) => {
+          if (lookups) {
+            const r = await seatKidBackend({ legId: row.leg.id, childId: row.kid.id });
+            setAddKidOpen(false);
+            if (r.skipped) {
+              const localR = seatKid(row.leg.id, row.kid.id, me.id);
+              if (localR.ok) {
+                ctx.showToast(`${row.kid.name} added to ${row.event.title}`, {
+                  action: {
+                    label: 'Undo',
+                    onAction: () => {
+                      unseatKid(row.leg.id, row.kid.id, me.id);
+                      ctx.showToast(`${row.kid.name} removed`);
+                    },
+                  },
+                });
+              } else if (localR.reason === 'already_seated') {
+                ctx.showToast(`${row.kid.name} is already in this carpool`);
+              } else if (localR.reason === 'no_seats') {
+                ctx.showToast('No seats left in that car');
+              } else {
+                ctx.showToast(`Could not add: ${localR.reason}`);
+              }
+              return;
+            }
+            if (r.ok) {
+              ctx.showToast(`${row.kid.name} added to ${row.event.title}`);
+              refreshBackend();
+            } else if (r.reason === 'full') {
+              ctx.showToast('No seats left in that car');
+            } else if (r.reason === 'already_seated') {
+              ctx.showToast(`${row.kid.name} is already in this carpool`);
+            } else {
+              ctx.showToast(`Could not add: ${r.reason || 'unknown error'}`);
+            }
+            return;
+          }
           const r = seatKid(row.leg.id, row.kid.id, me.id);
           setAddKidOpen(false);
           if (r.ok) {
@@ -874,7 +1118,7 @@ function NextDriveCard({ leg, ctx, meId, onSub, onLate, lookups }) {
   // buildStopChain reads parent_children + per-parent home_address out
   // of the local store, neither of which we load in backend mode this
   // slice — so the route mini-timeline is omitted in that case.
-  const chain = useMemo(() => (lookups ? null : buildStopChain(leg)), [leg.id, lookups]);
+  const chain = useMemo(() => (lookups ? null : buildStopChain(leg)), [leg, lookups]);
   const inProgress = leg.status === 'in_progress';
   const isToEvent = leg.direction === 'to_event';
 
@@ -1088,10 +1332,10 @@ function NoNextDriveCard({ ctx }) {
 /* "Your kids' next trip" — when someone else is driving               */
 /* ================================================================== */
 
-function KidsNextTripCard({ row, meId, ctx }) {
+function KidsNextTripCard({ row, ctx, lookups }) {
   const { leg, event, child, driver } = row;
   const isToEvent = leg.direction === 'to_event';
-  const chain = useMemo(() => buildStopChain(leg), [leg.id]);
+  const chain = useMemo(() => (lookups ? null : buildStopChain(leg)), [leg, lookups]);
 
   // Find the stop in the chain that matches MY kid (if any).
   // The chain labels stops as "Pick up [name]" / "Drop off [name]".
@@ -1115,7 +1359,7 @@ function KidsNextTripCard({ row, meId, ctx }) {
     : event?.location?.split(',')[0] || 'event location';
 
   // All kids of mine on this leg (rare, but possible — e.g., siblings)
-  const allKidsOnLeg = getKidsInLeg(leg.id);
+  const allKidsOnLeg = lookups ? getKidsInLegBE(leg.id, lookups) : getKidsInLeg(leg.id);
 
   return (
     <div style={{ margin: '0 16px 14px' }}>
@@ -1765,11 +2009,11 @@ function DriverPill({ leg, driver, isMine, isOpen }) {
 /* Attention card — only when there's something stalled                */
 /* ================================================================== */
 
-function AttentionCard({ sub, meId, ctx }) {
+function AttentionCard({ sub, ctx }) {
   const data = db();
   const leg = data.carpool_legs.find((l) => l.id === sub.leg_id);
   const event = leg ? data.events.find((e) => e.id === leg.event_id) : null;
-  const hoursAgo = Math.round((Date.now() - new Date(sub.created_at).getTime()) / 3_600_000);
+  const hoursAgo = hoursSinceIso(sub.created_at);
 
   return (
     <div
@@ -1996,9 +2240,7 @@ function NeedSubSheet({
   onEmergency,
 }) {
   const selected = legs.find((l) => l.id === selectedLegId);
-  const minutesUntil = selected
-    ? Math.round((new Date(selected.departure_time).getTime() - Date.now()) / 60000)
-    : null;
+  const minutesUntil = selected ? minutesFromNow(selected.departure_time) : null;
   const within = minutesUntil !== null && minutesUntil <= 30;
 
   return (
@@ -2198,9 +2440,7 @@ function formatCountdown(min) {
 function RunningLateSheet({ open, onClose, legs, selectedLegId, onPickLeg, onSendDelay, onClearLate }) {
   const selected = legs.find((l) => l.id === selectedLegId);
   const isInProgress = selected?.status === 'in_progress';
-  const minutesUntil = selected
-    ? Math.round((new Date(selected.departure_time).getTime() - Date.now()) / 60000)
-    : null;
+  const minutesUntil = selected ? minutesFromNow(selected.departure_time) : null;
 
   return (
     <Sheet open={open} onClose={onClose}>
@@ -2324,17 +2564,18 @@ function RunningLateSheet({ open, onClose, legs, selectedLegId, onPickLeg, onSen
   );
 }
 
-function KidOutSheet({ open, onClose, rows, meId: _meId, onRemove }) {
+function KidOutSheet({ open, onClose, rows, onRemove }) {
   const [step, setStep] = useState('pick');
   const [picked, setPicked] = useState(null);
   const [reason, setReason] = useState('');
 
   useEffect(() => {
-    if (open) {
+    if (!open) return;
+    queueMicrotask(() => {
       setStep('pick');
       setPicked(null);
       setReason('');
-    }
+    });
   }, [open]);
 
   const groups = useMemo(() => groupRowsByKidEvent(rows), [rows]);
@@ -2346,10 +2587,7 @@ function KidOutSheet({ open, onClose, rows, meId: _meId, onRemove }) {
     : null;
   const within =
     pickedGroup &&
-    pickedGroup.legs.some(
-      (l) =>
-        Math.round((new Date(l.departure_time).getTime() - Date.now()) / 60000) <= 30,
-    );
+    pickedGroup.legs.some((l) => minutesFromNow(l.departure_time) <= 30);
 
   return (
     <Sheet open={open} onClose={onClose}>

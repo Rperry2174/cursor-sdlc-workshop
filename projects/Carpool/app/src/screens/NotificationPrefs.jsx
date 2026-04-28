@@ -1,12 +1,22 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import {
   getCurrentParent,
   getNotificationPrefs,
   updateNotificationPrefs,
   getTeamsForParent,
 } from '../data/store.js';
+import { loadBackendNotificationPrefs, saveBackendNotificationPrefs } from '../data/notificationPrefsBackend.js';
+import { isSupabaseConfigured } from '../data/supabase.js';
 import { Toggle } from '../components/Toggle.jsx';
 import { TopNav } from '../components/TopNav.jsx';
+
+function snoozeEndIsoFromHours(hours) {
+  return new Date(Date.now() + hours * 3600_000).toISOString();
+}
+
+function minutesUntilFromNow(iso) {
+  return Math.max(0, Math.round((new Date(iso).getTime() - Date.now()) / 60000));
+}
 
 const TYPE_GROUPS = [
   {
@@ -110,18 +120,46 @@ const STYLE_PRESETS = {
 
 export function NotificationPrefs({ ctx }) {
   const me = getCurrentParent();
-  const prefs = getNotificationPrefs(me.id);
-  const teams = getTeamsForParent(me.id);
+  const [backendPrefs, setBackendPrefs] = useState(null);
+  const [backendFetchDone, setBackendFetchDone] = useState(false);
 
-  // Estimated weekly volume = number of "push" types, roughly.
-  const noiseScore = useMemo(() => {
-    const enabled = Object.values(prefs.by_type || {}).filter((v) => v === 'push').length;
-    return Math.min(30, Math.round(enabled * 1.3));
-  }, [prefs]);
+  useEffect(() => {
+    if (!isSupabaseConfigured()) {
+      queueMicrotask(() => setBackendFetchDone(true));
+      return;
+    }
+    let cancelled = false;
+    loadBackendNotificationPrefs().then((r) => {
+      if (cancelled) return;
+      if (r.ok && !r.skipped) setBackendPrefs(r.prefs);
+      setBackendFetchDone(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const prefs = backendPrefs ?? getNotificationPrefs(me.id);
 
   const update = (patch) => {
-    updateNotificationPrefs(me.id, patch);
+    if (isSupabaseConfigured()) {
+      void saveBackendNotificationPrefs(patch).then((r) => {
+        if (r.ok) setBackendPrefs(r.prefs);
+        else ctx.showToast?.(`Could not save: ${r.reason}`);
+      });
+    } else {
+      updateNotificationPrefs(me.id, patch);
+    }
   };
+  const teams = getTeamsForParent(me.id);
+
+  const prefsSnapshot = JSON.stringify(prefs);
+  // Estimated weekly volume = number of "push" types, roughly.
+  const noiseScore = useMemo(() => {
+    const p = JSON.parse(prefsSnapshot);
+    const enabled = Object.values(p.by_type || {}).filter((v) => v === 'push').length;
+    return Math.min(30, Math.round(enabled * 1.3));
+  }, [prefsSnapshot]);
 
   const setType = (type, value) => {
     update({ by_type: { ...prefs.by_type, [type]: value } });
@@ -137,19 +175,28 @@ export function NotificationPrefs({ ctx }) {
   };
 
   const snoozeFor = (hours) => {
-    const until = new Date(Date.now() + hours * 3600_000).toISOString();
+    const until = snoozeEndIsoFromHours(hours);
     update({ snoozed_until: until });
     ctx.showToast(`Snoozed for ${hours}h`);
   };
 
-  const snoozedRemaining = prefs.snoozed_until
-    ? Math.max(0, Math.round((new Date(prefs.snoozed_until).getTime() - Date.now()) / 60000))
-    : 0;
+  const snoozedRemaining = prefs.snoozed_until ? minutesUntilFromNow(prefs.snoozed_until) : 0;
 
   return (
     <>
       <TopNav title="Notifications" onBack={() => ctx.navigate('profile')} />
       <div className="section">
+        {backendFetchDone && isSupabaseConfigured() && (
+          <div className="card" style={{ marginBottom: 10, padding: '10px 12px' }}>
+            <span className="pill pill-green" style={{ fontSize: 11 }}>
+              Synced to Kinpala account
+            </span>
+            <div className="muted" style={{ fontSize: 12, marginTop: 6 }}>
+              Preferences are stored on the server for email and future push routing.
+            </div>
+          </div>
+        )}
+
         <NoiseMeter score={noiseScore} />
 
         {snoozedRemaining > 0 && (

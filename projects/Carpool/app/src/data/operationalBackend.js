@@ -34,15 +34,10 @@ async function findAuthParent(supabase, authUserId) {
 }
 
 /**
- * Pull the bag of state Today / OpenShifts need to render from the
- * backend: my parent row, my team ids, every active event for those
- * teams, the carpool_legs under those events, the seats under those
- * legs, and any other parents who appear as drivers (so the UI can
- * resolve names without an extra round trip per leg).
- *
- * Children, parent_children, sub_requests etc. are intentionally NOT
- * loaded — backend-mode UX for those features is degraded by design
- * for this slice.
+ * Pull the bag of state Today / OpenShifts need from Supabase: parent,
+ * teams, events, legs, seats, teammates-as-drivers, my children, open
+ * sub_requests on visible legs, and child_teams rows for joinable-leg
+ * logic.
  */
 export async function loadBackendOperationalState() {
   const session = await getSessionResult();
@@ -75,6 +70,10 @@ export async function loadBackendOperationalState() {
       legs: [],
       seats: [],
       parents: [],
+      myChildren: [],
+      subRequests: [],
+      subResponseCounts: {},
+      childTeams: [],
     };
   }
 
@@ -97,6 +96,10 @@ export async function loadBackendOperationalState() {
       legs: [],
       seats: [],
       parents: [],
+      myChildren: [],
+      subRequests: [],
+      subResponseCounts: {},
+      childTeams: [],
     };
   }
 
@@ -121,11 +124,7 @@ export async function loadBackendOperationalState() {
   // Other drivers besides the auth parent — deduped, non-null.
   // The auth parent is already loaded above so we don't re-fetch them.
   const driverIds = Array.from(
-    new Set(
-      legList
-        .map((l) => l.driver_id)
-        .filter((id) => id && id !== parent.id),
-    ),
+    new Set(legList.map((l) => l.driver_id).filter((id) => id && id !== parent.id)),
   );
   let driverList = [];
   if (driverIds.length > 0) {
@@ -137,6 +136,53 @@ export async function loadBackendOperationalState() {
     driverList = drivers || [];
   }
 
+  const { data: childLinks, error: clErr } = await supabase
+    .from('parent_children')
+    .select('child_id')
+    .eq('parent_id', parent.id);
+  if (clErr) return { ok: false, reason: clErr.message };
+  const myChildIds = (childLinks || []).map((r) => r.child_id);
+  let myChildren = [];
+  if (myChildIds.length > 0) {
+    const { data: kids, error: kidsErr } = await supabase
+      .from('children')
+      .select('*')
+      .in('id', myChildIds);
+    if (kidsErr) return { ok: false, reason: kidsErr.message };
+    myChildren = kids || [];
+  }
+
+  let subRequests = [];
+  let subResponseCounts = {};
+  if (legIds.length > 0) {
+    const { data: subs, error: subsErr } = await supabase
+      .from('sub_requests')
+      .select('*')
+      .in('leg_id', legIds)
+      .eq('status', 'open');
+    if (subsErr) return { ok: false, reason: subsErr.message };
+    subRequests = subs || [];
+    const subIds = subRequests.map((s) => s.id);
+    if (subIds.length > 0) {
+      const { data: respRows, error: respErr } = await supabase
+        .from('sub_request_responses')
+        .select('sub_request_id')
+        .in('sub_request_id', subIds);
+      if (respErr) return { ok: false, reason: respErr.message };
+      subResponseCounts = {};
+      for (const row of respRows || []) {
+        const k = row.sub_request_id;
+        subResponseCounts[k] = (subResponseCounts[k] || 0) + 1;
+      }
+    }
+  }
+
+  const { data: childTeams, error: ctErr } = await supabase
+    .from('child_teams')
+    .select('team_id, child_id')
+    .in('team_id', teamIds);
+  if (ctErr) return { ok: false, reason: ctErr.message };
+
   return {
     ok: true,
     parent,
@@ -145,6 +191,10 @@ export async function loadBackendOperationalState() {
     legs: legList,
     seats: seatList,
     parents: driverList,
+    myChildren,
+    subRequests,
+    subResponseCounts,
+    childTeams: childTeams || [],
   };
 }
 
@@ -316,17 +366,139 @@ export async function loadBackendLegDetail(legId) {
  * the supabase client's built-in error handling (a parent_id mismatch
  * surfaces as a constraint or RLS violation we surface to the caller).
  */
-export async function seatKidBackend({ legId, childId, parentId }) {
+export async function seatKidBackend({ legId, childId }) {
   const session = await getSessionResult();
   if (!session.ok) return session;
 
-  const { data, error } = await session.supabase
-    .from('seats')
-    .insert({ leg_id: legId, child_id: childId, added_by: parentId })
-    .select()
-    .maybeSingle();
+  const { data, error } = await session.supabase.rpc('seat_child_on_leg', {
+    p_leg_id: legId,
+    p_child_id: childId,
+  });
   if (error) return { ok: false, reason: error.message };
-  return { ok: true, seat: data };
+  if (data?.ok === true) return { ok: true };
+  return { ok: false, reason: data?.reason || 'seat_failed' };
+}
+
+/**
+ * Driver asks the team to cover this leg (opens sub_request + clears driver).
+ * Requires migration 015 `open_sub_request_for_leg`.
+ */
+export async function openSubRequestForLegBackend({ legId, reason, emergency = false }) {
+  const session = await getSessionResult();
+  if (!session.ok) return session;
+
+  const { data, error } = await session.supabase.rpc('open_sub_request_for_leg', {
+    p_leg_id: legId,
+    p_reason: reason || '',
+    p_emergency: emergency,
+  });
+  if (error) return { ok: false, reason: error.message };
+  return {
+    ok: data?.ok === true,
+    reason: data?.reason,
+    subRequestId: data?.sub_request_id,
+    leg: data?.leg,
+  };
+}
+
+/**
+ * Accept an open sub_request and atomically claim its leg.
+ */
+export async function acceptSubRequestBackend(subRequestId) {
+  const session = await getSessionResult();
+  if (!session.ok) return session;
+
+  const { data, error } = await session.supabase.rpc('accept_sub_request', {
+    p_sub_request_id: subRequestId,
+  });
+  if (error) return { ok: false, reason: error.message };
+  return {
+    ok: data?.ok === true,
+    reason: data?.reason,
+    leg: data?.leg,
+  };
+}
+
+/**
+ * Mark a child absent on a calendar day: removes their seats on team legs
+ * that day and records absence so auto-seat skips them. Clearing absent
+ * deletes the row and re-seats for that day.
+ */
+export async function markChildAbsenceBackend({ childId, onDate, absent, reason }) {
+  const session = await getSessionResult();
+  if (!session.ok) return session;
+
+  const { data, error } = await session.supabase.rpc('mark_child_absence', {
+    p_child_id: childId,
+    p_on_date: onDate,
+    p_absent: absent,
+    p_reason: reason || '',
+  });
+  if (error) return { ok: false, reason: error.message };
+  return {
+    ok: data?.ok === true,
+    reason: data?.reason,
+    mode: data?.mode,
+    seatsRemoved: data?.seats_removed,
+  };
+}
+
+/**
+ * Load one sub_request plus leg/event/requester/kids for SubResponse screen.
+ */
+export async function loadBackendSubRequestDetail(subRequestId) {
+  const session = await getSessionResult();
+  if (!session.ok) return session;
+  const { supabase } = session;
+
+  const { data: sub, error: subErr } = await supabase
+    .from('sub_requests')
+    .select('*')
+    .eq('id', subRequestId)
+    .maybeSingle();
+  if (subErr) return { ok: false, reason: subErr.message };
+  if (!sub) return { ok: false, reason: 'not_found' };
+
+  const { data: leg, error: legErr } = await supabase
+    .from('carpool_legs')
+    .select('*')
+    .eq('id', sub.leg_id)
+    .maybeSingle();
+  if (legErr) return { ok: false, reason: legErr.message };
+  if (!leg) return { ok: false, reason: 'leg_missing' };
+
+  const { data: event, error: evErr } = await supabase
+    .from('events')
+    .select('*')
+    .eq('id', leg.event_id)
+    .maybeSingle();
+  if (evErr) return { ok: false, reason: evErr.message };
+
+  const { data: requester } = await supabase
+    .from('parents')
+    .select('id, name, phone, avatar_color, photo_url')
+    .eq('id', sub.requested_by)
+    .maybeSingle();
+
+  const { data: seatRows } = await supabase.from('seats').select('child_id').eq('leg_id', leg.id);
+  const kidIds = Array.from(new Set((seatRows || []).map((s) => s.child_id)));
+  let kids = [];
+  if (kidIds.length > 0) {
+    const { data: krows } = await supabase
+      .from('children')
+      .select('id, name, age, avatar_color, photo_url')
+      .in('id', kidIds);
+    kids = krows || [];
+  }
+
+  return {
+    ok: true,
+    sub,
+    leg,
+    event,
+    requester: requester || null,
+    kids,
+  };
 }
 
 export async function addCoparentToChild({ childId, parentId }) {
