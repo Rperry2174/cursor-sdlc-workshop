@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { subscribe, getCurrentParent, listParents, setCurrentParentId, unreadCount, resetDb, isOnboarded, startFreshOnboarding, shouldShowGcHint, getOpenLegsForParent } from './data/store.js';
 import { resetAnalytics } from './data/analytics.js';
 import { loadBackendProfile } from './data/backendBootstrap.js';
+import { isSupabaseConfigured } from './data/supabase.js';
 import { Onboarding } from './screens/Onboarding.jsx';
 import { Today } from './screens/Today.jsx';
 import { Schedule } from './screens/Schedule.jsx';
@@ -173,9 +174,16 @@ export default function App() {
       screen = <Today ctx={ctx} />;
   }
 
+  // Hide the prototype demo-account switcher whenever Supabase is configured.
+  // In production the switcher's "Sarah / Mike / Priya / Alex" identities are
+  // a misleading remnant of the local-only prototype. Real account switching
+  // happens through magic-link auth, not this affordance.
+  const showDemoSwitcher = !isSupabaseConfigured();
+
   return (
     <div className="app-frame">
-      {/* Demo profile switcher */}
+      {/* Demo profile switcher (local prototype only) */}
+      {showDemoSwitcher && (
       <button
         type="button"
         onClick={() => setShowSwitcher(!showSwitcher)}
@@ -194,7 +202,8 @@ export default function App() {
       >
         Demo: {currentParent?.name?.split(' ')[0] || '—'} ▾
       </button>
-      {showSwitcher && (
+      )}
+      {showDemoSwitcher && showSwitcher && (
         <div
           style={{
             position: 'fixed',

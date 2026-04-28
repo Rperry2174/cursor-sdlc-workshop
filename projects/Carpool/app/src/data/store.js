@@ -19,6 +19,46 @@ const ONBOARD_KEY = 'carpool.onboarded.v1';
 const subscribers = new Set();
 let cache = null;
 
+// When Supabase is configured (real production deploys + any local dev that
+// has VITE_SUPABASE_URL set in .env.local), skip the prototype's demo seed.
+// Real signups must produce real backend rows; auto-loading Sarah Chen et al.
+// would (a) confuse new users by jumping them into a fake profile, and
+// (b) corrupt the wizard by silently flipping the onboarded flag mid-flow.
+function isSupabaseModeForLocalStore() {
+  try {
+    return Boolean(
+      import.meta?.env?.VITE_SUPABASE_URL && import.meta?.env?.VITE_SUPABASE_ANON_KEY,
+    );
+  } catch {
+    return false;
+  }
+}
+
+function emptyDb() {
+  return {
+    parents: [],
+    children: [],
+    parent_children: [],
+    teams: [],
+    team_members: [],
+    child_teams: [],
+    events: [],
+    carpool_legs: [],
+    seats: [],
+    ride_status_events: [],
+    sub_requests: [],
+    sub_request_responses: [],
+    notifications: [],
+    recurring_commitments: [],
+    blackout_dates: [],
+    chat_messages: [],
+    notification_preferences: [],
+    schedule_sources: [],
+    auto_claim_rules: [],
+    app_config: { weather_alerts: true },
+  };
+}
+
 function load() {
   if (cache) return cache;
   try {
@@ -29,17 +69,30 @@ function load() {
       // Pre-existing demo data should be treated as already onboarded so the
       // wizard doesn't surprise returning users. Only an explicit "Start fresh"
       // (or first-ever load + onboarding completion) forces the wizard.
-      if (cache.parents?.length && !localStorage.getItem(ONBOARD_KEY)) {
+      // Skip this when Supabase is configured: real auth gates onboarding,
+      // not the local store, so we should never silently flip this flag.
+      if (
+        cache.parents?.length &&
+        !localStorage.getItem(ONBOARD_KEY) &&
+        !isSupabaseModeForLocalStore()
+      ) {
         localStorage.setItem(ONBOARD_KEY, 'true');
       }
       return cache;
     }
   } catch {
-    // fall through to seed
+    // fall through
   }
+  if (isSupabaseModeForLocalStore()) {
+    // Production / Supabase mode: start with an empty local cache so every
+    // store call is safe but no demo identities ever exist. Real signup will
+    // populate Supabase and the local cache through the normal wizard path.
+    cache = emptyDb();
+    persist();
+    return cache;
+  }
+  // Pure local prototype mode: keep the existing guided demo experience.
   cache = seed();
-  // First-ever load: treat the seed as a guided demo, mark onboarded so we
-  // don't force the wizard. Users opt in to the wizard via "Start fresh".
   localStorage.setItem(ONBOARD_KEY, 'true');
   persist();
   return cache;
