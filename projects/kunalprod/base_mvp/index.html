@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FitForge</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0f172a;
+    color: #e2e8f0;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1rem;
+  }
+
+  h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #38bdf8, #818cf8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.25rem;
+  }
+
+  .tagline {
+    color: #94a3b8;
+    font-size: 0.875rem;
+    margin-bottom: 2rem;
+  }
+
+  .controls {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    width: 100%;
+    max-width: 480px;
+  }
+
+  select {
+    flex: 1;
+    min-width: 140px;
+    padding: 0.6rem 0.75rem;
+    border-radius: 8px;
+    border: 1px solid #334155;
+    background: #1e293b;
+    color: #e2e8f0;
+    font-size: 0.875rem;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+  }
+
+  select:focus { outline: 2px solid #818cf8; outline-offset: -1px; }
+
+  button {
+    padding: 0.6rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #6366f1, #818cf8);
+    color: #fff;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+
+  button:hover { opacity: 0.85; }
+
+  #workout {
+    display: grid;
+    gap: 0.75rem;
+    width: 100%;
+    max-width: 480px;
+  }
+
+  .card {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .card-name {
+    font-weight: 600;
+    font-size: 1rem;
+  }
+
+  .card-detail {
+    color: #94a3b8;
+    font-size: 0.8rem;
+    margin-top: 0.2rem;
+  }
+
+  .card-badge {
+    background: #334155;
+    border-radius: 6px;
+    padding: 0.35rem 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    color: #38bdf8;
+  }
+
+  .empty {
+    text-align: center;
+    color: #475569;
+    padding: 3rem 0;
+    font-size: 0.9rem;
+  }
+</style>
+</head>
+<body>
+
+<h1>FitForge</h1>
+<p class="tagline">Custom workout plans in one tap</p>
+
+<div class="controls">
+  <select id="muscle">
+    <option value="upper">Upper Body</option>
+    <option value="lower">Lower Body</option>
+    <option value="core">Core</option>
+    <option value="full">Full Body</option>
+  </select>
+  <select id="difficulty">
+    <option value="beginner">Beginner</option>
+    <option value="intermediate">Intermediate</option>
+    <option value="advanced">Advanced</option>
+  </select>
+  <button id="generate">Generate Workout</button>
+</div>
+
+<div id="workout">
+  <div class="empty">Pick your preferences and hit Generate</div>
+</div>
+
+<script>
+const exercises = [
+  { name: "Push-ups",           muscle: "upper", beginner: [2,10], intermediate: [3,15], advanced: [4,25] },
+  { name: "Dumbbell Rows",      muscle: "upper", beginner: [2,8],  intermediate: [3,12], advanced: [4,15] },
+  { name: "Shoulder Press",     muscle: "upper", beginner: [2,8],  intermediate: [3,12], advanced: [4,15] },
+  { name: "Bicep Curls",        muscle: "upper", beginner: [2,10], intermediate: [3,12], advanced: [4,15] },
+  { name: "Tricep Dips",        muscle: "upper", beginner: [2,8],  intermediate: [3,12], advanced: [4,20] },
+  { name: "Lateral Raises",     muscle: "upper", beginner: [2,10], intermediate: [3,12], advanced: [4,15] },
+
+  { name: "Squats",             muscle: "lower", beginner: [2,10], intermediate: [3,15], advanced: [4,20] },
+  { name: "Lunges",             muscle: "lower", beginner: [2,8],  intermediate: [3,12], advanced: [4,16] },
+  { name: "Glute Bridges",      muscle: "lower", beginner: [2,12], intermediate: [3,15], advanced: [4,20] },
+  { name: "Calf Raises",        muscle: "lower", beginner: [2,15], intermediate: [3,20], advanced: [4,25] },
+  { name: "Wall Sits",          muscle: "lower", beginner: [2,20], intermediate: [3,30], advanced: [4,45] },
+  { name: "Step-ups",           muscle: "lower", beginner: [2,8],  intermediate: [3,12], advanced: [4,16] },
+
+  { name: "Crunches",           muscle: "core",  beginner: [2,12], intermediate: [3,20], advanced: [4,30] },
+  { name: "Plank (sec)",        muscle: "core",  beginner: [2,20], intermediate: [3,40], advanced: [4,60] },
+  { name: "Bicycle Crunches",   muscle: "core",  beginner: [2,10], intermediate: [3,16], advanced: [4,24] },
+  { name: "Leg Raises",         muscle: "core",  beginner: [2,8],  intermediate: [3,12], advanced: [4,18] },
+  { name: "Mountain Climbers",  muscle: "core",  beginner: [2,10], intermediate: [3,16], advanced: [4,24] },
+  { name: "Dead Bugs",          muscle: "core",  beginner: [2,10], intermediate: [3,14], advanced: [4,20] },
+];
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function generate() {
+  const muscle = document.getElementById("muscle").value;
+  const diff = document.getElementById("difficulty").value;
+
+  let pool = muscle === "full"
+    ? [...exercises]
+    : exercises.filter(e => e.muscle === muscle);
+
+  shuffle(pool);
+  const pick = pool.slice(0, Math.min(5, pool.length));
+
+  const container = document.getElementById("workout");
+  container.innerHTML = "";
+
+  pick.forEach(ex => {
+    const [sets, reps] = ex[diff];
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML =
+      `<div><div class="card-name">${ex.name}</div>` +
+      `<div class="card-detail">${ex.muscle}</div></div>` +
+      `<div class="card-badge">${sets} × ${reps}</div>`;
+    container.appendChild(card);
+  });
+}
+
+document.getElementById("generate").addEventListener("click", generate);
+</script>
+</body>
+</html>
