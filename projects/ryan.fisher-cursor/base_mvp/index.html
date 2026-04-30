@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neon Pong</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #111;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+  }
+  canvas { display: block; }
+  .mute-btn {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: #fff;
+    font-size: 22px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+  .mute-btn:hover { background: rgba(255,255,255,0.2); }
+  .overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  .overlay.visible { opacity: 1; pointer-events: auto; }
+  .overlay h1 { font-size: 48px; color: #fff; margin-bottom: 8px; }
+  .overlay p  { font-size: 20px; color: #aaa; margin-bottom: 28px; }
+  .overlay button {
+    background: #fff;
+    color: #111;
+    border: none;
+    padding: 12px 36px;
+    font-size: 18px;
+    font-weight: 700;
+    border-radius: 40px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .overlay button:hover { background: #ddd; }
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+<button class="mute-btn" id="muteBtn">🔊</button>
+<div class="overlay" id="gameOver">
+  <h1 id="winnerText"></h1>
+  <p id="finalScore"></p>
+  <button id="playAgain">Play Again</button>
+</div>
+<script>
+(function () {
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+
+  const W = 800;
+  const H = 500;
+  canvas.width = W;
+  canvas.height = H;
+
+  const PADDLE_W = 12;
+  const PADDLE_H = 80;
+  const BALL_SIZE = 10;
+  const PADDLE_SPEED = 5;
+  const BALL_SPEED = 4;
+  const SPEED_BUMP = 0.3;
+  const MAX_SPEED = 10;
+  const WIN_SCORE = 7;
+
+  const NEON = '#0ff';
+  const NEON_BALL = '#f0f';
+  const TRAIL_LENGTH = 12;
+
+  const keys = {};
+  let gameOver = false;
+  const trail = [];
+  let leftFlash = 0;
+  let rightFlash = 0;
+
+  // --- Sound ---
+  let soundOn = true;
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  let audioCtx;
+  function ensureAudio() {
+    if (!audioCtx) audioCtx = new AudioCtx();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+  }
+  function tone(freq, dur, type) {
+    if (!soundOn || !audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type || 'square';
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + dur);
+  }
+  function sfxPaddle() { tone(440, 0.06, 'sine'); }
+  function sfxWall()   { tone(300, 0.04, 'triangle'); }
+  function sfxScore()  { tone(220, 0.15, 'sawtooth'); }
+
+  document.getElementById('muteBtn').addEventListener('click', () => {
+    soundOn = !soundOn;
+    document.getElementById('muteBtn').textContent = soundOn ? '🔊' : '🔇';
+  });
+
+  const state = {
+    left:  { y: H / 2 - PADDLE_H / 2 },
+    right: { y: H / 2 - PADDLE_H / 2 },
+    ball:  { x: W / 2, y: H / 2, vx: BALL_SPEED, vy: BALL_SPEED * 0.6 },
+    score: { left: 0, right: 0 }
+  };
+
+  function resetBall(direction) {
+    state.ball.x = W / 2;
+    state.ball.y = H / 2;
+    state.ball.vx = BALL_SPEED * direction;
+    state.ball.vy = BALL_SPEED * 0.6 * (Math.random() > 0.5 ? 1 : -1);
+    trail.length = 0;
+  }
+
+  function showGameOver(winner) {
+    gameOver = true;
+    document.getElementById('winnerText').textContent = winner + ' Wins!';
+    document.getElementById('finalScore').textContent =
+      state.score.left + ' – ' + state.score.right;
+    document.getElementById('gameOver').classList.add('visible');
+  }
+
+  function restartGame() {
+    state.score.left = 0;
+    state.score.right = 0;
+    resetBall(1);
+    gameOver = false;
+    document.getElementById('gameOver').classList.remove('visible');
+  }
+
+  document.getElementById('playAgain').addEventListener('click', restartGame);
+
+  function update() {
+    if (gameOver) return;
+
+    // Left paddle: W / S
+    if (keys['w'] || keys['W'])  state.left.y  = Math.max(0, state.left.y - PADDLE_SPEED);
+    if (keys['s'] || keys['S'])  state.left.y  = Math.min(H - PADDLE_H, state.left.y + PADDLE_SPEED);
+
+    // Right paddle: Arrow Up / Down
+    if (keys['ArrowUp'])   state.right.y = Math.max(0, state.right.y - PADDLE_SPEED);
+    if (keys['ArrowDown']) state.right.y = Math.min(H - PADDLE_H, state.right.y + PADDLE_SPEED);
+
+    if (leftFlash > 0) leftFlash--;
+    if (rightFlash > 0) rightFlash--;
+
+    const b = state.ball;
+    trail.push({ x: b.x, y: b.y });
+    if (trail.length > TRAIL_LENGTH) trail.shift();
+
+    b.x += b.vx;
+    b.y += b.vy;
+
+    // Top / bottom bounce
+    if (b.y - BALL_SIZE / 2 <= 0 || b.y + BALL_SIZE / 2 >= H) {
+      b.vy *= -1;
+      sfxWall();
+    }
+
+    // Left paddle collision
+    if (
+      b.vx < 0 &&
+      b.x - BALL_SIZE / 2 <= PADDLE_W + 16 &&
+      b.y >= state.left.y &&
+      b.y <= state.left.y + PADDLE_H
+    ) {
+      b.vx *= -1;
+      b.x = PADDLE_W + 16 + BALL_SIZE / 2;
+      const sign = b.vx > 0 ? 1 : -1;
+      b.vx = sign * Math.min(Math.abs(b.vx) + SPEED_BUMP, MAX_SPEED);
+      leftFlash = 8;
+      sfxPaddle();
+    }
+
+    // Right paddle collision
+    if (
+      b.vx > 0 &&
+      b.x + BALL_SIZE / 2 >= W - PADDLE_W - 16 &&
+      b.y >= state.right.y &&
+      b.y <= state.right.y + PADDLE_H
+    ) {
+      b.vx *= -1;
+      b.x = W - PADDLE_W - 16 - BALL_SIZE / 2;
+      const sign = b.vx > 0 ? 1 : -1;
+      b.vx = sign * Math.min(Math.abs(b.vx) + SPEED_BUMP, MAX_SPEED);
+      rightFlash = 8;
+      sfxPaddle();
+    }
+
+    // Scoring
+    if (b.x < 0) {
+      state.score.right++;
+      sfxScore();
+      if (state.score.right >= WIN_SCORE) return showGameOver('Player 2');
+      resetBall(1);
+    } else if (b.x > W) {
+      state.score.left++;
+      sfxScore();
+      if (state.score.left >= WIN_SCORE) return showGameOver('Player 1');
+      resetBall(-1);
+    }
+  }
+
+  function drawGlow(fn, color, blur) {
+    ctx.save();
+    ctx.shadowColor = color;
+    ctx.shadowBlur = blur;
+    fn();
+    fn();
+    ctx.restore();
+  }
+
+  function draw() {
+    ctx.fillStyle = '#0a0a12';
+    ctx.fillRect(0, 0, W, H);
+
+    // Center divider with glow
+    drawGlow(() => {
+      ctx.setLineDash([8, 8]);
+      ctx.strokeStyle = NEON;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(W / 2, 0);
+      ctx.lineTo(W / 2, H);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }, NEON, 12);
+
+    // Ball trail
+    for (let i = 0; i < trail.length; i++) {
+      const alpha = (i / trail.length) * 0.4;
+      const r = (BALL_SIZE / 2) * (i / trail.length);
+      ctx.fillStyle = `rgba(255, 0, 255, ${alpha})`;
+      ctx.beginPath();
+      ctx.arc(trail[i].x, trail[i].y, r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Ball with glow
+    drawGlow(() => {
+      ctx.fillStyle = NEON_BALL;
+      ctx.beginPath();
+      ctx.arc(state.ball.x, state.ball.y, BALL_SIZE / 2, 0, Math.PI * 2);
+      ctx.fill();
+    }, NEON_BALL, 20);
+
+    // Left paddle
+    const leftColor = leftFlash > 0 ? '#fff' : NEON;
+    const leftBlur = leftFlash > 0 ? 30 : 14;
+    drawGlow(() => {
+      ctx.fillStyle = leftColor;
+      ctx.fillRect(16, state.left.y, PADDLE_W, PADDLE_H);
+    }, leftColor, leftBlur);
+
+    // Right paddle
+    const rightColor = rightFlash > 0 ? '#fff' : NEON;
+    const rightBlur = rightFlash > 0 ? 30 : 14;
+    drawGlow(() => {
+      ctx.fillStyle = rightColor;
+      ctx.fillRect(W - PADDLE_W - 16, state.right.y, PADDLE_W, PADDLE_H);
+    }, rightColor, rightBlur);
+
+    // Score with subtle glow
+    ctx.save();
+    ctx.font = 'bold 48px monospace';
+    ctx.textAlign = 'center';
+    ctx.shadowColor = NEON;
+    ctx.shadowBlur = 8;
+    ctx.fillStyle = 'rgba(0, 255, 255, 0.3)';
+    ctx.fillText(state.score.left, W / 4, 60);
+    ctx.fillText(state.score.right, (3 * W) / 4, 60);
+    ctx.restore();
+  }
+
+  function loop() {
+    update();
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  document.addEventListener('keydown', (e) => {
+    ensureAudio();
+    keys[e.key] = true;
+    if (['ArrowUp', 'ArrowDown', ' '].includes(e.key)) e.preventDefault();
+  });
+  document.addEventListener('keyup', (e) => { keys[e.key] = false; });
+
+  loop();
+})();
+</script>
+</body>
+</html>
