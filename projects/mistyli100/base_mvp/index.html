@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Misty's Ultimate Coffee Shop Ranking</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #1b1410;
+    color: #f5f0eb;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 32px 16px;
+  }
+
+  .app {
+    width: 100%;
+    max-width: 480px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  header h1 {
+    font-size: 36px;
+    font-weight: 800;
+    color: #e8c47c;
+    letter-spacing: -1px;
+  }
+
+  header p {
+    color: #a08b74;
+    font-size: 14px;
+    margin-top: 4px;
+  }
+
+  /* --- Add Form --- */
+  .add-form {
+    background: #2a2018;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+    border: 1px solid #3d2e1f;
+  }
+
+  .add-form input[type="text"] {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: 1px solid #3d2e1f;
+    background: #1b1410;
+    color: #f5f0eb;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .add-form input[type="text"]:focus { border-color: #e8c47c; }
+  .add-form input[type="text"]::placeholder { color: #6b5a48; }
+
+  .star-picker {
+    display: flex;
+    gap: 6px;
+    margin: 14px 0 10px;
+    justify-content: center;
+  }
+
+  .star-picker button {
+    background: none;
+    border: none;
+    font-size: 32px;
+    cursor: pointer;
+    transition: transform 0.15s;
+    filter: grayscale(1) brightness(0.4);
+    padding: 2px;
+    line-height: 1;
+  }
+
+  .star-picker button.active { filter: none; }
+  .star-picker button:hover { transform: scale(1.2); }
+
+  /* --- Drink Tag Picker --- */
+  .tag-picker-label {
+    font-size: 12px;
+    color: #6b5a48;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+
+  .tag-picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+
+  .tag-chip {
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid #3d2e1f;
+    background: #1b1410;
+    color: #a08b74;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .tag-chip:hover { border-color: #5a4733; }
+
+  .tag-chip.selected {
+    background: #e8c47c;
+    color: #1b1410;
+    border-color: #e8c47c;
+    font-weight: 600;
+  }
+
+  .add-btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: #e8c47c;
+    color: #1b1410;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+  }
+
+  .add-btn:hover { background: #f0d48e; }
+  .add-btn:active { transform: scale(0.98); }
+  .add-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* --- Search & Filter Bar --- */
+  .search-bar {
+    margin-bottom: 10px;
+  }
+
+  .search-bar input[type="text"] {
+    width: 100%;
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: 1px solid #3d2e1f;
+    background: #2a2018;
+    color: #f5f0eb;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .search-bar input[type="text"]:focus { border-color: #e8c47c; }
+  .search-bar input[type="text"]::placeholder { color: #6b5a48; }
+
+  .filter-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 12px;
+  }
+
+  .filter-chip {
+    padding: 4px 10px;
+    border-radius: 16px;
+    border: 1px solid #3d2e1f;
+    background: transparent;
+    color: #6b5a48;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .filter-chip:hover { border-color: #5a4733; color: #a08b74; }
+
+  .filter-chip.active {
+    background: #3d2e1f;
+    color: #e8c47c;
+    border-color: #e8c47c;
+  }
+
+  /* --- Shop List --- */
+  .shop-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 48px 16px;
+    color: #6b5a48;
+  }
+
+  .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-state p { font-size: 15px; }
+
+  .shop-card {
+    background: #2a2018;
+    border: 1px solid #3d2e1f;
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    transition: border-color 0.2s;
+    animation: fadeIn 0.25s ease;
+  }
+
+  .shop-card.is-favorite {
+    border-color: #e85050;
+    box-shadow: 0 0 0 1px rgba(232, 80, 80, 0.15);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .shop-card:hover { border-color: #5a4733; }
+  .shop-card.is-favorite:hover { border-color: #e85050; }
+
+  .rank-badge {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 14px;
+    flex-shrink: 0;
+    background: #3d2e1f;
+    color: #a08b74;
+    margin-top: 2px;
+  }
+
+  .rank-gold  { background: #e8c47c; color: #1b1410; }
+  .rank-silver { background: #c0c0c0; color: #1b1410; }
+  .rank-bronze { background: #cd7f32; color: #1b1410; }
+
+  .shop-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .shop-name {
+    font-size: 16px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .shop-stars {
+    font-size: 15px;
+    margin-top: 2px;
+    letter-spacing: 2px;
+  }
+
+  .shop-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 6px;
+  }
+
+  .shop-tag {
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: #3d2e1f;
+    color: #c4a96a;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .shop-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 6px;
+  }
+
+  /* --- Visit Counter --- */
+  .visit-counter {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .visit-btn {
+    background: #3d2e1f;
+    border: none;
+    color: #a08b74;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, color 0.15s;
+    line-height: 1;
+  }
+
+  .visit-btn:hover { background: #5a4733; color: #e8c47c; }
+
+  .visit-count {
+    font-size: 12px;
+    color: #a08b74;
+    min-width: 52px;
+  }
+
+  /* --- Favorite & Delete --- */
+  .card-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .fav-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 2px;
+    transition: transform 0.2s;
+    line-height: 1;
+    filter: grayscale(1) brightness(0.5);
+  }
+
+  .fav-btn.is-fav {
+    filter: none;
+    animation: pop 0.3s ease;
+  }
+
+  @keyframes pop {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.35); }
+    100% { transform: scale(1); }
+  }
+
+  .fav-btn:hover { transform: scale(1.15); }
+
+  .delete-btn {
+    background: none;
+    border: none;
+    color: #5a4733;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 6px;
+    transition: color 0.2s, background 0.2s;
+    line-height: 1;
+  }
+
+  .delete-btn:hover {
+    color: #e85050;
+    background: rgba(232, 80, 80, 0.1);
+  }
+
+  .count-label {
+    text-align: center;
+    color: #6b5a48;
+    font-size: 13px;
+    margin-bottom: 12px;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header>
+    <h1>☕ Misty's Ultimate Coffee Shop Ranking</h1>
+    <p>Rate and rank your favorite coffee shops</p>
+  </header>
+
+  <div class="add-form">
+    <input type="text" id="shopName" placeholder="Coffee shop name..." maxlength="60">
+    <div class="star-picker" id="starPicker"></div>
+    <div class="tag-picker-label">Known for:</div>
+    <div class="tag-picker" id="tagPicker"></div>
+    <button class="add-btn" id="addBtn" disabled>Add Shop</button>
+  </div>
+
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Search shops...">
+  </div>
+  <div class="filter-tags" id="filterTags"></div>
+
+  <div id="countLabel" class="count-label"></div>
+  <div class="shop-list" id="shopList"></div>
+</div>
+
+<script>
+(function () {
+  const STORAGE_KEY = 'bean_ranks_shops';
+  const ALL_TAGS = ['Latte', 'Espresso', 'Drip', 'Cold Brew', 'Matcha', 'Pastries', 'Vibes'];
+
+  const shopNameInput = document.getElementById('shopName');
+  const starPickerEl = document.getElementById('starPicker');
+  const tagPickerEl = document.getElementById('tagPicker');
+  const addBtn = document.getElementById('addBtn');
+  const shopListEl = document.getElementById('shopList');
+  const countLabel = document.getElementById('countLabel');
+  const searchInput = document.getElementById('searchInput');
+  const filterTagsEl = document.getElementById('filterTags');
+
+  let selectedRating = 0;
+  let selectedTags = new Set();
+  let activeFilter = null;
+  let shops = loadShops();
+
+  function loadShops() {
+    try {
+      const data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+      return data.map(s => ({
+        tags: [],
+        visits: 0,
+        favorite: false,
+        ...s,
+      }));
+    } catch {
+      return [];
+    }
+  }
+
+  function saveShops() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(shops));
+  }
+
+  // --- Star Picker ---
+  function buildStarPicker() {
+    starPickerEl.replaceChildren();
+    for (let i = 1; i <= 5; i++) {
+      const btn = document.createElement('button');
+      btn.textContent = '\u2B50';
+      btn.setAttribute('aria-label', i + ' star' + (i > 1 ? 's' : ''));
+      if (i <= selectedRating) btn.classList.add('active');
+      btn.addEventListener('click', () => {
+        selectedRating = i;
+        buildStarPicker();
+        updateAddBtn();
+      });
+      starPickerEl.appendChild(btn);
+    }
+  }
+
+  // --- Tag Picker (add form) ---
+  function buildTagPicker() {
+    tagPickerEl.replaceChildren();
+    ALL_TAGS.forEach(tag => {
+      const chip = document.createElement('span');
+      chip.className = 'tag-chip' + (selectedTags.has(tag) ? ' selected' : '');
+      chip.textContent = tag;
+      chip.addEventListener('click', () => {
+        if (selectedTags.has(tag)) selectedTags.delete(tag);
+        else selectedTags.add(tag);
+        buildTagPicker();
+      });
+      tagPickerEl.appendChild(chip);
+    });
+  }
+
+  // --- Filter Tags ---
+  function buildFilterTags() {
+    filterTagsEl.replaceChildren();
+    const usedTags = new Set(shops.flatMap(s => s.tags || []));
+    if (usedTags.size === 0) return;
+
+    ALL_TAGS.filter(t => usedTags.has(t)).forEach(tag => {
+      const chip = document.createElement('span');
+      chip.className = 'filter-chip' + (activeFilter === tag ? ' active' : '');
+      chip.textContent = tag;
+      chip.addEventListener('click', () => {
+        activeFilter = activeFilter === tag ? null : tag;
+        buildFilterTags();
+        renderList();
+      });
+      filterTagsEl.appendChild(chip);
+    });
+  }
+
+  function updateAddBtn() {
+    addBtn.disabled = !(shopNameInput.value.trim() && selectedRating > 0);
+  }
+
+  function starsString(rating) {
+    return '\u2605'.repeat(rating) + '\u2606'.repeat(5 - rating);
+  }
+
+  function getFilteredSorted() {
+    const query = searchInput.value.trim().toLowerCase();
+
+    let list = shops;
+
+    if (query) {
+      list = list.filter(s => s.name.toLowerCase().includes(query));
+    }
+
+    if (activeFilter) {
+      list = list.filter(s => (s.tags || []).includes(activeFilter));
+    }
+
+    list = [...list].sort((a, b) => {
+      if (a.favorite !== b.favorite) return a.favorite ? -1 : 1;
+      if (b.rating !== a.rating) return b.rating - a.rating;
+      return a.name.localeCompare(b.name);
+    });
+
+    return list;
+  }
+
+  function renderList() {
+    shopListEl.replaceChildren();
+    const sorted = getFilteredSorted();
+
+    if (shops.length === 0) {
+      countLabel.textContent = '';
+      const empty = document.createElement('div');
+      empty.className = 'empty-state';
+      const icon = document.createElement('div');
+      icon.className = 'icon';
+      icon.textContent = '\u2615';
+      const msg = document.createElement('p');
+      msg.textContent = 'No coffee shops yet. Add your first one above!';
+      empty.appendChild(icon);
+      empty.appendChild(msg);
+      shopListEl.appendChild(empty);
+      return;
+    }
+
+    if (sorted.length === 0) {
+      countLabel.textContent = '';
+      const empty = document.createElement('div');
+      empty.className = 'empty-state';
+      const msg = document.createElement('p');
+      msg.textContent = 'No shops match your search.';
+      empty.appendChild(msg);
+      shopListEl.appendChild(empty);
+      return;
+    }
+
+    countLabel.textContent = sorted.length + ' shop' + (sorted.length === 1 ? '' : 's') + (sorted.length !== shops.length ? ' shown' : ' ranked');
+
+    sorted.forEach((shop, idx) => {
+      const card = document.createElement('div');
+      card.className = 'shop-card' + (shop.favorite ? ' is-favorite' : '');
+
+      const badge = document.createElement('div');
+      badge.className = 'rank-badge';
+      if (idx === 0) badge.classList.add('rank-gold');
+      else if (idx === 1) badge.classList.add('rank-silver');
+      else if (idx === 2) badge.classList.add('rank-bronze');
+      badge.textContent = idx + 1;
+
+      const info = document.createElement('div');
+      info.className = 'shop-info';
+
+      const name = document.createElement('div');
+      name.className = 'shop-name';
+      name.textContent = shop.name;
+
+      const stars = document.createElement('div');
+      stars.className = 'shop-stars';
+      stars.textContent = starsString(shop.rating);
+
+      info.appendChild(name);
+      info.appendChild(stars);
+
+      if (shop.tags && shop.tags.length > 0) {
+        const tagsRow = document.createElement('div');
+        tagsRow.className = 'shop-tags';
+        shop.tags.forEach(t => {
+          const tag = document.createElement('span');
+          tag.className = 'shop-tag';
+          tag.textContent = t;
+          tagsRow.appendChild(tag);
+        });
+        info.appendChild(tagsRow);
+      }
+
+      const meta = document.createElement('div');
+      meta.className = 'shop-meta';
+
+      const vc = document.createElement('div');
+      vc.className = 'visit-counter';
+
+      const plusBtn = document.createElement('button');
+      plusBtn.className = 'visit-btn';
+      plusBtn.textContent = '+';
+      plusBtn.title = 'Add a visit';
+      plusBtn.addEventListener('click', () => {
+        shop.visits = (shop.visits || 0) + 1;
+        saveShops();
+        renderList();
+      });
+
+      const visitLabel = document.createElement('span');
+      visitLabel.className = 'visit-count';
+      const v = shop.visits || 0;
+      visitLabel.textContent = v + ' visit' + (v === 1 ? '' : 's');
+
+      vc.appendChild(plusBtn);
+      vc.appendChild(visitLabel);
+      meta.appendChild(vc);
+      info.appendChild(meta);
+
+      const actions = document.createElement('div');
+      actions.className = 'card-actions';
+
+      const favBtn = document.createElement('button');
+      favBtn.className = 'fav-btn' + (shop.favorite ? ' is-fav' : '');
+      favBtn.textContent = shop.favorite ? '\u2764\uFE0F' : '\u{1F90D}';
+      favBtn.title = shop.favorite ? 'Unfavorite' : 'Favorite';
+      favBtn.addEventListener('click', () => {
+        shop.favorite = !shop.favorite;
+        saveShops();
+        renderList();
+      });
+
+      const del = document.createElement('button');
+      del.className = 'delete-btn';
+      del.textContent = '\u2715';
+      del.title = 'Remove ' + shop.name;
+      del.addEventListener('click', () => {
+        shops = shops.filter(s => s.id !== shop.id);
+        saveShops();
+        buildFilterTags();
+        renderList();
+      });
+
+      actions.appendChild(favBtn);
+      actions.appendChild(del);
+
+      card.appendChild(badge);
+      card.appendChild(info);
+      card.appendChild(actions);
+      shopListEl.appendChild(card);
+    });
+  }
+
+  function addShop() {
+    const name = shopNameInput.value.trim();
+    if (!name || selectedRating === 0) return;
+
+    shops.push({
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      name,
+      rating: selectedRating,
+      tags: [...selectedTags],
+      visits: 0,
+      favorite: false,
+    });
+
+    saveShops();
+    shopNameInput.value = '';
+    selectedRating = 0;
+    selectedTags.clear();
+    buildStarPicker();
+    buildTagPicker();
+    buildFilterTags();
+    updateAddBtn();
+    renderList();
+    shopNameInput.focus();
+  }
+
+  shopNameInput.addEventListener('input', updateAddBtn);
+  shopNameInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') addShop();
+  });
+  addBtn.addEventListener('click', addShop);
+  searchInput.addEventListener('input', renderList);
+
+  buildStarPicker();
+  buildTagPicker();
+  buildFilterTags();
+  renderList();
+})();
+</script>
+</body>
+</html>
