@@ -1,0 +1,14 @@
+.board {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 16px;
+  background: #e8e6dc;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(20, 20, 19, 0.1);
+}
+
+.board-row {
+  display: flex;
+  gap: 3px;
+}

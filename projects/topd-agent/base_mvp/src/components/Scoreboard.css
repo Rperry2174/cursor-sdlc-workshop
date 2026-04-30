@@ -1,0 +1,125 @@
+.scoreboard {
+  width: 100%;
+  max-width: 420px;
+  margin-top: 12px;
+  padding: 20px;
+  background: #e8e6dc;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(20, 20, 19, 0.1);
+}
+
+.scoreboard-title {
+  font-family: 'Poppins', Arial, sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  color: #141413;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.scoreboard-empty {
+  text-align: center;
+  color: #b0aea5;
+  font-size: 14px;
+}
+
+.scoreboard-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.scoreboard-entry {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: #faf9f5;
+  border-radius: 8px;
+}
+
+.entry-rank {
+  font-family: 'Poppins', Arial, sans-serif;
+  font-weight: 800;
+  font-size: 16px;
+  color: #d97757;
+  min-width: 28px;
+}
+
+.entry-name {
+  font-family: 'Poppins', Arial, sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  color: #141413;
+  flex: 1;
+  letter-spacing: 1px;
+}
+
+.entry-time {
+  font-family: 'Poppins', Arial, sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  color: #6a9bcc;
+}
+
+.name-entry {
+  margin-top: 14px;
+  text-align: center;
+}
+
+.name-prompt {
+  font-weight: 700;
+  font-size: 14px;
+  color: #788c5d;
+  margin-bottom: 8px;
+}
+
+.name-input-row {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.name-input {
+  font-family: 'Poppins', Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-align: center;
+  text-transform: uppercase;
+  width: 100px;
+  padding: 8px 12px;
+  border: 2px solid #d97757;
+  border-radius: 8px;
+  background: #faf9f5;
+  color: #141413;
+  outline: none;
+}
+
+.name-input:focus {
+  border-color: #c4623f;
+  box-shadow: 0 0 0 3px rgba(217, 119, 87, 0.2);
+}
+
+.name-submit {
+  font-family: 'Poppins', Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 16px;
+  background: #788c5d;
+  color: #faf9f5;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.name-submit:hover:not(:disabled) {
+  background: #677a4f;
+}
+
+.name-submit:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
