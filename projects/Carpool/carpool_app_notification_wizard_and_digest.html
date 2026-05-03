@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #f0f4f8;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    gap: 30px;
+    flex-wrap: wrap;
+  }
+  .phone {
+    width: 375px;
+    height: 800px;
+    background: #f8f9fb;
+    border-radius: 44px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.18), 0 0 0 2px #d1d5db;
+    overflow: hidden;
+    flex-shrink: 0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .phone-label {
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #6b7280;
+  }
+  .phone-wrap { display: flex; flex-direction: column; }
+
+  .av-green { background: linear-gradient(135deg, #2d6a4f, #52b788); }
+  .av-blue { background: linear-gradient(135deg, #1d4ed8, #60a5fa); }
+  .av-purple { background: linear-gradient(135deg, #7c3aed, #a78bfa); }
+  .av-teal { background: linear-gradient(135deg, #0d9488, #5eead4); }
+
+  .status-bar {
+    background: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 24px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #111827;
+    flex-shrink: 0;
+  }
+
+  /* ==================== WIZARD COMMON ==================== */
+  .wiz-header {
+    background: white;
+    padding: 12px 18px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .wiz-progress {
+    display: flex;
+    gap: 5px;
+  }
+  .wiz-dot {
+    width: 22px;
+    height: 5px;
+    background: #e5e7eb;
+    border-radius: 5px;
+  }
+  .wiz-dot.active { background: #2d6a4f; }
+  .wiz-dot.done { background: #86efac; }
+  .wiz-skip {
+    font-size: 12px;
+    color: #9ca3af;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .wiz-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 18px 18px 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .wiz-illustration {
+    text-align: center;
+    margin-bottom: 18px;
+  }
+  .illust-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 38px;
+    margin-bottom: 10px;
+  }
+  .illust-sleep {
+    background: linear-gradient(135deg, #ede9fe, #c4b5fd);
+  }
+  .illust-loud {
+    background: linear-gradient(135deg, #fef3c7, #fcd34d);
+  }
+  .illust-done {
+    background: linear-gradient(135deg, #d1fae5, #6ee7b7);
+  }
+
+  .wiz-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: #111827;
+    text-align: center;
+    line-height: 1.25;
+    margin-bottom: 6px;
+  }
+  .wiz-sub {
+    font-size: 13px;
+    color: #6b7280;
+    text-align: center;
+    line-height: 1.5;
+    margin-bottom: 22px;
+    padding: 0 8px;
+  }
+
+  .wiz-card {
+    background: white;
+    border-radius: 16px;
+    padding: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    margin-bottom: 10px;
+  }
+
+  .wiz-quiet-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .wiz-quiet-emoji {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .emoji-sleep { background: #ede9fe; }
+  .emoji-work { background: #dbeafe; }
+  .wiz-quiet-info { flex: 1; }
+  .wiz-quiet-title { font-size: 13px; font-weight: 700; color: #111827; }
+  .wiz-time-pills {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+    flex-wrap: wrap;
+  }
+  .time-pill {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 7px;
+    padding: 4px 9px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #374151;
+  }
+  .day-pill {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 7px;
+    padding: 4px 8px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #065f46;
+  }
+  .toggle {
+    width: 38px;
+    height: 22px;
+    background: #d1d5db;
+    border-radius: 22px;
+    position: relative;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+  .toggle.on { background: #2d6a4f; }
+  .toggle::after {
+    content: "";
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    background: white;
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+  }
+  .toggle.on::after { left: 18px; }
+
+  .smart-tip {
+    background: #eff6ff;
+    border-radius: 12px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 8px 0 14px;
+  }
+  .tip-icon { font-size: 16px; flex-shrink: 0; }
+  .tip-text { font-size: 11px; color: #1e40af; line-height: 1.4; }
+  .tip-text strong { font-weight: 700; }
+
+  .wiz-footer {
+    padding: 12px 18px 18px;
+    background: white;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .primary-btn {
+    background: linear-gradient(135deg, #2d6a4f, #40916c);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    padding: 14px;
+    font-size: 14px;
+    font-weight: 700;
+    width: 100%;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(45,106,79,0.3);
+  }
+  .ghost-link {
+    text-align: center;
+    color: #6b7280;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px;
+    cursor: pointer;
+  }
+
+  /* ==================== STYLE PRESETS ==================== */
+  .preset-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .preset-card {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 14px;
+    cursor: pointer;
+    position: relative;
+  }
+  .preset-card.selected {
+    border-color: #2d6a4f;
+    background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 60%);
+    box-shadow: 0 4px 14px rgba(45,106,79,0.12);
+  }
+  .preset-rec-pill {
+    position: absolute;
+    top: -8px;
+    right: 14px;
+    background: #2d6a4f;
+    color: white;
+    font-size: 9px;
+    font-weight: 800;
+    padding: 3px 9px;
+    border-radius: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .preset-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .preset-emoji-circle {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .preset-emoji-calm { background: #e0e7ff; color: #4338ca; }
+  .preset-emoji-balanced { background: #d1fae5; color: #065f46; }
+  .preset-emoji-loud { background: #fee2e2; color: #b91c1c; }
+  .preset-name { font-size: 14px; font-weight: 800; color: #111827; flex: 1; }
+  .preset-radio {
+    width: 22px; height: 22px;
+    border: 2px solid #d1d5db;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .preset-card.selected .preset-radio { background: #2d6a4f; border-color: #2d6a4f; }
+  .preset-radio-dot {
+    width: 8px; height: 8px;
+    background: white;
+    border-radius: 50%;
+    display: none;
+  }
+  .preset-card.selected .preset-radio-dot { display: block; }
+  .preset-desc {
+    font-size: 12px;
+    color: #4b5563;
+    line-height: 1.4;
+    margin-bottom: 10px;
+  }
+  .preset-volume {
+    background: #f9fafb;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 11px;
+    color: #6b7280;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .preset-card.selected .preset-volume { background: #ecfdf5; color: #065f46; }
+  .vol-bars {
+    display: inline-flex;
+    gap: 2px;
+    align-items: end;
+  }
+  .vol-bar {
+    width: 3px;
+    background: currentColor;
+    border-radius: 1px;
+  }
+
+  /* ==================== ALL SET ==================== */
+  .summary-card {
+    background: white;
+    border-radius: 16px;
+    padding: 0;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    margin-bottom: 14px;
+  }
+  .summary-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  .summary-row:last-child { border-bottom: none; }
+  .sum-icon {
+    width: 32px; height: 32px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .sum-info { flex: 1; }
+  .sum-title { font-size: 12px; font-weight: 700; color: #111827; }
+  .sum-detail { font-size: 11px; color: #6b7280; margin-top: 1px; }
+  .sum-check { color: #2d6a4f; font-size: 14px; flex-shrink: 0; }
+
+  .est-card {
+    background: linear-gradient(135deg, #2d6a4f 0%, #1b4332 100%);
+    color: white;
+    border-radius: 16px;
+    padding: 14px;
+    text-align: center;
+    margin-bottom: 14px;
+    box-shadow: 0 6px 20px rgba(45,106,79,0.25);
+  }
+  .est-eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    opacity: 0.85;
+    margin-bottom: 4px;
+  }
+  .est-num {
+    font-size: 32px;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .est-label { font-size: 13px; opacity: 0.9; }
+
+  /* ==================== PHONE 4: PUSH (LOCK SCREEN) ==================== */
+  .lock-screen {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(170deg, #312e81 0%, #581c87 35%, #9d174d 70%, #c2410c 100%);
+    display: flex;
+    flex-direction: column;
+    color: white;
+    padding: 18px 16px;
+  }
+  .lock-status {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 18px;
+  }
+  .lock-icon-row { text-align: center; margin-bottom: 6px; opacity: 0.9; }
+  .lock-date {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+    opacity: 0.95;
+  }
+  .lock-time {
+    text-align: center;
+    font-size: 78px;
+    font-weight: 200;
+    letter-spacing: -3px;
+    line-height: 1;
+    margin: -4px 0 28px;
+  }
+
+  .digest-notif {
+    background: rgba(255,255,255,0.18);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 18px;
+    padding: 14px;
+    border: 0.5px solid rgba(255,255,255,0.3);
+    margin-bottom: 8px;
+  }
+  .digest-notif-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .digest-app-icon {
+    width: 22px; height: 22px;
+    background: linear-gradient(135deg, #2d6a4f, #40916c);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+  }
+  .digest-app-name {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    flex: 1;
+  }
+  .digest-notif-time { font-size: 11px; opacity: 0.85; font-weight: 600; }
+  .digest-notif-title {
+    font-size: 16px;
+    font-weight: 800;
+    margin-bottom: 6px;
+    line-height: 1.2;
+  }
+  .digest-notif-summary {
+    font-size: 13px;
+    line-height: 1.5;
+    opacity: 0.95;
+    margin-bottom: 12px;
+  }
+  .digest-summary-line {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    margin-bottom: 4px;
+  }
+  .digest-summary-line:last-child { margin-bottom: 0; }
+  .digest-bullet { font-weight: 700; opacity: 0.9; flex-shrink: 0; }
+
+  .digest-actions {
+    display: flex;
+    gap: 8px;
+    margin: 4px -14px -14px;
+    border-top: 0.5px solid rgba(255,255,255,0.25);
+  }
+  .digest-action-btn {
+    flex: 1;
+    padding: 12px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: white;
+    border-right: 0.5px solid rgba(255,255,255,0.25);
+    cursor: pointer;
+  }
+  .digest-action-btn:last-child { border-right: none; }
+
+  .lock-bottom {
+    margin-top: auto;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 14px;
+  }
+  .lock-bottom-icon {
+    width: 38px; height: 38px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+  .home-indicator {
+    width: 120px;
+    height: 4px;
+    background: rgba(255,255,255,0.7);
+    border-radius: 2px;
+    margin: 8px auto 0;
+  }
+
+  /* ==================== PHONE 5: IN-APP DIGEST ==================== */
+  .digest-hero {
+    background: linear-gradient(135deg, #581c87 0%, #9d174d 60%, #c2410c 100%);
+    color: white;
+    padding: 18px 18px 28px;
+    flex-shrink: 0;
+  }
+  .digest-hero-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .digest-hero-eyebrow {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    opacity: 0.85;
+  }
+  .digest-close { font-size: 20px; opacity: 0.85; cursor: pointer; }
+  .digest-h1 {
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1.15;
+    margin-bottom: 4px;
+  }
+  .digest-date {
+    font-size: 13px;
+    opacity: 0.9;
+  }
+
+  .digest-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 14px 14px;
+  }
+
+  .digest-section {
+    background: white;
+    border-radius: 16px;
+    padding: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    margin-top: 12px;
+  }
+  .digest-section.priority {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 1.5px solid #fcd34d;
+    margin-top: -14px;
+  }
+  .ds-eyebrow {
+    font-size: 10px;
+    font-weight: 800;
+    color: #92400e;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 8px;
+  }
+  .ds-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: #78350f;
+    line-height: 1.2;
+    margin-bottom: 10px;
+  }
+  .ds-tomorrow-card {
+    background: white;
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .tom-emoji {
+    width: 38px; height: 38px;
+    background: #fef3c7;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .tom-info { flex: 1; }
+  .tom-name { font-size: 13px; font-weight: 700; color: #111827; }
+  .tom-detail { font-size: 11px; color: #6b7280; margin-top: 2px; }
+  .tom-time {
+    font-size: 13px;
+    font-weight: 800;
+    color: #92400e;
+    flex-shrink: 0;
+  }
+
+  .digest-section-title {
+    font-size: 11px;
+    font-weight: 800;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  .activity-item:last-child { border-bottom: none; }
+  .act-icon {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .icon-claim { background: #d1fae5; }
+  .icon-sub { background: #fef3c7; }
+  .icon-change { background: #dbeafe; }
+  .icon-join { background: #ede9fe; }
+  .icon-chat { background: #f3f4f6; }
+  .act-text { flex: 1; min-width: 0; font-size: 12px; line-height: 1.4; color: #374151; }
+  .act-text strong { color: #111827; font-weight: 700; }
+  .act-time { font-size: 10px; color: #9ca3af; margin-top: 2px; }
+
+  .heads-up-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  .heads-up-row:last-child { border-bottom: none; }
+  .hu-emoji {
+    width: 32px; height: 32px;
+    background: #fffbeb;
+    border: 1.5px dashed #f59e0b;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .hu-info { flex: 1; min-width: 0; }
+  .hu-title { font-size: 12px; font-weight: 700; color: #111827; }
+  .hu-sub { font-size: 11px; color: #6b7280; margin-top: 1px; }
+  .hu-action {
+    background: #f59e0b;
+    color: white;
+    border: none;
+    border-radius: 7px;
+    padding: 5px 10px;
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+</style>
+</head>
+<body>
+
+<!-- ============ PHONE 1: WIZARD - QUIET HOURS ============ -->
+<div class="phone-wrap">
+<div class="phone-label">Wizard 1 of 3 · Quiet hours</div>
+<div class="phone">
+  <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+
+  <div class="wiz-header">
+    <div class="wiz-progress">
+      <div class="wiz-dot active"></div>
+      <div class="wiz-dot"></div>
+      <div class="wiz-dot"></div>
+    </div>
+    <div class="wiz-skip">Skip</div>
+  </div>
+
+  <div class="wiz-content">
+    <div class="wiz-illustration">
+      <div class="illust-circle illust-sleep">🌙</div>
+    </div>
+    <div class="wiz-title">When should we keep quiet?</div>
+    <div class="wiz-sub">No buzzes during sleep or work hours. Urgent things still come through.</div>
+
+    <div class="wiz-card">
+      <div class="wiz-quiet-row">
+        <div class="wiz-quiet-emoji emoji-sleep">🌙</div>
+        <div class="wiz-quiet-info">
+          <div class="wiz-quiet-title">Sleep</div>
+          <div class="wiz-time-pills">
+            <span class="time-pill">10:00 PM → 7:00 AM</span>
+            <span class="day-pill">Every day</span>
+          </div>
+        </div>
+        <div class="toggle on"></div>
+      </div>
+    </div>
+
+    <div class="wiz-card">
+      <div class="wiz-quiet-row">
+        <div class="wiz-quiet-emoji emoji-work">💼</div>
+        <div class="wiz-quiet-info">
+          <div class="wiz-quiet-title">Work hours</div>
+          <div class="wiz-time-pills">
+            <span class="time-pill">9:00 AM → 5:00 PM</span>
+            <span class="day-pill">Mon–Fri</span>
+          </div>
+        </div>
+        <div class="toggle on"></div>
+      </div>
+    </div>
+
+    <div class="smart-tip">
+      <div class="tip-icon">🚨</div>
+      <div class="tip-text"><strong>Critical things still come through.</strong> If your kid's pickup needs a sub, you'll get a buzz no matter the hour.</div>
+    </div>
+  </div>
+
+  <div class="wiz-footer">
+    <button class="primary-btn">Sounds good →</button>
+  </div>
+</div>
+</div>
+
+<!-- ============ PHONE 2: WIZARD - STYLE PRESET ============ -->
+<div class="phone-wrap">
+<div class="phone-label">Wizard 2 of 3 · Notification style</div>
+<div class="phone">
+  <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+
+  <div class="wiz-header">
+    <div class="wiz-progress">
+      <div class="wiz-dot done"></div>
+      <div class="wiz-dot active"></div>
+      <div class="wiz-dot"></div>
+    </div>
+    <div class="wiz-skip">Skip</div>
+  </div>
+
+  <div class="wiz-content">
+    <div class="wiz-illustration">
+      <div class="illust-circle illust-loud">🔔</div>
+    </div>
+    <div class="wiz-title">How loud should pings be?</div>
+    <div class="wiz-sub">You're on 3 teams. Pick a starting style — fine-tune any group later.</div>
+
+    <div class="preset-stack">
+
+      <div class="preset-card">
+        <div class="preset-header">
+          <div class="preset-emoji-circle preset-emoji-calm">🤫</div>
+          <div class="preset-name">Calm</div>
+          <div class="preset-radio"><div class="preset-radio-dot"></div></div>
+        </div>
+        <div class="preset-desc">Mostly the 7pm digest. Buzz only for your assigned drives.</div>
+        <div class="preset-volume">
+          <span class="vol-bars">
+            <span class="vol-bar" style="height:4px"></span>
+            <span class="vol-bar" style="height:6px"></span>
+            <span class="vol-bar" style="height:3px; opacity:0.3"></span>
+            <span class="vol-bar" style="height:8px; opacity:0.3"></span>
+          </span>
+          <span>~3 pings / week</span>
+        </div>
+      </div>
+
+      <div class="preset-card selected">
+        <div class="preset-rec-pill">Recommended</div>
+        <div class="preset-header">
+          <div class="preset-emoji-circle preset-emoji-balanced">⚖️</div>
+          <div class="preset-name">Balanced</div>
+          <div class="preset-radio"><div class="preset-radio-dot"></div></div>
+        </div>
+        <div class="preset-desc">Critical & sub requests in real-time. Chat & social batched into the 7pm digest.</div>
+        <div class="preset-volume">
+          <span class="vol-bars">
+            <span class="vol-bar" style="height:4px"></span>
+            <span class="vol-bar" style="height:7px"></span>
+            <span class="vol-bar" style="height:5px"></span>
+            <span class="vol-bar" style="height:8px; opacity:0.3"></span>
+          </span>
+          <span>~12 pings / week</span>
+        </div>
+      </div>
+
+      <div class="preset-card">
+        <div class="preset-header">
+          <div class="preset-emoji-circle preset-emoji-loud">🔔</div>
+          <div class="preset-name">Loud</div>
+          <div class="preset-radio"><div class="preset-radio-dot"></div></div>
+        </div>
+        <div class="preset-desc">Tell me everything as it happens — chat, claims, joins, all of it.</div>
+        <div class="preset-volume">
+          <span class="vol-bars">
+            <span class="vol-bar" style="height:4px"></span>
+            <span class="vol-bar" style="height:7px"></span>
+            <span class="vol-bar" style="height:5px"></span>
+            <span class="vol-bar" style="height:9px"></span>
+          </span>
+          <span>~35 pings / week</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="wiz-footer">
+    <button class="primary-btn">Continue →</button>
+  </div>
+</div>
+</div>
+
+<!-- ============ PHONE 3: WIZARD - ALL SET ============ -->
+<div class="phone-wrap">
+<div class="phone-label">Wizard 3 of 3 · You're all set</div>
+<div class="phone">
+  <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+
+  <div class="wiz-header">
+    <div class="wiz-progress">
+      <div class="wiz-dot done"></div>
+      <div class="wiz-dot done"></div>
+      <div class="wiz-dot active"></div>
+    </div>
+    <div class="wiz-skip" style="opacity:0">Skip</div>
+  </div>
+
+  <div class="wiz-content">
+    <div class="wiz-illustration">
+      <div class="illust-circle illust-done">✓</div>
+    </div>
+    <div class="wiz-title">You're all set, Alex</div>
+    <div class="wiz-sub">Here's what to expect for your 3 teams.</div>
+
+    <div class="est-card">
+      <div class="est-eyebrow">Estimated volume</div>
+      <div class="est-num">~5</div>
+      <div class="est-label">notifications per day</div>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-row">
+        <div class="sum-icon" style="background:#ede9fe">🌙</div>
+        <div class="sum-info">
+          <div class="sum-title">Quiet at night</div>
+          <div class="sum-detail">10 PM – 7 AM, every day</div>
+        </div>
+        <div class="sum-check">✓</div>
+      </div>
+      <div class="summary-row">
+        <div class="sum-icon" style="background:#dbeafe">💼</div>
+        <div class="sum-info">
+          <div class="sum-title">Quiet during work</div>
+          <div class="sum-detail">9 AM – 5 PM, weekdays</div>
+        </div>
+        <div class="sum-check">✓</div>
+      </div>
+      <div class="summary-row">
+        <div class="sum-icon" style="background:#d1fae5">⚖️</div>
+        <div class="sum-info">
+          <div class="sum-title">Balanced style</div>
+          <div class="sum-detail">Critical now · chat & social in digest</div>
+        </div>
+        <div class="sum-check">✓</div>
+      </div>
+      <div class="summary-row">
+        <div class="sum-icon" style="background:#fef3c7">📬</div>
+        <div class="sum-info">
+          <div class="sum-title">Daily digest</div>
+          <div class="sum-detail">Every day at 7:00 PM</div>
+        </div>
+        <div class="sum-check">✓</div>
+      </div>
+      <div class="summary-row">
+        <div class="sum-icon" style="background:#fee2e2">🚨</div>
+        <div class="sum-info">
+          <div class="sum-title">Override for your kids</div>
+          <div class="sum-detail">Always alert when Lucas or Mia involved</div>
+        </div>
+        <div class="sum-check">✓</div>
+      </div>
+    </div>
+
+    <div class="ghost-link" style="text-align:center; padding:0; margin-top:6px;">Adjust anytime in Settings → Notifications</div>
+  </div>
+
+  <div class="wiz-footer">
+    <button class="primary-btn">Got it — take me home</button>
+  </div>
+</div>
+</div>
+
+<!-- ============ PHONE 4: PUSH (LOCK SCREEN) ============ -->
+<div class="phone-wrap">
+<div class="phone-label">Digest A · 7:00 PM push</div>
+<div class="phone">
+  <div class="lock-screen">
+    <div class="lock-status">
+      <span>7:00</span>
+      <span>📶 🔋</span>
+    </div>
+    <div class="lock-icon-row"><span style="font-size:13px;">🔒</span></div>
+    <div class="lock-date">Friday, April 17</div>
+    <div class="lock-time">7:00</div>
+
+    <div class="digest-notif">
+      <div class="digest-notif-header">
+        <div class="digest-app-icon">🚗</div>
+        <div class="digest-app-name">Carpool · Daily Digest</div>
+        <div class="digest-notif-time">now</div>
+      </div>
+      <div class="digest-notif-title">Your evening recap is ready</div>
+      <div class="digest-notif-summary">
+        <div class="digest-summary-line">
+          <span class="digest-bullet">·</span>
+          <span><strong>Tomorrow:</strong> you're driving Wed practice pick-up at 5:30 PM</span>
+        </div>
+        <div class="digest-summary-line">
+          <span class="digest-bullet">·</span>
+          <span><strong>3 updates today</strong> across your 3 teams</span>
+        </div>
+        <div class="digest-summary-line">
+          <span class="digest-bullet">·</span>
+          <span><strong>2 open slots</strong> still need a driver this week</span>
+        </div>
+      </div>
+      <div class="digest-actions">
+        <div class="digest-action-btn">📖 Read recap</div>
+        <div class="digest-action-btn">✓ Got it</div>
+      </div>
+    </div>
+
+    <div class="lock-bottom">
+      <div class="lock-bottom-icon">🔦</div>
+      <div class="lock-bottom-icon">📷</div>
+    </div>
+    <div class="home-indicator"></div>
+  </div>
+</div>
+</div>
+
+<!-- ============ PHONE 5: IN-APP DIGEST ============ -->
+<div class="phone-wrap">
+<div class="phone-label">Digest B · Tap → in-app recap</div>
+<div class="phone">
+  <div class="status-bar"><span>7:00</span><span>📶 🔋</span></div>
+
+  <div class="digest-hero">
+    <div class="digest-hero-row">
+      <div class="digest-hero-eyebrow">Daily digest · 7:00 PM</div>
+      <div class="digest-close">✕</div>
+    </div>
+    <div class="digest-h1">Your day in carpool</div>
+    <div class="digest-date">Friday, April 17 · across 3 teams</div>
+  </div>
+
+  <div class="digest-content">
+
+    <!-- Tomorrow priority -->
+    <div class="digest-section priority">
+      <div class="ds-eyebrow">⭐ Tomorrow you're driving</div>
+      <div class="ds-tomorrow-card">
+        <div class="tom-emoji">⚾</div>
+        <div class="tom-info">
+          <div class="tom-name">Practice pick-up</div>
+          <div class="tom-detail">Riverside Field · 4 kids · leave by 5:15</div>
+        </div>
+        <div class="tom-time">5:30<br><span style="font-size:9px; font-weight:600; opacity:0.7;">PM</span></div>
+      </div>
+    </div>
+
+    <!-- What changed today -->
+    <div class="digest-section">
+      <div class="digest-section-title">
+        <span>What changed today</span>
+        <span style="color:#9ca3af; font-weight:600; text-transform:none; letter-spacing:0;">3 updates</span>
+      </div>
+
+      <div class="activity-item">
+        <div class="act-icon icon-claim">✓</div>
+        <div class="act-text">
+          <strong>Mike</strong> claimed Wed Apr 22 drop-off · <span style="color:#065f46; font-weight:700">Tigers</span>
+          <div class="act-time">2:14 PM</div>
+        </div>
+      </div>
+
+      <div class="activity-item">
+        <div class="act-icon icon-change">📅</div>
+        <div class="act-text">
+          Saturday's game moved from <strong>10:00 AM → 11:30 AM</strong> · <span style="color:#065f46; font-weight:700">Tigers</span>
+          <div class="act-time">11:42 AM</div>
+        </div>
+      </div>
+
+      <div class="activity-item">
+        <div class="act-icon icon-join">👋</div>
+        <div class="act-text">
+          <strong>Diana Kim</strong> joined Piano Lessons (Mia's classmate)
+          <div class="act-time">9:08 AM</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Heads up this week -->
+    <div class="digest-section">
+      <div class="digest-section-title">
+        <span>Needs your attention</span>
+      </div>
+
+      <div class="heads-up-row">
+        <div class="hu-emoji">?</div>
+        <div class="hu-info">
+          <div class="hu-title">Thu game pick-up · 12:30 PM</div>
+          <div class="hu-sub">No driver yet · Tigers</div>
+        </div>
+        <button class="hu-action">I'll drive</button>
+      </div>
+
+      <div class="heads-up-row">
+        <div class="hu-emoji">?</div>
+        <div class="hu-info">
+          <div class="hu-title">Fri practice drop-off · 3:30 PM</div>
+          <div class="hu-sub">No driver yet · Tigers</div>
+        </div>
+        <button class="hu-action">I'll drive</button>
+      </div>
+    </div>
+
+    <!-- Conversations -->
+    <div class="digest-section">
+      <div class="digest-section-title">
+        <span>Quiet conversations</span>
+        <span style="color:#9ca3af; font-weight:600; text-transform:none; letter-spacing:0;">5 messages</span>
+      </div>
+
+      <div class="activity-item">
+        <div class="act-icon icon-chat">💬</div>
+        <div class="act-text">
+          <strong>Tigers chat</strong> — 4 messages about Saturday's game time
+          <div class="act-time">View thread →</div>
+        </div>
+      </div>
+      <div class="activity-item">
+        <div class="act-icon icon-chat">💬</div>
+        <div class="act-text">
+          <strong>Piano chat</strong> — 1 message from Mrs. Park
+          <div class="act-time">View thread →</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:14px"></div>
+
+  </div>
+</div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hangry</title>
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(145deg, #fefce8 0%, #ecfccb 50%, #f0fdf4 100%);
+      color: #1e293b;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 2rem 1.25rem 3rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    header h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #b45309;
+    }
+
+    header p {
+      margin-top: 0.35rem;
+      font-size: 1rem;
+      color: #78716c;
+    }
+
+    .panels {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    @media (max-width: 560px) {
+      .panels {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.92rem;
+      margin-bottom: 0.35rem;
+      color: #334155;
+    }
+
+    .panel textarea {
+      width: 100%;
+      min-height: 180px;
+      padding: 0.65rem 0.75rem;
+      border: 2px solid #d6d3d1;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      line-height: 1.55;
+      resize: vertical;
+      background: #fff;
+      transition: border-color 0.15s;
+    }
+
+    .panel textarea:focus {
+      outline: none;
+      border-color: #f59e0b;
+      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.18);
+    }
+
+    .panel textarea::placeholder {
+      color: #a8a29e;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.6rem 1.25rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-primary {
+      background: #f59e0b;
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #d97706;
+    }
+
+    .btn-secondary {
+      background: #e7e5e4;
+      color: #44403c;
+    }
+
+    .btn-secondary:hover {
+      background: #d6d3d1;
+    }
+
+    .btn-jewel {
+      background: #dc2626;
+      color: #fff;
+    }
+
+    .btn-jewel:hover {
+      background: #b91c1c;
+    }
+
+    .results {
+      background: #fff;
+      border: 2px solid #d6d3d1;
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      min-height: 60px;
+      margin-bottom: 1.5rem;
+    }
+
+    .results h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: #78350f;
+    }
+
+    .results .empty-msg {
+      color: #a8a29e;
+      font-style: italic;
+    }
+
+    #shopping-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    #shopping-list li {
+      padding: 0.3rem 0;
+      border-bottom: 1px solid #f5f5f4;
+      font-size: 0.95rem;
+    }
+
+    #shopping-list li::before {
+      content: "  ";
+      margin-right: 0.5rem;
+    }
+
+    #shopping-list li:last-child {
+      border-bottom: none;
+    }
+
+    .store-section {
+      text-align: center;
+      padding: 1rem;
+      background: #fef2f2;
+      border-radius: 10px;
+      border: 1px solid #fecaca;
+    }
+
+    .store-section p {
+      margin-bottom: 0.6rem;
+      font-size: 0.9rem;
+      color: #78716c;
+    }
+
+    .status-bar {
+      font-size: 0.85rem;
+      color: #78716c;
+      min-height: 1.3em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Hangry</h1>
+      <p>Figure out what's missing from your kitchen.</p>
+    </header>
+
+    <div class="panels">
+      <div class="panel">
+        <label for="baseline">Baseline order (full week)</label>
+        <textarea
+          id="baseline"
+          placeholder="Paste your full grocery list here, one item per line&#10;&#10;e.g.&#10;Milk&#10;Eggs&#10;Bread&#10;Butter&#10;Chicken breast&#10;Spinach"
+        ></textarea>
+      </div>
+      <div class="panel">
+        <label for="fridge">What's in the fridge now</label>
+        <textarea
+          id="fridge"
+          placeholder="Paste what you still have, one item per line&#10;&#10;e.g.&#10;Milk&#10;Butter"
+        ></textarea>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" id="diff-btn">What do I need?</button>
+      <button class="btn btn-secondary" id="clear-btn">Clear all</button>
+      <span class="status-bar" id="status"></span>
+    </div>
+
+    <div class="results">
+      <h2>Shopping list</h2>
+      <p class="empty-msg" id="empty-msg">Paste your lists above and click "What do I need?"</p>
+      <ul id="shopping-list"></ul>
+    </div>
+
+    <div class="store-section">
+      <p>Ready to order? Shop your list at Jewel-Osco.</p>
+      <a
+        class="btn btn-jewel"
+        href="https://www.jewelosco.com/"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Open Jewel-Osco
+      </a>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const baselineEl = document.getElementById("baseline");
+      const fridgeEl = document.getElementById("fridge");
+      const diffBtn = document.getElementById("diff-btn");
+      const clearBtn = document.getElementById("clear-btn");
+      const listEl = document.getElementById("shopping-list");
+      const emptyMsg = document.getElementById("empty-msg");
+      const statusEl = document.getElementById("status");
+
+      function parseList(text) {
+        return text
+          .split("\n")
+          .map(function (line) {
+            return line.trim().toLowerCase();
+          })
+          .filter(function (line) {
+            return line.length > 0;
+          });
+      }
+
+      function computeMissing(baseline, fridge) {
+        const haveSet = new Set(fridge);
+        return baseline.filter(function (item) {
+          return !haveSet.has(item);
+        });
+      }
+
+      function renderList(items) {
+        listEl.textContent = "";
+        if (items.length === 0) {
+          emptyMsg.textContent = "You're fully stocked — nothing to order!";
+          emptyMsg.style.display = "";
+          return;
+        }
+        emptyMsg.style.display = "none";
+        for (var i = 0; i < items.length; i++) {
+          var li = document.createElement("li");
+          li.textContent = items[i];
+          listEl.appendChild(li);
+        }
+      }
+
+      diffBtn.addEventListener("click", function () {
+        var baselineText = baselineEl.value;
+        var fridgeText = fridgeEl.value;
+
+        if (baselineText.trim().length === 0) {
+          statusEl.textContent = "Paste your baseline grocery list first.";
+          return;
+        }
+
+        var baseline = parseList(baselineText);
+        var fridge = parseList(fridgeText);
+        var missing = computeMissing(baseline, fridge);
+
+        renderList(missing);
+        statusEl.textContent =
+          missing.length +
+          " item" +
+          (missing.length === 1 ? "" : "s") +
+          " to order (from " +
+          baseline.length +
+          " baseline, " +
+          fridge.length +
+          " on hand).";
+      });
+
+      clearBtn.addEventListener("click", function () {
+        baselineEl.value = "";
+        fridgeEl.value = "";
+        listEl.textContent = "";
+        emptyMsg.textContent =
+          'Paste your lists above and click "What do I need?"';
+        emptyMsg.style.display = "";
+        statusEl.textContent = "";
+      });
+    })();
+  </script>
+</body>
+</html>

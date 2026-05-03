@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #f0f4f8;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    gap: 30px;
+    flex-wrap: wrap;
+  }
+  .phone {
+    width: 375px;
+    background: #f8f9fb;
+    border-radius: 44px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.18), 0 0 0 2px #d1d5db;
+    overflow: hidden;
+    padding-bottom: 24px;
+    flex-shrink: 0;
+  }
+  .phone-label {
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #6b7280;
+  }
+  .phone-wrap { display: flex; flex-direction: column; }
+
+  .status-bar {
+    background: #1a1f2e;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 24px 10px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .screen-header {
+    background: white;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .back-arrow { font-size: 22px; color: #6b7280; }
+  .screen-title { font-size: 17px; font-weight: 700; color: #111827; }
+  .screen-subtitle { font-size: 11px; color: #9ca3af; margin-top: 1px; }
+  .step-indicator { font-size: 11px; color: #9ca3af; font-weight: 600; }
+
+  .scroll-area { padding: 16px; }
+
+  /* ============ PHONE 1: AFTER SYNC ============ */
+  .connect-banner {
+    background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);
+    color: white;
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .ts-logo {
+    width: 40px; height: 40px;
+    background: white;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .connect-text { flex: 1; }
+  .connect-status {
+    font-size: 10px;
+    font-weight: 700;
+    opacity: 0.85;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .live-dot {
+    width: 6px; height: 6px;
+    background: #86efac;
+    border-radius: 50%;
+    box-shadow: 0 0 6px #86efac;
+  }
+  .connect-account {
+    font-size: 14px;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+  .swap-link {
+    font-size: 11px;
+    font-weight: 700;
+    background: rgba(255,255,255,0.2);
+    padding: 5px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  .field-section {
+    background: white;
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  }
+  .field-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #9ca3af;
+    margin-bottom: 6px;
+  }
+  .detected-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  .team-icon {
+    width: 36px; height: 36px;
+    background: #fef3c7;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+  .detected-info { flex: 1; }
+  .detected-team {
+    font-size: 13px;
+    font-weight: 700;
+    color: #111827;
+  }
+  .detected-meta {
+    font-size: 11px;
+    color: #6b7280;
+    margin-top: 1px;
+  }
+
+  .field-input {
+    background: #f9fafb;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #111827;
+    border: 1.5px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .edit-icon { font-size: 14px; color: #9ca3af; }
+
+  .preview-card {
+    background: white;
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  }
+  .preview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .preview-title { font-size: 13px; font-weight: 700; color: #111827; }
+  .preview-count {
+    font-size: 11px;
+    font-weight: 700;
+    color: #2d6a4f;
+    background: #d1fae5;
+    padding: 3px 8px;
+    border-radius: 10px;
+  }
+  .event-mini-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  .event-mini-row:last-of-type { border-bottom: none; }
+  .mini-date {
+    width: 38px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .mini-day { font-size: 9px; color: #9ca3af; font-weight: 700; text-transform: uppercase; }
+  .mini-num { font-size: 14px; font-weight: 800; color: #111827; line-height: 1.1; }
+  .mini-info { flex: 1; min-width: 0; }
+  .mini-name { font-size: 12px; font-weight: 600; color: #111827; }
+  .mini-time { font-size: 11px; color: #9ca3af; }
+  .mini-type {
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    flex-shrink: 0;
+  }
+  .type-practice { background: #dbeafe; color: #1e40af; }
+  .type-game { background: #fef3c7; color: #92400e; }
+
+  .more-events {
+    text-align: center;
+    font-size: 11px;
+    color: #6b7280;
+    padding-top: 10px;
+    margin-top: 4px;
+    border-top: 1px solid #f3f4f6;
+    font-weight: 600;
+  }
+
+  .auto-sync-row {
+    background: #eff6ff;
+    border-radius: 12px;
+    padding: 11px 13px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .auto-sync-icon { font-size: 16px; }
+  .auto-sync-text {
+    font-size: 11px;
+    color: #1e40af;
+    font-weight: 600;
+    flex: 1;
+    line-height: 1.3;
+  }
+  .toggle {
+    width: 36px;
+    height: 20px;
+    background: #2d6a4f;
+    border-radius: 20px;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .toggle::after {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    background: white;
+    border-radius: 50%;
+    top: 2px;
+    right: 2px;
+  }
+
+  .primary-btn {
+    background: linear-gradient(135deg, #2d6a4f, #40916c);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    padding: 14px;
+    font-size: 14px;
+    font-weight: 700;
+    width: 100%;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(45,106,79,0.3);
+  }
+
+  /* ============ PHONE 2: ASSIGN DRIVERS ============ */
+
+  .group-banner {
+    background: white;
+    border-radius: 16px;
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  }
+  .group-emoji {
+    width: 44px; height: 44px;
+    background: #fef3c7;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+  }
+  .group-info { flex: 1; }
+  .group-name { font-size: 15px; font-weight: 700; color: #111827; }
+  .group-meta { font-size: 11px; color: #6b7280; margin-top: 2px; }
+
+  .helper-text {
+    font-size: 12px;
+    color: #4b5563;
+    line-height: 1.4;
+    margin-bottom: 12px;
+    padding: 0 4px;
+  }
+
+  .bulk-actions {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 14px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .bulk-chip {
+    background: white;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #374151;
+    white-space: nowrap;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .bulk-chip-primary {
+    background: #2d6a4f;
+    color: white;
+    border-color: #2d6a4f;
+  }
+
+  .assign-event-card {
+    background: white;
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  }
+  .assign-event-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  .assign-date {
+    width: 40px;
+    background: #f9fafb;
+    border-radius: 8px;
+    text-align: center;
+    padding: 6px 0;
+    flex-shrink: 0;
+  }
+  .assign-day { font-size: 9px; color: #9ca3af; font-weight: 700; text-transform: uppercase; }
+  .assign-num { font-size: 16px; font-weight: 800; color: #111827; line-height: 1.1; }
+  .assign-event-info { flex: 1; min-width: 0; }
+  .assign-event-name { font-size: 13px; font-weight: 700; color: #111827; }
+  .assign-event-loc { font-size: 11px; color: #9ca3af; margin-top: 1px; }
+
+  .leg-assign-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    margin-bottom: 5px;
+  }
+  .leg-assign-row:last-child { margin-bottom: 0; }
+  .leg-assign-you { background: #f0fdf4; border: 1.5px solid #86efac; }
+  .leg-assign-other { background: #f9fafb; }
+  .leg-assign-open { background: #fffbeb; border: 1.5px dashed #f59e0b; }
+
+  .leg-assign-icon {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .leg-assign-info { flex: 1; min-width: 0; }
+  .leg-assign-label-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 1px;
+  }
+  .leg-assign-direction {
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: #6b7280;
+  }
+  .leg-assign-time {
+    font-size: 11px;
+    font-weight: 700;
+    color: #111827;
+  }
+  .leg-assign-driver {
+    font-size: 11px;
+    font-weight: 600;
+    color: #374151;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .driver-av-tiny {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 7px;
+    font-weight: 800;
+    color: white;
+  }
+  .av-green { background: linear-gradient(135deg, #2d6a4f, #52b788); }
+  .av-blue { background: linear-gradient(135deg, #1d4ed8, #60a5fa); }
+  .av-purple { background: linear-gradient(135deg, #7c3aed, #a78bfa); }
+  .av-orange { background: linear-gradient(135deg, #c05621, #f6ad55); }
+
+  .open-text-mini {
+    font-size: 11px;
+    font-weight: 700;
+    color: #92400e;
+  }
+  .open-q-mini {
+    width: 14px; height: 14px;
+    background: #fef3c7;
+    border: 1.2px dashed #f59e0b;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 7px;
+    color: #92400e;
+    font-weight: 800;
+  }
+
+  .leg-action-mini {
+    flex-shrink: 0;
+  }
+  .claim-btn {
+    background: #f59e0b;
+    color: white;
+    border: none;
+    border-radius: 7px;
+    padding: 5px 10px;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(245,158,11,0.3);
+  }
+  .change-btn {
+    background: white;
+    color: #6b7280;
+    border: 1px solid #e5e7eb;
+    border-radius: 7px;
+    padding: 5px 9px;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .summary-bar {
+    background: white;
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin: 14px 0;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .summary-icon { font-size: 18px; }
+  .summary-text { font-size: 11px; color: #4b5563; line-height: 1.4; flex: 1; }
+  .summary-text strong { color: #111827; font-weight: 700; }
+
+  .footer-actions {
+    display: flex;
+    gap: 8px;
+    padding: 0 16px;
+  }
+  .secondary-btn {
+    background: white;
+    color: #2d6a4f;
+    border: 1.5px solid #2d6a4f;
+    border-radius: 14px;
+    padding: 13px;
+    font-size: 13px;
+    font-weight: 700;
+    flex: 1;
+    cursor: pointer;
+  }
+
+</style>
+</head>
+<body>
+
+<!-- ============ PHONE 1: AFTER SYNC ============ -->
+<div class="phone-wrap">
+<div class="phone-label">Step 2 — After "Sync"</div>
+<div class="phone">
+  <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+
+  <div class="screen-header">
+    <div class="header-left">
+      <div class="back-arrow">←</div>
+      <div>
+        <div class="screen-title">Import from TeamSnap</div>
+        <div class="screen-subtitle">Step 2 of 3</div>
+      </div>
+    </div>
+    <div class="step-indicator">2/3</div>
+  </div>
+
+  <div class="scroll-area">
+
+    <div class="connect-banner">
+      <div class="ts-logo">🏟️</div>
+      <div class="connect-text">
+        <div class="connect-status"><div class="live-dot"></div> Connected</div>
+        <div class="connect-account">sarah.m@gmail.com</div>
+      </div>
+      <div class="swap-link">Switch</div>
+    </div>
+
+    <div class="field-section">
+      <div class="field-label">Detected team</div>
+      <div class="detected-row">
+        <div class="team-icon">⚾</div>
+        <div class="detected-info">
+          <div class="detected-team">Maplewood Tigers</div>
+          <div class="detected-meta">10U Baseball · Spring 2026 · 12 players</div>
+        </div>
+      </div>
+      <div class="field-label">Carpool group name</div>
+      <div class="field-input">
+        <span>10U Baseball — Tigers</span>
+        <span class="edit-icon">✏️</span>
+      </div>
+    </div>
+
+    <div class="preview-card">
+      <div class="preview-header">
+        <div class="preview-title">Events to import</div>
+        <div class="preview-count">23 found</div>
+      </div>
+      <div class="event-mini-row">
+        <div class="mini-date">
+          <div class="mini-day">Mon</div>
+          <div class="mini-num">20</div>
+        </div>
+        <div class="mini-info">
+          <div class="mini-name">Practice — Riverside Field</div>
+          <div class="mini-time">4:00 – 5:30 PM</div>
+        </div>
+        <div class="mini-type type-practice">Practice</div>
+      </div>
+      <div class="event-mini-row">
+        <div class="mini-date">
+          <div class="mini-day">Wed</div>
+          <div class="mini-num">22</div>
+        </div>
+        <div class="mini-info">
+          <div class="mini-name">Practice — Riverside Field</div>
+          <div class="mini-time">4:00 – 5:30 PM</div>
+        </div>
+        <div class="mini-type type-practice">Practice</div>
+      </div>
+      <div class="event-mini-row">
+        <div class="mini-date">
+          <div class="mini-day">Sat</div>
+          <div class="mini-num">25</div>
+        </div>
+        <div class="mini-info">
+          <div class="mini-name">Game vs. Oakwood Hawks</div>
+          <div class="mini-time">10:00 AM – 12:30 PM</div>
+        </div>
+        <div class="mini-type type-game">Game</div>
+      </div>
+      <div class="event-mini-row">
+        <div class="mini-date">
+          <div class="mini-day">Mon</div>
+          <div class="mini-num">27</div>
+        </div>
+        <div class="mini-info">
+          <div class="mini-name">Practice — Riverside Field</div>
+          <div class="mini-time">4:00 – 5:30 PM</div>
+        </div>
+        <div class="mini-type type-practice">Practice</div>
+      </div>
+      <div class="more-events">+ 19 more events</div>
+    </div>
+
+    <div class="auto-sync-row">
+      <div class="auto-sync-icon">🔄</div>
+      <div class="auto-sync-text"><strong>Keep in sync.</strong> Auto-update when the coach changes the schedule.</div>
+      <div class="toggle"></div>
+    </div>
+
+    <button class="primary-btn">Continue → Assign Drivers</button>
+  </div>
+</div>
+</div>
+
+<!-- ============ PHONE 2: ASSIGN DRIVERS ============ -->
+<div class="phone-wrap">
+<div class="phone-label">Step 3 — Assign Drivers</div>
+<div class="phone">
+  <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+
+  <div class="screen-header">
+    <div class="header-left">
+      <div class="back-arrow">←</div>
+      <div>
+        <div class="screen-title">Assign Drivers</div>
+        <div class="screen-subtitle">Step 3 of 3</div>
+      </div>
+    </div>
+    <div class="step-indicator">3/3</div>
+  </div>
+
+  <div class="scroll-area">
+
+    <div class="group-banner">
+      <div class="group-emoji">⚾</div>
+      <div class="group-info">
+        <div class="group-name">10U Baseball — Tigers</div>
+        <div class="group-meta">23 events · 4 kids · 4 parents</div>
+      </div>
+    </div>
+
+    <div class="helper-text">
+      Claim the legs you can drive. Leave others <strong>open</strong> — parents can sign up after they join.
+    </div>
+
+    <div class="bulk-actions">
+      <div class="bulk-chip bulk-chip-primary">⚡ Auto-rotate</div>
+      <div class="bulk-chip">🚗 I'll do all drop-offs</div>
+      <div class="bulk-chip">🏡 I'll do all pick-ups</div>
+      <div class="bulk-chip">🔓 Leave all open</div>
+    </div>
+
+    <!-- Event 1 -->
+    <div class="assign-event-card">
+      <div class="assign-event-header">
+        <div class="assign-date">
+          <div class="assign-day">Mon</div>
+          <div class="assign-num">20</div>
+        </div>
+        <div class="assign-event-info">
+          <div class="assign-event-name">Practice</div>
+          <div class="assign-event-loc">Riverside Field · 4:00–5:30 PM</div>
+        </div>
+      </div>
+      <div class="leg-assign-row leg-assign-you">
+        <div class="leg-assign-icon">🚗</div>
+        <div class="leg-assign-info">
+          <div class="leg-assign-label-row">
+            <span class="leg-assign-direction">Drop-off → field</span>
+            <span class="leg-assign-time">3:30 PM</span>
+          </div>
+          <div class="leg-assign-driver">
+            <div class="driver-av-tiny av-green">S</div>
+            You're driving
+          </div>
+        </div>
+        <div class="leg-action-mini">
+          <button class="change-btn">Change</button>
+        </div>
+      </div>
+      <div class="leg-assign-row leg-assign-open">
+        <div class="leg-assign-icon">🏡</div>
+        <div class="leg-assign-info">
+          <div class="leg-assign-label-row">
+            <span class="leg-assign-direction">Pick-up → home</span>
+            <span class="leg-assign-time">5:30 PM</span>
+          </div>
+          <div class="leg-assign-driver">
+            <div class="open-q-mini">?</div>
+            <span class="open-text-mini">Open</span>
+          </div>
+        </div>
+        <div class="leg-action-mini">
+          <button class="claim-btn">I'll drive</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Event 2 -->
+    <div class="assign-event-card">
+      <div class="assign-event-header">
+        <div class="assign-date">
+          <div class="assign-day">Wed</div>
+          <div class="assign-num">22</div>
+        </div>
+        <div class="assign-event-info">
+          <div class="assign-event-name">Practice</div>
+          <div class="assign-event-loc">Riverside Field · 4:00–5:30 PM</div>
+        </div>
+      </div>
+      <div class="leg-assign-row leg-assign-other">
+        <div class="leg-assign-icon">🚗</div>
+        <div class="leg-assign-info">
+          <div class="leg-assign-label-row">
+            <span class="leg-assign-direction">Drop-off → field</span>
+            <span class="leg-assign-time">3:30 PM</span>
+          </div>
+          <div class="leg-assign-driver">
+            <div class="driver-av-tiny av-blue">C</div>
+            Mike Chen
+          </div>
+        </div>
+        <div class="leg-action-mini">
+          <button class="change-btn">Change</button>
+        </div>
+      </div>
+      <div class="leg-assign-row leg-assign-you">
+        <div class="leg-assign-icon">🏡</div>
+        <div class="leg-assign-info">
+          <div class="leg-assign-label-row">
+            <span class="leg-assign-direction">Pick-up → home</span>
+            <span class="leg-assign-time">5:30 PM</span>
+          </div>
+          <div class="leg-assign-driver">
+            <div class="driver-av-tiny av-green">S</div>
+            You're driving
+          </div>
+        </div>
+        <div class="leg-action-mini">
+          <button class="change-btn">Change</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Event 3 -->
+    <div class="assign-event-card">
+      <div class="assign-event-header">
+        <div class="assign-date">
+          <div class="assign-day">Sat</div>
+          <div class="assign-num">25</div>
+        </div>
+        <div class="assign-event-info">
+          <div class="assign-event-name">Game vs. Oakwood Hawks</div>
+          <div class="assign-event-loc">Hawks Field · 10:00 AM–12:30 PM</div>
+        </div>
+      </div>
+      <div class="leg-assign-row leg-assign-other">
+        <div class="leg-assign-icon">🚗</div>
+        <div class="leg-assign-info">
+          <div class="leg-assign-label-row">
+            <span class="leg-assign-direction">Drop-off → field</span>
+            <span class="leg-assign-time">9:30 AM</span>
+          </div>
+          <div class="leg-assign-driver">
+            <div class="driver-av-tiny av-purple">J</div>
+            Priya Johnson
+          </div>
+        </div>
+        <div class="leg-action-mini">
+          <button class="change-btn">Change</button>
+        </div>
+      </div>
+      <div class="leg-assign-row leg-assign-open">
+        <div class="leg-assign-icon">🏡</div>
+        <div class="leg-assign-info">
+          <div class="leg-assign-label-row">
+            <span class="leg-assign-direction">Pick-up → home</span>
+            <span class="leg-assign-time">12:30 PM</span>
+          </div>
+          <div class="leg-assign-driver">
+            <div class="open-q-mini">?</div>
+            <span class="open-text-mini">Open</span>
+          </div>
+        </div>
+        <div class="leg-action-mini">
+          <button class="claim-btn">I'll drive</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-bar">
+      <div class="summary-icon">📊</div>
+      <div class="summary-text">
+        <strong>23 of 46 legs assigned.</strong> The remaining 23 will be open for parents to claim after they join.
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer-actions">
+    <button class="secondary-btn">Skip & Invite</button>
+    <button class="primary-btn">Save & Send Invites</button>
+  </div>
+</div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,99 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//GameChanger//Tigers Baseball Spring 2026//EN
+X-WR-CALNAME:Tigers Baseball — Spring 2026
+X-WR-CALDESC:Practices, games, and team events for the Tigers (10U)
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:tigers-practice-weekly-tue-2026@gamechanger.example
+DTSTAMP:20260420T120000Z
+SUMMARY:Tigers Practice
+LOCATION:Lincoln Field — Diamond 2
+DESCRIPTION:Bring batting helmets and water. Cleats required.
+DTSTART:20260428T180000
+DTEND:20260428T193000
+RRULE:FREQ=WEEKLY;BYDAY=TU;COUNT=8
+END:VEVENT
+BEGIN:VEVENT
+UID:tigers-practice-weekly-thu-2026@gamechanger.example
+DTSTAMP:20260420T120000Z
+SUMMARY:Tigers Practice
+LOCATION:Lincoln Field — Diamond 2
+DESCRIPTION:Focus: pitching mechanics + situational hitting.
+DTSTART:20260430T180000
+DTEND:20260430T193000
+RRULE:FREQ=WEEKLY;BYDAY=TH;COUNT=8
+END:VEVENT
+BEGIN:VEVENT
+UID:tigers-game-2026-05-02@gamechanger.example
+DTSTAMP:20260420T120000Z
+SUMMARY:Tigers vs. Wildcats
+LOCATION:Riverside Park — Field A
+DESCRIPTION:Home opener. Arrive 30 min early for warmups.
+DTSTART:20260502T100000
+DTEND:20260502T120000
+END:VEVENT
+BEGIN:VEVENT
+UID:tigers-game-2026-05-09@gamechanger.example
+DTSTAMP:20260420T120000Z
+SUMMARY:Tigers vs. Falcons
+LOCATION:Hometown Field
+DESCRIPTION:Concession duty for the Chen + Rivera families.
+DTSTART:20260509T100000
+DTEND:20260509T120000
+END:VEVENT
+BEGIN:VEVENT
+UID:tigers-game-2026-05-16@gamechanger.example
+DTSTAMP:20260420T120000Z
+SUMMARY:Tigers @ Lions (away)
+LOCATION:Lions Field — 4480 W Belmont Ave
+DESCRIPTION:Away game. Carpool strongly recommended.
+DTSTART:20260516T090000
+DTEND:20260516T110000
+END:VEVENT
+BEGIN:VEVENT
+UID:tigers-game-2026-05-23@gamechanger.example
+DTSTAMP:20260420T120000Z
+SUMMARY:Tigers vs. Bears
+LOCATION:Hometown Field
+DTSTART:20260523T130000
+DTEND:20260523T150000
+END:VEVENT
+BEGIN:VEVENT
+UID:tigers-game-2026-05-30@gamechanger.example
+DTSTAMP:20260420T120000Z
+SUMMARY:Tigers @ Eagles (away)
+LOCATION:Eagles Stadium — 1200 N Lake Shore
+DESCRIPTION:Long drive (~35 min). Bring snacks.
+DTSTART:20260530T110000
+DTEND:20260530T130000
+END:VEVENT
+BEGIN:VEVENT
+UID:tigers-game-2026-06-06@gamechanger.example
+DTSTAMP:20260420T120000Z
+SUMMARY:Tigers vs. Sharks — League Championship
+LOCATION:Hometown Field
+DESCRIPTION:Championship game. Team photos before first pitch.
+DTSTART:20260606T100000
+DTEND:20260606T120000
+END:VEVENT
+BEGIN:VEVENT
+UID:tigers-clinic-2026-05-04@gamechanger.example
+DTSTAMP:20260420T120000Z
+SUMMARY:Pitching Clinic (Optional)
+LOCATION:Lincoln Field — Bullpen
+DESCRIPTION:Optional clinic for pitchers and catchers.
+DTSTART:20260504T170000
+DTEND:20260504T183000
+END:VEVENT
+BEGIN:VEVENT
+UID:tigers-rainout-2026-05-05@gamechanger.example
+DTSTAMP:20260420T120000Z
+SUMMARY:Tigers Practice — RAINOUT
+LOCATION:Lincoln Field — Diamond 2
+DTSTART:20260505T180000
+DTEND:20260505T193000
+STATUS:CANCELLED
+END:VEVENT
+END:VCALENDAR

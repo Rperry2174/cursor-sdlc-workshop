@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #f0f4f8;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    gap: 30px;
+    flex-wrap: wrap;
+  }
+  .phone {
+    width: 375px;
+    height: 760px;
+    background: #f8f9fb;
+    border-radius: 44px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.18), 0 0 0 2px #d1d5db;
+    overflow: hidden;
+    flex-shrink: 0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .phone-label {
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #6b7280;
+  }
+  .phone-wrap { display: flex; flex-direction: column; }
+
+  /* Avatars */
+  .av-green { background: linear-gradient(135deg, #2d6a4f, #52b788); }
+  .av-blue { background: linear-gradient(135deg, #1d4ed8, #60a5fa); }
+  .av-purple { background: linear-gradient(135deg, #7c3aed, #a78bfa); }
+  .av-orange { background: linear-gradient(135deg, #c05621, #f6ad55); }
+  .av-teal { background: linear-gradient(135deg, #0d9488, #5eead4); }
+
+  .avatar-md {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; color: white;
+    flex-shrink: 0;
+  }
+  .avatar-lg {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 700; color: white;
+    flex-shrink: 0;
+  }
+
+  /* ==================== PHONE 1: LOCK SCREEN ==================== */
+  .lock-screen {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(170deg, #1e1b4b 0%, #4c1d95 35%, #831843 70%, #be185d 100%);
+    display: flex;
+    flex-direction: column;
+    color: white;
+    position: relative;
+    padding: 18px 16px;
+  }
+  .lock-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 22px;
+  }
+  .lock-icon-row {
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .lock-icon {
+    font-size: 13px;
+    opacity: 0.9;
+  }
+  .lock-date {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+    opacity: 0.95;
+    letter-spacing: 0.3px;
+  }
+  .lock-time {
+    text-align: center;
+    font-size: 78px;
+    font-weight: 200;
+    letter-spacing: -3px;
+    line-height: 1;
+    margin-top: -4px;
+    margin-bottom: 30px;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  .lock-widgets-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .notification-prominent {
+    background: rgba(255,255,255,0.18);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 18px;
+    padding: 14px;
+    border: 0.5px solid rgba(255,255,255,0.3);
+  }
+  .notif-header-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .notif-app-icon {
+    width: 22px; height: 22px;
+    background: linear-gradient(135deg, #2d6a4f, #40916c);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+  }
+  .notif-app-name {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    flex: 1;
+    opacity: 0.95;
+  }
+  .notif-time {
+    font-size: 11px;
+    font-weight: 600;
+    opacity: 0.8;
+  }
+  .notif-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+  .notif-body {
+    font-size: 13px;
+    line-height: 1.4;
+    opacity: 0.95;
+    margin-bottom: 12px;
+  }
+  .notif-actions {
+    display: flex;
+    gap: 8px;
+    margin: 0 -14px -14px;
+    border-top: 0.5px solid rgba(255,255,255,0.25);
+  }
+  .notif-action-btn {
+    flex: 1;
+    padding: 12px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: white;
+    border-right: 0.5px solid rgba(255,255,255,0.25);
+    cursor: pointer;
+  }
+  .notif-action-btn:last-child { border-right: none; }
+  .notif-action-btn.primary { font-weight: 700; }
+
+  .notif-stacked {
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 16px;
+    padding: 12px 14px;
+    border: 0.5px solid rgba(255,255,255,0.25);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .stack-icon {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .stack-icon.carpool { background: linear-gradient(135deg, #2d6a4f, #40916c); }
+  .stack-icon.weather { background: linear-gradient(135deg, #0ea5e9, #38bdf8); }
+  .stack-info { flex: 1; min-width: 0; }
+  .stack-app {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0.8;
+    font-weight: 700;
+  }
+  .stack-title {
+    font-size: 12px;
+    font-weight: 700;
+    margin-top: 1px;
+  }
+  .stack-body {
+    font-size: 11px;
+    opacity: 0.9;
+    margin-top: 1px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .stack-time {
+    font-size: 10px;
+    opacity: 0.75;
+    flex-shrink: 0;
+    font-weight: 600;
+  }
+
+  .lock-bottom {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 14px;
+    margin-top: 10px;
+  }
+  .lock-bottom-icon {
+    width: 38px; height: 38px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    backdrop-filter: blur(10px);
+  }
+  .home-indicator {
+    width: 120px;
+    height: 4px;
+    background: rgba(255,255,255,0.7);
+    border-radius: 2px;
+    margin: 8px auto 0;
+  }
+
+  /* ==================== PHONE 2: SUB REQUEST RESPONSE ==================== */
+  .status-bar {
+    background: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 24px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    flex-shrink: 0;
+    color: #111827;
+  }
+
+  .sub-resp-header {
+    background: white;
+    padding: 10px 16px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #f3f4f6;
+    flex-shrink: 0;
+  }
+  .header-close { font-size: 22px; color: #6b7280; cursor: pointer; }
+  .header-title { font-size: 15px; font-weight: 700; color: #111827; }
+  .header-spacer { width: 22px; }
+
+  .sub-resp-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 18px 16px;
+    background: #f8f9fb;
+  }
+
+  .resp-hero {
+    text-align: center;
+    margin-bottom: 18px;
+  }
+  .resp-avatar-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 12px;
+    position: relative;
+    height: 60px;
+  }
+  .resp-avatar {
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 700;
+    color: white;
+    box-shadow: 0 4px 14px rgba(45,106,79,0.3);
+  }
+  .resp-badge {
+    position: absolute;
+    bottom: -2px;
+    right: calc(50% - 38px);
+    width: 26px;
+    height: 26px;
+    background: #f59e0b;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    border: 3px solid #f8f9fb;
+  }
+  .resp-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 4px;
+  }
+  .resp-title {
+    font-size: 19px;
+    font-weight: 800;
+    color: #111827;
+    line-height: 1.3;
+    margin-bottom: 6px;
+  }
+  .resp-sub {
+    font-size: 13px;
+    color: #6b7280;
+    line-height: 1.4;
+  }
+
+  .resp-event-card {
+    background: white;
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  }
+  .resp-event-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  .resp-event-emoji {
+    width: 42px; height: 42px;
+    background: #fef3c7;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .resp-event-info { flex: 1; min-width: 0; }
+  .resp-event-name { font-size: 14px; font-weight: 700; color: #111827; }
+  .resp-event-meta { font-size: 12px; color: #6b7280; margin-top: 1px; }
+
+  .resp-leg {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    border: 1.5px solid #fde68a;
+    border-radius: 12px;
+    padding: 12px;
+  }
+  .resp-leg-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .resp-leg-icon {
+    width: 36px; height: 36px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .resp-leg-info { flex: 1; }
+  .resp-leg-direction {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #92400e;
+  }
+  .resp-leg-time {
+    font-size: 14px;
+    font-weight: 800;
+    color: #78350f;
+    margin-top: 2px;
+  }
+
+  .resp-message-card {
+    background: white;
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 14px;
+    border-left: 3px solid #2d6a4f;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  }
+  .msg-quote-mark {
+    font-size: 28px;
+    color: #d1d5db;
+    line-height: 1;
+    font-family: Georgia, serif;
+  }
+  .msg-text {
+    font-size: 13px;
+    color: #374151;
+    line-height: 1.5;
+    margin-top: -10px;
+    padding-left: 4px;
+    font-style: italic;
+  }
+
+  .resp-context {
+    background: #eff6ff;
+    border-radius: 12px;
+    padding: 11px 13px;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: #1e40af;
+    line-height: 1.4;
+  }
+  .resp-context strong { font-weight: 700; }
+
+  .resp-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .accept-btn {
+    background: linear-gradient(135deg, #2d6a4f, #40916c);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    padding: 15px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(45,106,79,0.3);
+  }
+  .decline-btn {
+    background: white;
+    color: #6b7280;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 14px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  /* ==================== PHONE 3: SETTINGS - RECURRING ==================== */
+  .settings-status-bar {
+    background: #f8f9fb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 24px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    flex-shrink: 0;
+    color: #111827;
+  }
+  .settings-header {
+    background: #f8f9fb;
+    padding: 8px 16px 16px;
+    flex-shrink: 0;
+  }
+  .settings-back-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #2d6a4f;
+    margin-bottom: 14px;
+  }
+  .settings-h1 {
+    font-size: 26px;
+    font-weight: 800;
+    color: #111827;
+    line-height: 1.2;
+  }
+  .settings-sub {
+    font-size: 13px;
+    color: #6b7280;
+    margin-top: 4px;
+  }
+
+  .settings-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 16px 16px;
+    background: #f8f9fb;
+  }
+
+  .stat-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  .stat-pill {
+    background: white;
+    border-radius: 14px;
+    padding: 12px 8px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  .stat-pill-num {
+    font-size: 22px;
+    font-weight: 800;
+    color: #2d6a4f;
+    line-height: 1;
+  }
+  .stat-pill-num.paused { color: #d97706; }
+  .stat-pill-num.dim { color: #9ca3af; }
+  .stat-pill-label {
+    font-size: 10px;
+    color: #6b7280;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-top: 6px;
+  }
+
+  .filter-tabs {
+    display: flex;
+    background: #e5e7eb;
+    border-radius: 10px;
+    padding: 3px;
+    margin-bottom: 14px;
+  }
+  .filter-tab {
+    flex: 1;
+    padding: 7px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: #6b7280;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  .filter-tab.active {
+    background: white;
+    color: #111827;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+
+  .commit-card {
+    background: white;
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  }
+  .commit-card.paused-card { opacity: 0.7; background: #fafafa; }
+  .commit-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .commit-emoji {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .commit-emoji.baseball { background: #fef3c7; }
+  .commit-emoji.piano { background: #ede9fe; }
+  .commit-emoji.scout { background: #dbeafe; }
+  .commit-info { flex: 1; min-width: 0; }
+  .commit-group { font-size: 13px; font-weight: 700; color: #111827; }
+  .commit-pattern { font-size: 12px; color: #6b7280; margin-top: 1px; }
+  .commit-status-pill {
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 3px 8px;
+    border-radius: 10px;
+    flex-shrink: 0;
+  }
+  .pill-active { background: #d1fae5; color: #065f46; }
+  .pill-paused { background: #fef3c7; color: #92400e; }
+
+  .commit-meta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-top: 1px solid #f3f4f6;
+    font-size: 11px;
+  }
+  .meta-left { color: #6b7280; }
+  .meta-left strong { color: #111827; font-weight: 700; }
+  .progress-bar {
+    width: 90px;
+    height: 4px;
+    background: #f3f4f6;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: #2d6a4f;
+    border-radius: 2px;
+  }
+  .meta-progress { display: flex; align-items: center; gap: 6px; }
+  .progress-text { font-size: 10px; color: #6b7280; font-weight: 700; }
+
+  .commit-actions {
+    display: flex;
+    gap: 6px;
+    padding-top: 10px;
+    border-top: 1px solid #f3f4f6;
+  }
+  .commit-action-btn {
+    flex: 1;
+    background: #f9fafb;
+    border: none;
+    border-radius: 10px;
+    padding: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #374151;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+  .commit-action-btn.danger {
+    color: #dc2626;
+  }
+  .commit-action-btn.resume {
+    background: #d1fae5;
+    color: #065f46;
+  }
+
+  .section-divider-title {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #6b7280;
+    margin: 18px 4px 8px;
+  }
+
+  .blackout-card {
+    background: white;
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  }
+  .blackout-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .blackout-emoji {
+    width: 38px; height: 38px;
+    background: #fef3c7;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .blackout-info { flex: 1; }
+  .blackout-title { font-size: 13px; font-weight: 700; color: #111827; }
+  .blackout-sub { font-size: 11px; color: #6b7280; margin-top: 2px; }
+  .toggle {
+    width: 38px;
+    height: 22px;
+    background: #d1d5db;
+    border-radius: 22px;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .toggle.on { background: #2d6a4f; }
+  .toggle::after {
+    content: "";
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    background: white;
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+  }
+  .toggle.on::after { left: 18px; }
+
+  .add-blackout {
+    background: white;
+    border: 1.5px dashed #d1d5db;
+    border-radius: 14px;
+    padding: 12px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: #6b7280;
+    cursor: pointer;
+  }
+
+</style>
+</head>
+<body>
+
+<!-- ============ PHONE 1: LOCK SCREEN ============ -->
+<div class="phone-wrap">
+<div class="phone-label">A · Lock screen — day-of reminder</div>
+<div class="phone">
+  <div class="lock-screen">
+    <div class="lock-status">
+      <span>4:25</span>
+      <span>📶 🔋</span>
+    </div>
+
+    <div class="lock-icon-row"><span class="lock-icon">🔒</span></div>
+    <div class="lock-date">Monday, April 20</div>
+    <div class="lock-time">4:25</div>
+
+    <div class="lock-widgets-area">
+
+      <!-- Prominent: pickup reminder with inline actions -->
+      <div class="notification-prominent">
+        <div class="notif-header-row">
+          <div class="notif-app-icon">🚗</div>
+          <div class="notif-app-name">Carpool</div>
+          <div class="notif-time">now</div>
+        </div>
+        <div class="notif-title">Up next: Pick-up at 5:30 PM</div>
+        <div class="notif-body">4 kids from Riverside Field. Leave by 5:15 to be 5 min early. 12 min drive.</div>
+        <div class="notif-actions">
+          <div class="notif-action-btn primary">🧭 Start route</div>
+          <div class="notif-action-btn">⏰ Late</div>
+          <div class="notif-action-btn">🔄 Sub</div>
+        </div>
+      </div>
+
+      <!-- Stacked notifications -->
+      <div class="notif-stacked">
+        <div class="stack-icon carpool">🚗</div>
+        <div class="stack-info">
+          <div class="stack-app">Carpool · 2h ago</div>
+          <div class="stack-title">Mike Chen sent a message</div>
+          <div class="stack-body">"Heads up — field is muddy today, brin..."</div>
+        </div>
+      </div>
+
+      <div class="notif-stacked">
+        <div class="stack-icon weather">☀️</div>
+        <div class="stack-info">
+          <div class="stack-app">Weather · 3h ago</div>
+          <div class="stack-title">72°F · Sunny in Maplewood</div>
+          <div class="stack-body">Light breeze · No rain expected today</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lock-bottom">
+      <div class="lock-bottom-icon">🔦</div>
+      <div class="lock-bottom-icon">📷</div>
+    </div>
+    <div class="home-indicator"></div>
+  </div>
+</div>
+</div>
+
+<!-- ============ PHONE 2: RECEIVING SUB REQUEST ============ -->
+<div class="phone-wrap">
+<div class="phone-label">B · Mike receives Sarah's sub request</div>
+<div class="phone">
+  <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+
+  <div class="sub-resp-header">
+    <div class="header-close">✕</div>
+    <div class="header-title">Sub Request</div>
+    <div class="header-spacer"></div>
+  </div>
+
+  <div class="sub-resp-content">
+
+    <div class="resp-hero">
+      <div class="resp-avatar-wrap">
+        <div class="resp-avatar av-green">S</div>
+        <div class="resp-badge">🆘</div>
+      </div>
+      <div class="resp-eyebrow">Sub request from</div>
+      <div class="resp-title">Sarah Martínez<br>needs a sub</div>
+      <div class="resp-sub">She can't drive her assigned drop-off on Monday.</div>
+    </div>
+
+    <div class="resp-event-card">
+      <div class="resp-event-row">
+        <div class="resp-event-emoji">⚾</div>
+        <div class="resp-event-info">
+          <div class="resp-event-name">Practice — Mon, Apr 20</div>
+          <div class="resp-event-meta">Riverside Field · 4:00–5:30 PM</div>
+        </div>
+      </div>
+      <div class="resp-leg">
+        <div class="resp-leg-row">
+          <div class="resp-leg-icon">🚗</div>
+          <div class="resp-leg-info">
+            <div class="resp-leg-direction">Drop-off → field</div>
+            <div class="resp-leg-time">3:30 PM · 4 kids</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="resp-message-card">
+      <div class="msg-quote-mark">"</div>
+      <div class="msg-text">Work meeting ran long — really appreciate it 🙏</div>
+    </div>
+
+    <div class="resp-context">
+      <span>👥</span>
+      <span>Sent to <strong>3 parents</strong>. First to accept gets the slot.</span>
+    </div>
+
+    <div class="resp-actions">
+      <button class="accept-btn">✓ &nbsp;Yes, I'll cover it</button>
+      <button class="decline-btn">Can't this time</button>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- ============ PHONE 3: SETTINGS - RECURRING ============ -->
+<div class="phone-wrap">
+<div class="phone-label">C · Settings — recurring commitments</div>
+<div class="phone">
+  <div class="settings-status-bar"><span>9:41</span><span>📶 🔋</span></div>
+
+  <div class="settings-header">
+    <div class="settings-back-row">
+      <span style="font-size:18px;">‹</span>
+      <span>Settings</span>
+    </div>
+    <div class="settings-h1">My Recurring Driving</div>
+    <div class="settings-sub">Slots that auto-claim throughout the season</div>
+  </div>
+
+  <div class="settings-content">
+
+    <div class="stat-row">
+      <div class="stat-pill">
+        <div class="stat-pill-num">3</div>
+        <div class="stat-pill-label">Active</div>
+      </div>
+      <div class="stat-pill">
+        <div class="stat-pill-num paused">1</div>
+        <div class="stat-pill-label">Paused</div>
+      </div>
+      <div class="stat-pill">
+        <div class="stat-pill-num dim">28</div>
+        <div class="stat-pill-label">Slots / Mo</div>
+      </div>
+    </div>
+
+    <div class="filter-tabs">
+      <div class="filter-tab active">All</div>
+      <div class="filter-tab">Active</div>
+      <div class="filter-tab">Paused</div>
+    </div>
+
+    <!-- Active commitment -->
+    <div class="commit-card">
+      <div class="commit-header">
+        <div class="commit-emoji baseball">⚾</div>
+        <div class="commit-info">
+          <div class="commit-group">10U Baseball — Tigers</div>
+          <div class="commit-pattern">Every Wed · Pick-up → home · 5:30 PM</div>
+        </div>
+        <div class="commit-status-pill pill-active">Active</div>
+      </div>
+      <div class="commit-meta-row">
+        <div class="meta-left">Next: <strong>Wed, Apr 22</strong></div>
+        <div class="meta-progress">
+          <div class="progress-bar"><div class="progress-fill" style="width:8%"></div></div>
+          <div class="progress-text">1 / 12</div>
+        </div>
+      </div>
+      <div class="commit-actions">
+        <button class="commit-action-btn">✏️ Edit</button>
+        <button class="commit-action-btn">⏸ Pause</button>
+        <button class="commit-action-btn danger">✕ Cancel</button>
+      </div>
+    </div>
+
+    <!-- Active commitment -->
+    <div class="commit-card">
+      <div class="commit-header">
+        <div class="commit-emoji baseball">⚾</div>
+        <div class="commit-info">
+          <div class="commit-group">10U Baseball — Tigers</div>
+          <div class="commit-pattern">Every Sat · Pick-up → home · After games</div>
+        </div>
+        <div class="commit-status-pill pill-active">Active</div>
+      </div>
+      <div class="commit-meta-row">
+        <div class="meta-left">Next: <strong>Sat, Apr 25</strong></div>
+        <div class="meta-progress">
+          <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+          <div class="progress-text">0 / 8</div>
+        </div>
+      </div>
+      <div class="commit-actions">
+        <button class="commit-action-btn">✏️ Edit</button>
+        <button class="commit-action-btn">⏸ Pause</button>
+        <button class="commit-action-btn danger">✕ Cancel</button>
+      </div>
+    </div>
+
+    <!-- Active commitment -->
+    <div class="commit-card">
+      <div class="commit-header">
+        <div class="commit-emoji piano">🎹</div>
+        <div class="commit-info">
+          <div class="commit-group">Piano Lessons</div>
+          <div class="commit-pattern">Every Tue · Drop-off → studio · 3:45 PM</div>
+        </div>
+        <div class="commit-status-pill pill-active">Active</div>
+      </div>
+      <div class="commit-meta-row">
+        <div class="meta-left">Next: <strong>Tue, Apr 21</strong></div>
+        <div class="meta-progress">
+          <div class="progress-bar"><div class="progress-fill" style="width:30%"></div></div>
+          <div class="progress-text">3 / 10</div>
+        </div>
+      </div>
+      <div class="commit-actions">
+        <button class="commit-action-btn">✏️ Edit</button>
+        <button class="commit-action-btn">⏸ Pause</button>
+        <button class="commit-action-btn danger">✕ Cancel</button>
+      </div>
+    </div>
+
+    <!-- Paused commitment -->
+    <div class="commit-card paused-card">
+      <div class="commit-header">
+        <div class="commit-emoji scout">🏕️</div>
+        <div class="commit-info">
+          <div class="commit-group">Scouts Troop 47</div>
+          <div class="commit-pattern">Every Thu · Drop-off → meeting · 5:30 PM</div>
+        </div>
+        <div class="commit-status-pill pill-paused">Paused</div>
+      </div>
+      <div class="commit-meta-row">
+        <div class="meta-left">Resumes: <strong>May 15</strong></div>
+        <div class="meta-progress">
+          <div class="progress-text">2 / 6</div>
+        </div>
+      </div>
+      <div class="commit-actions">
+        <button class="commit-action-btn resume">▶ Resume</button>
+        <button class="commit-action-btn">✏️ Edit</button>
+        <button class="commit-action-btn danger">✕ Cancel</button>
+      </div>
+    </div>
+
+    <div class="section-divider-title">Blackout Dates</div>
+
+    <div class="blackout-card">
+      <div class="blackout-row">
+        <div class="blackout-emoji">🏖️</div>
+        <div class="blackout-info">
+          <div class="blackout-title">Family vacation</div>
+          <div class="blackout-sub">May 15 – May 22 · 4 slots will need a sub</div>
+        </div>
+        <div class="toggle on"></div>
+      </div>
+    </div>
+
+    <div class="add-blackout">＋ Add blackout dates</div>
+
+  </div>
+</div>
+</div>
+
+</body>
+</html>

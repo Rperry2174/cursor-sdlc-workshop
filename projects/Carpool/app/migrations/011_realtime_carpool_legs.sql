@@ -1,0 +1,22 @@
+-- ============================================================
+-- Enable Realtime on carpool_legs
+--
+-- Supabase Realtime works by tailing the `supabase_realtime`
+-- publication. Tables aren't in that publication by default —
+-- adding them is what makes INSERT/UPDATE/DELETE events stream
+-- to subscribed clients.
+--
+-- Why carpool_legs:
+--   This is the table the "I'll drive" claim flow mutates and the
+--   surface every parent watches on Today / Open. Realtime here
+--   removes the "refresh to see Liz claimed it" friction without
+--   building any custom WebSocket plumbing.
+--
+-- RLS still applies. Subscribers only receive events for rows that
+-- pass legs_select_via_event (002) — i.e. legs in events of teams
+-- the caller belongs to.
+--
+-- Apply order: AFTER 001-010.
+-- ============================================================
+
+alter publication supabase_realtime add table carpool_legs;
