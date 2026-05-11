@@ -266,19 +266,20 @@ export const introSlides = [
     master: MASTER_NAMES.CONTENT_SLIDE,
     type: SLIDE_TYPES.checklist,
     section: { badge: 'Section 1', tone: 'section1' },
-    phaseBadge: 'Phase 1: Plan / Design • 10 min',
-    title: 'Plan / Design',
+    phaseBadge: 'Step 1: Plan in Notion • 10 min',
+    title: 'Turn Your Idea Into a PRD',
     scrollable: true,
     checklistGroups: [
       {
-        tone: 'git',
-        label: 'Git: Start',
+        tone: 'work',
+        sectionTone: 'section1',
+        label: 'In Notion',
         items: [
           {
-            title: 'Tell Cursor to fork and clone the repo',
-            codeComment: 'Ask Cursor:',
+            title: 'Explain what you want to build in plain English',
+            codeComment: 'Write in Notion:',
             codeLines: [
-              'Fork https://github.com/Rperry2174/cursor-sdlc-workshop to my GitHub account and clone my fork locally.',
+              'I want to build [simple project idea]. It should do [main behavior] for [user].',
             ],
           },
         ],
@@ -289,30 +290,30 @@ export const introSlides = [
         label: 'Tell Cursor',
         items: [
           {
-            title: 'Create your project folder',
+            title: 'Connect the Notion MCP in the Agent window',
+            detail:
+              'This lets Cursor read the Notion page you just wrote.',
+          },
+          {
+            title: 'Format the Notion page as an official PRD',
             codeComment: 'Ask Cursor:',
             codeLines: [
-              "Create my project under projects/[my-github-username]/ and scaffold the initial structure there.",
+              'Use my Notion page to format this as an official PRD.',
+              'Keep the project simple, do not use external APIs, stub any data that would require API access, and make the project public.',
             ],
           },
           {
-            title: 'Create your PRD with planned features',
+            title: 'Create a local project folder on the Desktop',
             codeComment: 'Ask Cursor:',
             codeLines: [
-              'Read the prd.md template and help me fill it out with my project idea, a base MVP, and 2-3 planned features.',
+              'Create a projects folder on my Desktop and add this project as a folder inside it.',
             ],
           },
-        ],
-      },
-      {
-        tone: 'git',
-        label: 'Git: Finish',
-        items: [
           {
-            title: 'Commit, push, and open your first PR',
+            title: 'Save the Notion PRD as prd.md in the project folder',
             codeComment: 'Ask Cursor:',
             codeLines: [
-              "Commit with message '[username] - Initial setup and PRD', push to my fork, and open a PR to the original repo.",
+              'Copy the finalized Notion PRD into the project folder as prd.md so the project has a local Markdown version of the plan.',
             ],
           },
         ],
@@ -326,38 +327,33 @@ export const introSlides = [
     master: MASTER_NAMES.CONTENT_SLIDE,
     type: SLIDE_TYPES.checklist,
     section: { badge: 'Section 1', tone: 'section1' },
-    phaseBadge: 'Phase 2: Develop • 10 min',
-    title: 'Develop',
+    phaseBadge: 'Step 2: Publish to GitHub • 5 min',
+    title: 'Create the GitHub Repo',
     scrollable: true,
     checklistGroups: [
       {
         tone: 'work',
         sectionTone: 'section1',
-        label: 'In Cursor',
+        label: 'In the Agent Window',
         items: [
           {
-            title: 'Build the base MVP from your PRD',
-            detail:
-              'Read prd.md, keep it minimal, and put the scaffold in base_mvp/.',
-          },
-          {
-            title: 'Run it locally',
+            title: 'Open the local project folder',
             codeComment: 'Ask Cursor:',
-            codeLines: ['How do I run this project?'],
+            codeLines: ['Open ~/Desktop/projects/[project-name] in Cursor.'],
           },
           {
-            title: 'Verify the base MVP works before moving on',
-          },
-        ],
-      },
-      {
-        tone: 'git',
-        label: 'Git: Finish',
-        items: [
-          {
-            title: 'Commit your scaffolded MVP',
+            title: 'Create a public GitHub repository and push the project',
             codeComment: 'Ask Cursor:',
-            codeLines: ["Commit with message '[username] - Base MVP scaffold'"],
+            codeLines: [
+              'Create a GitHub repository for this project, make the repository public, and push the current project to it.',
+            ],
+          },
+          {
+            title: 'Check GitHub',
+            codeComment: 'Ask Cursor:',
+            codeLines: [
+              'Give me the GitHub repository link so I can open it and confirm the project is there.',
+            ],
           },
         ],
       },
@@ -424,7 +420,7 @@ export const introSlides = [
         tone: 'section1',
         titleHighlight: 'Cursor helped you think, not just type',
         bullets: [
-          'You used PRDs, tasks, and issues before writing code',
+          'You turned a plain-language Notion idea into a public PRD',
           'Cursor starts helping as soon as you start thinking',
         ],
       },
@@ -442,7 +438,7 @@ export const introSlides = [
         tone: 'section1',
         titleHighlight: 'You did real git workflow without learning git',
         bullets: [
-          'You handled fork, branch, commit, push, and PR through conversation',
+          'You created a repo, pushed code, and shared the GitHub link through conversation',
           "You didn't have to memorize commands to follow the workflow",
         ],
       },
@@ -496,7 +492,7 @@ export const introSlides = [
         number: '03',
         tone: 'orange',
         title: 'Build & ship',
-        titleHighlight: 'Implement your feature(s) and open a PR',
+        titleHighlight: 'Implement your feature(s) and push to GitHub',
       },
     ],
   }),
@@ -707,7 +703,7 @@ export const introSlides = [
             title: 'Generate your PRD',
             codeComment: 'Ask Cursor:',
             codeLines: [
-              'Use the Figma breakdown to create a team PRD in prd.md and, if useful, mirror it in Notion or GitHub Issues.',
+              'Use the Figma breakdown to create a public team PRD in Notion and, if useful, create GitHub Issues from it.',
             ],
           },
         ],
@@ -736,9 +732,9 @@ export const introSlides = [
         label: 'Git: Start',
         items: [
           {
-            title: 'Sync your fork with upstream',
+            title: 'Pull the latest project changes',
             codeComment: 'Ask Cursor:',
-            codeLines: ['Sync my fork with upstream and pull the latest changes.'],
+            codeLines: ['Pull the latest changes from GitHub before I start building.'],
           },
         ],
       },
@@ -762,7 +758,7 @@ export const introSlides = [
             title: 'Use Agent Mode to implement your assigned work',
           },
           {
-            title: 'Test the feature in the browser before you open a PR',
+            title: 'Test the feature in the browser before you push',
           },
         ],
       },
@@ -771,10 +767,10 @@ export const introSlides = [
         label: 'Git: Finish',
         items: [
           {
-            title: 'Commit, push, and open a PR',
+            title: 'Commit and push your work',
             codeComment: 'Ask Cursor:',
             codeLines: [
-              "Commit with message 'Add [feature]', push to my fork, and open a PR.",
+              "Commit with message 'Add [feature]' and push the changes to GitHub.",
             ],
           },
         ],

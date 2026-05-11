@@ -66,11 +66,11 @@ export const projectSlides = [
     master: MASTER_NAMES.CONTENT_SLIDE,
     type: SLIDE_TYPES.docPreview,
     section: { badge: 'Section 1', tone: 'section1' },
-    phaseBadge: 'Your Plan = a prd.md File',
-    title: 'What Your PRD Looks Like',
+    phaseBadge: 'Your Plan = Public Notion + prd.md',
+    title: 'What Your Notion PRD Looks Like',
     docLabel: 'prd.md',
     intro:
-      'The plan lives in markdown at projects/<your-github-username>/prd.md.',
+      'The plan starts in Notion, then Cursor saves a Markdown copy as prd.md inside the project folder.',
     docLines: [
       '# Product Requirements Document (PRD)',
       '',
@@ -94,12 +94,18 @@ export const projectSlides = [
       '- Feature 3: Win Animation',
       '  - Description: Confetti effect when the game is won',
       '  - Files: src/components/Confetti.jsx',
+      '',
+      '## Constraints',
+      '- Keep the project simple enough to finish in the workshop',
+      '- Do not call external APIs',
+      '- Stub any data that would normally come from another service',
+      '- Make the project public',
     ],
     emphasis: {
       tone: 'green',
       label: 'Your turn:',
       body:
-        'There should already be a prd.md in projects/<your-github-username>/. Make sure it has your project idea, a base MVP, and at least 2-3 features.',
+        'Your Notion page should be public, and the project folder should contain a local prd.md copy before you start building.',
     },
   }),
   makeSlide({
@@ -107,22 +113,47 @@ export const projectSlides = [
     slug: 'run-project',
     sourceFile: 'SlideRunProject.jsx',
     master: MASTER_NAMES.CONTENT_SLIDE,
-    type: SLIDE_TYPES.browserDemo,
+    type: SLIDE_TYPES.checklist,
     section: { badge: 'Section 1', tone: 'section1' },
-    phaseBadge: 'Phase 2: Design',
-    title: 'Run It - See It In Your Browser',
-    subtitle:
-      'When you ask Cursor to run your project, you should see it live in your web browser:',
-    browserMock: {
-      variant: 'flappyBird',
-      url: 'localhost:5173',
-      score: '7',
-    },
+    phaseBadge: 'Step 3: Build, Run, Push • 15 min',
+    title: 'Build the Project From the PRD',
+    scrollable: true,
+    checklistGroups: [
+      {
+        tone: 'work',
+        sectionTone: 'section1',
+        label: 'In the Agent Window',
+        items: [
+          {
+            title: 'Build the project from the PRD',
+            codeComment: 'Ask Cursor:',
+            codeLines: [
+              'Read prd.md, the Markdown copy of my Notion PRD, and build the project in this folder.',
+              'Keep it simple and use stubbed data instead of external APIs.',
+            ],
+          },
+          {
+            title: 'Run the project for me',
+            codeComment: 'Ask Cursor:',
+            codeLines: [
+              'Run this project locally and give me the URL where I can see it.',
+            ],
+          },
+          {
+            title: 'Push the finished project to GitHub',
+            codeComment: 'Ask Cursor:',
+            codeLines: [
+              "Commit the finished project, push it to GitHub, and give me the repo link again.",
+            ],
+          },
+        ],
+      },
+    ],
     emphasis: {
       tone: 'green',
-      label: 'Ask Cursor:',
+      label: 'Done means:',
       body:
-        '"How do I run this project?" - then open the URL it gives you. If something looks wrong, tell Cursor what you see!',
+        'The app runs locally, the code is pushed, and the GitHub repository shows the latest version.',
     },
   }),
   makeSlide({
@@ -207,10 +238,10 @@ export const projectSlides = [
         label: 'Git: Finish',
         items: [
           {
-            title: 'Commit, push, and open a PR',
+            title: 'Commit and push',
             codeComment: 'Ask Cursor:',
             codeLines: [
-              "Commit with message 'Add [feature] to [project]', push to my fork, and open a PR.",
+              "Commit with message 'Add [feature] to [project]' and push the changes to GitHub.",
             ],
           },
         ],
@@ -302,9 +333,9 @@ export const projectSlides = [
         label: 'Git: Start',
         items: [
           {
-            title: 'Sync your fork with upstream',
+            title: 'Pull the latest project changes',
             codeComment: 'Ask Cursor:',
-            codeLines: ['Sync my fork with upstream and pull the latest changes.'],
+            codeLines: ['Pull the latest changes from GitHub before I start building.'],
           },
         ],
       },
@@ -317,7 +348,7 @@ export const projectSlides = [
             title: 'Find your issue',
             codeComment: 'Ask Cursor:',
             codeLines: [
-              'Find my GitHub issue assigned to me and read the prd.md to understand what I need to build.',
+              'Find my GitHub issue assigned to me and read the PRD to understand what I need to build.',
             ],
           },
           { title: 'Run the project first', detail: 'Make sure the base MVP works before you start.' },
@@ -331,10 +362,10 @@ export const projectSlides = [
         label: 'Git: Finish',
         items: [
           {
-            title: 'Commit, push, and open a PR',
+            title: 'Commit and push',
             codeComment: 'Ask Cursor:',
             codeLines: [
-              "Commit my changes with the message 'Add [feature]', push to my fork, and open a PR to the original repo.",
+              "Commit my changes with the message 'Add [feature]' and push to GitHub.",
             ],
           },
         ],
@@ -402,7 +433,7 @@ export const projectSlides = [
           {
             title: 'Commit and push the planning work',
             codeComment: 'Ask Cursor:',
-            codeLines: ["Commit with message '[username] - Feature plan', push and open a PR"],
+            codeLines: ["Commit with message '[username] - Feature plan' and push to GitHub"],
           },
         ],
       },
@@ -426,9 +457,9 @@ export const projectSlides = [
         label: 'Git: Start',
         items: [
           {
-            title: 'Sync your fork with upstream',
+            title: 'Pull the latest project changes',
             codeComment: 'Ask Cursor:',
-            codeLines: ['Sync my fork with upstream and pull the latest changes.'],
+            codeLines: ['Pull the latest changes from GitHub before I start building.'],
           },
         ],
       },
@@ -462,9 +493,9 @@ export const projectSlides = [
         label: 'Git: Finish',
         items: [
           {
-            title: 'Commit, push, and open a PR',
+            title: 'Commit and push',
             codeComment: 'Ask Cursor:',
-            codeLines: ["Commit with message 'Add [feature]', push and open a PR"],
+            codeLines: ["Commit with message 'Add [feature]' and push to GitHub"],
           },
         ],
       },

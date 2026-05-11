@@ -87,13 +87,11 @@ const SlideSection3Step1 = () => (
             <code>
               <span className="comment">Ask Cursor:</span>
               <br />
-              "Based on the Figma breakdown, create a PRD for
+              "Based on the Figma breakdown, create a public
               <br />
-              our team. Write it to Notion and/or create GitHub
+              team PRD in Notion and/or create GitHub
               <br />
-              Issues  - one per task, assigned to team members.
-              <br />
-              Also save as prd.md in our team folder."
+              Issues  - one per task, assigned to team members."
             </code>
           </div>
         </div>

@@ -23,7 +23,7 @@ const SlideSection1Takeaway = () => (
           </span>
         </div>
         <ul className="tile-bullets">
-          <li>PRD, tasks, GitHub issues  - all before writing code</li>
+          <li>You turned a plain-language Notion idea into a public PRD</li>
           <li>Most AI tools start when you code. Cursor starts when you think</li>
         </ul>
       </div>
@@ -51,7 +51,7 @@ const SlideSection1Takeaway = () => (
           </span>
         </div>
         <ul className="tile-bullets">
-          <li>Fork, branch, commit, push, PR  - through conversation</li>
+          <li>You created a repo, pushed code, and shared the GitHub link through conversation</li>
           <li>Nobody memorized a command. Hours of overhead gone</li>
         </ul>
       </div>

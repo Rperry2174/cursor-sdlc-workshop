@@ -19,16 +19,16 @@ const Slide09Phase3Develop = () => (
             <div className="check-header">
               <div className="check-box"></div>
               <div>
-                <strong>Tell Cursor to sync your fork</strong>
+                <strong>Tell Cursor to pull the latest project changes</strong>
               </div>
             </div>
             <div className="code-block">
               <code>
                 <span className="comment">Ask Cursor:</span>
                 <br />
-                "Sync my fork with upstream and pull the latest
+                "Pull the latest changes from GitHub before I start
                 <br />
-                changes"
+                building."
               </code>
             </div>
           </div>
@@ -50,7 +50,7 @@ const Slide09Phase3Develop = () => (
                 <br />
                 "Find my GitHub issue assigned to me and
                 <br />
-                read the prd.md to understand what I need to build."
+                read the PRD to understand what I need to build."
               </code>
             </div>
           </div>
@@ -88,7 +88,7 @@ const Slide09Phase3Develop = () => (
             <div className="check-header">
               <div className="check-box"></div>
               <div>
-                <strong>Tell Cursor to commit, push, and open a PR</strong>
+                <strong>Tell Cursor to commit and push</strong>
               </div>
             </div>
             <div className="code-block">
@@ -97,9 +97,9 @@ const Slide09Phase3Develop = () => (
                 <br />
                 "Commit my changes with the message
                 <br />
-                'Add [feature]', push to my fork,
+                'Add [feature]' and push
                 <br />
-                and open a PR to the original repo"
+                the changes to GitHub."
               </code>
             </div>
           </div>

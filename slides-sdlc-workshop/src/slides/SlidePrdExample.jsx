@@ -2,22 +2,11 @@ const SlidePrdExample = () => (
   <>
     <div className="section-header">
       <span className="section-badge section1">Section 1</span>
-      <span className="phase-badge">Your Plan = a prd.md File</span>
+      <span className="phase-badge">Your Plan = Public Notion + prd.md</span>
     </div>
-    <h2>What Your PRD Looks Like</h2>
+    <h2>What Your Notion PRD Looks Like</h2>
     <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>
-      Your plan lives in a markdown file at{' '}
-      <code style={{
-        background: 'var(--code-bg)',
-        padding: '0.15rem 0.4rem',
-        borderRadius: '4px',
-        border: '1px solid var(--border-subtle)',
-        fontSize: '0.8rem',
-        color: 'var(--cursor-blue)',
-        fontWeight: 600,
-      }}>
-        projects/&lt;your-github-username&gt;/prd.md
-      </code>
+      Your plan starts in Notion, then Cursor saves a Markdown copy as <code>prd.md</code> inside the project folder.
     </p>
     <div style={{
       background: 'var(--code-bg)',
@@ -127,12 +116,29 @@ const SlidePrdExample = () => (
         <span style={{ color: 'var(--cyan)' }}>-</span>{' '}
         <span style={{ color: '#93a1a1' }}>**Files:**</span> src/components/Confetti.jsx
       </div>
+      <br />
+
+      <div style={{ color: 'var(--cursor-blue)', fontWeight: 600, fontSize: '0.82rem' }}>
+        ## Constraints
+      </div>
+      <div style={{ paddingLeft: '0.75rem' }}>
+        <span style={{ color: 'var(--cyan)' }}>-</span> Keep the project simple enough to finish in the workshop
+      </div>
+      <div style={{ paddingLeft: '0.75rem' }}>
+        <span style={{ color: 'var(--cyan)' }}>-</span> Do not call external APIs
+      </div>
+      <div style={{ paddingLeft: '0.75rem' }}>
+        <span style={{ color: 'var(--cyan)' }}>-</span> Stub any data that would normally come from another service
+      </div>
+      <div style={{ paddingLeft: '0.75rem' }}>
+        <span style={{ color: 'var(--cyan)' }}>-</span> Make the project public
+      </div>
     </div>
 
     <div className="emphasis-box green" style={{ marginTop: '0.75rem' }}>
-      <strong>Your turn:</strong> There should already be a <code>prd.md</code> in{' '}
-      <code>projects/&lt;your-github-username&gt;/</code>  - Cursor helped you fill it out in the last step.
-      Make sure it has your project idea, a base MVP, and at least 2-3 features.
+      <strong>Your turn:</strong> Your Notion page should be public, and the
+      project folder should contain a local <code>prd.md</code> copy before you
+      start building.
     </div>
   </>
 )

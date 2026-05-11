@@ -113,9 +113,9 @@ const Slide13Section2Step2 = () => (
               <code>
                 <span className="comment">Ask Cursor:</span>
                 <br />
-                "Commit with message '[username] - Feature plan',
+                "Commit with message '[username] - Feature plan'
                 <br />
-                push and open a PR"
+                and push to GitHub."
               </code>
             </div>
           </div>

@@ -40,7 +40,7 @@ const Slide11Section2Intro = () => (
           <span className="highlight-orange">Build</span> &amp; ship
         </div>
         <div className="tile-desc">
-          Implement your feature(s) and open a PR
+          Implement your feature(s) and push to GitHub
         </div>
       </div>
     </div>

@@ -116,16 +116,16 @@ const SlideS2AddFeature = () => (
           <div className="check-header">
             <div className="check-box"></div>
             <div>
-              <strong>Commit, push, and open a PR</strong>
+              <strong>Commit and push</strong>
             </div>
           </div>
           <div className="code-block">
             <code>
               <span className="comment">Ask Cursor:</span>
               <br />
-              "Commit with message 'Add [feature] to [project]',
+              "Commit with message 'Add [feature] to [project]'
               <br />
-              push to my fork, and open a PR"
+              and push the changes to GitHub."
             </code>
           </div>
         </div>

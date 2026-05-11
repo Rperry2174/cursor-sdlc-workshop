@@ -14,16 +14,16 @@ const Slide14Section2Step3 = () => (
             <div className="check-header">
               <div className="check-box"></div>
               <div>
-                <strong>Sync your fork</strong>
+                <strong>Pull the latest project changes</strong>
               </div>
             </div>
             <div className="code-block">
               <code>
                 <span className="comment">Ask Cursor:</span>
                 <br />
-                "Sync my fork with upstream and pull the latest
+                "Pull the latest changes from GitHub before I start
                 <br />
-                changes"
+                building."
               </code>
             </div>
           </div>
@@ -102,16 +102,16 @@ const Slide14Section2Step3 = () => (
             <div className="check-header">
               <div className="check-box"></div>
               <div>
-                <strong>Commit, push, and open a PR</strong>
+                <strong>Commit and push</strong>
               </div>
             </div>
             <div className="code-block">
               <code>
                 <span className="comment">Ask Cursor:</span>
                 <br />
-                "Commit with message 'Add [feature]',
+                "Commit with message 'Add [feature]'
                 <br />
-                push and open a PR"
+                and push to GitHub."
               </code>
             </div>
           </div>
