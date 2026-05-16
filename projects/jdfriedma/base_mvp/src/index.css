@@ -1,0 +1,23 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:root {
+  --font-display: 'Press Start 2P', monospace;
+  --font-ui: 'Silkscreen', monospace;
+  --font-body: 'IBM Plex Mono', ui-monospace, 'Cascadia Code', 'SF Mono', Menlo,
+    monospace;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+}
